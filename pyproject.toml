@@ -17,8 +17,8 @@ keywords = ["lidar", "slam", "ros2", "point-cloud", "dynamic-object-removal", "m
 ros2 = ["rclpy"]
 
 [project.urls]
-Homepage = "https://github.com/rsasaki0109/research_ideas_ws"
-Repository = "https://github.com/rsasaki0109/research_ideas_ws"
+Homepage = "https://github.com/rsasaki0109/dynamic-3d-object-removal"
+Repository = "https://github.com/rsasaki0109/dynamic-3d-object-removal"
 
 [project.scripts]
 dynamic-object-removal = "dynamic_object_removal:main"

@@ -62,6 +62,26 @@ cd demo
 
 を備えています。
 
+## 参考 OSS
+
+- `dynamic_object_removal` (ROS2)
+  - https://github.com/davutcanakbas/dynamic_object_removal
+  - ライセンス: Apache-2.0（`package.xml` 記載）
+- NumPy
+  - https://numpy.org/doc/stable/license/
+  - ライセンス: BSD-3-Clause
+- Matplotlib
+  - https://matplotlib.org/stable/users/license.html
+  - ライセンス: Python Software Foundation License（BSD 互換）
+- Three.js
+  - https://github.com/mrdoob/three.js/
+  - ライセンス: MIT
+- rclpy (ROS 2 Python client library)
+  - https://github.com/ros2/rclpy
+  - ライセンス: Apache-2.0
+
 ## ライセンス
 
-MIT
+MIT License
+
+参照 OSS のライセンス互換性を確認し、同梱コードは本プロジェクト側を MIT で公開します。

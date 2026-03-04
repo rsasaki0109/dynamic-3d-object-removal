@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dynamic 3D Object Removal</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Trebuchet MS", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+        background: radial-gradient(circle at 20% 10%, #ecfeff, #dbeafe 45%, #f8fafc);
+        color: #0f172a;
+      }
+      .wrap {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 48px 24px;
+      }
+      h1 { margin: 0 0 8px; }
+      p { line-height: 1.7; }
+      .card {
+        margin-top: 20px;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.7);
+        padding: 18px;
+      }
+      .links {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 12px;
+        margin-top: 12px;
+      }
+      a {
+        color: #1d4ed8;
+        text-decoration: none;
+      }
+      .btn {
+        display: block;
+        background: #1e3a8a;
+        color: #fff;
+        border-radius: 10px;
+        padding: 10px 14px;
+        text-align: center;
+      }
+      .btn:hover { opacity: 0.9; }
+      .meta {
+        margin-top: 16px;
+        color: #334155;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Dynamic 3D Object Removal</h1>
+      <p>動的物体を除去した点群デモの公開ページです。</p>
+      <div class="card">
+        <strong>デモ</strong>
+        <div class="links">
+          <a class="btn" href="demo/index.html">デモ画像ビュー</a>
+          <a class="btn" href="demo/index_3d.html">3Dビュー（サーバ起動）</a>
+          <a class="btn" href="demo/index_3d_standalone.html">3Dビュー（スタンドアロン）</a>
+        </div>
+      </div>
+      <div class="meta">
+        GitHub: <a href="https://github.com/rsasaki0109/dynamic-3d-object-removal">rsasaki0109/dynamic-3d-object-removal</a><br />
+        取得方法: <a href="https://github.com/rsasaki0109/dynamic-3d-object-removal#github-pages">README</a>
+      </div>
+    </div>
+  </body>
+</html>

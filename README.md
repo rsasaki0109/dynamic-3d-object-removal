@@ -9,12 +9,12 @@
 
 ### 単一スキャンでの検証候補（tsukubachallenge）
 
-- map_utsukuba22_university_of_tsukuba.pcd
-  - 目安: 14.6M 点程度（比較的扱いやすい単一スキャン）
-- map_tc19_furo.pcd
-  - 目安: 22.3M 点程度（広がりがあり、街中シーンが見やすい）
-- map_tc18_furo.pcd
-  - 目安: 17.0M 点程度（単一スキャンで全体感が出る）
+- [map_utsukuba22_university_of_tsukuba.pcd](https://drive.google.com/file/d/1mSi6OP2p4jFwK3vVgvFIbCdxPmN4UcVg/view?usp=sharing)
+  - 目安: 224 MB / 14.6M 点 / 2022年（扱いやすい）
+- [map_tc19_furo.pcd](https://drive.google.com/file/d/1mH20dXpnBBlQ6hMKJZqdVhphrffsvWK_/view?usp=sharing)
+  - 目安: 683 MB / 22.3M 点 / 2019年（街中シーン）
+- [map_tc18_furo.pcd](https://drive.google.com/file/d/1c7Vd4vkMudAHyxc0ZOZCbTgx8ZFZ_Slx/view?usp=sharing)
+  - 目安: 519 MB / 17.0M 点 / 2018年
 
 どれも `tsukubachallenge/tc-datasets` 側の配布形式に合わせて取得してください。
 現状の `run_scan_demo.py` は `dynamic_object_removal.load_points()` を経由するため、`PCD` は

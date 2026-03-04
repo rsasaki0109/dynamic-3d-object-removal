@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Dynamic Object Removal 3D Studio (Server)</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.165.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+      :root {
+        --bg-top: #050711;
+        --bg-bottom: #10162d;
+        --panel: rgba(16, 24, 46, 0.82);
+        --line: #243457;
+        --text: #e5ecff;
+        --muted: #8ea2d3;
+        --accent: #6ee7ff;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+        color: var(--text);
+        background: radial-gradient(1200px 700px at 12% 2%, #1e2f5f 0%, transparent 56%),
+          linear-gradient(140deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+      }
+      .layout {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 340px 1fr;
+        gap: 18px;
+        padding: 16px;
+        box-sizing: border-box;
+      }
+      .side {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 12px;
+        box-shadow: 0 12px 24px rgba(2, 9, 28, 0.5);
+        backdrop-filter: blur(6px);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: fit-content;
+        border: 1px solid rgba(110, 231, 255, 0.45);
+        border-radius: 999px;
+        color: var(--accent);
+        padding: 4px 12px;
+        font-size: 12px;
+        letter-spacing: 0.02em;
+      }
+      h1 {
+        margin: 0;
+        font-size: 20px;
+      }
+      .note {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.55;
+        margin: 0;
+      }
+      .metric {
+        background: rgba(7, 15, 32, 0.75);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 10px;
+      }
+      .metric h3 { margin: 0 0 4px; font-size: 13px; color: #bdd6ff; }
+      .metric p { margin: 0; font-size: 16px; font-weight: 700; }
+      .control-group { display: flex; flex-direction: column; gap: 10px; }
+      .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+      label { display: inline-flex; gap: 10px; align-items: center; font-size: 14px; }
+      .line { height: 1px; background: linear-gradient(90deg, transparent, var(--line), transparent); margin: 4px 0; }
+      .slider { width: 100%; }
+      .actions { display: grid; gap: 8px; }
+      .btn {
+        border: 1px solid rgba(110, 231, 255, 0.5);
+        background: linear-gradient(130deg, rgba(18, 28, 56, 0.95), rgba(36, 58, 97, 0.82));
+        color: #e8f0ff;
+        border-radius: 10px;
+        padding: 8px 10px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      #stage {
+        position: relative;
+        border-radius: 16px;
+        min-height: 82vh;
+        border: 1px solid #243457;
+        overflow: hidden;
+        background: #05070f;
+      }
+      #viewer {
+        width: 100%;
+        height: 100%;
+        min-height: 600px;
+      }
+      #meta {
+        position: absolute;
+        right: 14px;
+        bottom: 12px;
+        padding: 8px 10px;
+        border-radius: 9px;
+        background: rgba(5, 9, 24, 0.58);
+        border: 1px solid rgba(138, 159, 199, 0.35);
+        color: #a8b6db;
+        font-size: 12px;
+        backdrop-filter: blur(3px);
+      }
+      .warn {
+        color: #ffc27a;
+        font-size: 12px;
+      }
+      @media (max-width: 1080px) {
+        .layout { grid-template-columns: 1fr; }
+        #stage { min-height: 68vh; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="side">
+        <span class="badge">Dynamic Object Removal Viewer</span>
+        <h1>3D Studio（Web）</h1>
+        <p class="note">
+          <a href="index.html" style="color:#93c5fd;">画像比較へ戻る</a> /
+          <a href="index_3d_standalone.html" style="color:#93c5fd;">standalone版を開く</a>
+        </p>
+        <p class="note" id="status"></p>
+        <div class="metric">
+          <h3>点群サマリ</h3>
+          <p id="summary">読み込み中...</p>
+        </div>
+        <div class="line"></div>
+        <div class="control-group">
+          <strong>表示レイヤー</strong>
+          <label><input type="checkbox" id="show-input" checked>入力</label>
+          <label><input type="checkbox" id="show-kept" checked>除去後（静的）</label>
+          <label><input type="checkbox" id="show-removed" checked>除去点（動的）</label>
+          <label><input type="checkbox" id="show-bbox" checked>バウンディングボックス</label>
+        </div>
+        <div class="line"></div>
+        <div class="control-group">
+          <div class="row"><span>点サイズ</span><strong id="point-size-value">2.0</strong></div>
+          <input id="point-size" class="slider" type="range" min="0.8" max="7" step="0.2" value="2">
+          <div class="row"><span>透過</span><strong id="alpha-value">0.80</strong></div>
+          <input id="alpha" class="slider" type="range" min="0.2" max="1" step="0.05" value="0.8">
+        </div>
+        <div class="line"></div>
+        <div class="control-group">
+          <div class="row">
+            <span>自動回転</span>
+            <label><input type="checkbox" id="auto-rotate"></label>
+          </div>
+          <div class="actions">
+            <button class="btn" id="fit-view">視点リセット</button>
+            <button class="btn" id="screenshot">PNG保存</button>
+          </div>
+        </div>
+      </aside>
+      <main id="stage" class="side">
+        <div id="viewer"></div>
+        <div id="meta"></div>
+      </main>
+    </div>
+
+    <script>
+      const status = document.getElementById("status");
+      const summary = document.getElementById("summary");
+      const stage = document.getElementById("stage");
+      const viewer = document.getElementById("viewer");
+      const meta = document.getElementById("meta");
+
+      if (!window.WebGLRenderingContext) {
+        status.textContent = "WebGL が利用できない環境です。ブラウザの設定を確認してください。";
+      }
+
+      const state = {
+        showInput: true,
+        showKept: true,
+        showRemoved: true,
+        showBbox: true,
+        pointSize: 2.0,
+        alpha: 0.8,
+        autoRotate: false,
+      };
+
+      let scene = null;
+      let camera = null;
+      let renderer = null;
+      let controls = null;
+      let activeDemo = null;
+      let layers = {
+        input: null,
+        kept: null,
+        removed: null,
+        bbox: null,
+      };
+      let fps = 0;
+      let fpsLast = performance.now();
+      let fpsFrames = 0;
+
+      function pointsToFloat32Array(points) {
+        if (!Array.isArray(points) || points.length === 0) {
+          return new Float32Array(0);
+        }
+        const flat = new Float32Array(points.length * 3);
+        let ptr = 0;
+        for (const p of points) {
+          flat[ptr++] = p[0];
+          flat[ptr++] = p[1];
+          flat[ptr++] = p[2];
+        }
+        return flat;
+      }
+
+      function createPointCloud(points, color, pointSize, alpha) {
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute("position", new THREE.Float32BufferAttribute(pointsToFloat32Array(points), 3));
+        const material = new THREE.PointsMaterial({
+          size: pointSize,
+          color: new THREE.Color(color),
+          transparent: true,
+          opacity: alpha,
+          depthWrite: false,
+        });
+        return new THREE.Points(geometry, material);
+      }
+
+      function buildBbox(limits, demo) {
+        const center = limits.box_center;
+        const half = limits.box_half;
+        const cube = new THREE.BoxGeometry(half[0] * 2.0, half[1] * 2.0, half[2] * 2.0);
+        const edges = new THREE.EdgesGeometry(cube);
+        const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x38d9ff }));
+        const group = new THREE.Object3D();
+        group.add(line);
+        group.position.set(center[0], center[1], center[2]);
+        group.rotation.set(0, 0, demo.box.yaw || 0);
+        return group;
+      }
+
+      function updatePointMaterials() {
+        for (const key of ["input", "kept", "removed"]) {
+          const obj = layers[key];
+          if (!obj) continue;
+          obj.material.size = state.pointSize;
+          obj.material.opacity = state.alpha;
+          obj.material.needsUpdate = true;
+        }
+      }
+
+      function applyLayerVisibility() {
+        if (layers.input) layers.input.visible = state.showInput;
+        if (layers.kept) layers.kept.visible = state.showKept;
+        if (layers.removed) layers.removed.visible = state.showRemoved;
+        if (layers.bbox) layers.bbox.visible = state.showBbox;
+      }
+
+      function fitCamera(demo) {
+        const limits = demo.limits;
+        const cx = (limits.xmin + limits.xmax) * 0.5;
+        const cy = (limits.ymin + limits.ymax) * 0.5;
+        const cz = (limits.zmin + limits.zmax) * 0.5;
+        const span = Math.max(
+          limits.xmax - limits.xmin,
+          limits.ymax - limits.ymin,
+          limits.zmax - limits.zmin,
+          1,
+        );
+        const fov = camera.fov * Math.PI / 180;
+        const dist = (span * 1.3) / Math.tan(fov * 0.5);
+        camera.position.set(cx + dist, cy + dist * 0.5, cz + dist * 0.8);
+        controls.target.set(cx, cy, cz);
+        controls.update();
+      }
+
+      function formatVec(vec) {
+        return vec.map((v) => v.toFixed(2)).join(", ");
+      }
+
+      function setupRenderer(viewW, viewH) {
+        renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setSize(viewW, viewH);
+        viewer.appendChild(renderer.domElement);
+      }
+
+      function setViewportSize() {
+        const rect = stage.getBoundingClientRect();
+        renderer.setSize(rect.width, rect.height);
+        camera.aspect = rect.width / rect.height;
+        camera.updateProjectionMatrix();
+      }
+
+      function onWindowResize() {
+        setViewportSize();
+      }
+
+      function boot(demo) {
+        if (!demo || !demo.points) {
+          status.textContent = "データ形式が不正です。demo_scene.json を確認してください。";
+          return;
+        }
+
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x05070f);
+        camera = new THREE.PerspectiveCamera(54, 16 / 9, 0.05, 2500);
+        setupRenderer(stage.clientWidth, stage.clientHeight);
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.08;
+        controls.autoRotate = state.autoRotate;
+        controls.autoRotateSpeed = 0.8;
+
+        layers.input = createPointCloud(demo.points.input, 0x8ec8ff, state.pointSize, state.alpha);
+        layers.kept = createPointCloud(demo.points.kept, 0x7cffa6, state.pointSize, state.alpha);
+        layers.removed = createPointCloud(demo.points.removed, 0xff6f84, state.pointSize, state.alpha);
+        layers.bbox = buildBbox(demo.limits, demo);
+
+        scene.add(layers.input);
+        scene.add(layers.kept);
+        scene.add(layers.removed);
+        scene.add(layers.bbox);
+
+        applyLayerVisibility();
+        status.textContent = `center: ${formatVec(demo.box.center)} / yaw: ${(demo.box.yaw ?? 0).toFixed(2)}`;
+        summary.textContent = `input ${demo.meta.input_points} 点 / kept ${demo.meta.output_points} 点 / removed ${demo.meta.removed_points} 点`;
+        fitCamera(demo);
+        onWindowResize();
+        window.addEventListener("resize", onWindowResize);
+        wireInputs();
+        animate();
+      }
+
+      function wireInputs() {
+        document.getElementById("show-input").addEventListener("change", (event) => {
+          state.showInput = event.target.checked;
+          applyLayerVisibility();
+        });
+        document.getElementById("show-kept").addEventListener("change", (event) => {
+          state.showKept = event.target.checked;
+          applyLayerVisibility();
+        });
+        document.getElementById("show-removed").addEventListener("change", (event) => {
+          state.showRemoved = event.target.checked;
+          applyLayerVisibility();
+        });
+        document.getElementById("show-bbox").addEventListener("change", (event) => {
+          state.showBbox = event.target.checked;
+          applyLayerVisibility();
+        });
+        document.getElementById("point-size").addEventListener("input", (event) => {
+          state.pointSize = Number(event.target.value);
+          document.getElementById("point-size-value").textContent = state.pointSize.toFixed(1);
+          updatePointMaterials();
+        });
+        document.getElementById("alpha").addEventListener("input", (event) => {
+          state.alpha = Number(event.target.value);
+          document.getElementById("alpha-value").textContent = state.alpha.toFixed(2);
+          updatePointMaterials();
+        });
+        document.getElementById("auto-rotate").addEventListener("change", (event) => {
+          state.autoRotate = event.target.checked;
+          if (controls) controls.autoRotate = state.autoRotate;
+        });
+        document.getElementById("fit-view").addEventListener("click", () => {
+          if (activeDemo) {
+            fitCamera(activeDemo);
+          }
+        });
+        document.getElementById("screenshot").addEventListener("click", () => {
+          const url = renderer.domElement.toDataURL("image/png");
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = `dynamic_scene_${Date.now()}.png`;
+          link.click();
+        });
+      }
+
+      async function fetchDemoData() {
+        const res = await fetch("demo_scene.json", { cache: "no-store" });
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+        return await res.json();
+      }
+
+      function animate() {
+        requestAnimationFrame(animate);
+        const now = performance.now();
+        fpsFrames += 1;
+        if (now - fpsLast >= 500) {
+          fps = Math.round((fpsFrames * 1000) / (now - fpsLast));
+          fpsLast = now;
+          fpsFrames = 0;
+        }
+        controls.update();
+        renderer.render(scene, camera);
+        if (fps) {
+          const inputCount = activeDemo ? activeDemo.points.input.length : 0;
+          const removedCount = activeDemo ? activeDemo.points.removed.length : 0;
+          const keptCount = activeDemo ? activeDemo.points.kept.length : 0;
+          meta.textContent = `FPS ${fps} / input ${inputCount} / kept ${keptCount} / removed ${removedCount}`;
+        }
+      }
+
+      (async () => {
+        if (window.location.protocol === "file:") {
+          status.textContent = "index_3d.html はHTTP配信環境で開いてください（demo_scene.json を fetch します）。";
+          summary.textContent = "ローカルファイルでは表示されません";
+          return;
+        }
+        try {
+          const demo = await fetchDemoData();
+          activeDemo = demo;
+          boot(demo);
+        } catch (error) {
+          status.textContent = "demo_scene.json の読み込みに失敗しました。demo.py の出力を確認してください。";
+          summary.textContent = `原因: ${error instanceof Error ? error.message : String(error)}`;
+        }
+      })();
+    </script>
+  </body>
+</html>

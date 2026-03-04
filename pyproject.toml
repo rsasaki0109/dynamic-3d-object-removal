@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dynamic-object-removal"
+version = "0.1.0"
+description = "Utility to remove dynamic objects from LiDAR point clouds using detected bounding boxes."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "rsasaki0109 contributors" }]
+dependencies = ["numpy>=1.24"]
+keywords = ["lidar", "slam", "ros2", "point-cloud", "dynamic-object-removal", "mapping"]
+
+[project.optional-dependencies]
+ros2 = ["rclpy"]
+
+[project.urls]
+Homepage = "https://github.com/rsasaki0109/research_ideas_ws"
+Repository = "https://github.com/rsasaki0109/research_ideas_ws"
+
+[project.scripts]
+dynamic-object-removal = "dynamic_object_removal:main"
+dynamic-object-removal-realtime = "realtime:main"
+dynamic-object-removal-bench = "bench:main"
+
+[tool.setuptools]
+py-modules = ["dynamic_object_removal", "realtime", "bench"]

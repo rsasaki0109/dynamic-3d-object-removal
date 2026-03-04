@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Dynamic Object Removal Demo</title>
+    <style>
+      body {
+        margin: 24px;
+        font-family: Arial, Helvetica, sans-serif;
+        background: #f7f8fc;
+        color: #1f2937;
+      }
+      h1 {
+        margin-bottom: 0;
+      }
+      .meta {
+        color: #4b5563;
+        margin-bottom: 24px;
+      }
+      .card {
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        background: #fff;
+        padding: 12px;
+        margin-bottom: 18px;
+      }
+      img {
+        max-width: 100%;
+        width: 100%;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+      }
+      .thumbs {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 16px;
+      }
+      ul { line-height: 1.8; }
+    </style>
+  </head>
+  <body>
+    <h1>Dynamic Object Removal デモ</h1>
+    <p class="meta">入力点群: 11000 点 / 出力点群: 8633 点 / 除去: 2367 点</p>
+
+    <div class="card">
+      <h2>デモ生成データ</h2>
+      <ul>
+        <li>demo_input.xyz</li>
+        <li>demo_objects.json</li>
+        <li>demo_output.xyz</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>3Dビュー</h2>
+      <p>インタラクティブ表示:</p>
+      <ul>
+        <li><a href="index_3d.html">index_3d.html</a>（マウスで回転・拡大縮小可能）</li>
+        <li><a href="index_3d_standalone.html">index_3d_standalone.html</a>（サーバ不要。直接開いて確認）</li>
+      </ul>
+    </div>
+
+    <div class="card thumbs">
+      <div>
+        <h3>Before / After</h3>
+        <img src="demo_before_after.png" alt="before after comparison">
+      </div>
+      <div>
+        <h3>Summary</h3>
+        <img src="demo_comparison.png" alt="summary comparison">
+      </div>
+      <div>
+        <h3>3D Topology (projected)</h3>
+        <img src="demo_before_after_3d.png" alt="3d point cloud comparison">
+      </div>
+    </div>
+  </body>
+</html>

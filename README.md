@@ -40,7 +40,7 @@ cd demo
 
 ### GitHub Pages 公開
 
-- ブランチ `master` の push をトリガーに、GitHub Actions でデモページを自動デプロイします。
+- ブランチ `master` の push をトリガーに、GitHub Pages を自動更新します。
 - 公開先: `https://rsasaki0109.github.io/dynamic-3d-object-removal/`
 - デモ:
   - `https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index.html`

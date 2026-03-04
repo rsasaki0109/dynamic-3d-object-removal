@@ -4,7 +4,6 @@
 
 ## まずはここから
 
-- GitHub Pages 設定画面: https://github.com/rsasaki0109/dynamic-3d-object-removal/settings/pages
 - GitHub Pages デモ: https://rsasaki0109.github.io/dynamic-3d-object-removal/
 
 ## 最短セットアップ
@@ -48,7 +47,6 @@ cd demo
 - ブランチ `master` の push をトリガーに、GitHub Pages を自動更新します。
 - 公開先: `https://rsasaki0109.github.io/dynamic-3d-object-removal/`
 - リポジトリ: https://github.com/rsasaki0109/dynamic-3d-object-removal
-- Pages 設定画面: https://github.com/rsasaki0109/dynamic-3d-object-removal/settings/pages
 - デモ:
   - `https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index.html`
   - `https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d.html`

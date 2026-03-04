@@ -4,9 +4,7 @@
 
 ## まずはここから
 
-- GitHub Pages（公開サイト）: https://rsasaki0109.github.io/dynamic-3d-object-removal/
 - GitHub Pages 設定画面: https://github.com/rsasaki0109/dynamic-3d-object-removal/settings/pages
-- 3Dデモ: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d.html
 
 ## 最短セットアップ
 

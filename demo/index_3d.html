@@ -204,11 +204,101 @@
       let fps = 0;
       let fpsLast = performance.now();
       let fpsFrames = 0;
+      const MAX_RENDER_POINTS_PER_LAYER = 200000;
+
+      function clampLimit(value, fallback) {
+        const number = Number(value);
+        return Number.isFinite(number) ? number : fallback;
+      }
+
+      function ensureFiniteLimits(candidate) {
+        if (!candidate) return null;
+        const keys = ["xmin", "xmax", "ymin", "ymax", "zmin", "zmax"];
+        const limits = {};
+        for (const key of keys) {
+          const num = clampLimit(candidate[key], NaN);
+          if (!Number.isFinite(num)) return null;
+          limits[key] = num;
+        }
+        if (!(limits.xmin <= limits.xmax) || !(limits.ymin <= limits.ymax) || !(limits.zmin <= limits.zmax)) {
+          return null;
+        }
+        limits.box_half = Array.isArray(candidate.box_half) ? candidate.box_half.map((v) => clampLimit(v, NaN)) : null;
+        limits.box_center = Array.isArray(candidate.box_center) ? candidate.box_center.map((v) => clampLimit(v, NaN)) : null;
+        if (!Array.isArray(limits.box_half) || limits.box_half.length !== 3 || !limits.box_half.every(Number.isFinite)) {
+          limits.box_half = null;
+        }
+        if (!Array.isArray(limits.box_center) || limits.box_center.length !== 3 || !limits.box_center.every(Number.isFinite)) {
+          limits.box_center = null;
+        }
+        return limits;
+      }
+
+      function preparePoints(rawPoints, label) {
+        if (!Array.isArray(rawPoints) || rawPoints.length === 0) {
+          return { original: 0, rendered: 0, dropped: 0, points: [], label };
+        }
+
+        const valid = [];
+        for (const point of rawPoints) {
+          if (!Array.isArray(point) || point.length < 3) continue;
+          const x = Number(point[0]);
+          const y = Number(point[1]);
+          const z = Number(point[2]);
+          if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z)) continue;
+          valid.push([x, y, z]);
+        }
+
+        const original = valid.length;
+        if (original <= MAX_RENDER_POINTS_PER_LAYER) {
+          return { original, rendered: original, dropped: 0, points: valid, label };
+        }
+
+        const stride = Math.ceil(original / MAX_RENDER_POINTS_PER_LAYER);
+        const sampled = [];
+        for (let i = 0; i < original; i += stride) {
+          sampled.push(valid[i]);
+        }
+        return {
+          original,
+          rendered: sampled.length,
+          dropped: original - sampled.length,
+          points: sampled,
+          label,
+        };
+      }
+
+      function computeLimitsFromPoints(points) {
+        if (!Array.isArray(points) || points.length === 0) {
+          return null;
+        }
+        const limits = {
+          xmin: points[0][0],
+          xmax: points[0][0],
+          ymin: points[0][1],
+          ymax: points[0][1],
+          zmin: points[0][2],
+          zmax: points[0][2],
+        };
+        for (const point of points) {
+          limits.xmin = Math.min(limits.xmin, point[0]);
+          limits.xmax = Math.max(limits.xmax, point[0]);
+          limits.ymin = Math.min(limits.ymin, point[1]);
+          limits.ymax = Math.max(limits.ymax, point[1]);
+          limits.zmin = Math.min(limits.zmin, point[2]);
+          limits.zmax = Math.max(limits.zmax, point[2]);
+        }
+        limits.box_half = null;
+        limits.box_center = null;
+        return limits;
+      }
+
+      function formatCount(total, rendered) {
+        return rendered === total ? `${total} 点` : `${total} 点 -> 表示 ${rendered} 点`;
+      }
 
       function pointsToFloat32Array(points) {
-        if (!Array.isArray(points) || points.length === 0) {
-          return new Float32Array(0);
-        }
+        if (!Array.isArray(points) || points.length === 0) return new Float32Array(0);
         const flat = new Float32Array(points.length * 3);
         let ptr = 0;
         for (const p of points) {
@@ -233,8 +323,15 @@
       }
 
       function buildBbox(limits, demo) {
-        const center = limits.box_center;
-        const half = limits.box_half;
+        const center = limits.box_center || (Array.isArray(demo?.box?.center) ? demo.box.center : null);
+        const half = limits.box_half || (Array.isArray(demo?.box?.size) ? demo.box.size.map((value) => Number(value) / 2) : null);
+
+        if (!Array.isArray(center) || center.length !== 3 || !Array.isArray(half) || half.length !== 3) {
+          return null;
+        }
+        if (!center.every(Number.isFinite) || !half.every(Number.isFinite)) {
+          return null;
+        }
         const cube = new THREE.BoxGeometry(half[0] * 2.0, half[1] * 2.0, half[2] * 2.0);
         const edges = new THREE.EdgesGeometry(cube);
         const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x38d9ff }));
@@ -275,8 +372,11 @@
         );
         const fov = camera.fov * Math.PI / 180;
         const dist = (span * 1.3) / Math.tan(fov * 0.5);
+        camera.near = Math.max(span * 1e-4, 0.05);
+        camera.far = Math.max(dist * 3, span * 4, 5000);
         camera.position.set(cx + dist, cy + dist * 0.5, cz + dist * 0.8);
         controls.target.set(cx, cy, cz);
+        camera.updateProjectionMatrix();
         controls.update();
       }
 
@@ -308,6 +408,51 @@
           return;
         }
 
+        const preparedInput = preparePoints(demo.points.input, "input");
+        const preparedKept = preparePoints(demo.points.kept, "kept");
+        const preparedRemoved = preparePoints(demo.points.removed, "removed");
+        const prepared = {
+          input: preparedInput,
+          kept: preparedKept,
+          removed: preparedRemoved,
+        };
+
+        const limitsCandidate = ensureFiniteLimits(demo.limits) || computeLimitsFromPoints([
+          ...preparedInput.points,
+          ...preparedKept.points,
+          ...preparedRemoved.points,
+        ]);
+        if (!limitsCandidate) {
+          status.textContent = "点群のバウンディング情報が不正です。";
+          return;
+        }
+
+        if (limitsCandidate.box_half === null) {
+          limitsCandidate.box_half = [0, 0, 0];
+        }
+        if (limitsCandidate.box_center === null && demo.box && Array.isArray(demo.box.center)) {
+          limitsCandidate.box_center = demo.box.center;
+        }
+
+        const safeDemo = {
+          ...demo,
+          points: {
+            input: preparedInput.points,
+            kept: preparedKept.points,
+            removed: preparedRemoved.points,
+          },
+          limits: limitsCandidate,
+          _meta: {
+            inputRendered: preparedInput.rendered,
+            keptRendered: preparedKept.rendered,
+            removedRendered: preparedRemoved.rendered,
+            inputDropped: preparedInput.dropped,
+            keptDropped: preparedKept.dropped,
+            removedDropped: preparedRemoved.dropped,
+          },
+        };
+        activeDemo = safeDemo;
+
         scene = new THREE.Scene();
         scene.background = new THREE.Color(0x05070f);
         camera = new THREE.PerspectiveCamera(54, 16 / 9, 0.05, 2500);
@@ -318,20 +463,36 @@
         controls.autoRotate = state.autoRotate;
         controls.autoRotateSpeed = 0.8;
 
-        layers.input = createPointCloud(demo.points.input, 0x8ec8ff, state.pointSize, state.alpha);
-        layers.kept = createPointCloud(demo.points.kept, 0x7cffa6, state.pointSize, state.alpha);
-        layers.removed = createPointCloud(demo.points.removed, 0xff6f84, state.pointSize, state.alpha);
-        layers.bbox = buildBbox(demo.limits, demo);
+        layers.input = createPointCloud(safeDemo.points.input, 0x8ec8ff, state.pointSize, state.alpha);
+        layers.kept = createPointCloud(safeDemo.points.kept, 0x7cffa6, state.pointSize, state.alpha);
+        layers.removed = createPointCloud(safeDemo.points.removed, 0xff6f84, state.pointSize, state.alpha);
+        layers.bbox = buildBbox(safeDemo.limits, safeDemo);
 
         scene.add(layers.input);
         scene.add(layers.kept);
         scene.add(layers.removed);
-        scene.add(layers.bbox);
+        if (layers.bbox) {
+          scene.add(layers.bbox);
+        }
 
         applyLayerVisibility();
-        status.textContent = `center: ${formatVec(demo.box.center)} / yaw: ${(demo.box.yaw ?? 0).toFixed(2)}`;
-        summary.textContent = `input ${demo.meta.input_points} 点 / kept ${demo.meta.output_points} 点 / removed ${demo.meta.removed_points} 点`;
-        fitCamera(demo);
+        const droppedParts = [];
+        if (preparedInput.dropped) droppedParts.push(`input ${preparedInput.dropped.toLocaleString()}点`);
+        if (preparedKept.dropped) droppedParts.push(`kept ${preparedKept.dropped.toLocaleString()}点`);
+        if (preparedRemoved.dropped) droppedParts.push(`removed ${preparedRemoved.dropped.toLocaleString()}点`);
+        const center = safeDemo.box && Array.isArray(safeDemo.box.center) ? safeDemo.box.center : [0, 0, 0];
+        const yaw = safeDemo.box && Number.isFinite(safeDemo.box.yaw) ? safeDemo.box.yaw : 0;
+        status.textContent = `center: ${formatVec(center)} / yaw: ${yaw.toFixed(2)}${
+          droppedParts.length ? " / 表示用ダウンサンプリングあり" : ""
+        }`;
+        summary.textContent = `input ${formatCount(demo.meta.input_points, safeDemo._meta.inputRendered)} / kept ${formatCount(
+          demo.meta.output_points,
+          safeDemo._meta.keptRendered,
+        )} / removed ${formatCount(demo.meta.removed_points, safeDemo._meta.removedRendered)}`;
+        if (droppedParts.length) {
+          summary.textContent += `（除外: ${droppedParts.join(" / ")}）`;
+        }
+        fitCamera(safeDemo);
         onWindowResize();
         window.addEventListener("resize", onWindowResize);
         wireInputs();

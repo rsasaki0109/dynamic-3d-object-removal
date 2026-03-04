@@ -62,6 +62,17 @@ cd demo
 
 を備えています。
 
+## デモ結果
+
+- 対象点群: `demo/demo_input.xyz`（11,000 点）
+- 除去結果: `demo/demo_output.xyz`（8,633 点）
+- 除去点: 2,367 点（約 21.5%）
+- 参照シーン: `demo/demo_scene.json`
+
+![before-after](demo/demo_before_after.png)
+![3d-before-after](demo/demo_before_after_3d.png)
+![comparison](demo/demo_comparison.png)
+
 ## 参考 OSS
 
 - `dynamic_object_detection` (ROS1/ROS2向け実装)

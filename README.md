@@ -5,6 +5,34 @@
 ## 3Dデモ（最初にここ）
 
 - GitHub Pages: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_standalone.html
+- 単一スキャン用: `demo/index_3d_scan_standalone.html`（`run_scan_demo.py` で生成）
+
+### 単一スキャンでの検証候補（tsukubachallenge）
+
+- map_utsukuba22_university_of_tsukuba.pcd
+  - 目安: 14.6M 点程度（比較的扱いやすい単一スキャン）
+- map_tc19_furo.pcd
+  - 目安: 22.3M 点程度（広がりがあり、街中シーンが見やすい）
+- map_tc18_furo.pcd
+  - 目安: 17.0M 点程度（単一スキャンで全体感が出る）
+
+どれも `tsukubachallenge/tc-datasets` 側の配布形式に合わせて取得してください。
+現状の `run_scan_demo.py` は `dynamic_object_removal.load_points()` を経由するため、`PCD` は
+ASCII 形式を前提にしています（`DATA binary` の場合は事前変換が必要です）。
+
+### 外部点群のデモ化（新）
+
+```bash
+python3 demo/run_scan_demo.py \
+  --input-cloud /path/to/map_utsukuba22_university_of_tsukuba.pcd \
+  --input-objects /path/to/objects.json \
+  --max-render-points 220000 \
+  --output-scene demo/demo_scene_single_scan.json \
+  --output-html demo/index_3d_scan_standalone.html
+```
+
+- `--input-objects` は省略可能です（省略時は「除去なしの可視化」）
+- 出力ファイル `--output-html` を GitHub Pages で置く場合は、リンクを更新してください
 
 ## インストール
 

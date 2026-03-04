@@ -64,9 +64,9 @@ cd demo
 
 ## 参考 OSS
 
-- `dynamic_object_removal` (ROS2)
-  - https://github.com/davutcanakbas/dynamic_object_removal
-  - ライセンス: Apache-2.0（`package.xml` 記載）
+- `dynamic_object_detection` (ROS1/ROS2向け実装)
+  - https://github.com/UTS-RI/dynamic_object_detection
+  - ライセンス: MIT
 - NumPy
   - https://numpy.org/doc/stable/license/
   - ライセンス: BSD-3-Clause

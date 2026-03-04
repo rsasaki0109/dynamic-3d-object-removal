@@ -2,6 +2,10 @@
 
 動的物体検出結果の 3D バウンディングボックスを使って点群を除去するライブラリです。
 
+## 3Dデモ（最初にここ）
+
+- GitHub Pages: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_standalone.html
+
 ## インストール
 
 ```bash

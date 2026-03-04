@@ -1,8 +1,8 @@
 # Dynamic 3D Object Removal
 
-動的物体を除去する 3D 点群デモ。
+動的物体を除去する 3D 点群アルゴリズム。
 
-## 触ってみる（3Dデモ）
+## 触ってみる（3D可視化）
 
 ### GitHub Pages
 

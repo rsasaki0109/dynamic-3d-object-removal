@@ -48,3 +48,7 @@ dynamic-object-removal --help
 
 - GitHub Pages: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_standalone.html
 - ローカル: `python3 demo/run_demo.py` を実行して `demo/demo_...` を更新、ブラウザで `demo/index_3d_standalone.html` を開く
+
+## 参考アルゴリズム
+
+- [UTS-RI/dynamic_object_detection](https://github.com/UTS-RI/dynamic_object_detection)

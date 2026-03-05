@@ -410,6 +410,8 @@ HTML_TEMPLATE = r'''<!doctype html>
       const controls = new OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.dampingFactor = 0.08;
+      controls.zoomSpeed = 0.35;
+      controls.zoomSpeed = 0.35;
       controls.target.set(0, 0, 0);
 
       const ambient = new THREE.AmbientLight(0xffffff, 0.9);

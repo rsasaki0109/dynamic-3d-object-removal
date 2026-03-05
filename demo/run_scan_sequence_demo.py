@@ -1035,12 +1035,13 @@ HTML_TEMPLATE = r'''<!doctype html>
           history: new THREE.Group(),
           current: new THREE.Group(),
           path: new THREE.Group(),
+          ghost: new THREE.Group(),
         };
       }
 
       const raw = createScene(0x0f172a, 0x334155, 0x1e293b);
       const clean = createScene(0x041712, 0x134e4a, 0x0f2f2b);
-      raw.scene.add(raw.history, raw.current, raw.path);
+      raw.scene.add(raw.history, raw.current, raw.path, raw.ghost);
       clean.scene.add(clean.history, clean.current, clean.path);
 
       function disposeObject(object) {
@@ -1109,6 +1110,38 @@ HTML_TEMPLATE = r'''<!doctype html>
         const marker = new THREE.Mesh(geometry, material);
         marker.position.set(centerPoint[0], centerPoint[1], centerPoint[2]);
         return marker;
+      }
+
+      function makeGhostFootprint(cells) {
+        if (!cells || cells.length === 0) return null;
+        const positions = new Float32Array(cells.length * 3);
+        const colors = new Float32Array(cells.length * 3);
+        const maxGhost = Math.max(1, Number(bev.max_ghost_count) || 1);
+        const z = limits.zmin + Math.max(voxelSize * 0.24, 0.08);
+        for (let i = 0; i < cells.length; i += 1) {
+          const cell = cells[i];
+          const t = Math.min(1, cell.count / maxGhost);
+          const offset = i * 3;
+          positions[offset] = cell.x;
+          positions[offset + 1] = cell.y;
+          positions[offset + 2] = z;
+          colors[offset] = 1.0;
+          colors[offset + 1] = 0.62 + 0.18 * (1 - t);
+          colors[offset + 2] = 0.28 + 0.24 * (1 - t);
+        }
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+        const material = new THREE.PointsMaterial({
+          size: Math.max(state.pointSize * 2.8, 5.2),
+          sizeAttenuation: false,
+          vertexColors: true,
+          transparent: true,
+          opacity: 0.92,
+          depthWrite: false,
+          depthTest: false,
+        });
+        return new THREE.Points(geometry, material);
       }
 
       const prefixCache = { input: [], kept: [], path: [] };
@@ -1444,6 +1477,10 @@ HTML_TEMPLATE = r'''<!doctype html>
           state.showTransient ? makePoints(frame.removed, 0xff4d6d, state.pointSize * 2.45, 0.98, false) : null,
           state.showBoxes ? makeBoxes(frame.objects, 0xf97316) : null,
         ]);
+        const showGhostFootprint = state.showTransient && state.frameIndex === initialFrame;
+        updateGroup(raw.ghost, [
+          showGhostFootprint ? makeGhostFootprint(ghostCells) : null,
+        ]);
         updateGroup(clean.history, [
           makePoints(cleanAccum, 0x14b8a6, state.pointSize * 1.02, 0.9, true),
         ]);
@@ -1464,8 +1501,8 @@ HTML_TEMPLATE = r'''<!doctype html>
         document.getElementById("footer-raw").textContent = frame.raw_voxels.toLocaleString();
         document.getElementById("footer-clean").textContent = frame.clean_voxels.toLocaleString();
         document.getElementById("footer-ghost").textContent = frame.ghost_voxels.toLocaleString();
-        document.getElementById("hud-left").textContent = `raw: ${frame.raw_voxels.toLocaleString()} voxels`;
-        document.getElementById("hud-right").textContent = `cleaned: ${frame.clean_voxels.toLocaleString()} voxels`;
+        document.getElementById("hud-left").textContent = `raw: ${frame.raw_voxels.toLocaleString()} voxels | ghost ${frame.ghost_voxels.toLocaleString()}`;
+        document.getElementById("hud-right").textContent = `cleaned: ${frame.clean_voxels.toLocaleString()} voxels | peak ${(100 - Number(frame.ghost_ratio_pct || 0)).toFixed(1)}% stable`;
         drawTimeline();
       }
 

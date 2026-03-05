@@ -564,7 +564,7 @@ HTML_TEMPLATE = r'''<!doctype html>
         </div>
 
         <div class="note-box">
-          drag: orbit / wheel: zoom / right drag: pan. the page opens at the final accumulation because that is where the map contamination difference is clearest. use <code>Replay build-up</code> to watch how the ghost grows over time. if shipped detections are absent, the orange 3D boxes are auto-proposed transient boxes from the checked-in sample so the method primitive is still visible.
+          drag: orbit / wheel: zoom / right drag: pan. the page opens at the final accumulation because that is where the map contamination difference is clearest. use <code>Replay build-up</code> to watch how the ghost grows over time. when detections are absent, the checked-in page bootstraps transient boxes and uses them for a sampled box-removal preview.
         </div>
       </section>
     </div>
@@ -663,6 +663,106 @@ HTML_TEMPLATE = r'''<!doctype html>
         return boxes.slice(0, AUTO_BOX_MAX_BOXES);
       }
 
+      function rotateToBoxFrame(dx, dy, yaw = 0) {
+        const c = Math.cos(yaw);
+        const s = Math.sin(yaw);
+        return [dx * c + dy * s, -dx * s + dy * c];
+      }
+
+      function splitPointsByBoxes(flat, objects) {
+        if (!flat || flat.length === 0 || !objects || objects.length === 0) {
+          return { kept: flat ? new Float32Array(flat) : new Float32Array(), removed: new Float32Array() };
+        }
+        const kept = [];
+        const removed = [];
+        pointLoop:
+        for (let i = 0; i < flat.length; i += 3) {
+          const x = flat[i];
+          const y = flat[i + 1];
+          const z = flat[i + 2];
+          for (const object of objects) {
+            const dx = x - object.center[0];
+            const dy = y - object.center[1];
+            const dz = z - object.center[2];
+            const [lx, ly] = rotateToBoxFrame(dx, dy, object.yaw || 0);
+            if (
+              Math.abs(lx) <= object.size[0] * 0.5 &&
+              Math.abs(ly) <= object.size[1] * 0.5 &&
+              Math.abs(dz) <= object.size[2] * 0.5
+            ) {
+              removed.push(x, y, z);
+              continue pointLoop;
+            }
+          }
+          kept.push(x, y, z);
+        }
+        return {
+          kept: new Float32Array(kept),
+          removed: new Float32Array(removed),
+        };
+      }
+
+      function voxelSetFromFlat(flat, voxelSize) {
+        const voxels = new Set();
+        if (!flat || flat.length === 0) return voxels;
+        for (let i = 0; i < flat.length; i += 3) {
+          const vx = Math.floor(flat[i] / voxelSize);
+          const vy = Math.floor(flat[i + 1] / voxelSize);
+          const vz = Math.floor(flat[i + 2] / voxelSize);
+          voxels.add(`${vx},${vy},${vz}`);
+        }
+        return voxels;
+      }
+
+      function addVoxels(target, source) {
+        for (const item of source) target.add(item);
+      }
+
+      function differenceVoxels(a, b) {
+        const diff = new Set();
+        for (const item of a) if (!b.has(item)) diff.add(item);
+        return diff;
+      }
+
+      function projectBevFromVoxelSet(voxelSet, voxelSize) {
+        const counts = new Map();
+        for (const key of voxelSet) {
+          const [sx, sy] = key.split(",", 2);
+          const xyKey = `${sx},${sy}`;
+          counts.set(xyKey, (counts.get(xyKey) || 0) + 1);
+        }
+        if (counts.size === 0) {
+          return { flat: [], maxCount: 0, bounds: { xmin: -1, xmax: 1, ymin: -1, ymax: 1 } };
+        }
+        const flat = [];
+        let xmin = Infinity;
+        let xmax = -Infinity;
+        let ymin = Infinity;
+        let ymax = -Infinity;
+        let maxCount = 0;
+        for (const [xyKey, count] of Array.from(counts.entries()).sort()) {
+          const [sx, sy] = xyKey.split(",").map(Number);
+          const x = (sx + 0.5) * voxelSize;
+          const y = (sy + 0.5) * voxelSize;
+          flat.push(Number(x.toFixed(3)), Number(y.toFixed(3)), count);
+          xmin = Math.min(xmin, x);
+          xmax = Math.max(xmax, x);
+          ymin = Math.min(ymin, y);
+          ymax = Math.max(ymax, y);
+          maxCount = Math.max(maxCount, count);
+        }
+        return {
+          flat,
+          maxCount,
+          bounds: {
+            xmin: Number(xmin.toFixed(3)),
+            xmax: Number(xmax.toFixed(3)),
+            ymin: Number(ymin.toFixed(3)),
+            ymax: Number(ymax.toFixed(3)),
+          },
+        };
+      }
+
       const baseFrames = (DEMO_DATA.frames || []).map((frame) => ({
         ...frame,
         objects: Array.isArray(frame.objects) ? frame.objects : [],
@@ -671,17 +771,58 @@ HTML_TEMPLATE = r'''<!doctype html>
         removed: new Float32Array(frame.removed || []),
       }));
       const frames = baseFrames.map((frame) => {
-        if (frame.objects.length > 0) {
-          return { ...frame, objectsDerived: false };
-        }
-        const objects = deriveTransientBoxes(frame.removed);
-        return { ...frame, objects, objectsDerived: objects.length > 0 };
+        const derivedObjects = frame.objects.length > 0 ? frame.objects : deriveTransientBoxes(frame.removed);
+        const objectsDerived = frame.objects.length === 0 && derivedObjects.length > 0;
+        const boxed = derivedObjects.length > 0 ? splitPointsByBoxes(frame.input, derivedObjects) : null;
+        return {
+          ...frame,
+          objects: derivedObjects,
+          objectsDerived,
+          kept: boxed ? boxed.kept : frame.kept,
+          removed: boxed ? boxed.removed : frame.removed,
+          render_kept_points: boxed ? boxed.kept.length / 3 : frame.render_kept_points,
+          render_removed_points: boxed ? boxed.removed.length / 3 : frame.render_removed_points,
+        };
       });
       const pathPoints = (DEMO_DATA.path || []).map((point) => point.map(Number));
-      const bev = DEMO_DATA.bev || { bounds: { xmin: -1, xmax: 1, ymin: -1, ymax: 1 }, clean: [], ghost: [], voxel_size: 1, max_clean_count: 1, max_ghost_count: 1 };
-      const hasBoxes = frames.some((frame) => Array.isArray(frame.objects) && frame.objects.length > 0);
       const usesDerivedBoxes = frames.some((frame) => frame.objectsDerived);
-      const voxelSize = Math.max(Number(bev.voxel_size) || 1, 1e-3);
+      const hasBoxes = frames.some((frame) => Array.isArray(frame.objects) && frame.objects.length > 0);
+      const voxelSize = Math.max(Number((DEMO_DATA.bev || {}).voxel_size) || 1, 1e-3);
+
+      if (hasBoxes) {
+        const rawAccum = new Set();
+        const cleanAccum = new Set();
+        for (const frame of frames) {
+          addVoxels(rawAccum, voxelSetFromFlat(frame.input, voxelSize));
+          addVoxels(cleanAccum, voxelSetFromFlat(frame.kept, voxelSize));
+          const ghostAccum = differenceVoxels(rawAccum, cleanAccum);
+          frame.raw_voxels = rawAccum.size;
+          frame.clean_voxels = cleanAccum.size;
+          frame.ghost_voxels = ghostAccum.size;
+          frame.ghost_ratio_pct = Number((100 * ghostAccum.size / Math.max(1, rawAccum.size)).toFixed(2));
+        }
+        const finalGhost = differenceVoxels(rawAccum, cleanAccum);
+        const cleanBev = projectBevFromVoxelSet(cleanAccum, voxelSize);
+        const ghostBev = projectBevFromVoxelSet(finalGhost, voxelSize);
+        DEMO_DATA.meta.final_clean_voxels = cleanAccum.size;
+        DEMO_DATA.meta.final_ghost_voxels = finalGhost.size;
+        DEMO_DATA.meta.final_ghost_ratio_pct = Number((100 * finalGhost.size / Math.max(1, rawAccum.size)).toFixed(2));
+        DEMO_DATA.bev = {
+          voxel_size: voxelSize,
+          clean: cleanBev.flat,
+          ghost: ghostBev.flat,
+          max_clean_count: cleanBev.maxCount,
+          max_ghost_count: ghostBev.maxCount,
+          bounds: {
+            xmin: Math.min(cleanBev.bounds.xmin, ghostBev.bounds.xmin),
+            xmax: Math.max(cleanBev.bounds.xmax, ghostBev.bounds.xmax),
+            ymin: Math.min(cleanBev.bounds.ymin, ghostBev.bounds.ymin),
+            ymax: Math.max(cleanBev.bounds.ymax, ghostBev.bounds.ymax),
+          },
+        };
+      }
+
+      const bev = DEMO_DATA.bev || { bounds: { xmin: -1, xmax: 1, ymin: -1, ymax: 1 }, clean: [], ghost: [], voxel_size: 1, max_clean_count: 1, max_ghost_count: 1 };
 
       function flatTriplesToCells(flat) {
         const cells = [];
@@ -1182,7 +1323,7 @@ HTML_TEMPLATE = r'''<!doctype html>
         document.getElementById("frame-label").textContent = `frame ${state.frameIndex + 1} / ${frames.length}`;
         document.getElementById("frame-source").textContent = frame.source;
         document.getElementById("meta-input").textContent = frame.input_points.toLocaleString();
-        document.getElementById("meta-kept").textContent = frame.kept_points.toLocaleString();
+        document.getElementById("meta-kept").textContent = Math.round(frame.render_kept_points || frame.kept_points).toLocaleString();
         document.getElementById("meta-ghost").textContent = frame.ghost_voxels.toLocaleString();
         document.getElementById("meta-ratio").textContent = `${frame.ghost_ratio_pct.toFixed(1)}%`;
 
@@ -1339,16 +1480,18 @@ HTML_TEMPLATE = r'''<!doctype html>
       document.getElementById("stat-ghost-ratio").textContent = `${DEMO_DATA.meta.final_ghost_ratio_pct.toFixed(1)}%`;
       document.getElementById("stat-ghost-voxels").textContent = DEMO_DATA.meta.final_ghost_voxels.toLocaleString();
       document.getElementById("stat-stable-voxels").textContent = DEMO_DATA.meta.final_clean_voxels.toLocaleString();
-      const sourceSuffix = usesDerivedBoxes
-        ? " 3D boxes are auto-proposed from transient clusters in the checked-in sampled sequence so the demo still shows the box-removal primitive even without shipped detections."
+      const sourceSuffix = hasBoxes
+        ? (usesDerivedBoxes
+            ? " The checked-in sequence has no shipped detections, so this page bootstraps auto transient boxes from temporal outliers and uses those boxes for a sampled box-removal preview."
+            : " This page is rendering the sampled box-removal preview driven by the provided detections.")
         : "";
       document.getElementById("source-note").textContent = `${DEMO_DATA.meta.source_note}${sourceSuffix}`;
       document.getElementById("frame-slider").max = String(Math.max(0, frames.length - 1));
       document.getElementById("frame-slider").value = String(initialFrame);
       document.getElementById("hotspot-metric").textContent = `${proof.ghostCrop.ghostCellCount.toLocaleString()} raw-only cells in crop`;
       document.getElementById("preserve-metric").textContent = `${proof.preserveCrop.overlapPct}% footprint overlap`;
-      document.getElementById("hotspot-copy").textContent = usesDerivedBoxes
-        ? `largest residual contamination pocket: ${proof.ghostCrop.ghostCellCount.toLocaleString()} raw-only cells survive here, and ${proof.ghostObjects.length} auto transient boxes summarize the current-frame clutter that would be cropped by the method.`
+      document.getElementById("hotspot-copy").textContent = hasBoxes
+        ? `largest residual contamination pocket: ${proof.ghostCrop.ghostCellCount.toLocaleString()} raw-only cells survive here, and ${proof.ghostObjects.length} box candidates summarize the current-frame clutter that the box-removal preview crops from the sampled sequence.`
         : `largest residual contamination pocket: ${proof.ghostCrop.ghostCellCount.toLocaleString()} raw-only cells survive inside this crop if every observation is accumulated.`;
       document.getElementById("preserve-copy").textContent = `this dense static crop keeps ${proof.preserveCrop.overlapPct}% of its footprint after cleaning, with ${proof.preserveCrop.ghostCellCount.toLocaleString()} raw-only cells leaking into the same area.`;
 

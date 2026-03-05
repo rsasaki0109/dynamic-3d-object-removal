@@ -9,8 +9,7 @@
 - 単発 checked-in 版は実スキャン `demo/actual_scan_20240820_cloud.pcd` と検出 box `demo/actual_scan_20240820_objects.json` から生成
 - 連続 checked-in 版は real multi-frame sequence `graph/*/cloud.pcd` を使い、`raw accumulation vs cleaned accumulation` を Pages 上でそのまま比較します
 - 連続デモには `ghost hotspot` と `static structure preserved` の証拠パネルを追加し、必要性と安全性を同じ画面で確認できます
-- 連続 checked-in 版の cleaned 側は、repo に per-frame box が入っていないため temporal consistency で生成しています
-- ただし viewer 上のオレンジ box は、checked-in sample の transient cluster から自動提案した `auto transient boxes` で、手法の box-removal primitive を視覚化しています
+- 連続 checked-in 版は、repo に per-frame box が入っていないため temporal consistency で transient outlier を拾い、そこから自動提案した `auto transient boxes` で sampled box-removal preview を作っています
 
 ![actual scan removal preview](demo/actual_scan_result_overview.png)
 
@@ -26,7 +25,7 @@
 - 左: `Raw accumulation`
   - 各フレームで観測した点をそのまま積むので、動的物体や transient clutter が尾を引きます
 - 右: `Cleaned accumulation`
-  - 継続して観測された点だけを積むので、静的構造の輪郭が先に残ります
+  - checked-in 版では auto transient boxes で cropped した sampled point 群を積むので、`box で消すと map contamination がどう変わるか` をそのまま見られます
 - 下段左: `Ghost hotspot`
   - final accumulation の中で raw-only occupancy が最も濃い領域を crop し、raw 側にだけ残る汚染を局所比較します
   - checked-in 版では current frame の transient cluster から自動提案した box も重ねて、どこを box-removal したいのかをその場で示します

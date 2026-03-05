@@ -38,6 +38,15 @@ cd demo
 ./open_latest_report.sh --safe
 ```
 
+### GitHub Pages 公開
+
+- ブランチ `master` の push をトリガーに、GitHub Actions でデモページを自動デプロイします。
+- 公開先: `https://rsasaki0109.github.io/dynamic-3d-object-removal/`
+- デモ:
+  - `https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index.html`
+  - `https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d.html`
+  - `https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_standalone.html`
+
 ## 対応データ
 
 - 点群: `*.xyz`, `*.pcd`, `*.csv`, `*.txt`, `*.npy`

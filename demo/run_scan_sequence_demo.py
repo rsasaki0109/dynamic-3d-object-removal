@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a self-contained split-view accumulation demo from multiple point-cloud frames."""
+"""Build a self-contained accumulation split demo from multiple point-cloud frames."""
 
 from __future__ import annotations
 
@@ -170,9 +170,7 @@ HTML_TEMPLATE = r'''<!doctype html>
         gap: 10px;
         flex-wrap: wrap;
       }
-      button, select, input[type="range"] {
-        font: inherit;
-      }
+      button, select, input[type="range"] { font: inherit; }
       button, select {
         border: 1px solid rgba(15, 118, 110, 0.18);
         background: #fff;
@@ -219,6 +217,25 @@ HTML_TEMPLATE = r'''<!doctype html>
         height: 10px;
         border-radius: 999px;
         display: inline-block;
+      }
+      .bev-card {
+        padding: 12px;
+        border-radius: 18px;
+        background: #08111f;
+        border: 1px solid rgba(15, 23, 42, 0.4);
+      }
+      #ghost-bev {
+        display: block;
+        width: 100%;
+        height: 220px;
+        border-radius: 12px;
+        background: linear-gradient(180deg, #08111f 0%, #0b1728 100%);
+      }
+      .bev-meta {
+        margin-top: 8px;
+        color: #cbd5e1;
+        font-size: 12px;
+        line-height: 1.6;
       }
       .compare-card {
         position: relative;
@@ -335,9 +352,9 @@ HTML_TEMPLATE = r'''<!doctype html>
       <aside class="panel">
         <div class="section">
           <span class="eyebrow">Impact Demo</span>
-          <h1>動的点を見せるのではなく、地図が締まることを見せる</h1>
+          <h1>動的点を見せるのではなく、地図の汚染を見せる</h1>
           <p class="lead">
-            左は観測した点をそのまま積算、右は各フレームから安定点だけを積算します。比較の主役は current frame ではなく、時間方向に積んだ後の差です。
+            初期表示は build-up 後の最終状態です。左は観測した点をそのまま積算、右は cleaned 点だけを積算します。主役は current frame ではなく、最後に残る ghost の差です。
           </p>
         </div>
 
@@ -353,19 +370,19 @@ HTML_TEMPLATE = r'''<!doctype html>
         </div>
 
         <div class="section">
-          <h2>Overview</h2>
+          <h2>Headline</h2>
           <div class="stats">
             <div class="stat"><strong id="stat-frame-count">0</strong><span>frames</span></div>
-            <div class="stat"><strong id="stat-fps">0</strong><span>default fps</span></div>
-            <div class="stat"><strong id="stat-max-render">0</strong><span>max rendered / frame</span></div>
-            <div class="stat"><strong id="stat-mode">-</strong><span>cleaning mode</span></div>
+            <div class="stat"><strong id="stat-ghost-ratio">0%</strong><span>final ghost ratio</span></div>
+            <div class="stat"><strong id="stat-ghost-voxels">0</strong><span>ghost voxels</span></div>
+            <div class="stat"><strong id="stat-stable-voxels">0</strong><span>stable voxels</span></div>
           </div>
         </div>
 
         <div class="section controls">
           <h2>Playback</h2>
           <div class="buttons">
-            <button class="primary" id="play-toggle">Play</button>
+            <button class="primary" id="play-toggle">Replay build-up</button>
             <button id="fit-view">Fit view</button>
             <button id="download-shot">Screenshot</button>
           </div>
@@ -405,10 +422,18 @@ HTML_TEMPLATE = r'''<!doctype html>
 
         <div class="section">
           <h2>Current frame</h2>
-          <div class="small-meta"><span>original points</span><span id="meta-input">0</span></div>
-          <div class="small-meta"><span>cleaned points</span><span id="meta-kept">0</span></div>
-          <div class="small-meta"><span>transient / removed</span><span id="meta-removed">0</span></div>
-          <div class="small-meta"><span>clean ratio</span><span id="meta-ratio">0%</span></div>
+          <div class="small-meta"><span>frame points</span><span id="meta-input">0</span></div>
+          <div class="small-meta"><span>cleaned frame points</span><span id="meta-kept">0</span></div>
+          <div class="small-meta"><span>accum ghost voxels</span><span id="meta-ghost">0</span></div>
+          <div class="small-meta"><span>accum ghost ratio</span><span id="meta-ratio">0%</span></div>
+        </div>
+
+        <div class="section">
+          <h2>Ghost heatmap</h2>
+          <div class="bev-card">
+            <canvas id="ghost-bev" width="320" height="220"></canvas>
+            <div class="bev-meta">teal = final cleaned footprint / pink-yellow = raw-only occupancy. hotter cells indicate where transient structure remains if you keep every observation.</div>
+          </div>
         </div>
 
         <div class="section">
@@ -438,13 +463,13 @@ HTML_TEMPLATE = r'''<!doctype html>
         </div>
 
         <div class="compare-footer">
-          <div class="footer-card"><strong>Accumulated raw</strong><span id="footer-raw">0</span></div>
-          <div class="footer-card"><strong>Accumulated cleaned</strong><span id="footer-clean">0</span></div>
-          <div class="footer-card"><strong>Current transient / removed</strong><span id="footer-removed">0</span></div>
+          <div class="footer-card"><strong>Accumulated raw voxels</strong><span id="footer-raw">0</span></div>
+          <div class="footer-card"><strong>Accumulated cleaned voxels</strong><span id="footer-clean">0</span></div>
+          <div class="footer-card"><strong>Accumulated ghost voxels</strong><span id="footer-ghost">0</span></div>
         </div>
 
         <div class="note-box">
-          drag: orbit / wheel: zoom / right drag: pan. checked-in continuous demo is generated from a real local multi-frame sequence and uses temporal consistency for the cleaned side unless per-frame object boxes are supplied.
+          drag: orbit / wheel: zoom / right drag: pan. the page opens at the final accumulation because that is where the map contamination difference is clearest. use <code>Replay build-up</code> to watch how the ghost grows over time.
         </div>
       </section>
     </div>
@@ -469,6 +494,7 @@ HTML_TEMPLATE = r'''<!doctype html>
         removed: new Float32Array(frame.removed || []),
       }));
       const pathPoints = (DEMO_DATA.path || []).map((point) => point.map(Number));
+      const bev = DEMO_DATA.bev || { bounds: { xmin: -1, xmax: 1, ymin: -1, ymax: 1 }, clean: [], ghost: [], voxel_size: 1, max_clean_count: 1, max_ghost_count: 1 };
       const hasBoxes = frames.some((frame) => Array.isArray(frame.objects) && frame.objects.length > 0);
 
       const stage = document.getElementById("compare-stage");
@@ -495,8 +521,11 @@ HTML_TEMPLATE = r'''<!doctype html>
       );
       const extent = Math.max(dx, dy, dz, 10);
 
+      const clampFrame = (index) => Math.max(0, Math.min(frames.length - 1, index));
+      const initialFrame = Math.max(frames.length - 1, 0);
+
       const state = {
-        frameIndex: 0,
+        frameIndex: initialFrame,
         playing: false,
         speed: 1,
         pointSize: 1.2,
@@ -563,7 +592,8 @@ HTML_TEMPLATE = r'''<!doctype html>
           depthWrite: false,
           depthTest,
         });
-        return new THREE.Points(geometry, material);
+        const points = new THREE.Points(geometry, material);
+        return points;
       }
 
       function makeBoxes(objects, color) {
@@ -642,30 +672,100 @@ HTML_TEMPLATE = r'''<!doctype html>
         updateGroup(clean.path, [makePath(pathFlat, pathColor), makeMarker(frame.center, pathColor)]);
       }
 
+      function drawGhostBEV() {
+        const canvas = document.getElementById("ghost-bev");
+        const rect = canvas.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const width = Math.max(260, Math.floor(rect.width));
+        const height = Math.max(220, Math.floor(rect.height));
+        if (canvas.width !== Math.floor(width * dpr) || canvas.height !== Math.floor(height * dpr)) {
+          canvas.width = Math.floor(width * dpr);
+          canvas.height = Math.floor(height * dpr);
+        }
+        const ctx = canvas.getContext("2d");
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.scale(dpr, dpr);
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = "#08111f";
+        ctx.fillRect(0, 0, width, height);
+
+        const margin = 16;
+        const bounds = bev.bounds || { xmin: -1, xmax: 1, ymin: -1, ymax: 1 };
+        const rangeX = Math.max(1e-6, bounds.xmax - bounds.xmin);
+        const rangeY = Math.max(1e-6, bounds.ymax - bounds.ymin);
+        const scaleX = (width - margin * 2) / rangeX;
+        const scaleY = (height - margin * 2) / rangeY;
+        const scale = Math.min(scaleX, scaleY);
+        const cell = Math.max(2, Math.min(8, Math.floor(scale * (bev.voxel_size || 1) * 0.9)));
+
+        function project(x, y) {
+          const px = margin + (x - bounds.xmin) * scale;
+          const py = height - margin - (y - bounds.ymin) * scale;
+          return [px, py];
+        }
+
+        ctx.strokeStyle = "rgba(255,255,255,0.08)";
+        ctx.strokeRect(0.5, 0.5, width - 1, height - 1);
+
+        const cleanFlat = bev.clean || [];
+        const ghostFlat = bev.ghost || [];
+        const maxClean = Math.max(1, Number(bev.max_clean_count) || 1);
+        const maxGhost = Math.max(1, Number(bev.max_ghost_count) || 1);
+
+        for (let i = 0; i < cleanFlat.length; i += 3) {
+          const [px, py] = project(cleanFlat[i], cleanFlat[i + 1]);
+          const alpha = 0.06 + 0.26 * Math.min(1, cleanFlat[i + 2] / maxClean);
+          ctx.fillStyle = `rgba(45, 212, 191, ${alpha.toFixed(3)})`;
+          ctx.fillRect(px - cell * 0.5, py - cell * 0.5, cell, cell);
+        }
+
+        for (let i = 0; i < ghostFlat.length; i += 3) {
+          const [px, py] = project(ghostFlat[i], ghostFlat[i + 1]);
+          const t = Math.min(1, ghostFlat[i + 2] / maxGhost);
+          const r = Math.round(255 - 10 * t);
+          const g = Math.round(110 + 70 * (1 - t));
+          const b = Math.round(100 + 45 * t);
+          const alpha = 0.34 + 0.58 * t;
+          ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha.toFixed(3)})`;
+          ctx.fillRect(px - cell * 0.6, py - cell * 0.6, cell * 1.2, cell * 1.2);
+        }
+
+        ctx.fillStyle = "rgba(226,232,240,0.92)";
+        ctx.font = "12px Trebuchet MS, sans-serif";
+        ctx.fillText("final accumulation footprint", 14, 18);
+        ctx.fillStyle = "rgba(45,212,191,0.92)";
+        ctx.fillRect(14, 28, 10, 10);
+        ctx.fillStyle = "rgba(226,232,240,0.82)";
+        ctx.fillText("cleaned", 30, 37);
+        ctx.fillStyle = "rgba(255,120,130,0.95)";
+        ctx.fillRect(92, 28, 10, 10);
+        ctx.fillStyle = "rgba(226,232,240,0.82)";
+        ctx.fillText("ghost / raw-only", 108, 37);
+      }
+
       function updateFrame(index) {
         if (frames.length === 0) return;
-        state.frameIndex = ((index % frames.length) + frames.length) % frames.length;
+        state.frameIndex = clampFrame(index);
         const frame = frames[state.frameIndex];
 
         const rawAccum = buildPrefix(state.frameIndex, "input");
         const cleanAccum = buildPrefix(state.frameIndex, "kept");
 
-        const rawNodes = [
+        updateGroup(raw.history, [
           makePoints(rawAccum, 0x94a3b8, state.pointSize * 0.92, 0.34, true),
-          state.showCurrent ? makePoints(frame.input, 0xe2e8f0, state.pointSize * 1.05, 0.26, true) : null,
+        ]);
+        updateGroup(raw.current, [
+          state.showCurrent ? makePoints(frame.input, 0xe2e8f0, state.pointSize * 1.05, 0.24, true) : null,
           state.showTransient ? makePoints(frame.removed, 0xff4d6d, state.pointSize * 2.45, 0.98, false) : null,
           state.showBoxes ? makeBoxes(frame.objects, 0xf97316) : null,
-        ];
-        const cleanNodes = [
+        ]);
+        updateGroup(clean.history, [
           makePoints(cleanAccum, 0x14b8a6, state.pointSize * 1.02, 0.9, true),
+        ]);
+        updateGroup(clean.current, [
           state.showCurrent ? makePoints(frame.kept, 0x99f6e4, state.pointSize * 1.35, 1.0, false) : null,
           state.showBoxes ? makeBoxes(frame.objects, 0xfbbf24) : null,
-        ];
-
-        updateGroup(raw.history, rawNodes.slice(0, 1));
-        updateGroup(raw.current, rawNodes.slice(1));
-        updateGroup(clean.history, cleanNodes.slice(0, 1));
-        updateGroup(clean.current, cleanNodes.slice(1));
+        ]);
         updatePathGroups(frame);
 
         document.getElementById("frame-slider").value = String(state.frameIndex);
@@ -673,13 +773,14 @@ HTML_TEMPLATE = r'''<!doctype html>
         document.getElementById("frame-source").textContent = frame.source;
         document.getElementById("meta-input").textContent = frame.input_points.toLocaleString();
         document.getElementById("meta-kept").textContent = frame.kept_points.toLocaleString();
-        document.getElementById("meta-removed").textContent = frame.removed_points.toLocaleString();
-        document.getElementById("meta-ratio").textContent = `${((frame.kept_points / Math.max(1, frame.input_points)) * 100).toFixed(1)}%`;
-        document.getElementById("footer-raw").textContent = `${(rawAccum.length / 3).toLocaleString()} pts`;
-        document.getElementById("footer-clean").textContent = `${(cleanAccum.length / 3).toLocaleString()} pts`;
-        document.getElementById("footer-removed").textContent = `${frame.removed_points.toLocaleString()} pts`;
-        document.getElementById("hud-left").textContent = `raw: ${(rawAccum.length / 3).toLocaleString()} accumulated`; 
-        document.getElementById("hud-right").textContent = `cleaned: ${(cleanAccum.length / 3).toLocaleString()} accumulated`;
+        document.getElementById("meta-ghost").textContent = frame.ghost_voxels.toLocaleString();
+        document.getElementById("meta-ratio").textContent = `${frame.ghost_ratio_pct.toFixed(1)}%`;
+
+        document.getElementById("footer-raw").textContent = frame.raw_voxels.toLocaleString();
+        document.getElementById("footer-clean").textContent = frame.clean_voxels.toLocaleString();
+        document.getElementById("footer-ghost").textContent = frame.ghost_voxels.toLocaleString();
+        document.getElementById("hud-left").textContent = `raw: ${frame.raw_voxels.toLocaleString()} voxels`;
+        document.getElementById("hud-right").textContent = `cleaned: ${frame.clean_voxels.toLocaleString()} voxels`;
       }
 
       function fitView() {
@@ -721,6 +822,15 @@ HTML_TEMPLATE = r'''<!doctype html>
       }
 
       let playbackTimer = null;
+      function stopPlayback() {
+        state.playing = false;
+        document.getElementById("play-toggle").textContent = "Replay build-up";
+        if (playbackTimer) {
+          clearInterval(playbackTimer);
+          playbackTimer = null;
+        }
+      }
+
       function restartPlayback() {
         if (playbackTimer) {
           clearInterval(playbackTimer);
@@ -729,15 +839,27 @@ HTML_TEMPLATE = r'''<!doctype html>
         if (!state.playing || frames.length <= 1) return;
         const fps = Math.max(0.5, Number(DEMO_DATA.meta.default_fps) * state.speed);
         playbackTimer = setInterval(() => {
+          if (state.frameIndex >= frames.length - 1) {
+            stopPlayback();
+            return;
+          }
           updateFrame(state.frameIndex + 1);
           renderSplit();
         }, 1000 / fps);
       }
 
       document.getElementById("play-toggle").addEventListener("click", () => {
-        state.playing = !state.playing;
-        document.getElementById("play-toggle").textContent = state.playing ? "Pause" : "Play";
+        if (state.playing) {
+          stopPlayback();
+          return;
+        }
+        if (state.frameIndex >= frames.length - 1) {
+          updateFrame(0);
+        }
+        state.playing = true;
+        document.getElementById("play-toggle").textContent = "Pause";
         restartPlayback();
+        renderSplit();
       });
       document.getElementById("fit-view").addEventListener("click", () => {
         fitView();
@@ -751,6 +873,7 @@ HTML_TEMPLATE = r'''<!doctype html>
         link.click();
       });
       document.getElementById("frame-slider").addEventListener("input", (event) => {
+        stopPlayback();
         updateFrame(Number(event.target.value));
         renderSplit();
       });
@@ -787,17 +910,22 @@ HTML_TEMPLATE = r'''<!doctype html>
       document.getElementById("toggle-boxes-wrap").hidden = !hasBoxes;
 
       document.getElementById("stat-frame-count").textContent = String(frames.length);
-      document.getElementById("stat-fps").textContent = String(DEMO_DATA.meta.default_fps);
-      document.getElementById("stat-max-render").textContent = String(DEMO_DATA.meta.max_render_points);
-      document.getElementById("stat-mode").textContent = DEMO_DATA.meta.mode_label;
+      document.getElementById("stat-ghost-ratio").textContent = `${DEMO_DATA.meta.final_ghost_ratio_pct.toFixed(1)}%`;
+      document.getElementById("stat-ghost-voxels").textContent = DEMO_DATA.meta.final_ghost_voxels.toLocaleString();
+      document.getElementById("stat-stable-voxels").textContent = DEMO_DATA.meta.final_clean_voxels.toLocaleString();
       document.getElementById("source-note").textContent = DEMO_DATA.meta.source_note;
       document.getElementById("frame-slider").max = String(Math.max(0, frames.length - 1));
+      document.getElementById("frame-slider").value = String(initialFrame);
 
-      window.addEventListener("resize", renderSplit);
+      window.addEventListener("resize", () => {
+        drawGhostBEV();
+        renderSplit();
+      });
       controls.addEventListener("change", renderSplit);
 
       fitView();
-      updateFrame(0);
+      drawGhostBEV();
+      updateFrame(initialFrame);
       renderSplit();
 
       function animate() {
@@ -930,6 +1058,52 @@ def _resolve_boxes(spec: Any, frame_path: Path) -> list[Any]:
     return []
 
 
+def _voxel_set(points: np.ndarray, voxel_size: float) -> set[tuple[int, int, int]]:
+    if points.size == 0:
+        return set()
+    voxels = np.floor(np.asarray(points, dtype=np.float64)[:, :3] / voxel_size).astype(np.int32)
+    if len(voxels) == 0:
+        return set()
+    unique = np.unique(voxels, axis=0)
+    return {tuple(int(v) for v in row) for row in unique}
+
+
+def _project_bev(voxel_set: set[tuple[int, int, int]], voxel_size: float) -> tuple[list[float], int, dict[str, float]]:
+    counts: dict[tuple[int, int], int] = {}
+    for vx, vy, vz in voxel_set:
+        key = (vx, vy)
+        counts[key] = counts.get(key, 0) + 1
+    flat: list[float] = []
+    if not counts:
+        return flat, 0, {"xmin": -1.0, "xmax": 1.0, "ymin": -1.0, "ymax": 1.0}
+    xs = []
+    ys = []
+    max_count = 0
+    for (vx, vy), count in sorted(counts.items()):
+        x = (vx + 0.5) * voxel_size
+        y = (vy + 0.5) * voxel_size
+        flat.extend([round(x, 3), round(y, 3), int(count)])
+        xs.append(x)
+        ys.append(y)
+        max_count = max(max_count, count)
+    bounds = {
+        "xmin": round(min(xs), 3),
+        "xmax": round(max(xs), 3),
+        "ymin": round(min(ys), 3),
+        "ymax": round(max(ys), 3),
+    }
+    return flat, max_count, bounds
+
+
+def _merge_bounds(a: dict[str, float], b: dict[str, float]) -> dict[str, float]:
+    return {
+        "xmin": min(a["xmin"], b["xmin"]),
+        "xmax": max(a["xmax"], b["xmax"]),
+        "ymin": min(a["ymin"], b["ymin"]),
+        "ymax": max(a["ymax"], b["ymax"]),
+    }
+
+
 def main() -> None:
     args = parse_args()
     frame_paths = [Path(p) for p in sorted(glob.glob(args.input_glob))]
@@ -958,92 +1132,114 @@ def main() -> None:
     path_points: list[list[float]] = []
     frames: list[dict[str, Any]] = []
 
+    raw_voxels_accum: set[tuple[int, int, int]] = set()
+    clean_voxels_accum: set[tuple[int, int, int]] = set()
+
     total_input_points = 0
     total_kept_points = 0
     total_removed_points = 0
 
     for frame_index, path in enumerate(selected):
         points = load_points(path, fmt="auto")
-        boxes = _resolve_boxes(boxes_spec, path) if boxes_spec is not None else []
+        if points.size == 0:
+            continue
 
-        if mode == "boxes":
-            if boxes:
-                kept_full, keep_mask = remove_points_in_boxes(points, boxes, margin=args.box_margin)
-            else:
-                keep_mask = np.ones(points.shape[0], dtype=bool)
-                kept_full = points
-        else:
-            assert temporal_filter is not None
-            kept_full, keep_mask = temporal_filter.filter(points)
-
-        removed_full = points[~keep_mask]
-        input_sample = _sample_points(points, args.max_render_points, rng)
-        kept_sample = _sample_points(kept_full, args.max_render_points, rng)
-        removed_sample = _sample_points(removed_full, args.max_render_points, rng)
-
-        center = input_sample.mean(axis=0) if len(input_sample) else np.zeros(3, dtype=np.float64)
+        center = np.asarray(points[:, :3].mean(axis=0), dtype=np.float64)
         if origin is None:
             origin = center.copy()
 
-        shifted_input = input_sample - origin
-        shifted_kept = kept_sample - origin
-        shifted_removed = removed_sample - origin
-        shifted_center = center - origin
+        shifted_full = np.asarray(points[:, :3], dtype=np.float64) - origin
+        boxes = _resolve_boxes(boxes_spec, path) if boxes_spec is not None else []
+        shifted_boxes = []
+        for box in boxes:
+            shifted_center = np.asarray(box.center, dtype=np.float64) - origin
+            shifted_boxes.append(type(box)(center=shifted_center, size=box.size, yaw=box.yaw, label=box.label))
 
-        _update_limits(limits, shifted_input)
-        _update_limits(limits, shifted_kept)
-        _update_limits(limits, shifted_removed)
-        _update_limits(limits, shifted_center.reshape(1, 3))
-        path_points.append(_round_vec(shifted_center))
+        if mode == "boxes":
+            if shifted_boxes:
+                kept_full, keep_mask = remove_points_in_boxes(shifted_full, shifted_boxes, margin=args.box_margin)
+            else:
+                keep_mask = np.ones(shifted_full.shape[0], dtype=bool)
+                kept_full = shifted_full
+        else:
+            assert temporal_filter is not None
+            kept_full, keep_mask = temporal_filter.filter(shifted_full)
+
+        removed_full = shifted_full[~keep_mask]
+        input_sample = _sample_points(shifted_full, args.max_render_points, rng)
+        kept_sample = _sample_points(kept_full, args.max_render_points, rng)
+        removed_sample = _sample_points(removed_full, args.max_render_points, rng)
+
+        raw_voxels_accum |= _voxel_set(shifted_full, args.voxel_size)
+        clean_voxels_accum |= _voxel_set(kept_full, args.voxel_size)
+        ghost_voxels_accum = raw_voxels_accum - clean_voxels_accum
+
+        frame_center = input_sample.mean(axis=0) if len(input_sample) else center - origin
+        _update_limits(limits, input_sample)
+        _update_limits(limits, kept_sample)
+        _update_limits(limits, removed_sample)
+        _update_limits(limits, frame_center.reshape(1, 3))
+        path_points.append(_round_vec(frame_center))
 
         frame_objects = []
-        for box in boxes:
-            shifted_box_center = np.asarray(box.center, dtype=np.float64) - origin
+        for box in shifted_boxes:
             frame_objects.append(
                 {
-                    "center": _round_vec(shifted_box_center),
+                    "center": _round_vec(box.center),
                     "size": _round_vec(box.size),
                     "yaw": round(float(box.yaw), 6),
                     "label": box.label or "object",
                 }
             )
 
-        total_input_points += int(len(points))
+        total_input_points += int(len(shifted_full))
         total_kept_points += int(len(kept_full))
         total_removed_points += int(len(removed_full))
+
+        raw_voxel_count = len(raw_voxels_accum)
+        clean_voxel_count = len(clean_voxels_accum)
+        ghost_voxel_count = len(ghost_voxels_accum)
 
         frames.append(
             {
                 "index": frame_index,
                 "name": path.parent.name,
                 "source": f"{path.parent.name}/{path.name}",
-                "input_points": int(len(points)),
+                "input_points": int(len(shifted_full)),
                 "kept_points": int(len(kept_full)),
                 "removed_points": int(len(removed_full)),
                 "render_input_points": int(len(input_sample)),
                 "render_kept_points": int(len(kept_sample)),
                 "render_removed_points": int(len(removed_sample)),
-                "input": _round_points(shifted_input),
-                "kept": _round_points(shifted_kept),
-                "removed": _round_points(shifted_removed),
-                "center": _round_vec(shifted_center),
+                "raw_voxels": raw_voxel_count,
+                "clean_voxels": clean_voxel_count,
+                "ghost_voxels": ghost_voxel_count,
+                "ghost_ratio_pct": round(100.0 * ghost_voxel_count / max(1, raw_voxel_count), 2),
+                "input": _round_points(input_sample),
+                "kept": _round_points(kept_sample),
+                "removed": _round_points(removed_sample),
+                "center": _round_vec(frame_center),
                 "objects": frame_objects,
             }
         )
 
-    assert origin is not None
+    if origin is None or not frames:
+        raise SystemExit("no valid frames were generated")
+
+    final_ghost_voxels = raw_voxels_accum - clean_voxels_accum
+    clean_bev, max_clean_count, clean_bounds = _project_bev(clean_voxels_accum, args.voxel_size)
+    ghost_bev, max_ghost_count, ghost_bounds = _project_bev(final_ghost_voxels, args.voxel_size)
+    bev_bounds = _merge_bounds(clean_bounds, ghost_bounds)
 
     if mode == "boxes":
-        mode_label = "bounding boxes"
         source_note = (
-            "checked-in sequence demo is using per-frame boxes for cleaned accumulation."
-            " raw keeps all accumulated observations, cleaned keeps points after box removal."
+            "checked-in sequence demo uses per-frame boxes for cleaned accumulation. "
+            "raw keeps all observations, cleaned keeps points after box removal."
         )
     else:
-        mode_label = f"temporal consistency ({args.voxel_size:.2f}m / {args.window_size} / {args.min_hits})"
         source_note = (
-            "checked-in sequence demo uses a real local multi-frame sequence and a temporal-consistency filter."
-            " cleaned accumulation keeps only voxels that persist across frames; raw keeps everything that was observed."
+            f"checked-in sequence demo uses a real local multi-frame sequence and temporal consistency ({args.voxel_size:.2f}m / {args.window_size} / {args.min_hits}) "
+            "for the cleaned side. raw keeps everything that was observed; cleaned keeps only persistent structure."
         )
 
     scene = {
@@ -1054,14 +1250,25 @@ def main() -> None:
             "max_render_points": int(args.max_render_points),
             "origin": _round_vec(origin),
             "mode": mode,
-            "mode_label": mode_label,
             "total_input_points": total_input_points,
             "total_kept_points": total_kept_points,
             "total_removed_points": total_removed_points,
+            "final_raw_voxels": len(raw_voxels_accum),
+            "final_clean_voxels": len(clean_voxels_accum),
+            "final_ghost_voxels": len(final_ghost_voxels),
+            "final_ghost_ratio_pct": round(100.0 * len(final_ghost_voxels) / max(1, len(raw_voxels_accum)), 2),
             "source_note": source_note,
         },
         "limits": _finalize_limits(limits),
         "path": path_points,
+        "bev": {
+            "voxel_size": round(float(args.voxel_size), 3),
+            "bounds": bev_bounds,
+            "clean": clean_bev,
+            "ghost": ghost_bev,
+            "max_clean_count": max_clean_count,
+            "max_ghost_count": max_ghost_count,
+        },
         "frames": frames,
     }
 

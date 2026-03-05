@@ -244,6 +244,24 @@ HTML_TEMPLATE = r'''<!doctype html>
         gap: 12px;
         min-height: min(88vh, 940px);
       }
+      .story-chip {
+        position: absolute;
+        left: 50%;
+        top: 14px;
+        transform: translateX(-50%);
+        max-width: min(70%, 720px);
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.78);
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        color: #e2e8f0;
+        font-size: 13px;
+        line-height: 1.4;
+        text-align: center;
+        backdrop-filter: blur(8px);
+        box-shadow: 0 10px 40px rgba(15, 23, 42, 0.22);
+        pointer-events: none;
+      }
       .compare-head {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -439,6 +457,7 @@ HTML_TEMPLATE = r'''<!doctype html>
           <h2>Playback</h2>
           <div class="buttons">
             <button class="primary" id="play-toggle">Replay build-up</button>
+            <button id="story-mode">Story mode</button>
             <button id="fit-view">Fit view</button>
             <button id="focus-ghost">Focus ghost hotspot</button>
             <button id="focus-stable">Focus static keep</button>
@@ -514,6 +533,7 @@ HTML_TEMPLATE = r'''<!doctype html>
 
         <div id="compare-stage">
           <div class="split-line"></div>
+          <div class="story-chip" id="story-chip">Final map impact: ghost voxels shrink once transient clutter is cropped.</div>
           <div class="canvas-hud">
             <div class="canvas-chip" id="hud-left">raw</div>
             <div class="canvas-chip" id="hud-right">cleaned</div>
@@ -978,6 +998,8 @@ HTML_TEMPLATE = r'''<!doctype html>
         showPath: true,
         showBoxes: hasBoxes,
       };
+      let storyTimers = [];
+      let storyAutoRan = false;
 
       function createScene(background, gridColorA, gridColorB) {
         const scene = new THREE.Scene();
@@ -1107,6 +1129,15 @@ HTML_TEMPLATE = r'''<!doctype html>
         for (const node of nodes) {
           if (node) group.add(node);
         }
+      }
+
+      function setStoryText(message) {
+        document.getElementById("story-chip").textContent = message;
+      }
+
+      function stopStory() {
+        for (const timer of storyTimers) clearTimeout(timer);
+        storyTimers = [];
       }
 
       function updatePathGroups(frame) {
@@ -1390,6 +1421,42 @@ HTML_TEMPLATE = r'''<!doctype html>
         }
       }
 
+      function storyMessages() {
+        const ghost = DEMO_DATA.meta.final_ghost_voxels.toLocaleString();
+        const stable = DEMO_DATA.meta.final_clean_voxels.toLocaleString();
+        return {
+          overview: `Final map impact: raw leaves ${ghost} ghost voxels while cleaned keeps ${stable} stable voxels.`,
+          hotspot: `Ghost hotspot: this crop is where raw-only occupancy persists if transient clutter is accumulated.`,
+          stable: `Static preserved: this crop stays dense after cleaning, so the preview is not just erasing structure.`,
+          outro: `Story complete. Replay build-up or scrub frames to inspect the sampled box-removal preview.`
+        };
+      }
+
+      function runStoryMode() {
+        stopPlayback();
+        stopStory();
+        updateFrame(initialFrame);
+        fitView();
+        renderSplit();
+        const messages = storyMessages();
+        setStoryText(messages.overview);
+        storyTimers.push(setTimeout(() => {
+          focusProof(proof.ghostFocus3D);
+          renderSplit();
+          setStoryText(messages.hotspot);
+        }, 1600));
+        storyTimers.push(setTimeout(() => {
+          focusProof(proof.preserveFocus3D);
+          renderSplit();
+          setStoryText(messages.stable);
+        }, 3600));
+        storyTimers.push(setTimeout(() => {
+          fitView();
+          renderSplit();
+          setStoryText(messages.outro);
+        }, 5600));
+      }
+
       function restartPlayback() {
         if (playbackTimer) {
           clearInterval(playbackTimer);
@@ -1408,8 +1475,10 @@ HTML_TEMPLATE = r'''<!doctype html>
       }
 
       document.getElementById("play-toggle").addEventListener("click", () => {
+        stopStory();
         if (state.playing) {
           stopPlayback();
+          setStoryText(storyMessages().outro);
           return;
         }
         if (state.frameIndex >= frames.length - 1) {
@@ -1417,19 +1486,29 @@ HTML_TEMPLATE = r'''<!doctype html>
         }
         state.playing = true;
         document.getElementById("play-toggle").textContent = "Pause";
+        setStoryText("Build-up replay: watch ghost occupancy grow on the raw side while the cleaned side stays tighter.");
         restartPlayback();
         renderSplit();
       });
+      document.getElementById("story-mode").addEventListener("click", () => {
+        runStoryMode();
+      });
       document.getElementById("fit-view").addEventListener("click", () => {
+        stopStory();
         fitView();
+        setStoryText(storyMessages().overview);
         renderSplit();
       });
       document.getElementById("focus-ghost").addEventListener("click", () => {
+        stopStory();
         focusProof(proof.ghostFocus3D);
+        setStoryText(storyMessages().hotspot);
         renderSplit();
       });
       document.getElementById("focus-stable").addEventListener("click", () => {
+        stopStory();
         focusProof(proof.preserveFocus3D);
+        setStoryText(storyMessages().stable);
         renderSplit();
       });
       document.getElementById("download-shot").addEventListener("click", () => {
@@ -1441,36 +1520,44 @@ HTML_TEMPLATE = r'''<!doctype html>
       });
       document.getElementById("frame-slider").addEventListener("input", (event) => {
         stopPlayback();
+        stopStory();
         updateFrame(Number(event.target.value));
+        setStoryText(`Manual scrub: frame ${Number(event.target.value) + 1} / ${frames.length}`);
         renderSplit();
       });
       document.getElementById("speed-select").addEventListener("change", (event) => {
         state.speed = Number(event.target.value);
+        stopStory();
         restartPlayback();
       });
       document.getElementById("point-size").addEventListener("input", (event) => {
         state.pointSize = Number(event.target.value);
         document.getElementById("point-size-value").textContent = `${state.pointSize.toFixed(1)} px`;
+        stopStory();
         updateFrame(state.frameIndex);
         renderSplit();
       });
       document.getElementById("toggle-current").addEventListener("change", (event) => {
         state.showCurrent = event.target.checked;
+        stopStory();
         updateFrame(state.frameIndex);
         renderSplit();
       });
       document.getElementById("toggle-transient").addEventListener("change", (event) => {
         state.showTransient = event.target.checked;
+        stopStory();
         updateFrame(state.frameIndex);
         renderSplit();
       });
       document.getElementById("toggle-path").addEventListener("change", (event) => {
         state.showPath = event.target.checked;
+        stopStory();
         updateFrame(state.frameIndex);
         renderSplit();
       });
       document.getElementById("toggle-boxes").addEventListener("change", (event) => {
         state.showBoxes = event.target.checked;
+        stopStory();
         updateFrame(state.frameIndex);
         renderSplit();
       });
@@ -1506,7 +1593,16 @@ HTML_TEMPLATE = r'''<!doctype html>
       drawGhostBEV();
       drawEvidencePanels();
       updateFrame(initialFrame);
+      setStoryText(storyMessages().overview);
       renderSplit();
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        storyTimers.push(setTimeout(() => {
+          if (!storyAutoRan) {
+            storyAutoRan = true;
+            runStoryMode();
+          }
+        }, 900));
+      }
 
       function animate() {
         requestAnimationFrame(animate);

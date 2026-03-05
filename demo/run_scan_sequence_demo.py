@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a self-contained sequence demo page from multiple point-cloud frames."""
+"""Build a self-contained split-view accumulation demo from multiple point-cloud frames."""
 
 from __future__ import annotations
 
@@ -18,6 +18,7 @@ if str(ROOT) not in sys.path:
 
 from dynamic_object_removal import (  # noqa: E402
     DEFAULT_BOX_MARGIN,
+    TemporalConsistencyFilter,
     load_points,
     parse_boxes_payload,
     remove_points_in_boxes,
@@ -25,73 +26,72 @@ from dynamic_object_removal import (  # noqa: E402
 
 DEFAULT_FPS = 4.0
 DEFAULT_FRAME_COUNT = 12
-DEFAULT_MAX_RENDER_POINTS = 12000
+DEFAULT_MAX_RENDER_POINTS = 9000
+DEFAULT_VOXEL_SIZE = 0.35
+DEFAULT_WINDOW_SIZE = 5
+DEFAULT_MIN_HITS = 3
 
 HTML_TEMPLATE = r'''<!doctype html>
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dynamic 3D Object Removal | Sequence Demo</title>
+    <title>Dynamic 3D Object Removal | Accumulation Split Demo</title>
     <style>
       :root {
         color-scheme: light;
-        --bg: #f3f7fb;
-        --panel: rgba(255, 255, 255, 0.88);
-        --panel-strong: rgba(255, 255, 255, 0.96);
-        --line: rgba(148, 163, 184, 0.32);
+        --bg: #f4f8fb;
+        --panel: rgba(255, 255, 255, 0.9);
+        --panel-strong: rgba(255, 255, 255, 0.97);
+        --line: rgba(148, 163, 184, 0.28);
         --text: #0f172a;
         --muted: #475569;
-        --accent: #0f766e;
-        --accent-strong: #115e59;
-        --input: #2563eb;
-        --kept: #0f766e;
-        --removed: #dc2626;
+        --raw: #c2410c;
+        --raw-soft: #fb7185;
+        --clean: #0f766e;
+        --clean-soft: #2dd4bf;
         --path: #f59e0b;
       }
-      * {
-        box-sizing: border-box;
-      }
+      * { box-sizing: border-box; }
       body {
         margin: 0;
         min-height: 100vh;
         font-family: "Trebuchet MS", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
-        background:
-          radial-gradient(circle at 15% 20%, rgba(37, 99, 235, 0.14), transparent 24%),
-          radial-gradient(circle at 80% 10%, rgba(15, 118, 110, 0.16), transparent 22%),
-          linear-gradient(180deg, #f8fbff 0%, #edf4fb 55%, #f7fafc 100%);
         color: var(--text);
+        background:
+          radial-gradient(circle at 10% 12%, rgba(194, 65, 12, 0.1), transparent 22%),
+          radial-gradient(circle at 84% 10%, rgba(15, 118, 110, 0.13), transparent 24%),
+          linear-gradient(180deg, #fbfdff 0%, #eef5fb 48%, #f5f8fc 100%);
       }
       .shell {
         display: grid;
-        grid-template-columns: minmax(320px, 380px) minmax(0, 1fr);
+        grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
         gap: 18px;
         min-height: 100vh;
         padding: 18px;
       }
-      .panel,
-      .viewer-wrap {
+      .panel, .compare-card {
+        border-radius: 24px;
         border: 1px solid var(--line);
-        border-radius: 22px;
         background: var(--panel);
         box-shadow: 0 18px 60px rgba(15, 23, 42, 0.08);
         backdrop-filter: blur(12px);
       }
       .panel {
-        padding: 22px 22px 18px;
+        padding: 22px;
         display: flex;
         flex-direction: column;
         gap: 18px;
       }
       .eyebrow {
         display: inline-flex;
+        width: fit-content;
         align-items: center;
         gap: 8px;
-        width: fit-content;
         padding: 6px 10px;
         border-radius: 999px;
         background: rgba(15, 118, 110, 0.12);
-        color: var(--accent-strong);
+        color: #115e59;
         font-size: 12px;
         font-weight: 700;
         letter-spacing: 0.08em;
@@ -113,10 +113,31 @@ HTML_TEMPLATE = r'''<!doctype html>
       }
       .section h2 {
         margin: 0;
-        font-size: 14px;
-        letter-spacing: 0.04em;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
         text-transform: uppercase;
         color: var(--muted);
+      }
+      .thesis {
+        display: grid;
+        gap: 10px;
+      }
+      .thesis-card {
+        padding: 12px 14px;
+        border-radius: 16px;
+        background: var(--panel-strong);
+        border: 1px solid rgba(148, 163, 184, 0.22);
+      }
+      .thesis-card strong {
+        display: block;
+        font-size: 14px;
+        margin-bottom: 5px;
+      }
+      .thesis-card span {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.55;
       }
       .stats {
         display: grid;
@@ -137,36 +158,22 @@ HTML_TEMPLATE = r'''<!doctype html>
       .stat span {
         display: block;
         margin-top: 4px;
-        color: var(--muted);
         font-size: 13px;
+        color: var(--muted);
       }
       .controls {
         display: grid;
         gap: 12px;
-      }
-      .control-row {
-        display: grid;
-        gap: 8px;
-      }
-      .control-row label,
-      .switches legend {
-        margin: 0;
-        font-size: 13px;
-        font-weight: 700;
-        color: var(--muted);
       }
       .buttons {
         display: flex;
         gap: 10px;
         flex-wrap: wrap;
       }
-      button,
-      select,
-      input[type="range"] {
+      button, select, input[type="range"] {
         font: inherit;
       }
-      button,
-      select {
+      button, select {
         border: 1px solid rgba(15, 118, 110, 0.18);
         background: #fff;
         color: var(--text);
@@ -174,9 +181,25 @@ HTML_TEMPLATE = r'''<!doctype html>
         padding: 10px 12px;
       }
       button.primary {
-        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+        background: linear-gradient(135deg, var(--clean) 0%, #115e59 100%);
         color: #fff;
         border: none;
+      }
+      .control-row {
+        display: grid;
+        gap: 8px;
+      }
+      .control-row label {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--muted);
+      }
+      .range-meta, .small-meta {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        font-size: 13px;
+        color: var(--muted);
       }
       .switches {
         border: 0;
@@ -190,7 +213,6 @@ HTML_TEMPLATE = r'''<!doctype html>
         align-items: center;
         gap: 10px;
         font-size: 14px;
-        color: var(--text);
       }
       .dot {
         width: 10px;
@@ -198,69 +220,113 @@ HTML_TEMPLATE = r'''<!doctype html>
         border-radius: 999px;
         display: inline-block;
       }
-      .range-meta,
-      .small-meta {
+      .compare-card {
+        position: relative;
+        padding: 16px;
+        display: grid;
+        gap: 12px;
+        min-height: min(88vh, 940px);
+      }
+      .compare-head {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .compare-label {
+        padding: 14px 16px;
+        border-radius: 18px;
+        background: var(--panel-strong);
+        border: 1px solid rgba(148, 163, 184, 0.22);
+      }
+      .compare-label strong {
+        display: block;
+        font-size: 18px;
+      }
+      .compare-label span {
+        display: block;
+        margin-top: 6px;
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+      .compare-label.raw strong { color: var(--raw); }
+      .compare-label.clean strong { color: var(--clean); }
+      #compare-stage {
+        position: relative;
+        min-height: min(72vh, 760px);
+        border-radius: 20px;
+        overflow: hidden;
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        background: linear-gradient(90deg, rgba(15, 23, 42, 0.96) 0%, rgba(15, 23, 42, 0.96) 50%, rgba(3, 18, 16, 0.98) 50%, rgba(3, 18, 16, 0.98) 100%);
+      }
+      #compare-stage canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      .split-line {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        width: 1px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.32), rgba(255,255,255,0.06));
+        pointer-events: none;
+      }
+      .canvas-hud {
+        position: absolute;
+        top: 14px;
+        left: 14px;
+        right: 14px;
         display: flex;
         justify-content: space-between;
         gap: 12px;
-        font-size: 13px;
-        color: var(--muted);
-      }
-      input[type="range"] {
-        width: 100%;
-      }
-      .viewer-wrap {
-        position: relative;
-        overflow: hidden;
-        min-height: min(82vh, 860px);
-      }
-      #viewer {
-        position: absolute;
-        inset: 0;
-      }
-      .hud {
-        position: absolute;
-        top: 16px;
-        right: 16px;
-        display: grid;
-        gap: 8px;
         pointer-events: none;
       }
-      .hud-card {
-        min-width: 220px;
-        padding: 10px 12px;
-        border-radius: 14px;
-        background: rgba(255, 255, 255, 0.86);
-        border: 1px solid rgba(148, 163, 184, 0.24);
-        color: var(--text);
+      .canvas-chip {
+        padding: 8px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        color: #e2e8f0;
+        background: rgba(15, 23, 42, 0.58);
+        border: 1px solid rgba(226, 232, 240, 0.12);
       }
-      .hud-card strong {
+      .compare-footer {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .footer-card {
+        padding: 12px 14px;
+        border-radius: 16px;
+        background: var(--panel-strong);
+        border: 1px solid rgba(148, 163, 184, 0.22);
+      }
+      .footer-card strong {
         display: block;
         font-size: 13px;
         color: var(--muted);
-        margin-bottom: 4px;
+        margin-bottom: 6px;
       }
-      .viewer-note {
-        position: absolute;
-        left: 16px;
-        bottom: 16px;
-        padding: 10px 12px;
-        border-radius: 14px;
-        background: rgba(15, 23, 42, 0.66);
-        color: #e2e8f0;
-        font-size: 12px;
-        line-height: 1.5;
+      .footer-card span {
+        font-size: 18px;
+        font-weight: 700;
       }
-      a {
-        color: var(--accent-strong);
+      .note-box {
+        padding: 12px 14px;
+        border-radius: 16px;
+        background: rgba(15, 118, 110, 0.08);
+        color: #134e4a;
+        line-height: 1.6;
+        font-size: 13px;
       }
-      @media (max-width: 980px) {
-        .shell {
-          grid-template-columns: 1fr;
-        }
-        .viewer-wrap {
-          min-height: 64vh;
-        }
+      a { color: #115e59; }
+      @media (max-width: 1100px) {
+        .shell { grid-template-columns: 1fr; }
+      }
+      @media (max-width: 720px) {
+        .compare-head, .compare-footer, .stats { grid-template-columns: 1fr; }
+        #compare-stage { min-height: 64vh; }
       }
     </style>
   </head>
@@ -268,32 +334,31 @@ HTML_TEMPLATE = r'''<!doctype html>
     <div class="shell">
       <aside class="panel">
         <div class="section">
-          <span class="eyebrow">Sequence Demo</span>
-          <h1>連続点群を Pages 上でそのまま再生</h1>
+          <span class="eyebrow">Impact Demo</span>
+          <h1>動的点を見せるのではなく、地図が締まることを見せる</h1>
           <p class="lead">
-            実フレーム列を sampled 埋め込みした self-contained ページです。GitHub Pages 上でも play / pause / scrub がそのまま動きます。
+            左は観測した点をそのまま積算、右は各フレームから安定点だけを積算します。比較の主役は current frame ではなく、時間方向に積んだ後の差です。
           </p>
+        </div>
+
+        <div class="section thesis">
+          <div class="thesis-card">
+            <strong>Raw accumulation</strong>
+            <span>その時々に見えた点を全部残すので、移動体や transient clutter がゴーストとして積み上がります。</span>
+          </div>
+          <div class="thesis-card">
+            <strong>Cleaned accumulation</strong>
+            <span>継続して観測された点だけを積むので、静的構造の輪郭が先に残ります。checked-in 版は temporal consistency で cleaned map を作っています。</span>
+          </div>
         </div>
 
         <div class="section">
           <h2>Overview</h2>
           <div class="stats">
-            <div class="stat">
-              <strong id="stat-frame-count">0</strong>
-              <span>frames</span>
-            </div>
-            <div class="stat">
-              <strong id="stat-fps">0</strong>
-              <span>default fps</span>
-            </div>
-            <div class="stat">
-              <strong id="stat-render-cap">0</strong>
-              <span>max rendered / frame</span>
-            </div>
-            <div class="stat">
-              <strong id="stat-layer-mode">input</strong>
-              <span>active layer</span>
-            </div>
+            <div class="stat"><strong id="stat-frame-count">0</strong><span>frames</span></div>
+            <div class="stat"><strong id="stat-fps">0</strong><span>default fps</span></div>
+            <div class="stat"><strong id="stat-max-render">0</strong><span>max rendered / frame</span></div>
+            <div class="stat"><strong id="stat-mode">-</strong><span>cleaning mode</span></div>
           </div>
         </div>
 
@@ -323,33 +388,27 @@ HTML_TEMPLATE = r'''<!doctype html>
           </div>
           <div class="control-row">
             <label for="point-size">Point size</label>
-            <input id="point-size" type="range" min="0.6" max="3.5" step="0.1" value="1.4" />
-            <div class="small-meta">
-              <span>small</span>
-              <span id="point-size-value">1.4 px</span>
-              <span>large</span>
-            </div>
+            <input id="point-size" type="range" min="0.6" max="3.2" step="0.1" value="1.2" />
+            <div class="small-meta"><span>small</span><span id="point-size-value">1.2 px</span><span>large</span></div>
           </div>
         </div>
 
         <div class="section">
           <h2>Layers</h2>
           <fieldset class="switches">
-            <label id="toggle-input-wrap"><input id="toggle-input" type="checkbox" checked /> <span class="dot" style="background: var(--input)"></span>入力点群</label>
-            <label id="toggle-kept-wrap"><input id="toggle-kept" type="checkbox" /> <span class="dot" style="background: var(--kept)"></span>除去後</label>
-            <label id="toggle-removed-wrap"><input id="toggle-removed" type="checkbox" /> <span class="dot" style="background: var(--removed)"></span>除去点</label>
-            <label id="toggle-boxes-wrap"><input id="toggle-boxes" type="checkbox" /> <span class="dot" style="background: #f97316"></span>3D box</label>
-            <label id="toggle-path-wrap"><input id="toggle-path" type="checkbox" checked /> <span class="dot" style="background: var(--path)"></span>フレーム軌跡</label>
+            <label><input id="toggle-current" type="checkbox" checked /> <span class="dot" style="background: #e2e8f0"></span>current frame highlight</label>
+            <label><input id="toggle-transient" type="checkbox" checked /> <span class="dot" style="background: var(--raw-soft)"></span>transient / removed points</label>
+            <label><input id="toggle-path" type="checkbox" checked /> <span class="dot" style="background: var(--path)"></span>frame path</label>
+            <label id="toggle-boxes-wrap"><input id="toggle-boxes" type="checkbox" checked /> <span class="dot" style="background: #f97316"></span>3D boxes</label>
           </fieldset>
         </div>
 
         <div class="section">
           <h2>Current frame</h2>
-          <div class="small-meta"><span>original points</span><span id="meta-original">0</span></div>
-          <div class="small-meta"><span>rendered input</span><span id="meta-rendered-input">0</span></div>
-          <div class="small-meta"><span>rendered kept</span><span id="meta-rendered-kept">0</span></div>
-          <div class="small-meta"><span>rendered removed</span><span id="meta-rendered-removed">0</span></div>
-          <div class="small-meta"><span>objects</span><span id="meta-objects">0</span></div>
+          <div class="small-meta"><span>original points</span><span id="meta-input">0</span></div>
+          <div class="small-meta"><span>cleaned points</span><span id="meta-kept">0</span></div>
+          <div class="small-meta"><span>transient / removed</span><span id="meta-removed">0</span></div>
+          <div class="small-meta"><span>clean ratio</span><span id="meta-ratio">0%</span></div>
         </div>
 
         <div class="section">
@@ -358,21 +417,34 @@ HTML_TEMPLATE = r'''<!doctype html>
         </div>
       </aside>
 
-      <section class="viewer-wrap">
-        <div id="viewer"></div>
-        <div class="hud">
-          <div class="hud-card">
-            <strong>Current frame</strong>
-            <div id="hud-frame">-</div>
+      <section class="compare-card">
+        <div class="compare-head">
+          <div class="compare-label raw">
+            <strong>Raw accumulation</strong>
+            <span>左は見えた点をそのまま積む。current frame の transient / removed は強いピンクで重ねています。</span>
           </div>
-          <div class="hud-card">
-            <strong>Counts</strong>
-            <div id="hud-counts">-</div>
+          <div class="compare-label clean">
+            <strong>Cleaned accumulation</strong>
+            <span>右は cleaned 点だけを積む。current frame の cleaned 点を明るく重ねて、静的構造がどこから立ち上がるかを見せます。</span>
           </div>
         </div>
-        <div class="viewer-note">
-          drag: orbit / wheel: zoom / right drag: pan<br />
-          sequence is recentered around the first frame for stable WebGL rendering
+
+        <div id="compare-stage">
+          <div class="split-line"></div>
+          <div class="canvas-hud">
+            <div class="canvas-chip" id="hud-left">raw</div>
+            <div class="canvas-chip" id="hud-right">cleaned</div>
+          </div>
+        </div>
+
+        <div class="compare-footer">
+          <div class="footer-card"><strong>Accumulated raw</strong><span id="footer-raw">0</span></div>
+          <div class="footer-card"><strong>Accumulated cleaned</strong><span id="footer-clean">0</span></div>
+          <div class="footer-card"><strong>Current transient / removed</strong><span id="footer-removed">0</span></div>
+        </div>
+
+        <div class="note-box">
+          drag: orbit / wheel: zoom / right drag: pan. checked-in continuous demo is generated from a real local multi-frame sequence and uses temporal consistency for the cleaned side unless per-frame object boxes are supplied.
         </div>
       </section>
     </div>
@@ -390,93 +462,117 @@ HTML_TEMPLATE = r'''<!doctype html>
       import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
       const DEMO_DATA = __DEMO_DATA__;
-      const frames = DEMO_DATA.frames || [];
-      const hasKept = frames.some((frame) => Array.isArray(frame.kept) && frame.kept.length > 0);
-      const hasRemoved = frames.some((frame) => Array.isArray(frame.removed) && frame.removed.length > 0);
+      const frames = (DEMO_DATA.frames || []).map((frame) => ({
+        ...frame,
+        input: new Float32Array(frame.input || []),
+        kept: new Float32Array(frame.kept || []),
+        removed: new Float32Array(frame.removed || []),
+      }));
+      const pathPoints = (DEMO_DATA.path || []).map((point) => point.map(Number));
       const hasBoxes = frames.some((frame) => Array.isArray(frame.objects) && frame.objects.length > 0);
 
-      const viewer = document.getElementById("viewer");
+      const stage = document.getElementById("compare-stage");
       const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-      renderer.setSize(viewer.clientWidth, viewer.clientHeight);
-      viewer.appendChild(renderer.domElement);
+      stage.appendChild(renderer.domElement);
 
-      const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0xf6f9fc);
-
-      const camera = new THREE.PerspectiveCamera(52, viewer.clientWidth / viewer.clientHeight, 0.1, 4000);
+      const camera = new THREE.PerspectiveCamera(52, 1, 0.05, 4000);
       camera.up.set(0, 0, 1);
-
       const controls = new OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.dampingFactor = 0.08;
       controls.zoomSpeed = 0.35;
-      controls.zoomSpeed = 0.35;
-      controls.target.set(0, 0, 0);
-
-      const ambient = new THREE.AmbientLight(0xffffff, 0.9);
-      const keyLight = new THREE.DirectionalLight(0xffffff, 0.8);
-      keyLight.position.set(25, -30, 40);
-      scene.add(ambient, keyLight);
+      controls.enablePan = true;
 
       const limits = DEMO_DATA.limits;
       const dx = Math.max(1, limits.xmax - limits.xmin);
       const dy = Math.max(1, limits.ymax - limits.ymin);
       const dz = Math.max(1, limits.zmax - limits.zmin);
-      const extent = Math.max(dx, dy, dz, 8);
-      const grid = new THREE.GridHelper(extent * 1.25, 28, 0x94a3b8, 0xd9e2ec);
-      grid.rotation.x = Math.PI / 2;
-      grid.position.z = limits.zmin;
-      scene.add(grid);
+      const center = new THREE.Vector3(
+        (limits.xmin + limits.xmax) * 0.5,
+        (limits.ymin + limits.ymax) * 0.5,
+        (limits.zmin + limits.zmax) * 0.5,
+      );
+      const extent = Math.max(dx, dy, dz, 10);
 
       const state = {
         frameIndex: 0,
-        pointSize: 1.4,
-        speed: 1,
         playing: false,
-        showInput: true,
-        showKept: hasKept,
-        showRemoved: false,
-        showBoxes: hasBoxes,
+        speed: 1,
+        pointSize: 1.2,
+        showCurrent: true,
+        showTransient: true,
         showPath: true,
+        showBoxes: hasBoxes,
       };
 
-      const groups = {
-        frame: new THREE.Group(),
-        path: null,
-        marker: null,
-      };
-      scene.add(groups.frame);
-
-      function flatToArray(flat) {
-        return new Float32Array(flat || []);
+      function createScene(background, gridColorA, gridColorB) {
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(background);
+        const ambient = new THREE.AmbientLight(0xffffff, 0.9);
+        const key = new THREE.DirectionalLight(0xffffff, 0.8);
+        key.position.set(25, -20, 42);
+        const grid = new THREE.GridHelper(extent * 1.3, 28, gridColorA, gridColorB);
+        grid.rotation.x = Math.PI / 2;
+        grid.position.z = limits.zmin;
+        grid.material.transparent = true;
+        grid.material.opacity = 0.22;
+        scene.add(ambient, key, grid);
+        return {
+          scene,
+          history: new THREE.Group(),
+          current: new THREE.Group(),
+          path: new THREE.Group(),
+        };
       }
 
-      function makePointSet(flat, color, alpha) {
-        if (!flat || flat.length === 0) {
-          return null;
+      const raw = createScene(0x0f172a, 0x334155, 0x1e293b);
+      const clean = createScene(0x041712, 0x134e4a, 0x0f2f2b);
+      raw.scene.add(raw.history, raw.current, raw.path);
+      clean.scene.add(clean.history, clean.current, clean.path);
+
+      function disposeObject(object) {
+        if (!object) return;
+        if (object.geometry) object.geometry.dispose();
+        if (object.material) {
+          if (Array.isArray(object.material)) object.material.forEach((material) => material.dispose());
+          else object.material.dispose();
         }
+      }
+
+      function clearGroup(group) {
+        while (group.children.length > 0) {
+          const child = group.children.pop();
+          if (child.children && child.children.length) {
+            clearGroup(child);
+          }
+          disposeObject(child);
+        }
+      }
+
+      function makePoints(flat, color, size, opacity, depthTest = true) {
+        if (!flat || flat.length === 0) return null;
         const geometry = new THREE.BufferGeometry();
-        geometry.setAttribute("position", new THREE.BufferAttribute(flatToArray(flat), 3));
+        geometry.setAttribute("position", new THREE.BufferAttribute(flat, 3));
         const material = new THREE.PointsMaterial({
           color,
-          size: state.pointSize,
+          size,
           sizeAttenuation: true,
-          transparent: alpha < 1,
-          opacity: alpha,
+          transparent: opacity < 1,
+          opacity,
+          depthWrite: false,
+          depthTest,
         });
         return new THREE.Points(geometry, material);
       }
 
-      function makeBoxes(objects) {
-        if (!objects || objects.length === 0) {
-          return null;
-        }
+      function makeBoxes(objects, color) {
+        if (!objects || objects.length === 0) return null;
         const group = new THREE.Group();
         for (const object of objects) {
           const geometry = new THREE.BoxGeometry(object.size[0], object.size[1], object.size[2]);
           const edges = new THREE.EdgesGeometry(geometry);
-          const material = new THREE.LineBasicMaterial({ color: 0xf97316 });
+          const material = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.95 });
           const lines = new THREE.LineSegments(edges, material);
           lines.position.set(object.center[0], object.center[1], object.center[2]);
           lines.rotation.z = object.yaw || 0;
@@ -485,107 +581,143 @@ HTML_TEMPLATE = r'''<!doctype html>
         return group;
       }
 
-      function clearGroup(group) {
-        while (group.children.length > 0) {
-          const child = group.children.pop();
-          if (child.geometry) child.geometry.dispose();
-          if (child.material) {
-            if (Array.isArray(child.material)) {
-              child.material.forEach((material) => material.dispose());
-            } else {
-              child.material.dispose();
-            }
-          }
+      function makePath(flat, color) {
+        if (!flat || flat.length < 6) return null;
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute("position", new THREE.BufferAttribute(flat, 3));
+        const material = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.9 });
+        return new THREE.Line(geometry, material);
+      }
+
+      function makeMarker(centerPoint, color) {
+        if (!centerPoint || centerPoint.length !== 3) return null;
+        const geometry = new THREE.SphereGeometry(Math.max(extent * 0.012, 0.18), 16, 16);
+        const material = new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.18 });
+        const marker = new THREE.Mesh(geometry, material);
+        marker.position.set(centerPoint[0], centerPoint[1], centerPoint[2]);
+        return marker;
+      }
+
+      const prefixCache = { input: [], kept: [], path: [] };
+
+      function buildPrefix(index, key) {
+        if (prefixCache[key][index]) return prefixCache[key][index];
+        let total = 0;
+        for (let i = 0; i <= index; i += 1) total += frames[i][key].length;
+        const merged = new Float32Array(total);
+        let offset = 0;
+        for (let i = 0; i <= index; i += 1) {
+          merged.set(frames[i][key], offset);
+          offset += frames[i][key].length;
+        }
+        prefixCache[key][index] = merged;
+        return merged;
+      }
+
+      function buildPathPrefix(index) {
+        if (prefixCache.path[index]) return prefixCache.path[index];
+        const slice = pathPoints.slice(0, index + 1);
+        const merged = new Float32Array(slice.length * 3);
+        let offset = 0;
+        for (const point of slice) {
+          merged[offset++] = point[0];
+          merged[offset++] = point[1];
+          merged[offset++] = point[2];
+        }
+        prefixCache.path[index] = merged;
+        return merged;
+      }
+
+      function updateGroup(group, nodes) {
+        clearGroup(group);
+        for (const node of nodes) {
+          if (node) group.add(node);
         }
       }
 
-      function updatePathLayer() {
-        if (groups.path) {
-          scene.remove(groups.path);
-          groups.path.geometry.dispose();
-          groups.path.material.dispose();
-          groups.path = null;
-        }
-        if (groups.marker) {
-          scene.remove(groups.marker);
-          groups.marker.geometry.dispose();
-          groups.marker.material.dispose();
-          groups.marker = null;
-        }
-        if (!state.showPath || !Array.isArray(DEMO_DATA.path) || DEMO_DATA.path.length === 0) {
-          return;
-        }
-        const pathArray = new Float32Array(DEMO_DATA.path.flat());
-        const geometry = new THREE.BufferGeometry();
-        geometry.setAttribute("position", new THREE.BufferAttribute(pathArray, 3));
-        const material = new THREE.LineBasicMaterial({ color: 0xf59e0b, linewidth: 2 });
-        groups.path = new THREE.Line(geometry, material);
-        scene.add(groups.path);
-
-        const marker = new THREE.Mesh(
-          new THREE.SphereGeometry(Math.max(extent * 0.012, 0.15), 16, 16),
-          new THREE.MeshStandardMaterial({ color: 0xf59e0b, emissive: 0x7c2d12, emissiveIntensity: 0.3 })
-        );
-        groups.marker = marker;
-        scene.add(marker);
+      function updatePathGroups(frame) {
+        const pathFlat = state.showPath ? buildPathPrefix(state.frameIndex) : null;
+        const pathColor = 0xf59e0b;
+        updateGroup(raw.path, [makePath(pathFlat, pathColor), makeMarker(frame.center, pathColor)]);
+        updateGroup(clean.path, [makePath(pathFlat, pathColor), makeMarker(frame.center, pathColor)]);
       }
 
       function updateFrame(index) {
-        if (frames.length === 0) {
-          return;
-        }
+        if (frames.length === 0) return;
         state.frameIndex = ((index % frames.length) + frames.length) % frames.length;
         const frame = frames[state.frameIndex];
+
+        const rawAccum = buildPrefix(state.frameIndex, "input");
+        const cleanAccum = buildPrefix(state.frameIndex, "kept");
+
+        const rawNodes = [
+          makePoints(rawAccum, 0x94a3b8, state.pointSize * 0.92, 0.34, true),
+          state.showCurrent ? makePoints(frame.input, 0xe2e8f0, state.pointSize * 1.05, 0.26, true) : null,
+          state.showTransient ? makePoints(frame.removed, 0xff4d6d, state.pointSize * 2.45, 0.98, false) : null,
+          state.showBoxes ? makeBoxes(frame.objects, 0xf97316) : null,
+        ];
+        const cleanNodes = [
+          makePoints(cleanAccum, 0x14b8a6, state.pointSize * 1.02, 0.9, true),
+          state.showCurrent ? makePoints(frame.kept, 0x99f6e4, state.pointSize * 1.35, 1.0, false) : null,
+          state.showBoxes ? makeBoxes(frame.objects, 0xfbbf24) : null,
+        ];
+
+        updateGroup(raw.history, rawNodes.slice(0, 1));
+        updateGroup(raw.current, rawNodes.slice(1));
+        updateGroup(clean.history, cleanNodes.slice(0, 1));
+        updateGroup(clean.current, cleanNodes.slice(1));
+        updatePathGroups(frame);
+
         document.getElementById("frame-slider").value = String(state.frameIndex);
         document.getElementById("frame-label").textContent = `frame ${state.frameIndex + 1} / ${frames.length}`;
         document.getElementById("frame-source").textContent = frame.source;
-        document.getElementById("hud-frame").textContent = `${frame.name} (${state.frameIndex + 1}/${frames.length})`;
-        document.getElementById("hud-counts").textContent = `${frame.input_points.toLocaleString()} pts | render ${frame.render_input_points.toLocaleString()}`;
-        document.getElementById("meta-original").textContent = frame.input_points.toLocaleString();
-        document.getElementById("meta-rendered-input").textContent = frame.render_input_points.toLocaleString();
-        document.getElementById("meta-rendered-kept").textContent = (frame.render_kept_points || 0).toLocaleString();
-        document.getElementById("meta-rendered-removed").textContent = (frame.render_removed_points || 0).toLocaleString();
-        document.getElementById("meta-objects").textContent = String((frame.objects || []).length);
-
-        clearGroup(groups.frame);
-
-        if (state.showInput && frame.input?.length) {
-          const points = makePointSet(frame.input, 0x2563eb, hasKept || hasRemoved ? 0.32 : 0.78);
-          if (points) groups.frame.add(points);
-        }
-        if (state.showKept && frame.kept?.length) {
-          const points = makePointSet(frame.kept, 0x0f766e, 0.88);
-          if (points) groups.frame.add(points);
-        }
-        if (state.showRemoved && frame.removed?.length) {
-          const points = makePointSet(frame.removed, 0xdc2626, 0.95);
-          if (points) groups.frame.add(points);
-        }
-        if (state.showBoxes && frame.objects?.length) {
-          const boxes = makeBoxes(frame.objects);
-          if (boxes) groups.frame.add(boxes);
-        }
-
-        if (groups.marker && frame.center) {
-          groups.marker.position.set(frame.center[0], frame.center[1], frame.center[2]);
-        }
-
-        let layerMode = "input";
-        if (state.showRemoved) layerMode = "removed";
-        else if (state.showKept) layerMode = "kept";
-        document.getElementById("stat-layer-mode").textContent = layerMode;
+        document.getElementById("meta-input").textContent = frame.input_points.toLocaleString();
+        document.getElementById("meta-kept").textContent = frame.kept_points.toLocaleString();
+        document.getElementById("meta-removed").textContent = frame.removed_points.toLocaleString();
+        document.getElementById("meta-ratio").textContent = `${((frame.kept_points / Math.max(1, frame.input_points)) * 100).toFixed(1)}%`;
+        document.getElementById("footer-raw").textContent = `${(rawAccum.length / 3).toLocaleString()} pts`;
+        document.getElementById("footer-clean").textContent = `${(cleanAccum.length / 3).toLocaleString()} pts`;
+        document.getElementById("footer-removed").textContent = `${frame.removed_points.toLocaleString()} pts`;
+        document.getElementById("hud-left").textContent = `raw: ${(rawAccum.length / 3).toLocaleString()} accumulated`; 
+        document.getElementById("hud-right").textContent = `cleaned: ${(cleanAccum.length / 3).toLocaleString()} accumulated`;
       }
 
       function fitView() {
-        const center = new THREE.Vector3(
-          (limits.xmin + limits.xmax) * 0.5,
-          (limits.ymin + limits.ymax) * 0.5,
-          (limits.zmin + limits.zmax) * 0.5
-        );
-        const radius = Math.max(dx, dy, dz, 8);
-        camera.position.set(center.x + radius * 0.9, center.y - radius * 1.25, center.z + radius * 0.7);
+        const fov = camera.fov * Math.PI / 180;
+        const dist = (extent * 1.15) / Math.tan(fov * 0.5);
+        camera.near = Math.max(extent * 1e-4, 0.05);
+        camera.far = Math.max(dist * 6, extent * 10, 6000);
+        camera.position.set(center.x + dist * 0.88, center.y - dist * 0.78, center.z + dist * 0.76);
         controls.target.copy(center);
+        camera.updateProjectionMatrix();
         controls.update();
+      }
+
+      function resizeRenderer() {
+        const width = stage.clientWidth;
+        const height = stage.clientHeight;
+        renderer.setSize(width, height, false);
+      }
+
+      function renderSplit() {
+        resizeRenderer();
+        const width = stage.clientWidth;
+        const height = stage.clientHeight;
+        const leftWidth = Math.floor(width / 2);
+        const rightWidth = width - leftWidth;
+        const aspect = Math.max(leftWidth, 1) / Math.max(height, 1);
+        camera.aspect = aspect;
+        camera.updateProjectionMatrix();
+
+        renderer.setScissorTest(true);
+        renderer.setViewport(0, 0, leftWidth, height);
+        renderer.setScissor(0, 0, leftWidth, height);
+        renderer.render(raw.scene, camera);
+
+        renderer.setViewport(leftWidth, 0, rightWidth, height);
+        renderer.setScissor(leftWidth, 0, rightWidth, height);
+        renderer.render(clean.scene, camera);
+        renderer.setScissorTest(false);
       }
 
       let playbackTimer = null;
@@ -594,12 +726,11 @@ HTML_TEMPLATE = r'''<!doctype html>
           clearInterval(playbackTimer);
           playbackTimer = null;
         }
-        if (!state.playing || frames.length <= 1) {
-          return;
-        }
+        if (!state.playing || frames.length <= 1) return;
         const fps = Math.max(0.5, Number(DEMO_DATA.meta.default_fps) * state.speed);
         playbackTimer = setInterval(() => {
           updateFrame(state.frameIndex + 1);
+          renderSplit();
         }, 1000 / fps);
       }
 
@@ -608,16 +739,20 @@ HTML_TEMPLATE = r'''<!doctype html>
         document.getElementById("play-toggle").textContent = state.playing ? "Pause" : "Play";
         restartPlayback();
       });
-      document.getElementById("fit-view").addEventListener("click", fitView);
+      document.getElementById("fit-view").addEventListener("click", () => {
+        fitView();
+        renderSplit();
+      });
       document.getElementById("download-shot").addEventListener("click", () => {
-        renderer.render(scene, camera);
+        renderSplit();
         const link = document.createElement("a");
         link.href = renderer.domElement.toDataURL("image/png");
-        link.download = `sequence_frame_${String(state.frameIndex).padStart(3, "0")}.png`;
+        link.download = `accumulation_split_${String(state.frameIndex).padStart(3, "0")}.png`;
         link.click();
       });
       document.getElementById("frame-slider").addEventListener("input", (event) => {
         updateFrame(Number(event.target.value));
+        renderSplit();
       });
       document.getElementById("speed-select").addEventListener("change", (event) => {
         state.speed = Number(event.target.value);
@@ -627,56 +762,47 @@ HTML_TEMPLATE = r'''<!doctype html>
         state.pointSize = Number(event.target.value);
         document.getElementById("point-size-value").textContent = `${state.pointSize.toFixed(1)} px`;
         updateFrame(state.frameIndex);
+        renderSplit();
       });
-      document.getElementById("toggle-input").addEventListener("change", (event) => {
-        state.showInput = event.target.checked;
+      document.getElementById("toggle-current").addEventListener("change", (event) => {
+        state.showCurrent = event.target.checked;
         updateFrame(state.frameIndex);
+        renderSplit();
       });
-      document.getElementById("toggle-kept").addEventListener("change", (event) => {
-        state.showKept = event.target.checked;
+      document.getElementById("toggle-transient").addEventListener("change", (event) => {
+        state.showTransient = event.target.checked;
         updateFrame(state.frameIndex);
+        renderSplit();
       });
-      document.getElementById("toggle-removed").addEventListener("change", (event) => {
-        state.showRemoved = event.target.checked;
+      document.getElementById("toggle-path").addEventListener("change", (event) => {
+        state.showPath = event.target.checked;
         updateFrame(state.frameIndex);
+        renderSplit();
       });
       document.getElementById("toggle-boxes").addEventListener("change", (event) => {
         state.showBoxes = event.target.checked;
         updateFrame(state.frameIndex);
+        renderSplit();
       });
-      document.getElementById("toggle-path").addEventListener("change", (event) => {
-        state.showPath = event.target.checked;
-        updatePathLayer();
-        updateFrame(state.frameIndex);
-      });
-
-      document.getElementById("toggle-kept-wrap").hidden = !hasKept;
-      document.getElementById("toggle-removed-wrap").hidden = !hasRemoved;
       document.getElementById("toggle-boxes-wrap").hidden = !hasBoxes;
 
       document.getElementById("stat-frame-count").textContent = String(frames.length);
       document.getElementById("stat-fps").textContent = String(DEMO_DATA.meta.default_fps);
-      document.getElementById("stat-render-cap").textContent = String(DEMO_DATA.meta.max_render_points);
+      document.getElementById("stat-max-render").textContent = String(DEMO_DATA.meta.max_render_points);
+      document.getElementById("stat-mode").textContent = DEMO_DATA.meta.mode_label;
       document.getElementById("source-note").textContent = DEMO_DATA.meta.source_note;
       document.getElementById("frame-slider").max = String(Math.max(0, frames.length - 1));
 
-      fitView();
-      updatePathLayer();
-      updateFrame(0);
+      window.addEventListener("resize", renderSplit);
+      controls.addEventListener("change", renderSplit);
 
-      function onResize() {
-        const width = viewer.clientWidth;
-        const height = viewer.clientHeight;
-        camera.aspect = width / height;
-        camera.updateProjectionMatrix();
-        renderer.setSize(width, height);
-      }
-      window.addEventListener("resize", onResize);
+      fitView();
+      updateFrame(0);
+      renderSplit();
 
       function animate() {
         requestAnimationFrame(animate);
         controls.update();
-        renderer.render(scene, camera);
       }
       animate();
     </script>
@@ -696,7 +822,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--fps", type=float, default=DEFAULT_FPS)
     parser.add_argument("--seed", type=int, default=7)
     parser.add_argument("--box-margin", type=float, nargs=3, default=DEFAULT_BOX_MARGIN)
-    parser.add_argument("--title", default="Continuous point-cloud sequence")
+    parser.add_argument("--voxel-size", type=float, default=DEFAULT_VOXEL_SIZE)
+    parser.add_argument("--window-size", type=int, default=DEFAULT_WINDOW_SIZE)
+    parser.add_argument("--min-hits", type=int, default=DEFAULT_MIN_HITS)
+    parser.add_argument("--title", default="Raw vs cleaned accumulation")
     parser.add_argument("--output-scene", type=Path)
     parser.add_argument("--output-html", type=Path, default=ROOT / "demo" / "index_3d_sequence_standalone.html")
     return parser.parse_args()
@@ -716,8 +845,7 @@ def _sample_points(points: np.ndarray, max_points: int, rng: np.random.Generator
 def _round_points(points: np.ndarray) -> list[float]:
     if points.size == 0:
         return []
-    compact = np.round(points.astype(np.float32), 3)
-    return compact.reshape(-1).tolist()
+    return np.round(points.astype(np.float32), 3).reshape(-1).tolist()
 
 
 def _round_vec(vec: np.ndarray, decimals: int = 3) -> list[float]:
@@ -817,91 +945,105 @@ def main() -> None:
         raise SystemExit("selection is empty; adjust --start-index / --frame-count / --stride")
 
     boxes_spec = _load_boxes_spec(Path(args.input_objects)) if args.input_objects else None
+    mode = "boxes" if boxes_spec is not None else "temporal_consistency"
+    temporal_filter = None if mode == "boxes" else TemporalConsistencyFilter(
+        voxel_size=args.voxel_size,
+        window_size=args.window_size,
+        min_hits=args.min_hits,
+    )
     rng = np.random.default_rng(args.seed)
 
-    raw_frames: list[dict[str, Any]] = []
     origin: np.ndarray | None = None
-
-    for frame_index, path in enumerate(selected):
-        points = load_points(path, fmt="auto")
-        boxes = _resolve_boxes(boxes_spec, path)
-
-        sampled_input = _sample_points(points, args.max_render_points, rng)
-        kept_points: np.ndarray | None = None
-        removed_points = np.zeros((0, 3), dtype=np.float64)
-        if boxes:
-            kept_full, keep_mask = remove_points_in_boxes(points, boxes, margin=args.box_margin)
-            removed_full = points[~keep_mask]
-            kept_points = _sample_points(kept_full, args.max_render_points, rng)
-            removed_points = _sample_points(removed_full, args.max_render_points, rng)
-
-        center = sampled_input.mean(axis=0) if len(sampled_input) else np.zeros(3, dtype=np.float64)
-        if origin is None:
-            origin = center.copy()
-
-        raw_frames.append(
-            {
-                "index": frame_index,
-                "name": path.parent.name,
-                "source": f"{path.parent.name}/{path.name}",
-                "input_points": int(len(points)),
-                "render_input_points": int(len(sampled_input)),
-                "kept_points": int(len(points) if kept_points is None else 0),
-                "render_kept_points": int(0 if kept_points is None else len(kept_points)),
-                "removed_points": int(len(removed_points) if boxes else 0),
-                "render_removed_points": int(len(removed_points)),
-                "input": sampled_input,
-                "kept": kept_points,
-                "removed": removed_points,
-                "objects": boxes,
-                "center": center,
-            }
-        )
-
-    assert origin is not None
     limits = _new_limits()
     path_points: list[list[float]] = []
     frames: list[dict[str, Any]] = []
 
-    for frame in raw_frames:
-        input_points = frame["input"] - origin
-        kept_points = None if frame["kept"] is None else frame["kept"] - origin
-        removed_points = frame["removed"] - origin
-        center = frame["center"] - origin
+    total_input_points = 0
+    total_kept_points = 0
+    total_removed_points = 0
 
-        _update_limits(limits, input_points)
-        if kept_points is not None:
-            _update_limits(limits, kept_points)
-        _update_limits(limits, removed_points)
-        path_points.append(_round_vec(center))
+    for frame_index, path in enumerate(selected):
+        points = load_points(path, fmt="auto")
+        boxes = _resolve_boxes(boxes_spec, path) if boxes_spec is not None else []
 
-        objects = []
-        for box in frame["objects"]:
-            shifted_center = np.asarray(box.center, dtype=np.float64) - origin
-            objects.append(
+        if mode == "boxes":
+            if boxes:
+                kept_full, keep_mask = remove_points_in_boxes(points, boxes, margin=args.box_margin)
+            else:
+                keep_mask = np.ones(points.shape[0], dtype=bool)
+                kept_full = points
+        else:
+            assert temporal_filter is not None
+            kept_full, keep_mask = temporal_filter.filter(points)
+
+        removed_full = points[~keep_mask]
+        input_sample = _sample_points(points, args.max_render_points, rng)
+        kept_sample = _sample_points(kept_full, args.max_render_points, rng)
+        removed_sample = _sample_points(removed_full, args.max_render_points, rng)
+
+        center = input_sample.mean(axis=0) if len(input_sample) else np.zeros(3, dtype=np.float64)
+        if origin is None:
+            origin = center.copy()
+
+        shifted_input = input_sample - origin
+        shifted_kept = kept_sample - origin
+        shifted_removed = removed_sample - origin
+        shifted_center = center - origin
+
+        _update_limits(limits, shifted_input)
+        _update_limits(limits, shifted_kept)
+        _update_limits(limits, shifted_removed)
+        _update_limits(limits, shifted_center.reshape(1, 3))
+        path_points.append(_round_vec(shifted_center))
+
+        frame_objects = []
+        for box in boxes:
+            shifted_box_center = np.asarray(box.center, dtype=np.float64) - origin
+            frame_objects.append(
                 {
-                    "center": _round_vec(shifted_center),
+                    "center": _round_vec(shifted_box_center),
                     "size": _round_vec(box.size),
                     "yaw": round(float(box.yaw), 6),
                     "label": box.label or "object",
                 }
             )
 
+        total_input_points += int(len(points))
+        total_kept_points += int(len(kept_full))
+        total_removed_points += int(len(removed_full))
+
         frames.append(
             {
-                "index": frame["index"],
-                "name": frame["name"],
-                "source": frame["source"],
-                "input_points": frame["input_points"],
-                "render_input_points": frame["render_input_points"],
-                "render_kept_points": frame["render_kept_points"],
-                "render_removed_points": frame["render_removed_points"],
-                "input": _round_points(input_points),
-                "kept": None if kept_points is None else _round_points(kept_points),
-                "removed": _round_points(removed_points),
-                "objects": objects,
-                "center": _round_vec(center),
+                "index": frame_index,
+                "name": path.parent.name,
+                "source": f"{path.parent.name}/{path.name}",
+                "input_points": int(len(points)),
+                "kept_points": int(len(kept_full)),
+                "removed_points": int(len(removed_full)),
+                "render_input_points": int(len(input_sample)),
+                "render_kept_points": int(len(kept_sample)),
+                "render_removed_points": int(len(removed_sample)),
+                "input": _round_points(shifted_input),
+                "kept": _round_points(shifted_kept),
+                "removed": _round_points(shifted_removed),
+                "center": _round_vec(shifted_center),
+                "objects": frame_objects,
             }
+        )
+
+    assert origin is not None
+
+    if mode == "boxes":
+        mode_label = "bounding boxes"
+        source_note = (
+            "checked-in sequence demo is using per-frame boxes for cleaned accumulation."
+            " raw keeps all accumulated observations, cleaned keeps points after box removal."
+        )
+    else:
+        mode_label = f"temporal consistency ({args.voxel_size:.2f}m / {args.window_size} / {args.min_hits})"
+        source_note = (
+            "checked-in sequence demo uses a real local multi-frame sequence and a temporal-consistency filter."
+            " cleaned accumulation keeps only voxels that persist across frames; raw keeps everything that was observed."
         )
 
     scene = {
@@ -911,10 +1053,12 @@ def main() -> None:
             "default_fps": round(float(args.fps), 2),
             "max_render_points": int(args.max_render_points),
             "origin": _round_vec(origin),
-            "source_note": (
-                "checked-in 版は local multi-frame sequence を sampled 埋め込みしています。"
-                " per-frame boxes JSON を渡せば kept / removed / box layer の再生にもそのまま使えます。"
-            ),
+            "mode": mode,
+            "mode_label": mode_label,
+            "total_input_points": total_input_points,
+            "total_kept_points": total_kept_points,
+            "total_removed_points": total_removed_points,
+            "source_note": source_note,
         },
         "limits": _finalize_limits(limits),
         "path": path_points,

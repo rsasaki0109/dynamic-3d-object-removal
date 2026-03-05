@@ -8,9 +8,12 @@
 - GitHub Pages / 連続比較デモ: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_sequence_standalone.html
 - 単発 checked-in 版は実スキャン `demo/actual_scan_20240820_cloud.pcd` と検出 box `demo/actual_scan_20240820_objects.json` から生成
 - 連続 checked-in 版は real multi-frame sequence `graph/*/cloud.pcd` を使い、`raw accumulation vs cleaned accumulation` を Pages 上でそのまま比較します
+- 連続デモには `ghost hotspot` と `static structure preserved` の証拠パネルを追加し、必要性と安全性を同じ画面で確認できます
 - 連続 checked-in 版の cleaned 側は、repo に per-frame box が入っていないため temporal consistency で生成しています
 
 ![actual scan removal preview](demo/actual_scan_result_overview.png)
+
+![sequence proof overview](demo/sequence_proof_overview.png)
 
 現在の単発 checked-in デモ結果:
 - 入力 24,224 点
@@ -23,7 +26,11 @@
   - 各フレームで観測した点をそのまま積むので、動的物体や transient clutter が尾を引きます
 - 右: `Cleaned accumulation`
   - 継続して観測された点だけを積むので、静的構造の輪郭が先に残ります
-- つまり主張は `removed points が赤く見える` ことではなく、`時間方向に積むと地図の締まり方が変わる` ことです
+- 下段左: `Ghost hotspot`
+  - final accumulation の中で raw-only occupancy が最も濃い領域を crop し、raw 側にだけ残る汚染を局所比較します
+- 下段右: `Static structure preserved`
+  - cleaned 後も footprint が残る静的領域を crop し、「cleaning がただ削っているだけではない」ことを見せます
+- つまり主張は `removed points が赤く見える` ことではなく、`時間方向に積むと地図の締まり方が変わる` ことと `静的構造は残る` ことです
 
 ### 外部地図点群での検証候補（tsukubachallenge map）
 

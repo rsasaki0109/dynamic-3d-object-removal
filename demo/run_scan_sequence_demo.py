@@ -329,6 +329,62 @@ HTML_TEMPLATE = r'''<!doctype html>
         font-size: 18px;
         font-weight: 700;
       }
+      .evidence-strip {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .evidence-card {
+        padding: 14px;
+        border-radius: 18px;
+        background: var(--panel-strong);
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        display: grid;
+        gap: 10px;
+      }
+      .evidence-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 12px;
+      }
+      .evidence-head strong {
+        font-size: 15px;
+      }
+      .evidence-head span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .evidence-copy {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.6;
+      }
+      .mini-compare {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .mini-pane {
+        display: grid;
+        gap: 8px;
+      }
+      .mini-pane span {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--muted);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .mini-pane canvas {
+        display: block;
+        width: 100%;
+        height: 148px;
+        border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        background: linear-gradient(180deg, #08111f 0%, #0b1728 100%);
+      }
       .note-box {
         padding: 12px 14px;
         border-radius: 16px;
@@ -342,7 +398,7 @@ HTML_TEMPLATE = r'''<!doctype html>
         .shell { grid-template-columns: 1fr; }
       }
       @media (max-width: 720px) {
-        .compare-head, .compare-footer, .stats { grid-template-columns: 1fr; }
+        .compare-head, .compare-footer, .stats, .evidence-strip, .mini-compare { grid-template-columns: 1fr; }
         #compare-stage { min-height: 64vh; }
       }
     </style>
@@ -384,6 +440,8 @@ HTML_TEMPLATE = r'''<!doctype html>
           <div class="buttons">
             <button class="primary" id="play-toggle">Replay build-up</button>
             <button id="fit-view">Fit view</button>
+            <button id="focus-ghost">Focus ghost hotspot</button>
+            <button id="focus-stable">Focus static keep</button>
             <button id="download-shot">Screenshot</button>
           </div>
           <div class="control-row">
@@ -468,6 +526,43 @@ HTML_TEMPLATE = r'''<!doctype html>
           <div class="footer-card"><strong>Accumulated ghost voxels</strong><span id="footer-ghost">0</span></div>
         </div>
 
+        <div class="evidence-strip">
+          <div class="evidence-card">
+            <div class="evidence-head">
+              <strong>Ghost hotspot</strong>
+              <span id="hotspot-metric">0 raw-only cells in crop</span>
+            </div>
+            <div class="mini-compare">
+              <div class="mini-pane">
+                <span>raw crop</span>
+                <canvas id="hotspot-raw" width="220" height="148"></canvas>
+              </div>
+              <div class="mini-pane">
+                <span>cleaned crop</span>
+                <canvas id="hotspot-clean" width="220" height="148"></canvas>
+              </div>
+            </div>
+            <p class="evidence-copy" id="hotspot-copy">largest residual contamination pocket. raw keeps the transient footprint; cleaned removes it from the final map.</p>
+          </div>
+          <div class="evidence-card">
+            <div class="evidence-head">
+              <strong>Static structure preserved</strong>
+              <span id="preserve-metric">0% overlap</span>
+            </div>
+            <div class="mini-compare">
+              <div class="mini-pane">
+                <span>raw crop</span>
+                <canvas id="preserve-raw" width="220" height="148"></canvas>
+              </div>
+              <div class="mini-pane">
+                <span>cleaned crop</span>
+                <canvas id="preserve-clean" width="220" height="148"></canvas>
+              </div>
+            </div>
+            <p class="evidence-copy" id="preserve-copy">dense stable footprint with near-zero ghost leakage. this is the counter-example to “cleaning just erases structure”.</p>
+          </div>
+        </div>
+
         <div class="note-box">
           drag: orbit / wheel: zoom / right drag: pan. the page opens at the final accumulation because that is where the map contamination difference is clearest. use <code>Replay build-up</code> to watch how the ghost grows over time.
         </div>
@@ -496,6 +591,118 @@ HTML_TEMPLATE = r'''<!doctype html>
       const pathPoints = (DEMO_DATA.path || []).map((point) => point.map(Number));
       const bev = DEMO_DATA.bev || { bounds: { xmin: -1, xmax: 1, ymin: -1, ymax: 1 }, clean: [], ghost: [], voxel_size: 1, max_clean_count: 1, max_ghost_count: 1 };
       const hasBoxes = frames.some((frame) => Array.isArray(frame.objects) && frame.objects.length > 0);
+      const voxelSize = Math.max(Number(bev.voxel_size) || 1, 1e-3);
+
+      function flatTriplesToCells(flat) {
+        const cells = [];
+        for (let i = 0; i < flat.length; i += 3) {
+          const x = Number(flat[i]);
+          const y = Number(flat[i + 1]);
+          const count = Number(flat[i + 2]) || 0;
+          const ix = Math.round((x / voxelSize) - 0.5);
+          const iy = Math.round((y / voxelSize) - 0.5);
+          cells.push({ x, y, count, ix, iy });
+        }
+        return cells;
+      }
+
+      const cleanCells = flatTriplesToCells(bev.clean || []);
+      const ghostCells = flatTriplesToCells(bev.ghost || []);
+      const rawCellMap = new Map();
+      for (const cell of cleanCells) {
+        rawCellMap.set(`${cell.ix},${cell.iy}`, { ...cell, cleanCount: cell.count, ghostCount: 0, totalCount: cell.count });
+      }
+      for (const cell of ghostCells) {
+        const key = `${cell.ix},${cell.iy}`;
+        const existing = rawCellMap.get(key);
+        if (existing) {
+          existing.ghostCount += cell.count;
+          existing.totalCount = existing.cleanCount + existing.ghostCount;
+        } else {
+          rawCellMap.set(key, { ...cell, cleanCount: 0, ghostCount: cell.count, totalCount: cell.count });
+        }
+      }
+      const rawCells = Array.from(rawCellMap.values());
+      const cropRadiusWorld = voxelSize * 5.5;
+
+      function centroidFromFlat(flat, fallback) {
+        if (!flat || flat.length < 3) return fallback;
+        let sx = 0;
+        let sy = 0;
+        let sz = 0;
+        const n = flat.length / 3;
+        for (let i = 0; i < flat.length; i += 3) {
+          sx += flat[i];
+          sy += flat[i + 1];
+          sz += flat[i + 2];
+        }
+        return [sx / n, sy / n, sz / n];
+      }
+
+      function neighborhoodGhost(ix, iy) {
+        let total = 0;
+        for (const cell of ghostCells) {
+          if (Math.abs(cell.ix - ix) <= 1 && Math.abs(cell.iy - iy) <= 1) total += cell.count;
+        }
+        return total;
+      }
+
+      function pickGhostHotspot() {
+        if (!ghostCells.length) return null;
+        return ghostCells.reduce((best, cell) => {
+          if (!best) return cell;
+          if (cell.count > best.count) return cell;
+          return best;
+        }, null);
+      }
+
+      function pickPreservedSpot() {
+        if (!cleanCells.length) return null;
+        const zeroGhost = cleanCells.filter((cell) => neighborhoodGhost(cell.ix, cell.iy) === 0);
+        const candidates = zeroGhost.length ? zeroGhost : cleanCells;
+        return candidates.reduce((best, cell) => {
+          const penalty = neighborhoodGhost(cell.ix, cell.iy);
+          const score = cell.count * 1000 - penalty;
+          if (!best || score > best.score) return { ...cell, score };
+          return best;
+        }, null);
+      }
+
+      function cellsInCrop(cells, focus) {
+        if (!focus) return [];
+        return cells.filter((cell) => Math.abs(cell.x - focus.x) <= cropRadiusWorld && Math.abs(cell.y - focus.y) <= cropRadiusWorld);
+      }
+
+      function cropStats(focus) {
+        const rawCrop = cellsInCrop(rawCells, focus);
+        const cleanCrop = cellsInCrop(cleanCells, focus);
+        const ghostCrop = cellsInCrop(ghostCells, focus);
+        const rawCellCount = rawCrop.length;
+        const cleanCellCount = cleanCrop.length;
+        const ghostCellCount = ghostCrop.length;
+        const overlapPct = Math.round(100 * cleanCellCount / Math.max(1, rawCellCount));
+        return { rawCrop, cleanCrop, ghostCrop, rawCellCount, cleanCellCount, ghostCellCount, overlapPct };
+      }
+
+      const proofBounds = DEMO_DATA.limits || { xmin: -1, xmax: 1, ymin: -1, ymax: 1, zmin: -1, zmax: 1 };
+      const proofFallback = {
+        x: (Number(proofBounds.xmin) + Number(proofBounds.xmax)) * 0.5,
+        y: (Number(proofBounds.ymin) + Number(proofBounds.ymax)) * 0.5,
+        z: (Number(proofBounds.zmin) + Number(proofBounds.zmax)) * 0.5,
+      };
+      const proof = (() => {
+        const ghostFocus2D = pickGhostHotspot() || { x: proofFallback.x, y: proofFallback.y, ix: 0, iy: 0, count: 0 };
+        const preserveFocus2D = pickPreservedSpot() || ghostFocus2D;
+        const ghostFrame = frames.reduce((best, frame) => (!best || frame.removed_points > best.removed_points ? frame : best), null);
+        return {
+          ghostFocus2D,
+          preserveFocus2D,
+          ghostFocus3D: centroidFromFlat(ghostFrame ? ghostFrame.removed : null, [ghostFocus2D.x, ghostFocus2D.y, proofFallback.z]),
+          preserveFocus3D: [preserveFocus2D.x, preserveFocus2D.y, proofFallback.z],
+          ghostCrop: cropStats(ghostFocus2D),
+          preserveCrop: cropStats(preserveFocus2D),
+        };
+      })();
 
       const stage = document.getElementById("compare-stage");
       const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
@@ -743,6 +950,101 @@ HTML_TEMPLATE = r'''<!doctype html>
         ctx.fillText("ghost / raw-only", 108, 37);
       }
 
+      function drawEvidenceCanvas(canvasId, focus, mode, emphasis) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas || !focus) return;
+        const rect = canvas.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const width = Math.max(180, Math.floor(rect.width || canvas.width));
+        const height = Math.max(140, Math.floor(rect.height || canvas.height));
+        if (canvas.width !== Math.floor(width * dpr) || canvas.height !== Math.floor(height * dpr)) {
+          canvas.width = Math.floor(width * dpr);
+          canvas.height = Math.floor(height * dpr);
+        }
+        const ctx = canvas.getContext("2d");
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.scale(dpr, dpr);
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = "#08111f";
+        ctx.fillRect(0, 0, width, height);
+
+        const bounds = {
+          xmin: focus.x - cropRadiusWorld,
+          xmax: focus.x + cropRadiusWorld,
+          ymin: focus.y - cropRadiusWorld,
+          ymax: focus.y + cropRadiusWorld,
+        };
+        const margin = 12;
+        const rangeX = Math.max(1e-6, bounds.xmax - bounds.xmin);
+        const rangeY = Math.max(1e-6, bounds.ymax - bounds.ymin);
+        const scale = Math.min((width - margin * 2) / rangeX, (height - margin * 2) / rangeY);
+        const cell = Math.max(4, Math.min(16, Math.floor(scale * voxelSize * 0.9)));
+        const maxClean = Math.max(1, Number(bev.max_clean_count) || 1);
+        const maxGhost = Math.max(1, Number(bev.max_ghost_count) || 1);
+
+        function project(x, y) {
+          return [
+            margin + (x - bounds.xmin) * scale,
+            height - margin - (y - bounds.ymin) * scale,
+          ];
+        }
+
+        const rawCrop = cellsInCrop(rawCells, focus);
+        const cleanCrop = cellsInCrop(cleanCells, focus);
+        const ghostCrop = cellsInCrop(ghostCells, focus);
+
+        ctx.strokeStyle = "rgba(255,255,255,0.08)";
+        ctx.strokeRect(0.5, 0.5, width - 1, height - 1);
+
+        if (mode === "raw") {
+          for (const cellData of rawCrop) {
+            if (cellData.cleanCount > 0) {
+              const [px, py] = project(cellData.x, cellData.y);
+              const alpha = 0.08 + 0.28 * Math.min(1, cellData.cleanCount / maxClean);
+              ctx.fillStyle = `rgba(45, 212, 191, ${alpha.toFixed(3)})`;
+              ctx.fillRect(px - cell * 0.5, py - cell * 0.5, cell, cell);
+            }
+            if (cellData.ghostCount > 0) {
+              const [px, py] = project(cellData.x, cellData.y);
+              const t = Math.min(1, cellData.ghostCount / maxGhost);
+              const alpha = 0.36 + 0.52 * t;
+              ctx.fillStyle = `rgba(255, 110, 130, ${alpha.toFixed(3)})`;
+              ctx.fillRect(px - cell * 0.62, py - cell * 0.62, cell * 1.24, cell * 1.24);
+            }
+          }
+        } else {
+          for (const cellData of cleanCrop) {
+            const [px, py] = project(cellData.x, cellData.y);
+            const alpha = 0.1 + 0.34 * Math.min(1, cellData.count / maxClean);
+            ctx.fillStyle = `rgba(45, 212, 191, ${alpha.toFixed(3)})`;
+            ctx.fillRect(px - cell * 0.5, py - cell * 0.5, cell, cell);
+          }
+        }
+
+        if (emphasis === "ghost") {
+          for (const cellData of ghostCrop) {
+            const [px, py] = project(cellData.x, cellData.y);
+            ctx.strokeStyle = "rgba(255, 236, 153, 0.88)";
+            ctx.lineWidth = 1.2;
+            ctx.strokeRect(px - cell * 0.8, py - cell * 0.8, cell * 1.6, cell * 1.6);
+          }
+        }
+
+        const [cx, cy] = project(focus.x, focus.y);
+        ctx.strokeStyle = emphasis === "ghost" ? "rgba(255,236,153,0.95)" : "rgba(191,219,254,0.92)";
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.arc(cx, cy, Math.max(6, cell * 0.75), 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      function drawEvidencePanels() {
+        drawEvidenceCanvas("hotspot-raw", proof.ghostFocus2D, "raw", "ghost");
+        drawEvidenceCanvas("hotspot-clean", proof.ghostFocus2D, "clean", "ghost");
+        drawEvidenceCanvas("preserve-raw", proof.preserveFocus2D, "raw", "preserve");
+        drawEvidenceCanvas("preserve-clean", proof.preserveFocus2D, "clean", "preserve");
+      }
+
       function updateFrame(index) {
         if (frames.length === 0) return;
         state.frameIndex = clampFrame(index);
@@ -783,15 +1085,23 @@ HTML_TEMPLATE = r'''<!doctype html>
         document.getElementById("hud-right").textContent = `cleaned: ${frame.clean_voxels.toLocaleString()} voxels`;
       }
 
-      function fitView() {
+      function moveCamera(targetPoint, sceneExtent) {
         const fov = camera.fov * Math.PI / 180;
-        const dist = (extent * 1.15) / Math.tan(fov * 0.5);
-        camera.near = Math.max(extent * 1e-4, 0.05);
+        const dist = sceneExtent / Math.tan(fov * 0.5);
+        camera.near = Math.max(sceneExtent * 1e-4, 0.05);
         camera.far = Math.max(dist * 6, extent * 10, 6000);
-        camera.position.set(center.x + dist * 0.88, center.y - dist * 0.78, center.z + dist * 0.76);
-        controls.target.copy(center);
+        camera.position.set(targetPoint.x + dist * 0.88, targetPoint.y - dist * 0.78, targetPoint.z + dist * 0.76);
+        controls.target.copy(targetPoint);
         camera.updateProjectionMatrix();
         controls.update();
+      }
+
+      function fitView() {
+        moveCamera(center, extent * 1.15);
+      }
+
+      function focusProof(point) {
+        moveCamera(new THREE.Vector3(point[0], point[1], point[2]), Math.max(extent * 0.28, voxelSize * 18, 10));
       }
 
       function resizeRenderer() {
@@ -865,6 +1175,14 @@ HTML_TEMPLATE = r'''<!doctype html>
         fitView();
         renderSplit();
       });
+      document.getElementById("focus-ghost").addEventListener("click", () => {
+        focusProof(proof.ghostFocus3D);
+        renderSplit();
+      });
+      document.getElementById("focus-stable").addEventListener("click", () => {
+        focusProof(proof.preserveFocus3D);
+        renderSplit();
+      });
       document.getElementById("download-shot").addEventListener("click", () => {
         renderSplit();
         const link = document.createElement("a");
@@ -916,15 +1234,21 @@ HTML_TEMPLATE = r'''<!doctype html>
       document.getElementById("source-note").textContent = DEMO_DATA.meta.source_note;
       document.getElementById("frame-slider").max = String(Math.max(0, frames.length - 1));
       document.getElementById("frame-slider").value = String(initialFrame);
+      document.getElementById("hotspot-metric").textContent = `${proof.ghostCrop.ghostCellCount.toLocaleString()} raw-only cells in crop`;
+      document.getElementById("preserve-metric").textContent = `${proof.preserveCrop.overlapPct}% footprint overlap`;
+      document.getElementById("hotspot-copy").textContent = `largest residual contamination pocket: ${proof.ghostCrop.ghostCellCount.toLocaleString()} raw-only cells survive inside this crop if every observation is accumulated.`;
+      document.getElementById("preserve-copy").textContent = `this dense static crop keeps ${proof.preserveCrop.overlapPct}% of its footprint after cleaning, with ${proof.preserveCrop.ghostCellCount.toLocaleString()} raw-only cells leaking into the same area.`;
 
       window.addEventListener("resize", () => {
         drawGhostBEV();
+        drawEvidencePanels();
         renderSplit();
       });
       controls.addEventListener("change", renderSplit);
 
       fitView();
       drawGhostBEV();
+      drawEvidencePanels();
       updateFrame(initialFrame);
       renderSplit();
 

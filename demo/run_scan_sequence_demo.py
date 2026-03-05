@@ -465,6 +465,7 @@ HTML_TEMPLATE = r'''<!doctype html>
           <div class="buttons">
             <button class="primary" id="play-toggle">Replay build-up</button>
             <button id="story-mode">Story mode</button>
+            <button id="peak-replay">Peak replay</button>
             <button id="fit-view">Fit view</button>
             <button id="focus-ghost">Focus ghost hotspot</button>
             <button id="focus-stable">Focus static keep</button>
@@ -516,7 +517,7 @@ HTML_TEMPLATE = r'''<!doctype html>
           <h2>Contamination timeline</h2>
           <div class="bev-card">
             <canvas id="timeline-canvas" width="320" height="120"></canvas>
-            <div class="bev-meta">ghost ratio per frame. the blue cursor tracks the current frame, and the amber mark shows the peak contamination moment in the sequence.</div>
+            <div class="bev-meta">ghost ratio per frame. the blue cursor tracks the current frame, the amber mark shows the peak contamination moment, and the shaded band brackets the peak replay window.</div>
           </div>
         </div>
 
@@ -1017,6 +1018,9 @@ HTML_TEMPLATE = r'''<!doctype html>
       let storyAutoRan = false;
       const peakFrameIndex = frames.reduce((best, frame, index) => ((Number(frame.ghost_ratio_pct) || 0) > (Number(frames[best]?.ghost_ratio_pct) || 0) ? index : best), 0);
       const finalGhostReductionPct = Number((100 - (Number(DEMO_DATA.meta.final_ghost_ratio_pct) || 0)).toFixed(1));
+      const peakWindowStart = Math.max(0, peakFrameIndex - 2);
+      const peakWindowEnd = Math.min(frames.length - 1, peakFrameIndex + 2);
+      const peakWindowLabel = `f${peakWindowStart + 1}-${peakWindowEnd + 1}`;
 
       function createScene(background, gridColorA, gridColorB) {
         const scene = new THREE.Scene();
@@ -1190,6 +1194,32 @@ HTML_TEMPLATE = r'''<!doctype html>
         storyTimers = [];
       }
 
+      function queuePeakReplay(startDelay = 0, completeMessage = "", restoreFrame = peakFrameIndex, restoreView = "ghost") {
+        const stepMs = 820;
+        for (let index = peakWindowStart; index <= peakWindowEnd; index += 1) {
+          const frame = frames[index];
+          const delay = startDelay + (index - peakWindowStart) * stepMs;
+          storyTimers.push(setTimeout(() => {
+            updateFrame(index);
+            focusProof(proof.ghostFocus3D);
+            renderSplit();
+            const ratio = Number(frame.ghost_ratio_pct || 0).toFixed(1);
+            const emphasis = index === peakFrameIndex ? "peak" : "window";
+            setStoryText(`Peak replay (${peakWindowLabel}): ${emphasis} frame ${index + 1} shows hotspot ghost ratio ${ratio}%.`);
+          }, delay));
+        }
+        const doneDelay = startDelay + (peakWindowEnd - peakWindowStart + 1) * stepMs + 180;
+        storyTimers.push(setTimeout(() => {
+          updateFrame(restoreFrame);
+          if (restoreView === "fit") fitView();
+          else if (restoreView === "stable") focusProof(proof.preserveFocus3D);
+          else focusProof(proof.ghostFocus3D);
+          renderSplit();
+          if (completeMessage) setStoryText(completeMessage);
+        }, doneDelay));
+        return doneDelay;
+      }
+
       function updatePathGroups(frame) {
         const pathFlat = state.showPath ? buildPathPrefix(state.frameIndex) : null;
         const pathColor = 0xf59e0b;
@@ -1220,6 +1250,8 @@ HTML_TEMPLATE = r'''<!doctype html>
         const ratios = frames.map((frame) => Number(frame.ghost_ratio_pct) || 0);
         const maxRatio = Math.max(1, ...ratios);
         const peakIndex = peakFrameIndex;
+        const peakBandStartX = margin.left + (chartW * peakWindowStart) / Math.max(1, ratios.length - 1);
+        const peakBandEndX = margin.left + (chartW * peakWindowEnd) / Math.max(1, ratios.length - 1);
 
         ctx.strokeStyle = "rgba(255,255,255,0.10)";
         ctx.lineWidth = 1;
@@ -1229,6 +1261,8 @@ HTML_TEMPLATE = r'''<!doctype html>
         ctx.lineTo(margin.left + chartW, margin.top + chartH);
         ctx.strokeStyle = "rgba(148,163,184,0.35)";
         ctx.stroke();
+        ctx.fillStyle = "rgba(251, 191, 36, 0.12)";
+        ctx.fillRect(Math.min(peakBandStartX, peakBandEndX) - 4, margin.top, Math.max(8, Math.abs(peakBandEndX - peakBandStartX) + 8), chartH);
 
         if (ratios.length > 0) {
           ctx.beginPath();
@@ -1569,7 +1603,7 @@ HTML_TEMPLATE = r'''<!doctype html>
         return {
           overview: `Final map impact: ghost occupancy drops ${finalGhostReductionPct.toFixed(1)}% and cleaned keeps ${stable} stable voxels.`,
           hotspot: `Ghost hotspot: this crop is where raw-only occupancy persists if transient clutter is accumulated.`,
-          peak: `Peak contamination arrives at frame ${peakFrameIndex + 1} with ghost ratio ${peak}%.`,
+          peak: `Peak contamination is concentrated in ${peakWindowLabel}; frame ${peakFrameIndex + 1} reaches ghost ratio ${peak}%.`,
           stable: `Static preserved: this crop stays dense after cleaning, so the preview is not just erasing structure.`,
           outro: `Story complete. Replay build-up, click the timeline, or scrub frames to inspect the sampled box-removal preview.`
         };
@@ -1584,26 +1618,21 @@ HTML_TEMPLATE = r'''<!doctype html>
         const messages = storyMessages();
         setStoryText(messages.overview);
         storyTimers.push(setTimeout(() => {
-          updateFrame(peakFrameIndex);
-          renderSplit();
           setStoryText(messages.peak);
-        }, 1400));
+        }, 1200));
+        const peakReplayDone = queuePeakReplay(2200, messages.hotspot, peakFrameIndex, "ghost");
         storyTimers.push(setTimeout(() => {
-          focusProof(proof.ghostFocus3D);
-          renderSplit();
-          setStoryText(messages.hotspot);
-        }, 3200));
-        storyTimers.push(setTimeout(() => {
+          updateFrame(initialFrame);
           focusProof(proof.preserveFocus3D);
           renderSplit();
           setStoryText(messages.stable);
-        }, 5200));
+        }, peakReplayDone + 1100));
         storyTimers.push(setTimeout(() => {
           updateFrame(initialFrame);
           fitView();
           renderSplit();
           setStoryText(messages.outro);
-        }, 7200));
+        }, peakReplayDone + 3000));
       }
 
       function restartPlayback() {
@@ -1641,6 +1670,11 @@ HTML_TEMPLATE = r'''<!doctype html>
       });
       document.getElementById("story-mode").addEventListener("click", () => {
         runStoryMode();
+      });
+      document.getElementById("peak-replay").addEventListener("click", () => {
+        stopPlayback();
+        stopStory();
+        queuePeakReplay(0, `Peak replay complete: ${peakWindowLabel} brackets the local contamination burst around the hotspot.`, peakFrameIndex, "ghost");
       });
       document.getElementById("fit-view").addEventListener("click", () => {
         stopStory();

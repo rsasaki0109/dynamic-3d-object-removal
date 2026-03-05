@@ -40,14 +40,12 @@
   </head>
   <body>
     <h1>Dynamic Object Removal デモ</h1>
-    <p class="meta">入力点群: 11000 点 / 出力点群: 8633 点 / 除去: 2367 点</p>
+    <p class="meta">checked-in 版は実スキャン `actual_scan_20240820_cloud.pcd` を表示します。</p>
 
     <div class="card">
-      <h2>デモ生成データ</h2>
+      <h2>入力データ</h2>
       <ul>
-        <li>demo_input.xyz</li>
-        <li>demo_objects.json</li>
-        <li>demo_output.xyz</li>
+        <li>actual_scan_20240820_cloud.pcd</li>
       </ul>
     </div>
 
@@ -55,24 +53,8 @@
       <h2>3Dビュー</h2>
       <p>インタラクティブ表示:</p>
       <ul>
-        <li><a href="index_3d.html">index_3d.html</a>（マウスで回転・拡大縮小可能）</li>
-        <li><a href="index_3d_standalone.html">index_3d_standalone.html</a>（サーバ不要。直接開いて確認）</li>
+        <li><a href="index_3d_scan_standalone.html">index_3d_scan_standalone.html</a>（サーバ不要。直接開いて確認）</li>
       </ul>
-    </div>
-
-    <div class="card thumbs">
-      <div>
-        <h3>Before / After</h3>
-        <img src="demo_before_after.png" alt="before after comparison">
-      </div>
-      <div>
-        <h3>Summary</h3>
-        <img src="demo_comparison.png" alt="summary comparison">
-      </div>
-      <div>
-        <h3>3D Topology (projected)</h3>
-        <img src="demo_before_after_3d.png" alt="3d point cloud comparison">
-      </div>
     </div>
   </body>
 </html>

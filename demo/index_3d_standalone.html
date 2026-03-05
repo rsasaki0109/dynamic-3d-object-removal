@@ -222,19 +222,176 @@
           "WebGL が利用できない環境です。ブラウザの設定を確認してください。";
       }
 
-      const meta = DEMO_DATA.meta;
-      const limits = DEMO_DATA.limits;
-      document.getElementById("status").textContent =
-        "center: " + DEMO_DATA.box.center.map((v) => v.toFixed(2)).join(", ");
-      document.getElementById("summary").textContent =
-        "input " + meta.input_points + " 点 / kept " + meta.output_points + " 点 / removed " + meta.removed_points + " 点";
+      const MAX_RENDER_POINTS_PER_LAYER = 200000;
 
-      const stage = document.getElementById("stage");
-      const viewer = document.getElementById("viewer");
-      const renderer = new THREE.WebGLRenderer({antialias: true, preserveDrawingBuffer: true});
-      const camera = new THREE.PerspectiveCamera(54, 16 / 9, 0.05, 1500);
-      const scene = new THREE.Scene();
-      const controls = new THREE.OrbitControls(camera, renderer.domElement);
+      function clampLimit(value, fallback) {
+        const number = Number(value);
+        return Number.isFinite(number) ? number : fallback;
+      }
+
+      function ensureFiniteLimits(candidate) {
+        if (!candidate) return null;
+        const keys = ["xmin", "xmax", "ymin", "ymax", "zmin", "zmax"];
+        const limits = {};
+        for (const key of keys) {
+          const num = clampLimit(candidate[key], NaN);
+          if (!Number.isFinite(num)) return null;
+          limits[key] = num;
+        }
+        if (!(limits.xmin <= limits.xmax) || !(limits.ymin <= limits.ymax) || !(limits.zmin <= limits.zmax)) {
+          return null;
+        }
+        limits.box_half = Array.isArray(candidate.box_half) ? candidate.box_half.map((v) => clampLimit(v, NaN)) : null;
+        limits.box_center = Array.isArray(candidate.box_center) ? candidate.box_center.map((v) => clampLimit(v, NaN)) : null;
+        if (!Array.isArray(limits.box_half) || limits.box_half.length !== 3 || !limits.box_half.every(Number.isFinite)) {
+          limits.box_half = null;
+        }
+        if (!Array.isArray(limits.box_center) || limits.box_center.length !== 3 || !limits.box_center.every(Number.isFinite)) {
+          limits.box_center = null;
+        }
+        return limits;
+      }
+
+      function preparePoints(rawPoints, label) {
+        if (!Array.isArray(rawPoints) || rawPoints.length === 0) {
+          return { original: 0, rendered: 0, dropped: 0, points: [], label };
+        }
+        const valid = [];
+        for (const point of rawPoints) {
+          if (!Array.isArray(point) || point.length < 3) continue;
+          const x = Number(point[0]);
+          const y = Number(point[1]);
+          const z = Number(point[2]);
+          if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z)) continue;
+          valid.push([x, y, z]);
+        }
+
+        const original = valid.length;
+        if (original <= MAX_RENDER_POINTS_PER_LAYER) {
+          return { original, rendered: original, dropped: 0, points: valid, label };
+        }
+
+        const stride = Math.ceil(original / MAX_RENDER_POINTS_PER_LAYER);
+        const sampled = [];
+        for (let i = 0; i < original; i += stride) {
+          sampled.push(valid[i]);
+        }
+        return {
+          original,
+          rendered: sampled.length,
+          dropped: original - sampled.length,
+          points: sampled,
+          label,
+        };
+      }
+
+      function computeLimitsFromPoints(points) {
+        if (!Array.isArray(points) || points.length === 0) {
+          return null;
+        }
+        const limits = {
+          xmin: points[0][0],
+          xmax: points[0][0],
+          ymin: points[0][1],
+          ymax: points[0][1],
+          zmin: points[0][2],
+          zmax: points[0][2],
+        };
+        for (const point of points) {
+          limits.xmin = Math.min(limits.xmin, point[0]);
+          limits.xmax = Math.max(limits.xmax, point[0]);
+          limits.ymin = Math.min(limits.ymin, point[1]);
+          limits.ymax = Math.max(limits.ymax, point[1]);
+          limits.zmin = Math.min(limits.zmin, point[2]);
+          limits.zmax = Math.max(limits.zmax, point[2]);
+        }
+        limits.box_half = null;
+        limits.box_center = null;
+        return limits;
+      }
+
+      function formatCount(total, rendered) {
+        return rendered === total ? `${total} 点` : `${total} 点 -> 表示 ${rendered} 点`;
+      }
+
+      function pointsToFloat32Array(points) {
+        if (!Array.isArray(points) || points.length === 0) return new Float32Array(0);
+        const flat = new Float32Array(points.length * 3);
+        let ptr = 0;
+        for (const p of points) {
+          flat[ptr++] = p[0];
+          flat[ptr++] = p[1];
+          flat[ptr++] = p[2];
+        }
+        return flat;
+      }
+
+      function buildPointCloud(points, color) {
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute("position", new THREE.Float32BufferAttribute(pointsToFloat32Array(points), 3));
+        const material = new THREE.PointsMaterial({
+          size: state.pointSize,
+          color,
+          opacity: state.alpha,
+          transparent: true,
+          depthWrite: false,
+          vertexColors: false,
+        });
+        return new THREE.Points(geometry, material);
+      }
+
+      function buildBbox(limits, demo) {
+        const center = limits.box_center || (Array.isArray(demo?.box?.center) ? demo.box.center : null);
+        const half = limits.box_half || (Array.isArray(demo?.box?.size) ? demo.box.size.map((value) => Number(value) / 2) : null);
+        if (!Array.isArray(center) || center.length !== 3 || !Array.isArray(half) || half.length !== 3) {
+          return null;
+        }
+        if (!center.every(Number.isFinite) || !half.every(Number.isFinite)) {
+          return null;
+        }
+        const geometry = new THREE.BoxGeometry(half[0] * 2.0, half[1] * 2.0, half[2] * 2.0);
+        const wire = new THREE.EdgesGeometry(geometry);
+        const material = new THREE.LineBasicMaterial({color: 0x2dd4bf, transparent: true, opacity: 0.9});
+        const line = new THREE.LineSegments(wire, material);
+        line.position.set(center[0], center[1], center[2]);
+        line.rotation.z = demo?.box?.yaw || 0.0;
+        return line;
+      }
+
+      const meta = DEMO_DATA.meta || {};
+      const preparedInput = preparePoints(DEMO_DATA?.points?.input, "input");
+      const preparedKept = preparePoints(DEMO_DATA?.points?.kept, "kept");
+      const preparedRemoved = preparePoints(DEMO_DATA?.points?.removed, "removed");
+      let limitsCandidate = ensureFiniteLimits(DEMO_DATA.limits) || computeLimitsFromPoints([
+        ...preparedInput.points,
+        ...preparedKept.points,
+        ...preparedRemoved.points,
+      ]);
+      if (!limitsCandidate) {
+        document.getElementById("status").textContent = "点群のバウンディング情報が不正です。";
+      }
+
+      if (limitsCandidate) {
+        if (limitsCandidate.box_half === null) {
+          limitsCandidate.box_half = [0, 0, 0];
+        }
+        if (limitsCandidate.box_center === null && Array.isArray(DEMO_DATA?.box?.center)) {
+          limitsCandidate.box_center = DEMO_DATA.box.center;
+        }
+      } else {
+        limitsCandidate = {
+          xmin: -10,
+          xmax: 10,
+          ymin: -10,
+          ymax: 10,
+          zmin: -2,
+          zmax: 2,
+          box_half: [0, 0, 0],
+          box_center: [0, 0, 0],
+        };
+      }
+
+      const limits = limitsCandidate;
       const center = new THREE.Vector3(
         (limits.xmin + limits.xmax) * 0.5,
         (limits.ymin + limits.ymax) * 0.5,
@@ -247,6 +404,13 @@
         1
       );
 
+      const stage = document.getElementById("stage");
+      const viewer = document.getElementById("viewer");
+      const camera = new THREE.PerspectiveCamera(54, 16 / 9, 0.05, 2500);
+      const scene = new THREE.Scene();
+      const renderer = new THREE.WebGLRenderer({antialias: true, preserveDrawingBuffer: true});
+      const controls = new THREE.OrbitControls(camera, renderer.domElement);
+
       const state = {
         showInput: true,
         showKept: true,
@@ -258,29 +422,52 @@
       };
 
       scene.background = new THREE.Color(0x05070f);
-      scene.fog = new THREE.FogExp2(0x070d21, 0.004);
 
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       viewer.appendChild(renderer.domElement);
 
       controls.enableDamping = true;
       controls.dampingFactor = 0.1;
-      camera.position.set(center.x + extent * 0.9, center.y + extent * 0.8, center.z + extent * 0.6);
-      controls.target.copy(center);
+      controls.enablePan = true;
 
-      const layerInput = buildPointCloud("input", DEMO_DATA.points.input, 0x94a3b8);
-      const layerKept = buildPointCloud("kept", DEMO_DATA.points.kept, 0x3b82f6);
-      const layerRemoved = buildPointCloud("removed", DEMO_DATA.points.removed, 0xef4444);
-      const bbox = buildBbox(DEMO_DATA.box);
-      const grid = new THREE.GridHelper(Math.max(30, extent), 30, 0x3b82f6, 0x253a66);
+      const layerInput = buildPointCloud(preparedInput.points, 0x94a3b8);
+      const layerKept = buildPointCloud(preparedKept.points, 0x3b82f6);
+      const layerRemoved = buildPointCloud(preparedRemoved.points, 0xef4444);
+      const bbox = buildBbox(limits, DEMO_DATA);
+      const grid = new THREE.GridHelper(Math.max(30, extent * 1.2), 30, 0x3b82f6, 0x253a66);
       grid.material.opacity = 0.2;
       grid.material.transparent = true;
 
       scene.add(grid);
-      scene.add(layerInput.mesh);
-      scene.add(layerKept.mesh);
-      scene.add(layerRemoved.mesh);
-      scene.add(bbox);
+      scene.add(layerInput);
+      scene.add(layerKept);
+      scene.add(layerRemoved);
+      if (bbox) {
+        scene.add(bbox);
+      }
+
+      const droppedParts = [];
+      if (preparedInput.dropped) droppedParts.push(`input ${preparedInput.dropped.toLocaleString()}点`);
+      if (preparedKept.dropped) droppedParts.push(`kept ${preparedKept.dropped.toLocaleString()}点`);
+      if (preparedRemoved.dropped) droppedParts.push(`removed ${preparedRemoved.dropped.toLocaleString()}点`);
+      const centerVec = Array.isArray(DEMO_DATA?.box?.center) ? DEMO_DATA.box.center : [0, 0, 0];
+      const yaw = Number.isFinite(Number(DEMO_DATA?.box?.yaw)) ? Number(DEMO_DATA.box.yaw) : 0;
+      document.getElementById("status").textContent =
+        `center: ${centerVec.map((value) => Number(value).toFixed(2)).join(", ")} / yaw: ${yaw.toFixed(2)}${
+          droppedParts.length ? " / 表示用ダウンサンプリングあり" : ""
+        }`;
+      document.getElementById("summary").textContent =
+        `input ${formatCount(Number(meta.input_points) || preparedInput.original, preparedInput.rendered)} / kept ${formatCount(
+          Number(meta.output_points) || preparedKept.original,
+          preparedKept.rendered,
+        )} / removed ${formatCount(
+          Number(meta.removed_points) || preparedRemoved.original,
+          preparedRemoved.rendered,
+        )}`;
+      if (droppedParts.length) {
+        document.getElementById("summary").textContent += `（除外: ${droppedParts.join(" / ")}）`;
+      }
+
       fitCamera();
 
       controls.addEventListener("change", () => {
@@ -293,37 +480,6 @@
         removed: layerRemoved,
         bbox,
       };
-
-      function buildPointCloud(key, points, color) {
-        const positions = new Float32Array(points.length * 3);
-        for (let i = 0; i < points.length; i++) {
-          positions[i * 3] = points[i][0];
-          positions[i * 3 + 1] = points[i][1];
-          positions[i * 3 + 2] = points[i][2];
-        }
-        const geometry = new THREE.BufferGeometry();
-        geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-        const material = new THREE.PointsMaterial({
-          size: state.pointSize,
-          color,
-          opacity: state.alpha,
-          transparent: true,
-          depthWrite: false,
-          vertexColors: false,
-        });
-        const mesh = new THREE.Points(geometry, material);
-        return {mesh};
-      }
-
-      function buildBbox(box) {
-        const geometry = new THREE.BoxGeometry(box.size[0], box.size[1], box.size[2]);
-        const wire = new THREE.EdgesGeometry(geometry);
-        const material = new THREE.LineBasicMaterial({color: 0x2dd4bf, transparent: true, opacity: 0.9});
-        const line = new THREE.LineSegments(wire, material);
-        line.position.set(box.center[0], box.center[1], box.center[2]);
-        line.rotation.z = box.yaw || 0.0;
-        return line;
-      }
 
       const ctrlInput = document.getElementById("show-input");
       const ctrlKept = document.getElementById("show-kept");
@@ -366,12 +522,14 @@
         state.pointSize = parseFloat(ctrlPointSize.value);
         state.alpha = parseFloat(ctrlAlpha.value);
 
-        layerInput.mesh.visible = state.showInput;
-        layerKept.mesh.visible = state.showKept;
-        layerRemoved.mesh.visible = state.showRemoved;
-        bbox.visible = state.showBbox;
+        layerInput.visible = state.showInput;
+        layerKept.visible = state.showKept;
+        layerRemoved.visible = state.showRemoved;
+        if (bbox) {
+          bbox.visible = state.showBbox;
+        }
 
-        [layerInput.mesh, layerKept.mesh, layerRemoved.mesh].forEach((mesh) => {
+        [layerInput, layerKept, layerRemoved].forEach((mesh) => {
           mesh.material.size = state.pointSize;
           mesh.material.opacity = state.alpha;
         });
@@ -381,13 +539,15 @@
       }
 
       function fitCamera() {
-        camera.near = extent / 30;
-        camera.far = Math.max(extent * 40, 300);
+        const fov = camera.fov * Math.PI / 180;
+        const dist = (extent * 1.3) / Math.tan(fov * 0.5);
+        camera.near = Math.max(extent * 1e-4, 0.05);
+        camera.far = Math.max(dist * 3, extent * 4, 5000);
+        camera.position.set(center.x + dist, center.y + dist * 0.8, center.z + dist * 0.6);
         controls.target.copy(center);
-        controls.enablePan = true;
         controls.autoRotate = state.autoRotate;
-        controls.update();
         camera.updateProjectionMatrix();
+        controls.update();
       }
 
       function resize() {

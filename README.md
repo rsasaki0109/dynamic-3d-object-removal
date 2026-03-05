@@ -24,6 +24,7 @@
 
 - `Story mode` を押すと、全体比較 -> ghost hotspot -> static preserved の順に自動で寄って主張を通します
 - `contamination timeline` で frame ごとの ghost ratio を追えるので、最悪フレームと最終状態の差が読みやすくなっています
+- headline では `ghost reduction` と `peak ghost ratio` を前面に出し、効果量を一目で読めるようにしています
 
 - 左: `Raw accumulation`
   - 各フレームで観測した点をそのまま積むので、動的物体や transient clutter が尾を引きます

@@ -5,7 +5,7 @@
 ## 3Dデモ（最初にここ）
 
 - GitHub Pages: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_standalone.html
-- 単一スキャン用: `demo/index_3d_scan_standalone.html`（checked-in 版は `demo/demo_input.xyz` と `demo/demo_objects.json` から生成）
+- 単一スキャン用: `demo/index_3d_scan_standalone.html`（checked-in 版は実スキャン `demo/actual_scan_20240820_cloud.pcd` から生成）
 
 ### 外部地図点群での検証候補（tsukubachallenge map）
 
@@ -18,14 +18,13 @@
 
 どれも `tsukubachallenge/tc-datasets` 側の配布形式に合わせて取得してください。
 現状の `run_scan_demo.py` は `dynamic_object_removal.load_points()` を経由するため、`PCD` は
-ASCII 形式を前提にしています（`DATA binary` の場合は事前変換が必要です）。
+ASCII / binary に対応しています（`DATA binary_compressed` は未対応です）。
 
 ### 単一スキャンの再生成
 
 ```bash
 python3 demo/run_scan_demo.py \
-  --input-cloud demo/demo_input.xyz \
-  --input-objects demo/demo_objects.json \
+  --input-cloud demo/actual_scan_20240820_cloud.pcd \
   --max-render-points 220000 \
   --output-scene demo/demo_scene_single_scan.json \
   --output-html demo/index_3d_scan_standalone.html

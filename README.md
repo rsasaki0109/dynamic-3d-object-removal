@@ -23,6 +23,7 @@
 ### 連続デモの見どころ
 
 - `Story mode` を押すと、全体比較 -> ghost hotspot -> static preserved の順に自動で寄って主張を通します
+- `contamination timeline` で frame ごとの ghost ratio を追えるので、最悪フレームと最終状態の差が読みやすくなっています
 
 - 左: `Raw accumulation`
   - 各フレームで観測した点をそのまま積むので、動的物体や transient clutter が尾を引きます

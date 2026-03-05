@@ -224,6 +224,13 @@ HTML_TEMPLATE = r'''<!doctype html>
         background: #08111f;
         border: 1px solid rgba(15, 23, 42, 0.4);
       }
+      #timeline-canvas {
+        display: block;
+        width: 100%;
+        height: 120px;
+        border-radius: 12px;
+        background: linear-gradient(180deg, #08111f 0%, #0b1728 100%);
+      }
       #ghost-bev {
         display: block;
         width: 100%;
@@ -503,6 +510,14 @@ HTML_TEMPLATE = r'''<!doctype html>
           <div class="small-meta"><span>cleaned frame points</span><span id="meta-kept">0</span></div>
           <div class="small-meta"><span>accum ghost voxels</span><span id="meta-ghost">0</span></div>
           <div class="small-meta"><span>accum ghost ratio</span><span id="meta-ratio">0%</span></div>
+        </div>
+
+        <div class="section">
+          <h2>Contamination timeline</h2>
+          <div class="bev-card">
+            <canvas id="timeline-canvas" width="320" height="120"></canvas>
+            <div class="bev-meta">ghost ratio per frame. the blue cursor tracks the current frame, and the amber mark shows the peak contamination moment in the sequence.</div>
+          </div>
         </div>
 
         <div class="section">
@@ -1147,6 +1162,76 @@ HTML_TEMPLATE = r'''<!doctype html>
         updateGroup(clean.path, [makePath(pathFlat, pathColor), makeMarker(frame.center, pathColor)]);
       }
 
+      function drawTimeline() {
+        const canvas = document.getElementById("timeline-canvas");
+        const rect = canvas.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const width = Math.max(260, Math.floor(rect.width));
+        const height = Math.max(120, Math.floor(rect.height));
+        if (canvas.width !== Math.floor(width * dpr) || canvas.height !== Math.floor(height * dpr)) {
+          canvas.width = Math.floor(width * dpr);
+          canvas.height = Math.floor(height * dpr);
+        }
+        const ctx = canvas.getContext("2d");
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.scale(dpr, dpr);
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = "#08111f";
+        ctx.fillRect(0, 0, width, height);
+
+        const margin = { left: 18, right: 14, top: 14, bottom: 22 };
+        const chartW = width - margin.left - margin.right;
+        const chartH = height - margin.top - margin.bottom;
+        const ratios = frames.map((frame) => Number(frame.ghost_ratio_pct) || 0);
+        const maxRatio = Math.max(1, ...ratios);
+        const peakIndex = ratios.reduce((best, value, index) => (value > ratios[best] ? index : best), 0);
+
+        ctx.strokeStyle = "rgba(255,255,255,0.10)";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(0.5, 0.5, width - 1, height - 1);
+        ctx.beginPath();
+        ctx.moveTo(margin.left, margin.top + chartH);
+        ctx.lineTo(margin.left + chartW, margin.top + chartH);
+        ctx.strokeStyle = "rgba(148,163,184,0.35)";
+        ctx.stroke();
+
+        if (ratios.length > 0) {
+          ctx.beginPath();
+          ratios.forEach((ratio, index) => {
+            const x = margin.left + (chartW * index) / Math.max(1, ratios.length - 1);
+            const y = margin.top + chartH - (chartH * ratio) / maxRatio;
+            if (index === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          });
+          const gradient = ctx.createLinearGradient(0, margin.top, 0, margin.top + chartH);
+          gradient.addColorStop(0, "rgba(248, 113, 113, 0.95)");
+          gradient.addColorStop(1, "rgba(45, 212, 191, 0.9)");
+          ctx.strokeStyle = gradient;
+          ctx.lineWidth = 2.2;
+          ctx.stroke();
+
+          const peakX = margin.left + (chartW * peakIndex) / Math.max(1, ratios.length - 1);
+          const peakY = margin.top + chartH - (chartH * ratios[peakIndex]) / maxRatio;
+          ctx.fillStyle = "rgba(251,191,36,0.95)";
+          ctx.beginPath();
+          ctx.arc(peakX, peakY, 4, 0, Math.PI * 2);
+          ctx.fill();
+
+          const currentX = margin.left + (chartW * state.frameIndex) / Math.max(1, ratios.length - 1);
+          ctx.strokeStyle = "rgba(96,165,250,0.95)";
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(currentX, margin.top);
+          ctx.lineTo(currentX, margin.top + chartH);
+          ctx.stroke();
+        }
+
+        ctx.fillStyle = "rgba(226,232,240,0.92)";
+        ctx.font = "12px Trebuchet MS, sans-serif";
+        ctx.fillText(`peak ${ratios[peakIndex]?.toFixed(1) || '0.0'}%`, margin.left, 14);
+        ctx.fillText(`final ${ratios[ratios.length - 1]?.toFixed(1) || '0.0'}%`, Math.max(margin.left, width - 86), 14);
+      }
+
       function drawGhostBEV() {
         const canvas = document.getElementById("ghost-bev");
         const rect = canvas.getBoundingClientRect();
@@ -1363,6 +1448,7 @@ HTML_TEMPLATE = r'''<!doctype html>
         document.getElementById("footer-ghost").textContent = frame.ghost_voxels.toLocaleString();
         document.getElementById("hud-left").textContent = `raw: ${frame.raw_voxels.toLocaleString()} voxels`;
         document.getElementById("hud-right").textContent = `cleaned: ${frame.clean_voxels.toLocaleString()} voxels`;
+        drawTimeline();
       }
 
       function moveCamera(targetPoint, sceneExtent) {
@@ -1583,6 +1669,7 @@ HTML_TEMPLATE = r'''<!doctype html>
       document.getElementById("preserve-copy").textContent = `this dense static crop keeps ${proof.preserveCrop.overlapPct}% of its footprint after cleaning, with ${proof.preserveCrop.ghostCellCount.toLocaleString()} raw-only cells leaking into the same area.`;
 
       window.addEventListener("resize", () => {
+        drawTimeline();
         drawGhostBEV();
         drawEvidencePanels();
         renderSplit();
@@ -1590,6 +1677,7 @@ HTML_TEMPLATE = r'''<!doctype html>
       controls.addEventListener("change", renderSplit);
 
       fitView();
+      drawTimeline();
       drawGhostBEV();
       drawEvidencePanels();
       updateFrame(initialFrame);

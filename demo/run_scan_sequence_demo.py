@@ -564,7 +564,7 @@ HTML_TEMPLATE = r'''<!doctype html>
         </div>
 
         <div class="note-box">
-          drag: orbit / wheel: zoom / right drag: pan. the page opens at the final accumulation because that is where the map contamination difference is clearest. use <code>Replay build-up</code> to watch how the ghost grows over time.
+          drag: orbit / wheel: zoom / right drag: pan. the page opens at the final accumulation because that is where the map contamination difference is clearest. use <code>Replay build-up</code> to watch how the ghost grows over time. if shipped detections are absent, the orange 3D boxes are auto-proposed transient boxes from the checked-in sample so the method primitive is still visible.
         </div>
       </section>
     </div>
@@ -582,15 +582,105 @@ HTML_TEMPLATE = r'''<!doctype html>
       import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
       const DEMO_DATA = __DEMO_DATA__;
-      const frames = (DEMO_DATA.frames || []).map((frame) => ({
+      const AUTO_BOX_GRID = 0.85;
+      const AUTO_BOX_MIN_POINTS = 18;
+      const AUTO_BOX_MAX_BOXES = 3;
+      const AUTO_BOX_PADDING = [0.8, 0.8, 0.6];
+
+      function deriveTransientBoxes(flat) {
+        if (!flat || flat.length < AUTO_BOX_MIN_POINTS * 3) return [];
+        const cells = new Map();
+        for (let i = 0; i < flat.length; i += 3) {
+          const gx = Math.floor(flat[i] / AUTO_BOX_GRID);
+          const gy = Math.floor(flat[i + 1] / AUTO_BOX_GRID);
+          const key = `${gx},${gy}`;
+          let cell = cells.get(key);
+          if (!cell) {
+            cell = { gx, gy, indices: [] };
+            cells.set(key, cell);
+          }
+          cell.indices.push(i);
+        }
+
+        const visited = new Set();
+        const boxes = [];
+        for (const cell of cells.values()) {
+          const seedKey = `${cell.gx},${cell.gy}`;
+          if (visited.has(seedKey)) continue;
+          const queue = [cell];
+          visited.add(seedKey);
+          const indices = [];
+          while (queue.length > 0) {
+            const current = queue.pop();
+            indices.push(...current.indices);
+            for (let dx = -1; dx <= 1; dx += 1) {
+              for (let dy = -1; dy <= 1; dy += 1) {
+                const key = `${current.gx + dx},${current.gy + dy}`;
+                if (visited.has(key) || !cells.has(key)) continue;
+                visited.add(key);
+                queue.push(cells.get(key));
+              }
+            }
+          }
+
+          if (indices.length < AUTO_BOX_MIN_POINTS) continue;
+          let xmin = Infinity;
+          let ymin = Infinity;
+          let zmin = Infinity;
+          let xmax = -Infinity;
+          let ymax = -Infinity;
+          let zmax = -Infinity;
+          for (const idx of indices) {
+            const x = flat[idx];
+            const y = flat[idx + 1];
+            const z = flat[idx + 2];
+            xmin = Math.min(xmin, x);
+            ymin = Math.min(ymin, y);
+            zmin = Math.min(zmin, z);
+            xmax = Math.max(xmax, x);
+            ymax = Math.max(ymax, y);
+            zmax = Math.max(zmax, z);
+          }
+          const size = [
+            Math.max(xmax - xmin + AUTO_BOX_PADDING[0], AUTO_BOX_GRID * 1.5),
+            Math.max(ymax - ymin + AUTO_BOX_PADDING[1], AUTO_BOX_GRID * 1.5),
+            Math.max(zmax - zmin + AUTO_BOX_PADDING[2], 1.2),
+          ];
+          if (size[0] * size[1] > 90 || size[2] > 8) continue;
+          boxes.push({
+            center: [
+              Number(((xmin + xmax) * 0.5).toFixed(3)),
+              Number(((ymin + ymax) * 0.5).toFixed(3)),
+              Number(((zmin + zmax) * 0.5).toFixed(3)),
+            ],
+            size: size.map((value) => Number(value.toFixed(3))),
+            yaw: 0,
+            label: `auto transient box ${boxes.length + 1}`,
+            points: indices.length,
+          });
+        }
+        boxes.sort((a, b) => b.points - a.points);
+        return boxes.slice(0, AUTO_BOX_MAX_BOXES);
+      }
+
+      const baseFrames = (DEMO_DATA.frames || []).map((frame) => ({
         ...frame,
+        objects: Array.isArray(frame.objects) ? frame.objects : [],
         input: new Float32Array(frame.input || []),
         kept: new Float32Array(frame.kept || []),
         removed: new Float32Array(frame.removed || []),
       }));
+      const frames = baseFrames.map((frame) => {
+        if (frame.objects.length > 0) {
+          return { ...frame, objectsDerived: false };
+        }
+        const objects = deriveTransientBoxes(frame.removed);
+        return { ...frame, objects, objectsDerived: objects.length > 0 };
+      });
       const pathPoints = (DEMO_DATA.path || []).map((point) => point.map(Number));
       const bev = DEMO_DATA.bev || { bounds: { xmin: -1, xmax: 1, ymin: -1, ymax: 1 }, clean: [], ghost: [], voxel_size: 1, max_clean_count: 1, max_ghost_count: 1 };
       const hasBoxes = frames.some((frame) => Array.isArray(frame.objects) && frame.objects.length > 0);
+      const usesDerivedBoxes = frames.some((frame) => frame.objectsDerived);
       const voxelSize = Math.max(Number(bev.voxel_size) || 1, 1e-3);
 
       function flatTriplesToCells(flat) {
@@ -694,13 +784,19 @@ HTML_TEMPLATE = r'''<!doctype html>
         const ghostFocus2D = pickGhostHotspot() || { x: proofFallback.x, y: proofFallback.y, ix: 0, iy: 0, count: 0 };
         const preserveFocus2D = pickPreservedSpot() || ghostFocus2D;
         const ghostFrame = frames.reduce((best, frame) => (!best || frame.removed_points > best.removed_points ? frame : best), null);
+        const ghostObjects = ghostFrame && ghostFrame.objects ? ghostFrame.objects : [];
+        const ghostFocus3D = ghostObjects.length > 0
+          ? ghostObjects[0].center
+          : centroidFromFlat(ghostFrame ? ghostFrame.removed : null, [ghostFocus2D.x, ghostFocus2D.y, proofFallback.z]);
         return {
           ghostFocus2D,
           preserveFocus2D,
-          ghostFocus3D: centroidFromFlat(ghostFrame ? ghostFrame.removed : null, [ghostFocus2D.x, ghostFocus2D.y, proofFallback.z]),
+          ghostFocus3D,
           preserveFocus3D: [preserveFocus2D.x, preserveFocus2D.y, proofFallback.z],
           ghostCrop: cropStats(ghostFocus2D),
           preserveCrop: cropStats(preserveFocus2D),
+          ghostFrame,
+          ghostObjects,
         };
       })();
 
@@ -1028,6 +1124,18 @@ HTML_TEMPLATE = r'''<!doctype html>
             ctx.lineWidth = 1.2;
             ctx.strokeRect(px - cell * 0.8, py - cell * 0.8, cell * 1.6, cell * 1.6);
           }
+          for (const object of proof.ghostObjects || []) {
+            const ox0 = object.center[0] - object.size[0] * 0.5;
+            const ox1 = object.center[0] + object.size[0] * 0.5;
+            const oy0 = object.center[1] - object.size[1] * 0.5;
+            const oy1 = object.center[1] + object.size[1] * 0.5;
+            if (ox1 < bounds.xmin || ox0 > bounds.xmax || oy1 < bounds.ymin || oy0 > bounds.ymax) continue;
+            const [px0, py0] = project(ox0, oy0);
+            const [px1, py1] = project(ox1, oy1);
+            ctx.strokeStyle = "rgba(255, 204, 128, 0.95)";
+            ctx.lineWidth = 1.6;
+            ctx.strokeRect(px0, py1, Math.max(2, px1 - px0), Math.max(2, py0 - py1));
+          }
         }
 
         const [cx, cy] = project(focus.x, focus.y);
@@ -1231,12 +1339,17 @@ HTML_TEMPLATE = r'''<!doctype html>
       document.getElementById("stat-ghost-ratio").textContent = `${DEMO_DATA.meta.final_ghost_ratio_pct.toFixed(1)}%`;
       document.getElementById("stat-ghost-voxels").textContent = DEMO_DATA.meta.final_ghost_voxels.toLocaleString();
       document.getElementById("stat-stable-voxels").textContent = DEMO_DATA.meta.final_clean_voxels.toLocaleString();
-      document.getElementById("source-note").textContent = DEMO_DATA.meta.source_note;
+      const sourceSuffix = usesDerivedBoxes
+        ? " 3D boxes are auto-proposed from transient clusters in the checked-in sampled sequence so the demo still shows the box-removal primitive even without shipped detections."
+        : "";
+      document.getElementById("source-note").textContent = `${DEMO_DATA.meta.source_note}${sourceSuffix}`;
       document.getElementById("frame-slider").max = String(Math.max(0, frames.length - 1));
       document.getElementById("frame-slider").value = String(initialFrame);
       document.getElementById("hotspot-metric").textContent = `${proof.ghostCrop.ghostCellCount.toLocaleString()} raw-only cells in crop`;
       document.getElementById("preserve-metric").textContent = `${proof.preserveCrop.overlapPct}% footprint overlap`;
-      document.getElementById("hotspot-copy").textContent = `largest residual contamination pocket: ${proof.ghostCrop.ghostCellCount.toLocaleString()} raw-only cells survive inside this crop if every observation is accumulated.`;
+      document.getElementById("hotspot-copy").textContent = usesDerivedBoxes
+        ? `largest residual contamination pocket: ${proof.ghostCrop.ghostCellCount.toLocaleString()} raw-only cells survive here, and ${proof.ghostObjects.length} auto transient boxes summarize the current-frame clutter that would be cropped by the method.`
+        : `largest residual contamination pocket: ${proof.ghostCrop.ghostCellCount.toLocaleString()} raw-only cells survive inside this crop if every observation is accumulated.`;
       document.getElementById("preserve-copy").textContent = `this dense static crop keeps ${proof.preserveCrop.overlapPct}% of its footprint after cleaning, with ${proof.preserveCrop.ghostCellCount.toLocaleString()} raw-only cells leaking into the same area.`;
 
       window.addEventListener("resize", () => {

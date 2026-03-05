@@ -10,6 +10,7 @@
 - 連続 checked-in 版は real multi-frame sequence `graph/*/cloud.pcd` を使い、`raw accumulation vs cleaned accumulation` を Pages 上でそのまま比較します
 - 連続デモには `ghost hotspot` と `static structure preserved` の証拠パネルを追加し、必要性と安全性を同じ画面で確認できます
 - 連続 checked-in 版の cleaned 側は、repo に per-frame box が入っていないため temporal consistency で生成しています
+- ただし viewer 上のオレンジ box は、checked-in sample の transient cluster から自動提案した `auto transient boxes` で、手法の box-removal primitive を視覚化しています
 
 ![actual scan removal preview](demo/actual_scan_result_overview.png)
 
@@ -28,6 +29,7 @@
   - 継続して観測された点だけを積むので、静的構造の輪郭が先に残ります
 - 下段左: `Ghost hotspot`
   - final accumulation の中で raw-only occupancy が最も濃い領域を crop し、raw 側にだけ残る汚染を局所比較します
+  - checked-in 版では current frame の transient cluster から自動提案した box も重ねて、どこを box-removal したいのかをその場で示します
 - 下段右: `Static structure preserved`
   - cleaned 後も footprint が残る静的領域を crop し、「cleaning がただ削っているだけではない」ことを見せます
 - つまり主張は `removed points が赤く見える` ことではなく、`時間方向に積むと地図の締まり方が変わる` ことと `静的構造は残る` ことです

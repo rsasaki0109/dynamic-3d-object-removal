@@ -391,6 +391,11 @@ HTML_TEMPLATE = r'''<!doctype html>
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 10px;
       }
+      .trip-compare {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
       .mini-pane {
         display: grid;
         gap: 8px;
@@ -423,7 +428,7 @@ HTML_TEMPLATE = r'''<!doctype html>
         .shell { grid-template-columns: 1fr; }
       }
       @media (max-width: 720px) {
-        .compare-head, .compare-footer, .stats, .evidence-strip, .mini-compare { grid-template-columns: 1fr; }
+        .compare-head, .compare-footer, .stats, .evidence-strip, .mini-compare, .trip-compare { grid-template-columns: 1fr; }
         #compare-stage { min-height: 64vh; }
       }
     </style>
@@ -596,6 +601,27 @@ HTML_TEMPLATE = r'''<!doctype html>
               </div>
             </div>
             <p class="evidence-copy" id="preserve-copy">dense stable footprint with near-zero ghost leakage. this is the counter-example to “cleaning just erases structure”.</p>
+          </div>
+          <div class="evidence-card">
+            <div class="evidence-head">
+              <strong>Peak burst</strong>
+              <span id="burst-metric">f0-0 window</span>
+            </div>
+            <div class="trip-compare">
+              <div class="mini-pane">
+                <span id="burst-label-a">enter</span>
+                <canvas id="burst-a" width="220" height="148"></canvas>
+              </div>
+              <div class="mini-pane">
+                <span id="burst-label-b">peak</span>
+                <canvas id="burst-b" width="220" height="148"></canvas>
+              </div>
+              <div class="mini-pane">
+                <span id="burst-label-c">settle</span>
+                <canvas id="burst-c" width="220" height="148"></canvas>
+              </div>
+            </div>
+            <p class="evidence-copy" id="burst-copy">click a burst frame to jump into the local clutter event that seeds the ghost hotspot.</p>
           </div>
         </div>
 
@@ -976,7 +1002,6 @@ HTML_TEMPLATE = r'''<!doctype html>
           ghostObjects,
         };
       })();
-
       const stage = document.getElementById("compare-stage");
       const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -1021,6 +1046,11 @@ HTML_TEMPLATE = r'''<!doctype html>
       const peakWindowStart = Math.max(0, peakFrameIndex - 2);
       const peakWindowEnd = Math.min(frames.length - 1, peakFrameIndex + 2);
       const peakWindowLabel = `f${peakWindowStart + 1}-${peakWindowEnd + 1}`;
+      const burstFrames = [
+        { key: "a", index: peakWindowStart, label: "enter" },
+        { key: "b", index: peakFrameIndex, label: "peak" },
+        { key: "c", index: peakWindowEnd, label: "settle" },
+      ];
 
       function createScene(background, gridColorA, gridColorB) {
         const scene = new THREE.Scene();
@@ -1495,6 +1525,112 @@ HTML_TEMPLATE = r'''<!doctype html>
         drawEvidenceCanvas("preserve-clean", proof.preserveFocus2D, "clean", "preserve");
       }
 
+      function drawBurstCanvas(canvasId, frameIndex, label) {
+        const canvas = document.getElementById(canvasId);
+        const frame = frames[frameIndex];
+        if (!canvas || !frame) return;
+        const rect = canvas.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const width = Math.max(180, Math.floor(rect.width || canvas.width));
+        const height = Math.max(140, Math.floor(rect.height || canvas.height));
+        if (canvas.width !== Math.floor(width * dpr) || canvas.height !== Math.floor(height * dpr)) {
+          canvas.width = Math.floor(width * dpr);
+          canvas.height = Math.floor(height * dpr);
+        }
+        const ctx = canvas.getContext("2d");
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.scale(dpr, dpr);
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = "#08111f";
+        ctx.fillRect(0, 0, width, height);
+
+        const focus = proof.ghostFocus2D;
+        const bounds = {
+          xmin: focus.x - cropRadiusWorld,
+          xmax: focus.x + cropRadiusWorld,
+          ymin: focus.y - cropRadiusWorld,
+          ymax: focus.y + cropRadiusWorld,
+        };
+        const margin = 12;
+        const rangeX = Math.max(1e-6, bounds.xmax - bounds.xmin);
+        const rangeY = Math.max(1e-6, bounds.ymax - bounds.ymin);
+        const scale = Math.min((width - margin * 2) / rangeX, (height - margin * 2) / rangeY);
+
+        function project(x, y) {
+          return [
+            margin + (x - bounds.xmin) * scale,
+            height - margin - (y - bounds.ymin) * scale,
+          ];
+        }
+
+        function drawFlat(flat, fillStyle, pixelSize) {
+          if (!flat || flat.length < 3) return;
+          ctx.fillStyle = fillStyle;
+          for (let i = 0; i < flat.length; i += 3) {
+            const x = flat[i];
+            const y = flat[i + 1];
+            if (x < bounds.xmin || x > bounds.xmax || y < bounds.ymin || y > bounds.ymax) continue;
+            const [px, py] = project(x, y);
+            ctx.fillRect(px - pixelSize * 0.5, py - pixelSize * 0.5, pixelSize, pixelSize);
+          }
+        }
+
+        drawFlat(frame.input, "rgba(226,232,240,0.22)", 2.0);
+        drawFlat(frame.kept, "rgba(45,212,191,0.55)", 2.2);
+        drawFlat(frame.removed, "rgba(255,77,109,0.92)", 2.8);
+
+        for (const object of frame.objects || []) {
+          const ox0 = object.center[0] - object.size[0] * 0.5;
+          const ox1 = object.center[0] + object.size[0] * 0.5;
+          const oy0 = object.center[1] - object.size[1] * 0.5;
+          const oy1 = object.center[1] + object.size[1] * 0.5;
+          if (ox1 < bounds.xmin || ox0 > bounds.xmax || oy1 < bounds.ymin || oy0 > bounds.ymax) continue;
+          const [px0, py0] = project(ox0, oy0);
+          const [px1, py1] = project(ox1, oy1);
+          ctx.strokeStyle = "rgba(255, 204, 128, 0.95)";
+          ctx.lineWidth = 1.4;
+          ctx.strokeRect(px0, py1, Math.max(2, px1 - px0), Math.max(2, py0 - py1));
+        }
+
+        const [cx, cy] = project(focus.x, focus.y);
+        ctx.strokeStyle = "rgba(251,191,36,0.92)";
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 7, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.strokeStyle = state.frameIndex === frameIndex ? "rgba(96,165,250,0.95)" : "rgba(255,255,255,0.08)";
+        ctx.lineWidth = state.frameIndex === frameIndex ? 2 : 1;
+        ctx.strokeRect(0.5, 0.5, width - 1, height - 1);
+
+        ctx.fillStyle = "rgba(226,232,240,0.94)";
+        ctx.font = "12px Trebuchet MS, sans-serif";
+        ctx.fillText(`${label} f${frameIndex + 1}`, 12, 18);
+        ctx.fillStyle = "rgba(251,191,36,0.92)";
+        ctx.fillText(`${Number(frame.ghost_ratio_pct || 0).toFixed(1)}%`, Math.max(12, width - 48), 18);
+      }
+
+      function drawPeakBurstStrip() {
+        for (const burst of burstFrames) {
+          drawBurstCanvas(`burst-${burst.key}`, burst.index, burst.label);
+        }
+      }
+
+      function attachPeakBurstInteractions() {
+        for (const burst of burstFrames) {
+          const canvas = document.getElementById(`burst-${burst.key}`);
+          if (!canvas) continue;
+          canvas.addEventListener("click", () => {
+            stopPlayback();
+            stopStory();
+            updateFrame(burst.index);
+            focusProof(proof.ghostFocus3D);
+            setStoryText(`Peak burst snapshot: ${burst.label} frame ${burst.index + 1} shows the local clutter event around the ghost hotspot.`);
+            renderSplit();
+          });
+        }
+      }
+
       function updateFrame(index) {
         if (frames.length === 0) return;
         state.frameIndex = clampFrame(index);
@@ -1538,6 +1674,7 @@ HTML_TEMPLATE = r'''<!doctype html>
         document.getElementById("hud-left").textContent = `raw: ${frame.raw_voxels.toLocaleString()} voxels | ghost ${frame.ghost_voxels.toLocaleString()}`;
         document.getElementById("hud-right").textContent = `cleaned: ${frame.clean_voxels.toLocaleString()} voxels | peak ${(100 - Number(frame.ghost_ratio_pct || 0)).toFixed(1)}% stable`;
         drawTimeline();
+        drawPeakBurstStrip();
       }
 
       function moveCamera(targetPoint, sceneExtent) {
@@ -1764,11 +1901,17 @@ HTML_TEMPLATE = r'''<!doctype html>
         ? `largest residual contamination pocket: ${proof.ghostCrop.ghostCellCount.toLocaleString()} raw-only cells survive here, and ${proof.ghostObjects.length} box candidates summarize the current-frame clutter that the box-removal preview crops from the sampled sequence.`
         : `largest residual contamination pocket: ${proof.ghostCrop.ghostCellCount.toLocaleString()} raw-only cells survive inside this crop if every observation is accumulated.`;
       document.getElementById("preserve-copy").textContent = `this dense static crop keeps ${proof.preserveCrop.overlapPct}% of its footprint after cleaning, with ${proof.preserveCrop.ghostCellCount.toLocaleString()} raw-only cells leaking into the same area.`;
+      document.getElementById("burst-metric").textContent = `${peakWindowLabel} around hotspot`;
+      document.getElementById("burst-label-a").textContent = `enter | f${peakWindowStart + 1}`;
+      document.getElementById("burst-label-b").textContent = `peak | f${peakFrameIndex + 1}`;
+      document.getElementById("burst-label-c").textContent = `settle | f${peakWindowEnd + 1}`;
+      document.getElementById("burst-copy").textContent = `click a burst frame to jump into the local clutter event. pink = removed current-frame points, orange = box candidates, teal = kept points inside the hotspot crop.`;
 
       window.addEventListener("resize", () => {
         drawTimeline();
         drawGhostBEV();
         drawEvidencePanels();
+        drawPeakBurstStrip();
         renderSplit();
       });
       controls.addEventListener("change", renderSplit);
@@ -1778,6 +1921,8 @@ HTML_TEMPLATE = r'''<!doctype html>
       attachTimelineInteractions();
       drawGhostBEV();
       drawEvidencePanels();
+      drawPeakBurstStrip();
+      attachPeakBurstInteractions();
       updateFrame(initialFrame);
       setStoryText(storyMessages().overview);
       renderSplit();

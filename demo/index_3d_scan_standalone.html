@@ -326,18 +326,26 @@
         return flat;
       }
 
-      function buildPointCloud(points, color) {
+      function buildPointCloud(points, color, options = {}) {
+        const sizeScale = Number.isFinite(options.sizeScale) ? options.sizeScale : 1.0;
+        const opacity = Number.isFinite(options.opacity) ? options.opacity : state.alpha;
+        const depthTest = options.depthTest !== false;
+        const renderOrder = Number.isFinite(options.renderOrder) ? options.renderOrder : 0;
         const geometry = new THREE.BufferGeometry();
         geometry.setAttribute("position", new THREE.Float32BufferAttribute(pointsToFloat32Array(points), 3));
         const material = new THREE.PointsMaterial({
-          size: state.pointSize,
+          size: state.pointSize * sizeScale,
           color,
-          opacity: state.alpha,
+          opacity,
           transparent: true,
           depthWrite: false,
+          depthTest,
           vertexColors: false,
         });
-        return new THREE.Points(geometry, material);
+        const cloud = new THREE.Points(geometry, material);
+        cloud.userData.sizeScale = sizeScale;
+        cloud.renderOrder = renderOrder;
+        return cloud;
       }
 
       function buildBbox(limits, demo) {
@@ -418,7 +426,7 @@
         showRemoved: true,
         showBbox: true,
         pointSize: 2,
-        alpha: 0.8,
+        alpha: 0.75,
         autoRotate: false,
       };
 
@@ -431,9 +439,9 @@
       controls.dampingFactor = 0.1;
       controls.enablePan = true;
 
-      const layerInput = buildPointCloud(preparedInput.points, 0x94a3b8);
-      const layerKept = buildPointCloud(preparedKept.points, 0x3b82f6);
-      const layerRemoved = buildPointCloud(preparedRemoved.points, 0xef4444);
+      const layerInput = buildPointCloud(preparedInput.points, 0x94a3b8, {opacity: 0.22, sizeScale: 0.9, renderOrder: 1});
+      const layerKept = buildPointCloud(preparedKept.points, 0x3b82f6, {opacity: 0.55, sizeScale: 1.0, renderOrder: 2});
+      const layerRemoved = buildPointCloud(preparedRemoved.points, 0xef4444, {opacity: 0.98, sizeScale: 1.9, depthTest: false, renderOrder: 3});
       const bbox = buildBbox(limits, DEMO_DATA);
       const grid = new THREE.GridHelper(Math.max(30, extent * 1.2), 30, 0x3b82f6, 0x253a66);
       grid.rotation.x = Math.PI / 2;
@@ -532,10 +540,21 @@
           bbox.visible = state.showBbox;
         }
 
-        [layerInput, layerKept, layerRemoved].forEach((mesh) => {
-          mesh.material.size = state.pointSize;
-          mesh.material.opacity = state.alpha;
-        });
+        const inputOpacity = (state.showKept || state.showRemoved) ? Math.min(0.28, state.alpha * 0.35) : Math.min(0.75, state.alpha);
+        const keptOpacity = state.showRemoved ? Math.min(0.6, state.alpha * 0.75) : Math.min(0.88, state.alpha);
+        const removedOpacity = Math.min(1.0, Math.max(0.92, state.alpha));
+
+        layerInput.material.size = state.pointSize * (layerInput.userData.sizeScale || 1.0);
+        layerInput.material.opacity = inputOpacity;
+        layerInput.material.depthTest = true;
+
+        layerKept.material.size = state.pointSize * (layerKept.userData.sizeScale || 1.0);
+        layerKept.material.opacity = keptOpacity;
+        layerKept.material.depthTest = true;
+
+        layerRemoved.material.size = state.pointSize * (layerRemoved.userData.sizeScale || 1.0);
+        layerRemoved.material.opacity = removedOpacity;
+        layerRemoved.material.depthTest = false;
 
         pointSizeValue.textContent = state.pointSize.toFixed(1);
         alphaValue.textContent = state.alpha.toFixed(2);

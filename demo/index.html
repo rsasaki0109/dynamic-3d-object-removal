@@ -6,7 +6,7 @@
     <style>
       body {
         margin: 24px;
-        font-family: Arial, Helvetica, sans-serif;
+        font-family: "Trebuchet MS", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
         background: #f7f8fc;
         color: #1f2937;
       }
@@ -21,40 +21,30 @@
         border: 1px solid #e5e7eb;
         border-radius: 10px;
         background: #fff;
-        padding: 12px;
+        padding: 14px;
         margin-bottom: 18px;
       }
-      img {
-        max-width: 100%;
-        width: 100%;
-        border-radius: 8px;
-        border: 1px solid #e5e7eb;
-      }
-      .thumbs {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap: 16px;
-      }
       ul { line-height: 1.8; }
+      a { color: #0f766e; }
     </style>
   </head>
   <body>
     <h1>Dynamic Object Removal デモ</h1>
-    <p class="meta">checked-in 版は実スキャン `actual_scan_20240820_cloud.pcd` と box `actual_scan_20240820_objects.json` を表示します。</p>
+    <p class="meta">単発実スキャンの除去結果と、連続点群プレイヤーの両方を checked-in しています。</p>
 
     <div class="card">
       <h2>入力データ</h2>
       <ul>
-        <li>actual_scan_20240820_cloud.pcd</li>
-        <li>actual_scan_20240820_objects.json</li>
+        <li>単発: actual_scan_20240820_cloud.pcd + actual_scan_20240820_objects.json</li>
+        <li>連続: local multi-frame graph/*/cloud.pcd を sampled 埋め込み</li>
       </ul>
     </div>
 
     <div class="card">
       <h2>3Dビュー</h2>
-      <p>インタラクティブ表示:</p>
       <ul>
-        <li><a href="index_3d_standalone.html">index_3d_standalone.html</a>（サーバ不要。直接開いて確認）</li>
+        <li><a href="index_3d_standalone.html">index_3d_standalone.html</a>（単発実スキャン）</li>
+        <li><a href="index_3d_sequence_standalone.html">index_3d_sequence_standalone.html</a>（連続点群プレイヤー）</li>
       </ul>
     </div>
   </body>

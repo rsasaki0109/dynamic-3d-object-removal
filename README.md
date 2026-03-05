@@ -4,12 +4,14 @@
 
 ## 3Dデモ（最初にここ）
 
-- GitHub Pages: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_standalone.html
-- checked-in 版は実スキャン `demo/actual_scan_20240820_cloud.pcd` と検出 box `demo/actual_scan_20240820_objects.json` から生成
+- GitHub Pages / 単発実スキャン: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_standalone.html
+- GitHub Pages / 連続フレーム: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_sequence_standalone.html
+- 単発 checked-in 版は実スキャン `demo/actual_scan_20240820_cloud.pcd` と検出 box `demo/actual_scan_20240820_objects.json` から生成
+- 連続 checked-in 版は local multi-frame sequence `graph/*/cloud.pcd` を sampled 埋め込みして再生します
 
 ![actual scan removal preview](demo/actual_scan_result_overview.png)
 
-現在の checked-in デモ結果:
+現在の単発 checked-in デモ結果:
 - 入力 24,224 点
 - 除去後 23,909 点
 - 除去 315 点（実スキャン中の vehicle box 1件）
@@ -24,7 +26,7 @@
   - 目安: 519 MB / 17.0M 点 / 2018年
 
 どれも `tsukubachallenge/tc-datasets` 側の配布形式に合わせて取得してください。
-現状の `run_scan_demo.py` は `dynamic_object_removal.load_points()` を経由するため、`PCD` は
+現状の `run_scan_demo.py` / `run_scan_sequence_demo.py` は `dynamic_object_removal.load_points()` を経由するため、`PCD` は
 ASCII / binary に対応しています（`DATA binary_compressed` は未対応です）。
 
 ### 単一スキャンの再生成
@@ -38,7 +40,22 @@ python3 demo/run_scan_demo.py \
   --output-html demo/index_3d_standalone.html
 ```
 
-### 外部点群のデモ化
+### 連続フレームの再生成
+
+```bash
+python3 demo/run_scan_sequence_demo.py \
+  --input-glob "/path/to/graph/*/cloud.pcd" \
+  --frame-count 12 \
+  --stride 1 \
+  --max-render-points 12000 \
+  --fps 4 \
+  --output-html demo/index_3d_sequence_standalone.html
+```
+
+- `--input-objects` を付けると、global boxes または `frame_name -> boxes` JSON を使って kept / removed / 3D box も連続再生できます
+- checked-in 版は Pages でそのまま再生できるように sampled point 群を HTML に内包しています
+
+### 外部点群の単発デモ化
 
 ```bash
 python3 demo/run_scan_demo.py \
@@ -78,8 +95,8 @@ save_points(Path("/path/to/output.xyz"), kept, fmt="auto")
 - `load_points(path, fmt="auto")`
 - `load_boxes(path, fmt="auto", skip_invalid=False)`
 - `remove_points_in_boxes(points, boxes, margin=(0.05,0.05,0.05))`
-- `TemporalConsistencyFilter(voxel_size=0.10, window_size=5, min_hits=3)`  
-- `save_points(path, points, fmt="auto")`
+- `TemporalConsistencyFilter(voxel_size=0.10, window_size=5, min_hits=3)`
+- `save_points(path, fmt="auto")`
 
 ## CLI で使う
 

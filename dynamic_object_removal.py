@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import io
 import json
 from collections import deque
 import math
@@ -312,36 +313,104 @@ def _load_points_csv_or_txt(path: Path) -> np.ndarray:
         return _load_ascii_point_cloud(path, delimiter=delimiter)
 
 
-def _load_pcd_ascii(path: Path) -> np.ndarray:
-    lines = path.read_text(encoding="utf-8").splitlines()
+def _pcd_scalar_dtype(type_code: str, size: int) -> np.dtype:
+    low = type_code.lower()
+    if low == "f" and size in {4, 8}:
+        return np.dtype(f"<f{size}")
+    if low == "i" and size in {1, 2, 4, 8}:
+        return np.dtype(f"<i{size}")
+    if low == "u" and size in {1, 2, 4, 8}:
+        return np.dtype(f"<u{size}")
+    raise ValueError(f"unsupported PCD field type: type={type_code} size={size}")
+
+
+def _load_pcd(path: Path) -> np.ndarray:
     fields: list[str] = []
-    data_start = 0
-    for i, line in enumerate(lines):
-        low = line.strip().lower()
-        if low.startswith("fields "):
-            fields = [x for x in low.split()[1:]]
-        elif low.startswith("data "):
-            if "ascii" not in low:
-                raise ValueError("only ASCII PCD is supported currently")
-            data_start = i + 1
-            break
+    sizes: list[int] = []
+    types: list[str] = []
+    counts: list[int] = []
+    points = 0
+    data_kind = ""
+    payload = b""
+
+    with path.open("rb") as f:
+        while True:
+            raw = f.readline()
+            if not raw:
+                break
+            line = raw.decode("ascii", errors="strict").strip()
+            if not line or line.startswith("#"):
+                continue
+            low = line.lower()
+            if low.startswith("fields "):
+                fields = [token.lower() for token in line.split()[1:]]
+            elif low.startswith("size "):
+                sizes = [int(token) for token in line.split()[1:]]
+            elif low.startswith("type "):
+                types = [token.upper() for token in line.split()[1:]]
+            elif low.startswith("count "):
+                counts = [int(token) for token in line.split()[1:]]
+            elif low.startswith("points "):
+                points = int(line.split()[1])
+            elif low.startswith("data "):
+                data_kind = low.split()[1]
+                payload = f.read()
+                break
+
     if not fields:
         raise ValueError("PCD header missing FIELDS line")
-    if not data_start or data_start >= len(lines):
-        raise ValueError("PCD has no DATA ascii section")
+    if not data_kind:
+        raise ValueError("PCD header missing DATA section")
+    if not sizes or len(sizes) != len(fields):
+        raise ValueError("PCD SIZE does not match FIELDS")
+    if not types or len(types) != len(fields):
+        raise ValueError("PCD TYPE does not match FIELDS")
+    if not counts:
+        counts = [1] * len(fields)
+    if len(counts) != len(fields):
+        raise ValueError("PCD COUNT does not match FIELDS")
+    if points < 0:
+        raise ValueError("PCD POINTS must be non-negative")
 
     idx = {k: fields.index(k) for k in ("x", "y", "z") if k in fields}
     if len(idx) != 3:
         raise ValueError("PCD FIELDS must include x,y,z")
-    point_lines = [ln for ln in lines[data_start:] if ln.strip() and not ln.lstrip().startswith("#")]
-    if not point_lines:
-        return np.zeros((0, 3), dtype=np.float64)
-    data = np.loadtxt(point_lines, dtype=np.float64)
-    if data.ndim == 1:
-        data = data[None, :]
-    if data.shape[1] < len(fields):
-        raise ValueError("PCD point format is shorter than expected")
-    return data[:, [idx["x"], idx["y"], idx["z"]]]
+    if data_kind == "binary_compressed":
+        raise ValueError("PCD DATA binary_compressed is not supported")
+
+    if data_kind == "ascii":
+        point_lines = [ln for ln in payload.decode("utf-8").splitlines() if ln.strip() and not ln.lstrip().startswith("#")]
+        if not point_lines:
+            return np.zeros((0, 3), dtype=np.float64)
+        data = np.loadtxt(io.StringIO("\n".join(point_lines)), dtype=np.float64)
+        if data.ndim == 1:
+            data = data[None, :]
+        if data.shape[1] < len(fields):
+            raise ValueError("PCD point format is shorter than expected")
+        return data[:, [idx["x"], idx["y"], idx["z"]]]
+
+    if data_kind != "binary":
+        raise ValueError(f"unsupported PCD DATA type: {data_kind}")
+
+    dtype_fields: list[tuple[Any, ...]] = []
+    for name, size, type_code, count in zip(fields, sizes, types, counts):
+        scalar_dtype = _pcd_scalar_dtype(type_code, size)
+        if count == 1:
+            dtype_fields.append((name, scalar_dtype))
+        else:
+            dtype_fields.append((name, scalar_dtype, (count,)))
+    point_dtype = np.dtype(dtype_fields)
+    expected_size = point_dtype.itemsize * points
+    if len(payload) < expected_size:
+        raise ValueError("PCD binary payload is shorter than expected")
+    data = np.frombuffer(payload[:expected_size], dtype=point_dtype, count=points)
+    return np.column_stack(
+        (
+            np.asarray(data["x"], dtype=np.float64),
+            np.asarray(data["y"], dtype=np.float64),
+            np.asarray(data["z"], dtype=np.float64),
+        )
+    )
 
 
 def load_points(path: Path, *, fmt: str) -> np.ndarray:
@@ -363,7 +432,7 @@ def load_points(path: Path, *, fmt: str) -> np.ndarray:
             raise ValueError("npy cloud must have at least 3 columns")
         return np.asarray(arr[:, :3], dtype=np.float64)
     if fmt == "pcd":
-        return _load_pcd_ascii(path)
+        return _load_pcd(path)
     if fmt == "text":
         return _load_points_csv_or_txt(path)
     raise ValueError(f"unsupported cloud format: {fmt}")

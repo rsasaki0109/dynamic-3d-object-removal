@@ -94,11 +94,6 @@ dynamic-object-removal \
 dynamic-object-removal --help
 ```
 
-## 3Dデモ
-
-- GitHub Pages: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_standalone.html
-- ローカル: `python3 demo/run_scan_demo.py --input-cloud demo/actual_scan_20240820_cloud.pcd --input-objects demo/actual_scan_20240820_objects.json --output-html demo/index_3d_standalone.html` を実行し、ブラウザで `demo/index_3d_standalone.html` を開く
-
 ## 参考アルゴリズム
 
 - [UTS-RI/dynamic_object_detection](https://github.com/UTS-RI/dynamic_object_detection)

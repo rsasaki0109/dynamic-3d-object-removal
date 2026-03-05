@@ -5,9 +5,9 @@
 ## 3Dデモ（最初にここ）
 
 - GitHub Pages: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_standalone.html
-- 単一スキャン用: `demo/index_3d_scan_standalone.html`（`run_scan_demo.py` で生成）
+- 単一スキャン用: `demo/index_3d_scan_standalone.html`（checked-in 版は `demo/demo_input.xyz` と `demo/demo_objects.json` から生成）
 
-### 単一スキャンでの検証候補（tsukubachallenge）
+### 外部地図点群での検証候補（tsukubachallenge map）
 
 - [map_utsukuba22_university_of_tsukuba.pcd](https://drive.google.com/file/d/1mSi6OP2p4jFwK3vVgvFIbCdxPmN4UcVg/view?usp=sharing)
   - 目安: 224 MB / 14.6M 点 / 2022年（扱いやすい）
@@ -20,7 +20,18 @@
 現状の `run_scan_demo.py` は `dynamic_object_removal.load_points()` を経由するため、`PCD` は
 ASCII 形式を前提にしています（`DATA binary` の場合は事前変換が必要です）。
 
-### 外部点群のデモ化（新）
+### 単一スキャンの再生成
+
+```bash
+python3 demo/run_scan_demo.py \
+  --input-cloud demo/demo_input.xyz \
+  --input-objects demo/demo_objects.json \
+  --max-render-points 220000 \
+  --output-scene demo/demo_scene_single_scan.json \
+  --output-html demo/index_3d_scan_standalone.html
+```
+
+### 外部点群のデモ化
 
 ```bash
 python3 demo/run_scan_demo.py \

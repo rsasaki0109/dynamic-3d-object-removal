@@ -9,7 +9,7 @@
 - 単発 checked-in 版は実スキャン `demo/actual_scan_20240820_cloud.pcd` と検出 box `demo/actual_scan_20240820_objects.json` から生成
 - 連続 checked-in 版は real multi-frame sequence `graph/*/cloud.pcd` を使い、`raw accumulation vs cleaned accumulation` を Pages 上でそのまま比較します
 - 連続デモには `ghost hotspot` と `static structure preserved` の証拠パネルを追加し、必要性と安全性を同じ画面で確認できます
-- 連続 checked-in 版は、repo に per-frame box が入っていないため temporal consistency で transient outlier を拾い、そこから自動提案した `auto transient boxes` で sampled box-removal preview を作っています
+- 連続 checked-in 版は、repo に per-frame box が入っていないため temporal consistency で transient outlier を拾い、そこから自動提案した `auto transient boxes` で sampled box-removal preview と `Peak replay` を作っています
 
 ![actual scan removal preview](demo/actual_scan_result_overview.png)
 

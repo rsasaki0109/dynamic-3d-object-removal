@@ -62,7 +62,7 @@ def parse_args() -> argparse.Namespace:
         "--max-render-points",
         type=int,
         default=DEFAULT_MAX_RENDER_POINTS,
-        help="Maximum points embedded into browser scene per layer.",
+        help="Maximum points embedded into browser scene per layer. 0 or negative disables downsampling.",
     )
     parser.add_argument(
         "--random-seed",

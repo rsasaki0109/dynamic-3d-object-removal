@@ -4,8 +4,8 @@
 
 ## 3Dデモ（最初にここ）
 
-- GitHub Pages: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_standalone.html
-- 単一スキャン用: `demo/index_3d_scan_standalone.html`（checked-in 版は実スキャン `demo/actual_scan_20240820_cloud.pcd` から生成）
+- GitHub Pages: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_scan_standalone.html
+- checked-in 版は実スキャン `demo/actual_scan_20240820_cloud.pcd` から生成
 
 ### 外部地図点群での検証候補（tsukubachallenge map）
 
@@ -58,12 +58,12 @@ python3 -m pip install -e .
 from pathlib import Path
 from dynamic_object_removal import load_points, load_boxes, remove_points_in_boxes, save_points
 
-points = load_points(Path("demo/demo_input.xyz"), fmt="auto")
-boxes = load_boxes(Path("demo/demo_objects.json"), fmt="auto", skip_invalid=True)
+points = load_points(Path("/path/to/scan.pcd"), fmt="auto")
+boxes = load_boxes(Path("/path/to/objects.json"), fmt="auto", skip_invalid=True)
 kept, keep_mask = remove_points_in_boxes(points, boxes, margin=(0.05, 0.05, 0.05))
 removed = points[~keep_mask]
 
-save_points(Path("demo/demo_output.xyz"), kept, fmt="auto")
+save_points(Path("/path/to/output.xyz"), kept, fmt="auto")
 ```
 
 公開 API（主要）
@@ -77,9 +77,9 @@ save_points(Path("demo/demo_output.xyz"), kept, fmt="auto")
 
 ```bash
 dynamic-object-removal \
-  --input-cloud demo/demo_input.xyz \
-  --input-objects demo/demo_objects.json \
-  --output-cloud demo/demo_output.xyz
+  --input-cloud /path/to/scan.pcd \
+  --input-objects /path/to/objects.json \
+  --output-cloud /path/to/output.xyz
 ```
 
 ```bash
@@ -88,8 +88,8 @@ dynamic-object-removal --help
 
 ## 3Dデモ
 
-- GitHub Pages: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_standalone.html
-- ローカル: `python3 demo/run_demo.py` を実行して `demo/demo_...` を更新、ブラウザで `demo/index_3d_standalone.html` を開く
+- GitHub Pages: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_scan_standalone.html
+- ローカル: `python3 demo/run_scan_demo.py --input-cloud demo/actual_scan_20240820_cloud.pcd --output-html demo/index_3d_scan_standalone.html` を実行し、ブラウザで `demo/index_3d_scan_standalone.html` を開く
 
 ## 参考アルゴリズム
 

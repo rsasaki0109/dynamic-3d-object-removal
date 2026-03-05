@@ -454,8 +454,8 @@ HTML_TEMPLATE = r'''<!doctype html>
           <h2>Headline</h2>
           <div class="stats">
             <div class="stat"><strong id="stat-frame-count">0</strong><span>frames</span></div>
-            <div class="stat"><strong id="stat-ghost-ratio">0%</strong><span>final ghost ratio</span></div>
-            <div class="stat"><strong id="stat-ghost-voxels">0</strong><span>ghost voxels</span></div>
+            <div class="stat"><strong id="stat-ghost-reduction">0%</strong><span>ghost reduction</span></div>
+            <div class="stat"><strong id="stat-peak-ratio">0%</strong><span>peak ghost ratio</span></div>
             <div class="stat"><strong id="stat-stable-voxels">0</strong><span>stable voxels</span></div>
           </div>
         </div>
@@ -1015,6 +1015,8 @@ HTML_TEMPLATE = r'''<!doctype html>
       };
       let storyTimers = [];
       let storyAutoRan = false;
+      const peakFrameIndex = frames.reduce((best, frame, index) => ((Number(frame.ghost_ratio_pct) || 0) > (Number(frames[best]?.ghost_ratio_pct) || 0) ? index : best), 0);
+      const finalGhostReductionPct = Number((100 - (Number(DEMO_DATA.meta.final_ghost_ratio_pct) || 0)).toFixed(1));
 
       function createScene(background, gridColorA, gridColorB) {
         const scene = new THREE.Scene();
@@ -1184,7 +1186,7 @@ HTML_TEMPLATE = r'''<!doctype html>
         const chartH = height - margin.top - margin.bottom;
         const ratios = frames.map((frame) => Number(frame.ghost_ratio_pct) || 0);
         const maxRatio = Math.max(1, ...ratios);
-        const peakIndex = ratios.reduce((best, value, index) => (value > ratios[best] ? index : best), 0);
+        const peakIndex = peakFrameIndex;
 
         ctx.strokeStyle = "rgba(255,255,255,0.10)";
         ctx.lineWidth = 1;
@@ -1228,8 +1230,24 @@ HTML_TEMPLATE = r'''<!doctype html>
 
         ctx.fillStyle = "rgba(226,232,240,0.92)";
         ctx.font = "12px Trebuchet MS, sans-serif";
-        ctx.fillText(`peak ${ratios[peakIndex]?.toFixed(1) || '0.0'}%`, margin.left, 14);
-        ctx.fillText(`final ${ratios[ratios.length - 1]?.toFixed(1) || '0.0'}%`, Math.max(margin.left, width - 86), 14);
+        ctx.fillText(`peak f${peakIndex + 1} ${ratios[peakIndex]?.toFixed(1) || '0.0'}%`, margin.left, 14);
+        ctx.fillText(`final ${ratios[ratios.length - 1]?.toFixed(1) || '0.0'}%`, Math.max(margin.left, width - 100), 14);
+      }
+
+      function attachTimelineInteractions() {
+        const canvas = document.getElementById("timeline-canvas");
+        function seekFromEvent(event) {
+          if (!frames.length) return;
+          const rect = canvas.getBoundingClientRect();
+          const ratio = Math.min(1, Math.max(0, (event.clientX - rect.left) / Math.max(1, rect.width)));
+          const index = Math.round(ratio * Math.max(0, frames.length - 1));
+          stopPlayback();
+          stopStory();
+          updateFrame(index);
+          setStoryText(`Timeline seek: frame ${index + 1} / ${frames.length}, ghost ratio ${Number(frames[index].ghost_ratio_pct).toFixed(1)}%.`);
+          renderSplit();
+        }
+        canvas.addEventListener("click", seekFromEvent);
       }
 
       function drawGhostBEV() {
@@ -1510,11 +1528,13 @@ HTML_TEMPLATE = r'''<!doctype html>
       function storyMessages() {
         const ghost = DEMO_DATA.meta.final_ghost_voxels.toLocaleString();
         const stable = DEMO_DATA.meta.final_clean_voxels.toLocaleString();
+        const peak = Number(frames[peakFrameIndex]?.ghost_ratio_pct || 0).toFixed(1);
         return {
-          overview: `Final map impact: raw leaves ${ghost} ghost voxels while cleaned keeps ${stable} stable voxels.`,
+          overview: `Final map impact: ghost occupancy drops ${finalGhostReductionPct.toFixed(1)}% and cleaned keeps ${stable} stable voxels.`,
           hotspot: `Ghost hotspot: this crop is where raw-only occupancy persists if transient clutter is accumulated.`,
+          peak: `Peak contamination arrives at frame ${peakFrameIndex + 1} with ghost ratio ${peak}%.`,
           stable: `Static preserved: this crop stays dense after cleaning, so the preview is not just erasing structure.`,
-          outro: `Story complete. Replay build-up or scrub frames to inspect the sampled box-removal preview.`
+          outro: `Story complete. Replay build-up, click the timeline, or scrub frames to inspect the sampled box-removal preview.`
         };
       }
 
@@ -1527,20 +1547,26 @@ HTML_TEMPLATE = r'''<!doctype html>
         const messages = storyMessages();
         setStoryText(messages.overview);
         storyTimers.push(setTimeout(() => {
+          updateFrame(peakFrameIndex);
+          renderSplit();
+          setStoryText(messages.peak);
+        }, 1400));
+        storyTimers.push(setTimeout(() => {
           focusProof(proof.ghostFocus3D);
           renderSplit();
           setStoryText(messages.hotspot);
-        }, 1600));
+        }, 3200));
         storyTimers.push(setTimeout(() => {
           focusProof(proof.preserveFocus3D);
           renderSplit();
           setStoryText(messages.stable);
-        }, 3600));
+        }, 5200));
         storyTimers.push(setTimeout(() => {
+          updateFrame(initialFrame);
           fitView();
           renderSplit();
           setStoryText(messages.outro);
-        }, 5600));
+        }, 7200));
       }
 
       function restartPlayback() {
@@ -1650,8 +1676,8 @@ HTML_TEMPLATE = r'''<!doctype html>
       document.getElementById("toggle-boxes-wrap").hidden = !hasBoxes;
 
       document.getElementById("stat-frame-count").textContent = String(frames.length);
-      document.getElementById("stat-ghost-ratio").textContent = `${DEMO_DATA.meta.final_ghost_ratio_pct.toFixed(1)}%`;
-      document.getElementById("stat-ghost-voxels").textContent = DEMO_DATA.meta.final_ghost_voxels.toLocaleString();
+      document.getElementById("stat-ghost-reduction").textContent = `${finalGhostReductionPct.toFixed(1)}%`;
+      document.getElementById("stat-peak-ratio").textContent = `${Number(frames[peakFrameIndex]?.ghost_ratio_pct || 0).toFixed(1)}%`;
       document.getElementById("stat-stable-voxels").textContent = DEMO_DATA.meta.final_clean_voxels.toLocaleString();
       const sourceSuffix = hasBoxes
         ? (usesDerivedBoxes
@@ -1678,6 +1704,7 @@ HTML_TEMPLATE = r'''<!doctype html>
 
       fitView();
       drawTimeline();
+      attachTimelineInteractions();
       drawGhostBEV();
       drawEvidencePanels();
       updateFrame(initialFrame);

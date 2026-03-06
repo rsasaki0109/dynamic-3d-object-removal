@@ -5,9 +5,10 @@
 ## 3Dデモ（最初にここ）
 
 - GitHub Pages / 単発実スキャン: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_standalone.html
-- GitHub Pages / 連続フレーム: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_sequence_standalone.html
+- GitHub Pages / 連続比較デモ: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_sequence_standalone.html
 - 単発 checked-in 版は実スキャン `demo/actual_scan_20240820_cloud.pcd` と検出 box `demo/actual_scan_20240820_objects.json` から生成
-- 連続 checked-in 版は local multi-frame sequence `graph/*/cloud.pcd` を sampled 埋め込みして再生します
+- 連続 checked-in 版は real multi-frame sequence `graph/*/cloud.pcd` を使い、`raw accumulation vs cleaned accumulation` を Pages 上でそのまま比較します
+- 連続 checked-in 版の cleaned 側は、repo に per-frame box が入っていないため temporal consistency で生成しています
 
 ![actual scan removal preview](demo/actual_scan_result_overview.png)
 
@@ -15,6 +16,14 @@
 - 入力 24,224 点
 - 除去後 23,909 点
 - 除去 315 点（実スキャン中の vehicle box 1件）
+
+### 連続デモの見どころ
+
+- 左: `Raw accumulation`
+  - 各フレームで観測した点をそのまま積むので、動的物体や transient clutter が尾を引きます
+- 右: `Cleaned accumulation`
+  - 継続して観測された点だけを積むので、静的構造の輪郭が先に残ります
+- つまり主張は `removed points が赤く見える` ことではなく、`時間方向に積むと地図の締まり方が変わる` ことです
 
 ### 外部地図点群での検証候補（tsukubachallenge map）
 
@@ -40,20 +49,24 @@ python3 demo/run_scan_demo.py \
   --output-html demo/index_3d_standalone.html
 ```
 
-### 連続フレームの再生成
+### 連続比較デモの再生成
 
 ```bash
 python3 demo/run_scan_sequence_demo.py \
   --input-glob "/path/to/graph/*/cloud.pcd" \
   --frame-count 12 \
   --stride 1 \
-  --max-render-points 12000 \
+  --max-render-points 9000 \
   --fps 4 \
+  --voxel-size 0.35 \
+  --window-size 5 \
+  --min-hits 3 \
   --output-html demo/index_3d_sequence_standalone.html
 ```
 
-- `--input-objects` を付けると、global boxes または `frame_name -> boxes` JSON を使って kept / removed / 3D box も連続再生できます
-- checked-in 版は Pages でそのまま再生できるように sampled point 群を HTML に内包しています
+- `--input-objects` を渡すと、連続デモの cleaned 側を per-frame box 除去ベースで作れます
+- `--input-objects` を渡さない場合は temporal consistency で cleaned accumulation を作ります
+- checked-in 版は sampled point 群を HTML に内包しているので、GitHub Pages 上でそのまま再生できます
 
 ### 外部点群の単発デモ化
 

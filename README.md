@@ -18,9 +18,7 @@ Sequence demo では次の 3 点を見せます。
 - cleaned accumulation はそれを抑える
 - 静的構造は残る
 
-![actual scan removal preview](demo/actual_scan_result_overview.png)
-
-![sequence proof overview](demo/sequence_proof_overview.png)
+![story mode preview](demo/story_mode.gif)
 
 補足:
 

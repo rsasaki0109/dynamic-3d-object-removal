@@ -438,7 +438,7 @@ HTML_TEMPLATE = r'''<!doctype html>
       <aside class="panel">
         <div class="section">
           <span class="eyebrow">Impact Demo</span>
-          <h1>動的点を見せるのではなく、地図の汚染を見せる</h1>
+          <h1>動的物体のせいで地図に残るノイズを除去する</h1>
           <p class="lead">
             初期表示は build-up 後の最終状態です。左は観測した点をそのまま積算、右は cleaned 点だけを積算します。主役は current frame ではなく、最後に残る ghost の差です。
           </p>

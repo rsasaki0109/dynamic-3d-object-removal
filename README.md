@@ -10,8 +10,8 @@
 
 この repo の主役は sequence proof demo です。主張は次の 3 点です。
 
-- raw accumulation は動的物体や transient clutter を地図に残す
-- cleaned accumulation はその汚染を減らす
+- raw accumulation は動的物体による不要な点群を地図に残しやすい
+- cleaned accumulation はそうした不要な点群を抑える
 - cleaned 側は静的構造まで無差別に消しているわけではない
 
 ![actual scan removal preview](demo/actual_scan_result_overview.png)
@@ -31,7 +31,7 @@
 - 入力は real multi-frame sequence `graph/*/cloud.pcd`
 - 左が `Raw accumulation`、右が `Cleaned accumulation`
 - `ghost hotspot` と `static structure preserved` で必要性と安全性を同時に見せます
-- `Story mode`、`contamination timeline`、`Peak replay`、`Peak burst` で「いつ汚染が発生したか」を追えます
+- `Story mode`、`contamination timeline`、`Peak replay`、`Peak burst` で「どのフレームでその影響が強まったか」を追えます
 
 重要:
 

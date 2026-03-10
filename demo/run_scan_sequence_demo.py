@@ -1041,6 +1041,7 @@ HTML_TEMPLATE = r'''<!doctype html>
       };
       let storyTimers = [];
       let storyAutoRan = false;
+      let storyRunning = false;
       const peakFrameIndex = frames.reduce((best, frame, index) => ((Number(frame.ghost_ratio_pct) || 0) > (Number(frames[best]?.ghost_ratio_pct) || 0) ? index : best), 0);
       const finalGhostReductionPct = Number((100 - (Number(DEMO_DATA.meta.final_ghost_ratio_pct) || 0)).toFixed(1));
       const peakWindowStart = Math.max(0, peakFrameIndex - 2);
@@ -1219,9 +1220,17 @@ HTML_TEMPLATE = r'''<!doctype html>
         document.getElementById("story-chip").textContent = message;
       }
 
+      function updateStoryButton() {
+        const button = document.getElementById("story-mode");
+        button.textContent = storyRunning ? "Stop story" : "Story mode";
+        button.classList.toggle("primary", storyRunning);
+      }
+
       function stopStory() {
         for (const timer of storyTimers) clearTimeout(timer);
         storyTimers = [];
+        storyRunning = false;
+        updateStoryButton();
       }
 
       function queuePeakReplay(startDelay = 0, completeMessage = "", restoreFrame = peakFrameIndex, restoreView = "ghost") {
@@ -1749,6 +1758,8 @@ HTML_TEMPLATE = r'''<!doctype html>
       function runStoryMode() {
         stopPlayback();
         stopStory();
+        storyRunning = true;
+        updateStoryButton();
         updateFrame(initialFrame);
         fitView();
         renderSplit();
@@ -1768,6 +1779,8 @@ HTML_TEMPLATE = r'''<!doctype html>
           updateFrame(initialFrame);
           fitView();
           renderSplit();
+          storyRunning = false;
+          updateStoryButton();
           setStoryText(messages.outro);
         }, peakReplayDone + 3000));
       }
@@ -1806,6 +1819,11 @@ HTML_TEMPLATE = r'''<!doctype html>
         renderSplit();
       });
       document.getElementById("story-mode").addEventListener("click", () => {
+        if (storyRunning) {
+          stopStory();
+          setStoryText(storyMessages().outro);
+          return;
+        }
         runStoryMode();
       });
       document.getElementById("peak-replay").addEventListener("click", () => {
@@ -1924,6 +1942,7 @@ HTML_TEMPLATE = r'''<!doctype html>
       drawPeakBurstStrip();
       attachPeakBurstInteractions();
       updateFrame(initialFrame);
+      updateStoryButton();
       setStoryText(storyMessages().overview);
       renderSplit();
       if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {

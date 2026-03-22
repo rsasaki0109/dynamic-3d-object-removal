@@ -27,3 +27,6 @@ dynamic-object-removal-bench = "bench:main"
 
 [tool.setuptools]
 py-modules = ["dynamic_object_removal", "realtime", "bench"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

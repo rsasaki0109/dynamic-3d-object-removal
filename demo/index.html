@@ -25,14 +25,14 @@
   </head>
   <body>
     <h1>Dynamic Object Removal デモ</h1>
-    <p class="meta">単発実スキャンの除去結果と、raw-vs-cleaned の連続比較デモを checked-in しています。連続デモは ghost hotspot と static preserved の局所比較つきです。</p>
+    <p class="meta">単発実スキャンの除去結果と、raw-vs-cleaned の連続比較デモを checked-in しています。連続デモは temporal consistency ベースで cleaned 側を生成しています。per-frame box がある場合は <code>--input-objects</code> で box-driven な sequence に切り替え可能です。</p>
 
     <div class="card">
       <h2>入力データ</h2>
       <ul>
         <li>単発: actual_scan_20240820_cloud.pcd + actual_scan_20240820_objects.json</li>
         <li>連続: local multi-frame graph/*/cloud.pcd を sampled 埋め込み</li>
-        <li>連続 checked-in 版: temporal consistency から auto transient boxes を提案し、sampled box-removal preview / Story mode / Peak replay / Peak burst / contamination timeline / ghost reduction headline を表示</li>
+        <li>連続 checked-in 版: temporal consistency フィルタで cleaned accumulation を生成（per-frame box JSON は未同梱）</li>
       </ul>
     </div>
 

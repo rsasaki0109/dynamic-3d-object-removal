@@ -493,7 +493,7 @@ def _rotate_by_yaw(points: np.ndarray, yaw: float) -> np.ndarray:
     return rotated
 
 
-def remove_points_in_boxes(points: np.ndarray, boxes: Sequence[DetectionBox], margin: Sequence[float]) -> tuple[np.ndarray, np.ndarray]:
+def remove_points_in_boxes(points: np.ndarray, boxes: Sequence[DetectionBox], margin: Sequence[float] = (0.05, 0.05, 0.05)) -> tuple[np.ndarray, np.ndarray]:
     if points.size == 0 or len(points) == 0:
         return points, np.ones(0, dtype=bool)
     if len(boxes) == 0:

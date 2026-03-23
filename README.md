@@ -1,6 +1,12 @@
 # Dynamic 3D Object Removal
 
-動的物体の 3D バウンディングボックスを使って、点群から対象領域を除去するライブラリと可視化デモです。
+![Before/After](demo/av2_before_after.png)
+
+> 赤い点 = 動的物体（車両・歩行者・自転車）→ 除去後は道路・建物の静的構造だけが残ります
+>
+> Argoverse 2 実データ — 95k 点から 23 オブジェクト (3,406 点) を除去
+
+3D バウンディングボックスを使って、点群から動的物体を除去するライブラリです。
 
 ## まずはこれ
 
@@ -32,8 +38,6 @@ git clone git@github.com:rsasaki0109/dynamic-3d-object-removal.git
 cd dynamic-3d-object-removal
 python3 -m pip install -e .
 ```
-
-![Argoverse 2 before/after](demo/av2_demo_preview.png)
 
 ## Quick start (公開データで試す)
 

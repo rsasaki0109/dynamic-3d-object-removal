@@ -33,32 +33,36 @@ cd dynamic-3d-object-removal
 python3 -m pip install -e .
 ```
 
-## Quick start (KITTI データで試す)
+![Argoverse 2 before/after](demo/av2_demo_preview.png)
 
-サンプルデータを生成して、3 コマンドで動的物体除去を体験できます。
+## Quick start (公開データで試す)
+
+[Argoverse 2](https://www.argoverse.org/av2.html) の実データを使って、3 コマンドで動的物体除去を体験できます。登録不要です。
 
 ```bash
-# 1. サンプル KITTI データを生成
-python3 scripts/download_kitti_sample.py
+# 1. Argoverse 2 サンプル (1 sweep + annotations, ~1.3 MB) をダウンロード
+pip install awscli pyarrow
+python3 scripts/download_av2_sample.py
 
-# 2. 動的物体を除去
+# 2. 動的物体を除去 (車両 18 台 + 歩行者 3 人 + 自転車 1 台 + 車椅子 1 台)
 dynamic-object-removal \
-  --input-cloud data/kitti_sample/velodyne/000000.bin \
-  --input-objects data/kitti_sample/label_2/000000.txt \
-  --objects-format kitti \
-  --calib-path data/kitti_sample/calib/000000.txt \
-  --output-cloud output/cleaned.pcd
+  --input-cloud data/av2_sample/lidar/315969904359876000.feather \
+  --input-objects data/av2_sample/annotations.feather \
+  --timestamp-ns 315969904359876000 \
+  --output-cloud output/av2_cleaned.pcd
 
 # 3. Before/After を 3D で確認
 python3 demo/run_scan_demo.py \
-  --input-cloud data/kitti_sample/velodyne/000000.bin \
-  --input-objects data/kitti_sample/label_2/000000.txt \
-  --objects-format kitti \
-  --calib-path data/kitti_sample/calib/000000.txt \
-  --output-html demo/index_3d_kitti.html
+  --input-cloud data/av2_sample/lidar/315969904359876000.feather \
+  --input-objects data/av2_sample/annotations.feather \
+  --timestamp-ns 315969904359876000 \
+  --max-render-points 50000 \
+  --output-html demo/index_3d_av2.html
 ```
 
-本物の KITTI データを使う場合は [KITTI 3D Object Detection](https://www.cvlibs.net/datasets/kitti/eval_object.php?obj_benchmark=3d) からダウンロードして `data/kitti_sample/` に配置してください。
+> 95,381 点中 3,406 点 (3.6%) を除去 — 車両・歩行者・自転車が消え、道路・建物の静的構造が残ります
+
+KITTI データも対応しています。詳しくは `scripts/download_kitti_sample.py` を参照してください。
 
 ## デモ再生成
 
@@ -128,8 +132,8 @@ save_points(Path("/path/to/output.xyz"), kept, fmt="auto")
 
 ## 対応形式
 
-- 点群: `PCD` (ASCII / binary), `CSV`, `TXT`, `XYZ`, `NPY`, `BIN` (KITTI velodyne)
-- バウンディングボックス: `JSON`, `CSV`, `KITTI label_2`
+- 点群: `PCD` (ASCII / binary), `CSV`, `TXT`, `XYZ`, `NPY`, `BIN` (KITTI), `Feather` (Argoverse 2)
+- バウンディングボックス: `JSON`, `CSV`, `KITTI label_2`, `Feather` (Argoverse 2)
 - `PCD DATA binary_compressed` は未対応
 
 ## 参考

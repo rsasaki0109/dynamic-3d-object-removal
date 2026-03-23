@@ -2,9 +2,9 @@
 
 ![Before/After](demo/av2_before_after.png)
 
-> 赤い点 = 車両の移動に伴う ghost trails → 除去後は道路・建物の静的構造だけが残ります
->
-> Argoverse 2 実データ — 20 フレーム accumulated map (1.9M 点) から 67k の ghost points を除去
+![Ghost Trail Close-up](demo/av2_zoom.png)
+
+> Argoverse 2 実データ — 20 フレーム accumulated map (2M 点) から 233k の ghost points (11.9%) を除去
 
 3D バウンディングボックスを使って、点群から動的物体を除去するライブラリです。
 

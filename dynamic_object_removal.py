@@ -329,10 +329,14 @@ def _load_boxes_from_av2_feather(
     if not required.issubset(set(table.column_names)):
         raise ValueError(f"feather file missing required AV2 annotation columns: {path}")
 
-    if timestamp_ns is not None and "timestamp_ns" in table.column_names:
-        ts_arr = table["timestamp_ns"].to_numpy()
-        mask = ts_arr == timestamp_ns
-        table = table.filter(mask)
+    if "timestamp_ns" in table.column_names:
+        n_timestamps = len(set(table["timestamp_ns"].to_pylist()))
+        if timestamp_ns is not None:
+            ts_arr = table["timestamp_ns"].to_numpy()
+            mask = ts_arr == timestamp_ns
+            table = table.filter(mask)
+        elif n_timestamps > 1:
+            _eprint(f"warning: AV2 annotations contain {n_timestamps} timestamps; use --timestamp-ns to filter to a single frame")
 
     boxes: list[DetectionBox] = []
     for i in range(table.num_rows):
@@ -814,6 +818,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     filtered, keep_mask = remove_points_in_boxes(points, boxes, args.box_margin)
 
     removed = points.shape[0] - filtered.shape[0]
+    out_path.parent.mkdir(parents=True, exist_ok=True)
     save_points(out_path, filtered, fmt=args.cloud_format)
 
     if not args.quiet:

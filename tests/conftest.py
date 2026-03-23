@@ -7,9 +7,11 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-DEMO_DIR = Path(__file__).resolve().parent.parent / "demo"
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+DEMO_DIR = PROJECT_ROOT / "demo"
 DEMO_PCD = DEMO_DIR / "actual_scan_20240820_cloud.pcd"
 DEMO_OBJECTS_JSON = DEMO_DIR / "actual_scan_20240820_objects.json"
+KITTI_SAMPLE_DIR = PROJECT_ROOT / "data" / "kitti_sample"
 
 
 @pytest.fixture

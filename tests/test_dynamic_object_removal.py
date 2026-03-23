@@ -10,6 +10,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+import struct
+
 from dynamic_object_removal import (
     DetectionBox,
     TemporalConsistencyFilter,
@@ -18,6 +20,7 @@ from dynamic_object_removal import (
     remove_points_in_boxes,
     save_points,
     main,
+    _parse_kitti_calib,
 )
 
 
@@ -121,6 +124,31 @@ class TestLoadPoints:
         with pytest.raises(ValueError, match="not enough numeric columns"):
             load_points(csv_file, fmt="auto")
 
+    def test_load_kitti_bin(self, tmp_path: Path):
+        """Load a KITTI-format .bin file (float32 x4 per point)."""
+        points_expected = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], dtype=np.float32)
+        bin_file = tmp_path / "test.bin"
+        with bin_file.open("wb") as f:
+            for row in points_expected:
+                f.write(struct.pack("ffff", row[0], row[1], row[2], 0.5))
+        pts = load_points(bin_file, fmt="auto")
+        assert pts.shape == (2, 3)
+        assert pts.dtype == np.float64
+        np.testing.assert_allclose(pts, points_expected, atol=1e-6)
+
+    def test_load_kitti_bin_explicit_fmt(self, tmp_path: Path):
+        bin_file = tmp_path / "cloud.dat"
+        with bin_file.open("wb") as f:
+            f.write(struct.pack("ffff", 1.0, 2.0, 3.0, 0.5))
+        pts = load_points(bin_file, fmt="bin")
+        assert pts.shape == (1, 3)
+
+    def test_load_kitti_bin_bad_size(self, tmp_path: Path):
+        bin_file = tmp_path / "bad.bin"
+        bin_file.write_bytes(b"\x00" * 5)  # not divisible by 4*4=16
+        with pytest.raises(ValueError, match="not divisible by 4"):
+            load_points(bin_file, fmt="bin")
+
     def test_unsupported_format(self, tmp_path: Path):
         f = tmp_path / "cloud.bin"
         f.write_bytes(b"")
@@ -180,6 +208,128 @@ class TestLoadBoxes:
         f.write_text("<boxes/>")
         with pytest.raises(ValueError, match="unsupported box format"):
             load_boxes(f, fmt="xml", skip_invalid=False)
+
+
+# ---------------------------------------------------------------------------
+# KITTI format
+# ---------------------------------------------------------------------------
+
+class TestKITTI:
+    def _write_calib(self, path: Path) -> None:
+        """Write a standard KITTI-like calibration file."""
+        calib_text = (
+            "P0: 1 0 0 0 0 1 0 0 0 0 1 0\n"
+            "P1: 1 0 0 0 0 1 0 0 0 0 1 0\n"
+            "P2: 7.215377e+02 0 6.095593e+02 4.485728e+01 0 7.215377e+02 1.728540e+02 2.163791e-01 0 0 1 2.745884e-03\n"
+            "P3: 1 0 0 0 0 1 0 0 0 0 1 0\n"
+            "R0_rect: 1 0 0 0 1 0 0 0 1\n"
+            "Tr_velo_to_cam: 0 -1 0 0 0 0 -1 0 1 0 0 0\n"
+            "Tr_imu_to_velo: 1 0 0 0 0 1 0 0 0 0 1 0\n"
+        )
+        path.write_text(calib_text, encoding="utf-8")
+
+    def test_parse_kitti_calib(self, tmp_path: Path):
+        calib_file = tmp_path / "calib.txt"
+        self._write_calib(calib_file)
+        cam_to_velo = _parse_kitti_calib(calib_file)
+        assert cam_to_velo.shape == (4, 4)
+        # velo(1,0,0) -> cam(0,0,1) so inverse should map cam(0,0,1) -> velo(1,0,0)
+        result = cam_to_velo @ np.array([0.0, 0.0, 1.0, 1.0])
+        np.testing.assert_allclose(result[:3], [1.0, 0.0, 0.0], atol=1e-10)
+
+    def test_parse_kitti_calib_missing(self, tmp_path: Path):
+        calib_file = tmp_path / "bad_calib.txt"
+        calib_file.write_text("P0: 1 0 0 0 0 1 0 0 0 0 1 0\n")
+        with pytest.raises(ValueError, match="Tr_velo_to_cam not found"):
+            _parse_kitti_calib(calib_file)
+
+    def test_load_kitti_labels_with_calib(self, tmp_path: Path):
+        calib_file = tmp_path / "calib.txt"
+        self._write_calib(calib_file)
+        # Car at velo(10, -2, -0.5): cam_x=2, cam_y=0.5, cam_z=10
+        # bottom center: cam_y_bottom = 0.5 + 0.75 = 1.25
+        label_file = tmp_path / "label.txt"
+        label_file.write_text("Car 0.00 0 0.00 100 100 300 250 1.50 1.80 4.50 2.00 1.25 10.00 0.00\n")
+
+        boxes = load_boxes(label_file, fmt="kitti", skip_invalid=False, calib_path=calib_file)
+        assert len(boxes) == 1
+        box = boxes[0]
+        assert box.label == "Car"
+        np.testing.assert_allclose(box.center[0], 10.0, atol=0.01)
+        np.testing.assert_allclose(box.center[1], -2.0, atol=0.01)
+        np.testing.assert_allclose(box.center[2], -0.5, atol=0.01)
+        np.testing.assert_allclose(box.size, [4.5, 1.8, 1.5], atol=0.01)
+
+    def test_load_kitti_filters_dontcare(self, tmp_path: Path):
+        calib_file = tmp_path / "calib.txt"
+        self._write_calib(calib_file)
+        label_file = tmp_path / "label.txt"
+        label_file.write_text(
+            "Car 0.00 0 0.00 100 100 300 250 1.50 1.80 4.50 2.00 1.25 10.00 0.00\n"
+            "DontCare -1 -1 -10 0 0 0 0 -1 -1 -1 -1000 -1000 -1000 -10\n"
+            "Misc 0.00 0 0.00 100 100 300 250 1.00 1.00 1.00 0.00 0.00 5.00 0.00\n"
+        )
+        boxes = load_boxes(label_file, fmt="kitti", skip_invalid=True, calib_path=calib_file)
+        assert len(boxes) == 1
+        assert boxes[0].label == "Car"
+
+    def test_load_kitti_without_calib(self, tmp_path: Path):
+        """Without calib file, uses approximate transform."""
+        label_file = tmp_path / "label.txt"
+        label_file.write_text("Pedestrian 0.00 0 0.00 100 100 200 300 1.70 0.60 0.80 1.00 1.50 8.00 0.00\n")
+        boxes = load_boxes(label_file, fmt="kitti", skip_invalid=False)
+        assert len(boxes) == 1
+        assert boxes[0].label == "Pedestrian"
+
+    def test_kitti_end_to_end(self, tmp_path: Path):
+        """Full pipeline: bin -> load_boxes(kitti) -> remove -> verify removal."""
+        calib_file = tmp_path / "calib.txt"
+        self._write_calib(calib_file)
+
+        # Create points: ground + car cluster at velo(10, -2, -0.5)
+        rng = np.random.default_rng(42)
+        ground = np.column_stack([
+            rng.uniform(0, 40, 1000),
+            rng.uniform(-10, 10, 1000),
+            np.full(1000, -1.7) + rng.normal(0, 0.02, 1000),
+        ])
+        car = np.column_stack([
+            10.0 + rng.normal(0, 0.5, 200),
+            -2.0 + rng.normal(0, 0.2, 200),
+            -0.5 + rng.normal(0, 0.2, 200),
+        ])
+        all_pts = np.vstack([ground, car]).astype(np.float32)
+
+        # Write .bin
+        bin_file = tmp_path / "test.bin"
+        with bin_file.open("wb") as f:
+            for row in all_pts:
+                f.write(struct.pack("ffff", row[0], row[1], row[2], 0.5))
+
+        # Write label: Car at cam(2, 0.5, 10), bottom center cam_y=1.25
+        label_file = tmp_path / "label.txt"
+        label_file.write_text("Car 0.00 0 0.00 100 100 300 250 1.50 1.80 4.50 2.00 1.25 10.00 0.00\n")
+
+        pts = load_points(bin_file, fmt="auto")
+        boxes = load_boxes(label_file, fmt="kitti", skip_invalid=False, calib_path=calib_file)
+        kept, mask = remove_points_in_boxes(pts, boxes)
+
+        removed = pts.shape[0] - kept.shape[0]
+        assert removed > 50, f"Expected significant removal, got {removed}"
+        assert kept.shape[0] > 800, f"Expected most ground points kept, got {kept.shape[0]}"
+
+    def test_kitti_sample_data(self):
+        """Test with generated sample data if available."""
+        kitti_dir = Path(__file__).resolve().parent.parent / "data" / "kitti_sample"
+        velodyne = kitti_dir / "velodyne" / "000000.bin"
+        label = kitti_dir / "label_2" / "000000.txt"
+        calib = kitti_dir / "calib" / "000000.txt"
+        if not velodyne.exists():
+            pytest.skip("KITTI sample data not generated yet")
+        pts = load_points(velodyne, fmt="auto")
+        boxes = load_boxes(label, fmt="kitti", skip_invalid=False, calib_path=calib)
+        kept, _ = remove_points_in_boxes(pts, boxes)
+        assert pts.shape[0] > kept.shape[0]
 
 
 # ---------------------------------------------------------------------------

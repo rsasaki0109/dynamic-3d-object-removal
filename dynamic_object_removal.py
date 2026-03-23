@@ -236,7 +236,89 @@ def _load_boxes_from_csv(path: Path, *, skip_invalid: bool) -> list[DetectionBox
     return boxes
 
 
-def load_boxes(path: Path, *, fmt: str, skip_invalid: bool) -> list[DetectionBox]:
+_KITTI_DYNAMIC_CLASSES = {"Car", "Van", "Truck", "Pedestrian", "Cyclist", "Person_sitting", "Tram"}
+
+
+def _parse_kitti_calib(calib_path: Path) -> np.ndarray:
+    """Parse KITTI calibration file and return 4x4 cam-to-velo transform."""
+    with calib_path.open(encoding="utf-8") as f:
+        for line in f:
+            if line.startswith("Tr_velo_to_cam:") or line.startswith("Tr_velo_cam"):
+                vals = [float(x) for x in line.split(":")[1].split()]
+                T = np.eye(4)
+                T[:3, :] = np.array(vals).reshape(3, 4)
+                return np.linalg.inv(T)
+    raise ValueError(f"Tr_velo_to_cam not found in {calib_path}")
+
+
+def _load_boxes_from_kitti(
+    label_path: Path,
+    *,
+    calib_path: Path | None = None,
+    skip_invalid: bool = False,
+) -> list[DetectionBox]:
+    """Load KITTI label_2 format boxes, converting from camera to velodyne frame."""
+    cam_to_velo: np.ndarray | None = None
+    if calib_path is not None:
+        cam_to_velo = _parse_kitti_calib(calib_path)
+
+    boxes: list[DetectionBox] = []
+    text = label_path.read_text(encoding="utf-8").strip()
+    if not text:
+        return boxes
+
+    for line in text.splitlines():
+        parts = line.split()
+        if len(parts) < 15:
+            if skip_invalid:
+                continue
+            raise ValueError(f"KITTI label line has fewer than 15 fields: {line}")
+        obj_type = parts[0]
+        if obj_type not in _KITTI_DYNAMIC_CLASSES:
+            continue
+        try:
+            h, w, l = float(parts[8]), float(parts[9]), float(parts[10])
+            x_cam, y_cam, z_cam = float(parts[11]), float(parts[12]), float(parts[13])
+            ry = float(parts[14])
+        except (ValueError, IndexError) as exc:
+            if skip_invalid:
+                _eprint(f"skip invalid KITTI label: {exc}")
+                continue
+            raise
+
+        # KITTI location is bottom-center in camera frame; move to 3D center
+        y_cam_center = y_cam - h / 2.0
+        cam_pt = np.array([x_cam, y_cam_center, z_cam, 1.0])
+
+        if cam_to_velo is not None:
+            velo_pt = cam_to_velo @ cam_pt
+            R = cam_to_velo[:3, :3]
+            dir_cam = np.array([math.sin(ry), 0.0, math.cos(ry)])
+            dir_velo = R @ dir_cam
+            yaw_velo = math.atan2(dir_velo[1], dir_velo[0])
+        else:
+            # Without calibration: use approximate KITTI default transform
+            # cam(x_right, y_down, z_forward) -> velo(x_forward, y_left, z_up)
+            velo_pt = np.array([z_cam, -x_cam, -(y_cam_center), 1.0])
+            yaw_velo = -(ry + math.pi / 2.0)
+
+        box = DetectionBox(
+            center=np.array([velo_pt[0], velo_pt[1], velo_pt[2]]),
+            size=np.array([l, w, h]),
+            yaw=yaw_velo,
+            label=obj_type,
+        )
+        boxes.append(box)
+    return boxes
+
+
+def load_boxes(
+    path: Path,
+    *,
+    fmt: str,
+    skip_invalid: bool,
+    calib_path: Path | None = None,
+) -> list[DetectionBox]:
     fmt = fmt.lower()
     if fmt == "auto":
         if path.suffix.lower() in {".json", ".jsn"}:
@@ -249,6 +331,8 @@ def load_boxes(path: Path, *, fmt: str, skip_invalid: bool) -> list[DetectionBox
         return _load_boxes_from_json(path, skip_invalid=skip_invalid)
     if fmt == "csv":
         return _load_boxes_from_csv(path, skip_invalid=skip_invalid)
+    if fmt == "kitti":
+        return _load_boxes_from_kitti(path, calib_path=calib_path, skip_invalid=skip_invalid)
     raise ValueError(f"unsupported box format: {fmt}")
 
 
@@ -413,6 +497,15 @@ def _load_pcd(path: Path) -> np.ndarray:
     )
 
 
+def _load_kitti_bin(path: Path) -> np.ndarray:
+    """Load KITTI velodyne .bin file (float32 x4: x, y, z, reflectance)."""
+    raw = np.fromfile(path, dtype=np.float32)
+    if raw.size % 4 != 0:
+        raise ValueError(f"KITTI .bin file size not divisible by 4: {path}")
+    points = raw.reshape(-1, 4)
+    return points[:, :3].astype(np.float64)
+
+
 def load_points(path: Path, *, fmt: str) -> np.ndarray:
     fmt = fmt.lower()
     if fmt == "auto":
@@ -420,6 +513,8 @@ def load_points(path: Path, *, fmt: str) -> np.ndarray:
             fmt = "npy"
         elif path.suffix.lower() == ".pcd":
             fmt = "pcd"
+        elif path.suffix.lower() == ".bin":
+            fmt = "bin"
         elif path.suffix.lower() in {".csv", ".txt", ".xyz", ".pts", ".tsv"}:
             fmt = "text"
         else:
@@ -433,6 +528,8 @@ def load_points(path: Path, *, fmt: str) -> np.ndarray:
         return np.asarray(arr[:, :3], dtype=np.float64)
     if fmt == "pcd":
         return _load_pcd(path)
+    if fmt == "bin":
+        return _load_kitti_bin(path)
     if fmt == "text":
         return _load_points_csv_or_txt(path)
     raise ValueError(f"unsupported cloud format: {fmt}")
@@ -571,8 +668,9 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--input-cloud", required=True, help="Input point cloud path (csv/txt/xyz/pcd/npy).")
     parser.add_argument("--input-objects", required=True, help="Detected object boxes JSON or CSV path.")
     parser.add_argument("--output-cloud", required=True, help="Output point cloud path.")
-    parser.add_argument("--cloud-format", default="auto", choices=["auto", "csv", "pcd", "text", "npy"], help="Output/input point cloud format.")
-    parser.add_argument("--objects-format", default="auto", choices=["auto", "json", "csv"], help="Object file format.")
+    parser.add_argument("--cloud-format", default="auto", choices=["auto", "csv", "pcd", "text", "npy", "bin"], help="Output/input point cloud format.")
+    parser.add_argument("--objects-format", default="auto", choices=["auto", "json", "csv", "kitti"], help="Object file format.")
+    parser.add_argument("--calib-path", default=None, help="KITTI calibration file path (required when --objects-format=kitti).")
     parser.add_argument("--box-margin", nargs=3, type=float, default=list(DEFAULT_BOX_MARGIN), metavar=("X", "Y", "Z"), help="Safety margin around each box (meters).")
     parser.add_argument("--skip-invalid", action="store_true", help="Skip invalid object entries instead of stopping.")
     parser.add_argument("--min-size", type=float, default=0.01, help="Skip boxes smaller than this size in any axis.")
@@ -622,7 +720,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         _eprint(f"object file not found: {obj_path}")
         return 1
 
-    boxes = load_boxes(obj_path, fmt=args.objects_format, skip_invalid=args.skip_invalid)
+    calib = Path(args.calib_path) if args.calib_path else None
+    boxes = load_boxes(obj_path, fmt=args.objects_format, skip_invalid=args.skip_invalid, calib_path=calib)
     boxes = _filter_small_boxes(boxes, args.min_size)
 
     if not boxes:

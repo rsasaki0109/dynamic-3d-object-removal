@@ -33,6 +33,33 @@ cd dynamic-3d-object-removal
 python3 -m pip install -e .
 ```
 
+## Quick start (KITTI データで試す)
+
+サンプルデータを生成して、3 コマンドで動的物体除去を体験できます。
+
+```bash
+# 1. サンプル KITTI データを生成
+python3 scripts/download_kitti_sample.py
+
+# 2. 動的物体を除去
+dynamic-object-removal \
+  --input-cloud data/kitti_sample/velodyne/000000.bin \
+  --input-objects data/kitti_sample/label_2/000000.txt \
+  --objects-format kitti \
+  --calib-path data/kitti_sample/calib/000000.txt \
+  --output-cloud output/cleaned.pcd
+
+# 3. Before/After を 3D で確認
+python3 demo/run_scan_demo.py \
+  --input-cloud data/kitti_sample/velodyne/000000.bin \
+  --input-objects data/kitti_sample/label_2/000000.txt \
+  --objects-format kitti \
+  --calib-path data/kitti_sample/calib/000000.txt \
+  --output-html demo/index_3d_kitti.html
+```
+
+本物の KITTI データを使う場合は [KITTI 3D Object Detection](https://www.cvlibs.net/datasets/kitti/eval_object.php?obj_benchmark=3d) からダウンロードして `data/kitti_sample/` に配置してください。
+
 ## デモ再生成
 
 ### 単発スキャン
@@ -101,8 +128,9 @@ save_points(Path("/path/to/output.xyz"), kept, fmt="auto")
 
 ## 対応形式
 
-- `PCD` の ASCII / binary に対応
-- `DATA binary_compressed` は未対応
+- 点群: `PCD` (ASCII / binary), `CSV`, `TXT`, `XYZ`, `NPY`, `BIN` (KITTI velodyne)
+- バウンディングボックス: `JSON`, `CSV`, `KITTI label_2`
+- `PCD DATA binary_compressed` は未対応
 
 ## 参考
 

@@ -36,19 +36,25 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--cloud-format",
         default="auto",
-        choices=["auto", "csv", "pcd", "text", "npy", "bin"],
+        choices=["auto", "csv", "pcd", "text", "npy", "bin", "feather"],
         help="Input/output point cloud format.",
     )
     parser.add_argument(
         "--objects-format",
         default="auto",
-        choices=["auto", "json", "csv", "kitti"],
+        choices=["auto", "json", "csv", "kitti", "av2"],
         help="Box format if --input-objects is set.",
     )
     parser.add_argument(
         "--calib-path",
         default="",
         help="KITTI calibration file path (required when --objects-format=kitti).",
+    )
+    parser.add_argument(
+        "--timestamp-ns",
+        type=int,
+        default=None,
+        help="Filter AV2 annotations by timestamp (nanoseconds).",
     )
     parser.add_argument(
         "--box-margin",
@@ -121,7 +127,13 @@ def main() -> int:
             print(f"objects file not found: {objects_path}")
             return 1
         calib = Path(args.calib_path) if args.calib_path else None
-        boxes = core.load_boxes(objects_path, fmt=args.objects_format, skip_invalid=args.skip_invalid, calib_path=calib)
+        boxes = core.load_boxes(
+            objects_path,
+            fmt=args.objects_format,
+            skip_invalid=args.skip_invalid,
+            calib_path=calib,
+            timestamp_ns=args.timestamp_ns,
+        )
 
     if boxes:
         kept, keep_mask = core.remove_points_in_boxes(points, boxes, args.box_margin)

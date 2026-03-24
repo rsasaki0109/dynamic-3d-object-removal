@@ -312,17 +312,71 @@ def _load_boxes_from_kitti(
     return boxes
 
 
+def _load_boxes_from_av2_feather(
+    path: Path,
+    *,
+    timestamp_ns: int | None = None,
+    skip_invalid: bool = False,
+) -> list[DetectionBox]:
+    """Load Argoverse 2 annotations.feather as DetectionBox list."""
+    try:
+        import pyarrow.feather as feather
+    except ImportError as exc:
+        raise ImportError("pyarrow is required to load .feather files: pip install pyarrow") from exc
+
+    table = feather.read_table(path)
+    required = {"tx_m", "ty_m", "tz_m", "length_m", "width_m", "height_m", "qw", "qx", "qy", "qz"}
+    if not required.issubset(set(table.column_names)):
+        raise ValueError(f"feather file missing required AV2 annotation columns: {path}")
+
+    if timestamp_ns is not None and "timestamp_ns" in table.column_names:
+        ts_arr = table["timestamp_ns"].to_numpy()
+        mask = ts_arr == timestamp_ns
+        table = table.filter(mask)
+
+    boxes: list[DetectionBox] = []
+    for i in range(table.num_rows):
+        try:
+            tx = float(table["tx_m"][i].as_py())
+            ty = float(table["ty_m"][i].as_py())
+            tz = float(table["tz_m"][i].as_py())
+            l = float(table["length_m"][i].as_py())
+            w = float(table["width_m"][i].as_py())
+            h = float(table["height_m"][i].as_py())
+            qw = float(table["qw"][i].as_py())
+            qx = float(table["qx"][i].as_py())
+            qy = float(table["qy"][i].as_py())
+            qz = float(table["qz"][i].as_py())
+            yaw = math.atan2(2.0 * (qw * qz + qx * qy), 1.0 - 2.0 * (qy * qy + qz * qz))
+            label = table["category"][i].as_py() if "category" in table.column_names else None
+            boxes.append(DetectionBox(
+                center=np.array([tx, ty, tz]),
+                size=np.array([l, w, h]),
+                yaw=yaw,
+                label=label,
+            ))
+        except Exception as exc:
+            if skip_invalid:
+                _eprint(f"skip invalid AV2 annotation row {i}: {exc}")
+                continue
+            raise
+    return boxes
+
+
 def load_boxes(
     path: Path,
     *,
     fmt: str,
     skip_invalid: bool,
     calib_path: Path | None = None,
+    timestamp_ns: int | None = None,
 ) -> list[DetectionBox]:
     fmt = fmt.lower()
     if fmt == "auto":
         if path.suffix.lower() in {".json", ".jsn"}:
             fmt = "json"
+        elif path.suffix.lower() == ".feather":
+            fmt = "av2"
         elif path.suffix.lower() in {".csv", ".tsv", ".txt"}:
             fmt = "csv"
         else:
@@ -333,6 +387,8 @@ def load_boxes(
         return _load_boxes_from_csv(path, skip_invalid=skip_invalid)
     if fmt == "kitti":
         return _load_boxes_from_kitti(path, calib_path=calib_path, skip_invalid=skip_invalid)
+    if fmt == "av2":
+        return _load_boxes_from_av2_feather(path, timestamp_ns=timestamp_ns, skip_invalid=skip_invalid)
     raise ValueError(f"unsupported box format: {fmt}")
 
 
@@ -506,6 +562,22 @@ def _load_kitti_bin(path: Path) -> np.ndarray:
     return points[:, :3].astype(np.float64)
 
 
+def _load_feather_points(path: Path) -> np.ndarray:
+    """Load point cloud from Apache Feather file (Argoverse 2 format)."""
+    try:
+        import pyarrow.feather as feather
+    except ImportError as exc:
+        raise ImportError("pyarrow is required to load .feather files: pip install pyarrow") from exc
+    table = feather.read_table(path)
+    if not all(c in table.column_names for c in ("x", "y", "z")):
+        raise ValueError(f"feather file must have x,y,z columns: {path}")
+    return np.column_stack([
+        table["x"].to_numpy(zero_copy_only=False),
+        table["y"].to_numpy(zero_copy_only=False),
+        table["z"].to_numpy(zero_copy_only=False),
+    ]).astype(np.float64)
+
+
 def load_points(path: Path, *, fmt: str) -> np.ndarray:
     fmt = fmt.lower()
     if fmt == "auto":
@@ -515,6 +587,8 @@ def load_points(path: Path, *, fmt: str) -> np.ndarray:
             fmt = "pcd"
         elif path.suffix.lower() == ".bin":
             fmt = "bin"
+        elif path.suffix.lower() == ".feather":
+            fmt = "feather"
         elif path.suffix.lower() in {".csv", ".txt", ".xyz", ".pts", ".tsv"}:
             fmt = "text"
         else:
@@ -530,6 +604,8 @@ def load_points(path: Path, *, fmt: str) -> np.ndarray:
         return _load_pcd(path)
     if fmt == "bin":
         return _load_kitti_bin(path)
+    if fmt == "feather":
+        return _load_feather_points(path)
     if fmt == "text":
         return _load_points_csv_or_txt(path)
     raise ValueError(f"unsupported cloud format: {fmt}")
@@ -668,9 +744,10 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--input-cloud", required=True, help="Input point cloud path (csv/txt/xyz/pcd/npy).")
     parser.add_argument("--input-objects", required=True, help="Detected object boxes JSON or CSV path.")
     parser.add_argument("--output-cloud", required=True, help="Output point cloud path.")
-    parser.add_argument("--cloud-format", default="auto", choices=["auto", "csv", "pcd", "text", "npy", "bin"], help="Output/input point cloud format.")
-    parser.add_argument("--objects-format", default="auto", choices=["auto", "json", "csv", "kitti"], help="Object file format.")
+    parser.add_argument("--cloud-format", default="auto", choices=["auto", "csv", "pcd", "text", "npy", "bin", "feather"], help="Output/input point cloud format.")
+    parser.add_argument("--objects-format", default="auto", choices=["auto", "json", "csv", "kitti", "av2"], help="Object file format.")
     parser.add_argument("--calib-path", default=None, help="KITTI calibration file path (required when --objects-format=kitti).")
+    parser.add_argument("--timestamp-ns", type=int, default=None, help="Filter AV2 annotations by timestamp (nanoseconds).")
     parser.add_argument("--box-margin", nargs=3, type=float, default=list(DEFAULT_BOX_MARGIN), metavar=("X", "Y", "Z"), help="Safety margin around each box (meters).")
     parser.add_argument("--skip-invalid", action="store_true", help="Skip invalid object entries instead of stopping.")
     parser.add_argument("--min-size", type=float, default=0.01, help="Skip boxes smaller than this size in any axis.")
@@ -721,7 +798,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 1
 
     calib = Path(args.calib_path) if args.calib_path else None
-    boxes = load_boxes(obj_path, fmt=args.objects_format, skip_invalid=args.skip_invalid, calib_path=calib)
+    boxes = load_boxes(
+        obj_path,
+        fmt=args.objects_format,
+        skip_invalid=args.skip_invalid,
+        calib_path=calib,
+        timestamp_ns=args.timestamp_ns,
+    )
     boxes = _filter_small_boxes(boxes, args.min_size)
 
     if not boxes:

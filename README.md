@@ -1,5 +1,9 @@
 # Dynamic 3D Object Removal
 
+[![Tests](https://github.com/rsasaki0109/dynamic-3d-object-removal/actions/workflows/test.yml/badge.svg)](https://github.com/rsasaki0109/dynamic-3d-object-removal/actions/workflows/test.yml)
+[![GitHub Pages](https://github.com/rsasaki0109/dynamic-3d-object-removal/actions/workflows/gh-pages.yml/badge.svg)](https://github.com/rsasaki0109/dynamic-3d-object-removal/actions/workflows/gh-pages.yml)
+[![Release](https://img.shields.io/github/v/release/rsasaki0109/dynamic-3d-object-removal)](https://github.com/rsasaki0109/dynamic-3d-object-removal/releases)
+
 **GPU 不要・numpy only・幾何ベース** — LiDAR 点群から動的物体を除去するライブラリ。Deep learning を使わず、3D bounding box の幾何 crop だけで動的物体を高速に除去します。
 
 ![Before/After](demo/av2_before_after.png)

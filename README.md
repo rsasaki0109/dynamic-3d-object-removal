@@ -6,6 +6,8 @@
 
 **GPU 不要・numpy only・幾何ベース** — LiDAR 点群から動的物体を除去するライブラリ。Deep learning を使わず、3D bounding box の幾何 crop と voxel-based temporal filter だけで、moving-object contamination を accumulated map から落とします。
 
+English: Numpy-only dynamic object removal for LiDAR point clouds using 3D box crop and temporal filtering. Public AV2 demos and a ROS2 realtime node are included.
+
 ## まずはこれ
 
 - **AV2 public sequence demo**: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_sequence_av2.html

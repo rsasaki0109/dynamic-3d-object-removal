@@ -58,12 +58,13 @@
   <body>
     <div class="wrap">
       <h1>Dynamic 3D Object Removal</h1>
-      <p>動的物体除去アルゴリズムの結果を、単発実スキャンと raw-vs-cleaned の連続比較デモで閲覧できます。単発スキャンは per-frame box による除去、連続デモは temporal consistency ベースの cleaned accumulation です。per-frame box がある場合は <code>--input-objects</code> で box-driven な sequence を再生成できます。</p>
+      <p>動的物体除去アルゴリズムの結果を、単発実スキャン、local sequence proof demo、AV2 public sequence demo で閲覧できます。単発スキャンは per-frame box による除去、local sequence は temporal consistency ベース、AV2 sequence は pose-aligned な per-frame box 除去です。</p>
       <div class="card">
         <strong>3Dインタラクティブ表示</strong>
         <div class="links">
           <a class="btn" href="demo/index_3d_standalone.html">単発実スキャン</a>
           <a class="btn alt" href="demo/index_3d_sequence_standalone.html">連続比較デモ / ghost proof</a>
+          <a class="btn alt" href="demo/index_3d_sequence_av2.html">AV2 公開 sequence demo</a>
         </div>
       </div>
       <div class="meta">

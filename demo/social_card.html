@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dynamic 3D Object Removal Social Card</title>
+    <style>
+      :root {
+        --bg: #f4f8fb;
+        --panel: rgba(255, 255, 255, 0.88);
+        --line: rgba(15, 23, 42, 0.10);
+        --text: #102033;
+        --muted: #51657a;
+        --accent: #0f766e;
+        --accent-strong: #115e59;
+        --warm: #c2410c;
+      }
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+        font-family: "Trebuchet MS", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+        color: var(--text);
+      }
+      body {
+        background:
+          radial-gradient(circle at 10% 10%, rgba(194, 65, 12, 0.10), transparent 22%),
+          radial-gradient(circle at 92% 8%, rgba(15, 118, 110, 0.16), transparent 22%),
+          linear-gradient(180deg, #fbfdff 0%, #edf4f9 46%, #f7fafc 100%);
+      }
+      .frame {
+        width: 100%;
+        height: 100%;
+        padding: 34px;
+      }
+      .shell {
+        width: 100%;
+        height: 100%;
+        display: grid;
+        grid-template-columns: 1.02fr 1fr;
+        gap: 20px;
+      }
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 32px;
+        background: var(--panel);
+        box-shadow: 0 26px 70px rgba(15, 23, 42, 0.10);
+        backdrop-filter: blur(14px);
+      }
+      .copy {
+        padding: 28px 30px;
+        display: flex;
+        flex-direction: column;
+      }
+      .eyebrow {
+        display: inline-flex;
+        width: fit-content;
+        align-items: center;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(15, 118, 110, 0.10);
+        color: var(--accent-strong);
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      h1 {
+        margin: 18px 0 12px;
+        font-size: 64px;
+        line-height: 0.94;
+        letter-spacing: -0.05em;
+      }
+      .lead {
+        margin: 0;
+        color: var(--muted);
+        font-size: 24px;
+        line-height: 1.52;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: auto;
+      }
+      .stat {
+        padding: 16px 14px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.90);
+        border: 1px solid rgba(15, 23, 42, 0.08);
+      }
+      .stat strong {
+        display: block;
+        font-size: 30px;
+        line-height: 1.0;
+      }
+      .stat span {
+        display: block;
+        margin-top: 7px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.4;
+      }
+      .visual {
+        padding: 18px;
+        display: grid;
+        grid-template-rows: 1.1fr 0.9fr;
+        gap: 16px;
+      }
+      .image-card {
+        position: relative;
+        overflow: hidden;
+        border-radius: 24px;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        background: #09111f;
+      }
+      .image-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .badge {
+        position: absolute;
+        left: 14px;
+        bottom: 14px;
+        padding: 8px 10px;
+        border-radius: 999px;
+        background: rgba(9, 17, 31, 0.72);
+        color: #e6f2f4;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+      }
+      .proof {
+        display: grid;
+        gap: 10px;
+      }
+      .proof-item {
+        padding: 14px 16px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.88);
+        border: 1px solid rgba(15, 23, 42, 0.08);
+      }
+      .proof-item strong {
+        display: block;
+        font-size: 18px;
+      }
+      .proof-item span {
+        display: block;
+        margin-top: 5px;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.45;
+      }
+      .footer {
+        position: absolute;
+        right: 26px;
+        bottom: 20px;
+        color: var(--warm);
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <div class="shell">
+        <section class="panel copy">
+          <div class="eyebrow">Public AV2 Demo</div>
+          <h1>Clean Dynamic Objects Out of LiDAR Maps</h1>
+          <p class="lead">Numpy-only 3D box crop + temporal filtering. Public AV2 proof demos and a ROS2 realtime node included.</p>
+          <div class="stats">
+            <div class="stat">
+              <strong>20 frames</strong>
+              <span>pose-aligned AV2 accumulated map</span>
+            </div>
+            <div class="stat">
+              <strong>2M points</strong>
+              <span>raw map-scale proof scene</span>
+            </div>
+            <div class="stat">
+              <strong>233k removed</strong>
+              <span>ghost points removed, 11.9%</span>
+            </div>
+          </div>
+        </section>
+        <section class="panel visual">
+          <div class="image-card">
+            <img src="av2_before_after.png" alt="AV2 before and after dynamic object removal proof" />
+            <div class="badge">raw accumulation vs cleaned accumulation</div>
+          </div>
+          <div class="proof">
+            <div class="proof-item">
+              <strong>Ghost contamination becomes visible</strong>
+              <span>Accumulating moving objects leaves raw-only clutter in the map.</span>
+            </div>
+            <div class="proof-item">
+              <strong>Cleaned accumulation reduces it</strong>
+              <span>Static structure stays while dynamic contamination is suppressed.</span>
+            </div>
+          </div>
+        </section>
+      </div>
+      <div class="footer">rsasaki0109.github.io/dynamic-3d-object-removal</div>
+    </div>
+  </body>
+</html>

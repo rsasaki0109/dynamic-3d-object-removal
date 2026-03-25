@@ -4,7 +4,19 @@
 [![GitHub Pages](https://github.com/rsasaki0109/dynamic-3d-object-removal/actions/workflows/gh-pages.yml/badge.svg)](https://github.com/rsasaki0109/dynamic-3d-object-removal/actions/workflows/gh-pages.yml)
 [![Release](https://img.shields.io/github/v/release/rsasaki0109/dynamic-3d-object-removal)](https://github.com/rsasaki0109/dynamic-3d-object-removal/releases)
 
-**GPU 不要・numpy only・幾何ベース** — LiDAR 点群から動的物体を除去するライブラリ。Deep learning を使わず、3D bounding box の幾何 crop だけで動的物体を高速に除去します。
+**GPU 不要・numpy only・幾何ベース** — LiDAR 点群から動的物体を除去するライブラリ。Deep learning を使わず、3D bounding box の幾何 crop と voxel-based temporal filter だけで、moving-object contamination を accumulated map から落とします。
+
+## まずはこれ
+
+- **AV2 public sequence demo**: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_sequence_av2.html
+- **Single-scan demo**: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_standalone.html
+- **Local sequence proof demo**: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_sequence_standalone.html
+
+この repo で最初に見せたい証拠:
+
+- **20-frame AV2 accumulated map** を pose-aligned に比較できる
+- **2M 点規模の raw accumulation** から **233k の ghost points (11.9%)** を除去できる
+- **動的物体の残像は減り、道路・建物などの静的構造は残る**
 
 ![Before/After](demo/av2_before_after.png)
 
@@ -18,33 +30,22 @@
 - **高速**: 24k 点で 1.5ms (CPU)。リアルタイム処理に十分
 - **ROS2 リアルタイムノード**: `PointCloud2` を subscribe → filter → publish。box / temporal の 2 アルゴリズム切り替え
 - **軽量依存**: `numpy` のみ（Argoverse 2 形式を使う場合は `pyarrow` も必要）
-- **多形式対応**: PCD, KITTI, Argoverse 2, CSV, NPY 等 7 形式の点群 + 4 形式の box
+- **公開 proof 付き**: 単発スキャン、local sequence proof、AV2 public sequence demo を checked-in
 
-## まずはこれ
-
-メインの公開デモ:
-
-- Sequence proof demo (local real sequence + temporal consistency): https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_sequence_standalone.html
-- AV2 public sequence demo (20 frames + pose-aligned + per-frame boxes): https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_sequence_av2.html
-
-単発スキャン版:
-
-- Single-scan demo: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_standalone.html
-
-Sequence demo では次の 3 点を見せます。
+Sequence demo で示したいこと:
 
 - 動的物体による不要な点群が accumulated map に残る
 - cleaned accumulation はそれを抑える
 - 静的構造は残る
 
-![story mode preview](demo/story_mode.gif)
-
 補足:
 
-- checked-in の sequence proof demo は repo 内に per-frame box JSON が無いため、cleaned 側を `temporal consistency` ベースで作っています
+- checked-in の local sequence proof demo は repo 内に per-frame box JSON が無いため、cleaned 側を `temporal consistency` ベースで作っています
 - AV2 public sequence demo は `annotations.feather` + `city_SE3_egovehicle.feather` で pose-aligned な box-driven accumulation を使っています
 - per-frame box がある場合は `--input-objects` を渡して box-driven な sequence を再生成できます
 - accumulated map として共通座標に揃える場合は `--input-poses` も渡します
+
+![story mode preview](demo/story_mode.gif)
 
 ## インストール
 

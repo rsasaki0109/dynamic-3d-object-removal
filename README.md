@@ -1,12 +1,20 @@
 # Dynamic 3D Object Removal
 
+**GPU 不要・numpy only・幾何ベース** — LiDAR 点群から動的物体を除去するライブラリ。Deep learning を使わず、3D bounding box の幾何 crop だけで動的物体を高速に除去します。
+
 ![Before/After](demo/av2_before_after.png)
 
 ![Ghost Trail Close-up](demo/av2_zoom.png)
 
 > Argoverse 2 実データ — 20 フレーム accumulated map (2M 点) から 233k の ghost points (11.9%) を除去
 
-3D バウンディングボックスを使って、点群から動的物体を除去するライブラリです。
+### 特徴
+
+- **Deep learning 不要**: 検出済み 3D box を入力するだけ。GPU・学習データ・推論時間は不要
+- **高速**: 24k 点で 1.5ms (CPU)。リアルタイム処理に十分
+- **ROS2 リアルタイムノード**: `PointCloud2` を subscribe → filter → publish。box / temporal の 2 アルゴリズム切り替え
+- **軽量依存**: `numpy` のみ（Argoverse 2 形式を使う場合は `pyarrow` も必要）
+- **多形式対応**: PCD, KITTI, Argoverse 2, CSV, NPY 等 7 形式の点群 + 4 形式の box
 
 ## まずはこれ
 
@@ -111,6 +119,30 @@ dynamic-object-removal \
 
 ```bash
 dynamic-object-removal --help
+```
+
+## ROS2 リアルタイムノード
+
+`PointCloud2` トピックをリアルタイムで filter して publish します。
+
+```bash
+# Box-driven removal (検出トピックと連携)
+dynamic-object-removal-realtime \
+  --pointcloud-topic /velodyne_points \
+  --objects-topic /detected_objects \
+  --output-topic /cleaned_points \
+  --algorithm box
+
+# Temporal consistency (検出器なしで動的物体を除去)
+dynamic-object-removal-realtime \
+  --pointcloud-topic /velodyne_points \
+  --output-topic /cleaned_points \
+  --algorithm temporal \
+  --voxel-size 0.10 --temporal-window 5 --temporal-min-hits 3
+```
+
+```bash
+dynamic-object-removal-realtime --help
 ```
 
 ## ライブラリ API

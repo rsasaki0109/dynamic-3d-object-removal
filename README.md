@@ -4,7 +4,7 @@
 [![GitHub Pages](https://github.com/rsasaki0109/dynamic-3d-object-removal/actions/workflows/gh-pages.yml/badge.svg)](https://github.com/rsasaki0109/dynamic-3d-object-removal/actions/workflows/gh-pages.yml)
 [![Release](https://img.shields.io/github/v/release/rsasaki0109/dynamic-3d-object-removal)](https://github.com/rsasaki0109/dynamic-3d-object-removal/releases)
 
-**GPU 不要・numpy only・幾何ベース** — LiDAR 点群から動的物体を除去するライブラリ。Deep learning を使わず、3D bounding box の幾何 crop と voxel-based temporal filter だけで、moving-object contamination を accumulated map から落とします。
+**GPU 不要・numpy only・幾何ベース** — LiDAR 点群から動的物体を除去するライブラリ。Deep learning を使わず、単発スキャンでは 3D bounding box の幾何 crop で、multi-frame では voxel-based temporal filter で、moving-object contamination を落とします。
 
 English: Numpy-only dynamic object removal for LiDAR point clouds using 3D box crop and temporal filtering. Public AV2 demos and a ROS2 realtime node are included.
 
@@ -20,11 +20,14 @@ English: Numpy-only dynamic object removal for LiDAR point clouds using 3D box c
 - **2M 点規模の raw accumulation** から **233k の ghost points (11.9%)** を除去できる
 - **動的物体の残像は減り、道路・建物などの静的構造は残る**
 
+この 2 枚の hero image は **1 スキャンではなく 20 フレームを蓄積した accumulated map** です。
+単発スキャンの除去例は `Quick start` と `Single-scan demo` で確認できます。
+
 ![Before/After](demo/av2_before_after.png)
 
 ![Ghost Trail Close-up](demo/av2_zoom.png)
 
-> Argoverse 2 実データ — 20 フレーム accumulated map (2M 点) から 233k の ghost points (11.9%) を除去
+> Argoverse 2 実データの 20 フレーム accumulated map。単発スキャン比較ではなく、map accumulation 上の ghost cleanup proof として 233k の ghost points (11.9%) を除去
 
 ### 特徴
 

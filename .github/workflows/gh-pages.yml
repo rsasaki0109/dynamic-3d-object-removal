@@ -32,10 +32,13 @@ jobs:
           mkdir -p _site
           cp -r demo _site/demo
           cp index.html _site/index.html
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4.0.0
+          tar -czf github-pages.tar.gz -C _site .
+      - name: Upload Pages artifact
+        uses: actions/upload-artifact@v7.0.0
         with:
-          path: _site
+          name: github-pages
+          path: github-pages.tar.gz
+          retention-days: 1
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5.0.0

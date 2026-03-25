@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import glob
 import json
+import math
 import sys
 from pathlib import Path
 from typing import Any
@@ -19,6 +20,7 @@ if str(ROOT) not in sys.path:
 from dynamic_object_removal import (  # noqa: E402
     DEFAULT_BOX_MARGIN,
     TemporalConsistencyFilter,
+    load_boxes,
     load_points,
     parse_boxes_payload,
     remove_points_in_boxes,
@@ -1968,7 +1970,8 @@ HTML_TEMPLATE = r'''<!doctype html>
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input-glob", required=True, help="glob for frame clouds, e.g. /path/to/graph/*/cloud.pcd")
-    parser.add_argument("--input-objects", help="optional JSON file. Either one global box payload or a frame-name -> payload map")
+    parser.add_argument("--input-objects", help="optional box source. JSON payload / frame map, or a load_boxes-compatible file such as AV2 annotations.feather")
+    parser.add_argument("--input-poses", type=Path, help="optional shared-frame pose file. AV2 city_SE3_egovehicle.feather is supported")
     parser.add_argument("--start-index", type=int, default=0)
     parser.add_argument("--frame-count", type=int, default=DEFAULT_FRAME_COUNT)
     parser.add_argument("--stride", type=int, default=1)
@@ -2060,13 +2063,114 @@ def _is_global_box_payload(raw: Any) -> bool:
     return bool(keys & global_keys)
 
 
-def _load_boxes_spec(path: Path) -> Any:
-    return json.loads(path.read_text(encoding="utf-8"))
+def _load_boxes_source(path: Path) -> Any:
+    if path.suffix.lower() == ".json":
+        return json.loads(path.read_text(encoding="utf-8"))
+    return path
+
+
+def _frame_timestamp_ns(frame_path: Path) -> int | None:
+    stem = frame_path.stem
+    return int(stem) if stem.isdigit() else None
+
+
+def _quat_wxyz_to_rotation_matrix(qw: float, qx: float, qy: float, qz: float) -> np.ndarray:
+    norm = math.sqrt(qw * qw + qx * qx + qy * qy + qz * qz)
+    if norm == 0.0:
+        raise ValueError("invalid quaternion in pose file")
+    w = qw / norm
+    x = qx / norm
+    y = qy / norm
+    z = qz / norm
+    return np.array(
+        [
+            [1.0 - 2.0 * (y * y + z * z), 2.0 * (x * y - z * w), 2.0 * (x * z + y * w)],
+            [2.0 * (x * y + z * w), 1.0 - 2.0 * (x * x + z * z), 2.0 * (y * z - x * w)],
+            [2.0 * (x * z - y * w), 2.0 * (y * z + x * w), 1.0 - 2.0 * (x * x + y * y)],
+        ],
+        dtype=np.float64,
+    )
+
+
+def _load_pose_map(path: Path) -> dict[int, tuple[np.ndarray, np.ndarray]]:
+    if path.suffix.lower() != ".feather":
+        raise ValueError(f"unsupported pose format: {path.suffix}")
+    try:
+        import pyarrow.feather as feather
+    except ImportError as exc:
+        raise ImportError("pyarrow is required to load pose .feather files: pip install pyarrow") from exc
+
+    table = feather.read_table(path)
+    required = ("timestamp_ns", "qw", "qx", "qy", "qz", "tx_m", "ty_m", "tz_m")
+    missing = [name for name in required if name not in table.column_names]
+    if missing:
+        raise ValueError(f"pose file missing required columns {missing}: {path}")
+
+    cols = {name: table[name].to_pylist() for name in required}
+    pose_map: dict[int, tuple[np.ndarray, np.ndarray]] = {}
+    for idx in range(len(cols["timestamp_ns"])):
+        timestamp_ns = int(cols["timestamp_ns"][idx])
+        rotation = _quat_wxyz_to_rotation_matrix(
+            float(cols["qw"][idx]),
+            float(cols["qx"][idx]),
+            float(cols["qy"][idx]),
+            float(cols["qz"][idx]),
+        )
+        translation = np.array(
+            [float(cols["tx_m"][idx]), float(cols["ty_m"][idx]), float(cols["tz_m"][idx])],
+            dtype=np.float64,
+        )
+        pose_map[timestamp_ns] = (rotation, translation)
+    return pose_map
+
+
+def _lookup_pose(
+    pose_map: dict[int, tuple[np.ndarray, np.ndarray]],
+    frame_path: Path,
+) -> tuple[np.ndarray, np.ndarray]:
+    timestamp_ns = _frame_timestamp_ns(frame_path)
+    if timestamp_ns is None:
+        raise ValueError(f"cannot derive timestamp_ns from frame name: {frame_path.name}")
+    if timestamp_ns not in pose_map:
+        raise ValueError(f"pose timestamp not found for frame: {frame_path.name}")
+    return pose_map[timestamp_ns]
+
+
+def _transform_points_with_pose(
+    points: np.ndarray,
+    rotation: np.ndarray,
+    translation: np.ndarray,
+) -> np.ndarray:
+    xyz = np.asarray(points, dtype=np.float64)
+    if xyz.ndim != 2 or xyz.shape[1] < 3:
+        raise ValueError("points must have shape (N,3+)")
+    return xyz[:, :3] @ rotation.T + translation.reshape(1, 3)
+
+
+def _transform_boxes_with_pose(
+    boxes: list[Any],
+    rotation: np.ndarray,
+    translation: np.ndarray,
+) -> list[Any]:
+    transformed = []
+    for box in boxes:
+        center = rotation @ np.asarray(box.center, dtype=np.float64) + translation
+        heading = rotation @ np.array([math.cos(float(box.yaw)), math.sin(float(box.yaw)), 0.0], dtype=np.float64)
+        yaw = math.atan2(float(heading[1]), float(heading[0]))
+        transformed.append(type(box)(center=center, size=box.size, yaw=yaw, label=box.label))
+    return transformed
 
 
 def _resolve_boxes(spec: Any, frame_path: Path) -> list[Any]:
     if spec is None:
         return []
+    if isinstance(spec, Path):
+        return load_boxes(
+            spec,
+            fmt="auto",
+            skip_invalid=True,
+            timestamp_ns=_frame_timestamp_ns(frame_path),
+        )
     if _is_global_box_payload(spec):
         return parse_boxes_payload(spec, skip_invalid=True)
     if not isinstance(spec, dict):
@@ -2144,7 +2248,8 @@ def main() -> None:
     if not selected:
         raise SystemExit("selection is empty; adjust --start-index / --frame-count / --stride")
 
-    boxes_spec = _load_boxes_spec(Path(args.input_objects)) if args.input_objects else None
+    boxes_spec = _load_boxes_source(Path(args.input_objects)) if args.input_objects else None
+    pose_map = _load_pose_map(args.input_poses) if args.input_poses else None
     mode = "boxes" if boxes_spec is not None else "temporal_consistency"
     temporal_filter = None if mode == "boxes" else TemporalConsistencyFilter(
         voxel_size=args.voxel_size,
@@ -2170,12 +2275,18 @@ def main() -> None:
         if points.size == 0:
             continue
 
-        center = np.asarray(points[:, :3].mean(axis=0), dtype=np.float64)
+        aligned_full = np.asarray(points[:, :3], dtype=np.float64)
+        boxes = _resolve_boxes(boxes_spec, path) if boxes_spec is not None else []
+        if pose_map is not None:
+            rotation, translation = _lookup_pose(pose_map, path)
+            aligned_full = _transform_points_with_pose(aligned_full, rotation, translation)
+            boxes = _transform_boxes_with_pose(boxes, rotation, translation)
+
+        center = np.asarray(aligned_full.mean(axis=0), dtype=np.float64)
         if origin is None:
             origin = center.copy()
 
-        shifted_full = np.asarray(points[:, :3], dtype=np.float64) - origin
-        boxes = _resolve_boxes(boxes_spec, path) if boxes_spec is not None else []
+        shifted_full = aligned_full - origin
         shifted_boxes = []
         for box in boxes:
             shifted_center = np.asarray(box.center, dtype=np.float64) - origin
@@ -2258,15 +2369,27 @@ def main() -> None:
     bev_bounds = _merge_bounds(clean_bounds, ghost_bounds)
 
     if mode == "boxes":
-        source_note = (
-            "checked-in sequence demo uses per-frame boxes for cleaned accumulation. "
-            "raw keeps all observations, cleaned keeps points after box removal."
-        )
+        if pose_map is not None:
+            source_note = (
+                "frames are aligned with the supplied poses before accumulation. "
+                "raw keeps all observations in the shared frame, cleaned keeps points after per-frame box removal."
+            )
+        else:
+            source_note = (
+                "checked-in sequence demo uses per-frame boxes for cleaned accumulation. "
+                "raw keeps all observations, cleaned keeps points after box removal."
+            )
     else:
-        source_note = (
-            f"checked-in sequence demo uses a real local multi-frame sequence and temporal consistency ({args.voxel_size:.2f}m / {args.window_size} / {args.min_hits}) "
-            "for the cleaned side. raw keeps everything that was observed; cleaned keeps only persistent structure."
-        )
+        if pose_map is not None:
+            source_note = (
+                f"frames are aligned with the supplied poses before accumulation, then temporal consistency ({args.voxel_size:.2f}m / {args.window_size} / {args.min_hits}) "
+                "keeps only persistent structure in the shared frame."
+            )
+        else:
+            source_note = (
+                f"checked-in sequence demo uses a real local multi-frame sequence and temporal consistency ({args.voxel_size:.2f}m / {args.window_size} / {args.min_hits}) "
+                "for the cleaned side. raw keeps everything that was observed; cleaned keeps only persistent structure."
+            )
 
     scene = {
         "meta": {
@@ -2283,6 +2406,7 @@ def main() -> None:
             "final_clean_voxels": len(clean_voxels_accum),
             "final_ghost_voxels": len(final_ghost_voxels),
             "final_ghost_ratio_pct": round(100.0 * len(final_ghost_voxels) / max(1, len(raw_voxels_accum)), 2),
+            "alignment_mode": "pose" if pose_map is not None else "first_frame_center",
             "source_note": source_note,
         },
         "limits": _finalize_limits(limits),

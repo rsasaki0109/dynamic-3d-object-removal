@@ -20,7 +20,8 @@
 
 メインの公開デモ:
 
-- Sequence proof demo: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_sequence_standalone.html
+- Sequence proof demo (local real sequence + temporal consistency): https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_sequence_standalone.html
+- AV2 public sequence demo (20 frames + pose-aligned + per-frame boxes): https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_sequence_av2.html
 
 単発スキャン版:
 
@@ -36,13 +37,15 @@ Sequence demo では次の 3 点を見せます。
 
 補足:
 
-- 公開中の sequence demo は repo 内に per-frame box JSON が無いため、cleaned 側を `temporal consistency` ベースで作っています
+- checked-in の sequence proof demo は repo 内に per-frame box JSON が無いため、cleaned 側を `temporal consistency` ベースで作っています
+- AV2 public sequence demo は `annotations.feather` + `city_SE3_egovehicle.feather` で pose-aligned な box-driven accumulation を使っています
 - per-frame box がある場合は `--input-objects` を渡して box-driven な sequence を再生成できます
+- accumulated map として共通座標に揃える場合は `--input-poses` も渡します
 
 ## インストール
 
 ```bash
-git clone git@github.com:rsasaki0109/dynamic-3d-object-removal.git
+git clone https://github.com/rsasaki0109/dynamic-3d-object-removal.git
 cd dynamic-3d-object-removal
 python3 -m pip install -e .
 ```
@@ -106,6 +109,7 @@ python3 demo/run_scan_sequence_demo.py \
 
 - `--input-objects` を渡すと、cleaned 側を per-frame box 除去ベースで生成できます
 - `--input-objects` は 1 つの box payload でも `frame name -> payload` の map JSON でも受けられます
+- `--input-objects /path/to/annotations.feather --input-poses /path/to/city_SE3_egovehicle.feather` で AV2 を共通座標に揃えた public sequence を生成できます
 - checked-in HTML は sampled point 群を内包する self-contained 形式です
 
 ## CLI

@@ -41,6 +41,7 @@ demo/
 ├── run_scan_sequence_demo.py # マルチフレーム → sequence HTML 生成
 ├── index_3d_standalone.html  # 単発スキャンデモ (GitHub Pages)
 ├── index_3d_sequence_standalone.html  # sequence デモ (GitHub Pages)
+├── index_3d_sequence_av2.html  # AV2 public sequence デモ (GitHub Pages)
 ├── index_3d_av2.html       # Argoverse 2 単発デモ
 ├── av2_before_after.png    # README hero (3-panel: Before/Ghost/After)
 ├── av2_zoom.png            # README hero (zoomed close-up)
@@ -52,7 +53,8 @@ scripts/
 
 tests/
 ├── conftest.py             # 共有 fixture
-└── test_dynamic_object_removal.py  # 57 テスト
+├── test_dynamic_object_removal.py  # コアライブラリの回帰テスト
+└── test_sequence_demo.py   # sequence demo の pose / AV2 回帰テスト
 ```
 
 ---
@@ -70,16 +72,16 @@ tests/
   - 3-panel (Before / Ghost only / After) + zoomed close-up
   - 2M 点, 233k ghost points (11.9%) 除去
 - [x] GitHub Pages デモ: sequence + 単発スキャン + AV2
-- [x] テスト 57 件 (DetectionBox, load_points, load_boxes, KITTI, remove, temporal filter, save, CLI)
+- [x] AV2 public sequence demo: `annotations.feather` + `city_SE3_egovehicle.feather` から 20 フレームの pose-aligned / box-driven HTML を生成
+- [x] テスト 64 件 (DetectionBox, load_points, load_boxes, KITTI, remove, temporal filter, save, CLI, sequence demo pose / AV2)
 - [x] Dogfooding: fresh clone → install → quick start の全フローを検証済み
   - 発見・修正: output dir 自動作成, margin デフォルト値, timestamp_ns 未指定時の warning
 - [x] メッセージ整合: README / index.html / demo/index.html で temporal consistency ベースを明示
+- [x] CI: `.github/workflows/test.yml` で `pytest` を実行
 
 ### 未完了
 
 - [ ] hero image のインパクト向上の余地（後述）
-- [ ] 第二の sequence demo（AV2 ベースの multi-frame sequence HTML）
-- [ ] CI (GitHub Actions で pytest を回す)
 - [ ] PyPI publish (0.1.0 は未 publish)
 
 ---
@@ -207,36 +209,14 @@ GitHub repo の About (description + topics) を設定する。
 
 優先度: 低（現状で十分なインパクト）
 
-### 3. AV2 multi-frame sequence HTML demo
-
-AV2 の 20 フレームを使って `run_scan_sequence_demo.py` で sequence HTML を生成し、GitHub Pages に追加。
-公開データのみで再現可能な sequence proof になる。
-
-必要なもの:
-- ego pose で各フレームを共通座標系に変換する機能の追加（現在 demo スクリプトにはない）
-- または ego frame のまま各フレームを独立に clean して sequence 表示
-
-優先度: 中
-
-### 4. CI (GitHub Actions)
-
-```yaml
-# .github/workflows/test.yml
-- python3 -m pytest tests/ -v
-```
-
-numpy のみ依存なので設定は簡単。KITTI sample は `download_kitti_sample.py` で生成すれば CI 内で完結。
-
-優先度: 中
-
-### 5. PyPI publish
+### 3. PyPI publish
 
 `pyproject.toml` は整備済み。`twine upload` するだけ。
 バージョンは 0.1.0。
 
 優先度: 低
 
-### 6. 検出器との統合例
+### 4. 検出器との統合例
 
 CenterPoint / PointPillars の出力を `load_boxes()` に食わせるチュートリアル。
 これがあると「検出→除去」のエンドツーエンドが見えて、ユーザーの導入障壁が下がる。

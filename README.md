@@ -8,6 +8,12 @@
 
 ## Start Here
 
+- **🕹️ Interactive browser playground (no install)**: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/playground.html — the real `numpy` library runs in your browser via Pyodide. Drop your own LiDAR scan and watch dynamic objects get removed in 3D.
+
+  [![Browser playground demo](demo/playground_demo.gif)](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/playground.html)
+
+  > The exact `dynamic_object_removal.py` from this repo, running client-side on a 95k-point Argoverse 2 scan. No GPU, no upload, no signup.
+
 - **AV2 public sequence demo**: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_sequence_av2.html
 - **Single-scan demo**: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_standalone.html
 - **Local sequence proof demo**: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_sequence_standalone.html
@@ -48,6 +54,22 @@ Notes:
 - If you want multiple frames aligned into a shared map frame, also pass `--input-poses`
 
 ![story mode preview](demo/story_mode.gif)
+
+## How It Compares
+
+Two well-known geometry-based (no deep learning) dynamic-removal methods are [ERASOR](https://github.com/LimHyungTae/ERASOR) (RA-L/ICRA '21) and [Removert](https://github.com/gisbi-kim/removert) (IROS '20). They solve a **different** problem than this project: they clean a *finished, pose-aligned accumulated map offline*. This project focuses on *online, per-scan* removal. The table is a positioning guide to help you pick the right tool — **not** a re-run benchmark.
+
+| | **This project** | ERASOR | Removert |
+|---|---|---|---|
+| Primary goal | Per-scan / realtime removal | Offline static-map cleaning | Offline static-map cleaning |
+| Needs a detector / 3D boxes | `box`: yes · `temporal`: no | No | No |
+| Needs poses | No (single scan) | Yes (map + poses) | Yes (scans + poses) |
+| Online / realtime | **Yes** (ROS2 node) | No (batch) | No (batch) |
+| Deep learning | No | No | No |
+| Core stack | `numpy` only | C++ / ROS / PCL | C++ / ROS / PCL |
+| Best when | Filtering live in a SLAM pipeline, or a quick per-scan cleanup | Cleaning a completed accumulated map | Fine-refining a static map after a coarse pass |
+
+If you need a detector-free, map-level cleaner for a finished sequence, ERASOR / Removert are excellent and purpose-built for it. If you want a tiny dependency-free filter you can run per scan (or live over ROS2) — and you already have boxes or are fine with voxel temporal consistency — this project is the lighter fit. Characteristics above are from each method's paper and repository, not re-measured here.
 
 ## Installation
 

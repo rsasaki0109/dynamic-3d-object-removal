@@ -32,6 +32,8 @@ jobs:
           mkdir -p _site
           cp -r demo _site/demo
           cp index.html _site/index.html
+          # The browser playground fetches the real library source and runs it via Pyodide.
+          cp dynamic_object_removal.py _site/dynamic_object_removal.py
           tar -czf github-pages.tar.gz -C _site .
       - name: Upload Pages artifact
         uses: actions/upload-artifact@v7.0.0

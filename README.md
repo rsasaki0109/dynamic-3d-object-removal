@@ -8,7 +8,7 @@
 
 ## Start Here
 
-- **🕹️ Interactive browser playground (no install)**: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/playground.html — the real `numpy` library runs in your browser via Pyodide. Drop your own LiDAR scan and watch dynamic objects get removed in 3D.
+- **🕹️ Interactive browser playground (no install)**: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/playground.html — the real `numpy` library runs in your browser via Pyodide. **Box mode**: drop your own LiDAR scan and watch dynamic objects get removed in 3D. **Range mode**: detector-free range-image visibility cleaning across pose-aligned scans — no boxes, no labels.
 
   [![Browser playground demo](demo/playground_demo.gif)](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/playground.html)
 
@@ -35,8 +35,9 @@ These two hero images are **not single scans**. They show a **20-frame accumulat
 ### Features
 
 - **No deep learning**: give it detected 3D boxes and it removes points geometrically. No GPU, training data, or model inference required
+- **Three algorithms, all numpy**: `box` (per-scan, needs boxes), `temporal` (detector-free voxel consistency), and `range` (detector-free range-image visibility — Removert-style remove + revert for cleaning accumulated maps)
 - **Fast**: 1.5 ms for 24k points on CPU
-- **ROS2 realtime node**: subscribe to `PointCloud2`, filter, and publish. Supports both `box` and `temporal` algorithms
+- **ROS2 realtime node**: subscribe to `PointCloud2`, filter, and publish. Supports `box`, `temporal`, and `range` algorithms
 - **Minimal dependencies**: `numpy` only. `pyarrow` is only needed for Argoverse 2 Feather input
 - **Public proof artifacts**: checked-in single-scan, local sequence proof, and AV2 public sequence demos
 
@@ -61,15 +62,32 @@ Two well-known geometry-based (no deep learning) dynamic-removal methods are [ER
 
 | | **This project** | ERASOR | Removert |
 |---|---|---|---|
-| Primary goal | Per-scan / realtime removal | Offline static-map cleaning | Offline static-map cleaning |
-| Needs a detector / 3D boxes | `box`: yes · `temporal`: no | No | No |
-| Needs poses | No (single scan) | Yes (map + poses) | Yes (scans + poses) |
+| Primary goal | Per-scan / realtime removal + map cleaning | Offline static-map cleaning | Offline static-map cleaning |
+| Needs a detector / 3D boxes | `box`: yes · `temporal`/`range`: no | No | No |
+| Needs poses | `box`/`temporal`: no · `range`: yes (map + poses) | Yes (map + poses) | Yes (scans + poses) |
 | Online / realtime | **Yes** (ROS2 node) | No (batch) | No (batch) |
 | Deep learning | No | No | No |
 | Core stack | `numpy` only | C++ / ROS / PCL | C++ / ROS / PCL |
 | Best when | Filtering live in a SLAM pipeline, or a quick per-scan cleanup | Cleaning a completed accumulated map | Fine-refining a static map after a coarse pass |
 
 If you need a detector-free, map-level cleaner for a finished sequence, ERASOR / Removert are excellent and purpose-built for it. If you want a tiny dependency-free filter you can run per scan (or live over ROS2) — and you already have boxes or are fine with voxel temporal consistency — this project is the lighter fit. Characteristics above are from each method's paper and repository, not re-measured here.
+
+### Measured on Argoverse 2 (this repo's own detector-free methods)
+
+These numbers **are** re-measured here, on real public data, and are reproducible with one command. We accumulate a pose-aligned 12-sweep map from an Argoverse 2 val log, take ground truth as the points on objects whose track actually moved (a motion-based method should not be expected to remove parked cars), and score each detector-free algorithm. This is *our* methods only — not ERASOR/Removert.
+
+| method (detector-free) | precision | recall | F1 | static points kept |
+|---|---|---|---|---|
+| **range-image visibility** (`range`) | **0.68** | 0.54 | **0.60** | 0.98 |
+| temporal consistency (`temporal`) | 0.19 | 0.72 | 0.30 | 0.78 |
+
+> Scene `0b5142c1…`, 1.24 M points, 84 k ground-truth points on moving objects. The range-image cleaner uses see-through voting + a Removert-style *revert* (a repeatedly-observed surface is kept even if a few scans see past it) + ground protection. Tunable for higher precision (e.g. `--min-see-through 4` → precision ≈ 0.89).
+
+```bash
+# Reproduce (downloads a few AV2 sweeps, no signup):
+pip install awscli pyarrow
+python3 scripts/run_av2_benchmark.py --frames 12
+```
 
 ## Installation
 
@@ -154,6 +172,17 @@ dynamic-object-removal \
 dynamic-object-removal --help
 ```
 
+Detector-free range-image visibility removal (clean an accumulated map with a query sweep):
+
+```bash
+dynamic-object-removal \
+  --algorithm range \
+  --input-map accumulated_map.npy \
+  --input-cloud query_sweep.npy \
+  --sensor-origin 0 0 0 \
+  --output-cloud cleaned_map.npy
+```
+
 ## ROS2 Realtime Node
 
 The realtime node subscribes to `PointCloud2`, filters it, and publishes cleaned points.
@@ -197,7 +226,24 @@ Main public APIs:
 - `load_boxes(path, fmt="auto", skip_invalid=False)`
 - `remove_points_in_boxes(points, boxes, margin=(0.05, 0.05, 0.05))`
 - `TemporalConsistencyFilter(voxel_size=0.10, window_size=5, min_hits=3)`
+- `remove_ghost_by_range_image(map_points, query_points, sensor_origin, range_margin=0.5)` — single map-vs-scan visibility removal
+- `clean_map_by_visibility(map_points, scans, min_see_through=2, max_surface_hits=2, ground_z=None)` — multi-scan map cleaner (remove + revert)
+- `RangeImageGhostFilter(window_size=5, range_margin=0.5)` — streaming range-image filter for ROS2
 - `save_points(path, fmt="auto")`
+
+### Range-image visibility removal
+
+```python
+from dynamic_object_removal import clean_map_by_visibility
+
+# scans: list of (points_in_map_frame, sensor_origin) from the sweeps that built the map.
+kept, keep_mask = clean_map_by_visibility(
+    map_points, scans,
+    range_margin=0.5, min_see_through=2, max_surface_hits=2, ground_z=-1.4,
+)
+```
+
+A map point is removed only when enough scans see *through* it (free space) **and** few scans confirm it as a real surface — the Removert-style *revert* guard that stops static structure from being eroded. Try it live (detector-free, runs in your browser) in the **Range mode** of the [playground](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/playground.html).
 
 ## Supported Formats
 

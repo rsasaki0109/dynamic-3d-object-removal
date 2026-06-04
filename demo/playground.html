@@ -139,6 +139,14 @@
 
         <div id="status"><span class="spinner"></span> Booting Python runtime…</div>
 
+        <div class="row" id="modeRow">
+          <button id="modeBox" class="primary">Box · detector</button>
+          <button id="modeRange">Range · detector-free</button>
+        </div>
+        <p class="hint" id="modeHint">
+          <b>Box mode:</b> crop points inside detected 3D boxes (needs boxes). Drop your own scan below.
+        </p>
+
         <div class="row">
           <button id="sampleBtn" class="primary" disabled>▶ Run sample scene</button>
         </div>
@@ -308,6 +316,8 @@
       let pyodide = null;
       let currentCloud = null; // {bytes: Uint8Array, name: string}
       let currentBoxes = null; // string (json text)
+      let mode = "box"; // "box" | "range"
+      let rangeSampleLoaded = false;
       const statusEl = document.getElementById("status");
 
       function setStatus(msg, isErr) {
@@ -381,6 +391,42 @@ def run_box_removal(filename, boxes_json, margin):
             for b in boxes
         ],
     }
+
+def run_range_removal():
+    # Detector-free range-image visibility cleaning over a multi-scan accumulated map.
+    # The sample is already centroid-centered. Map = union of the pose-aligned scans.
+    data = np.load('/work/sample_av2_range.npz')
+    scans_cat = np.ascontiguousarray(data['scans'], dtype=np.float64)
+    splits = data['splits']
+    origins = np.asarray(data['origins'], dtype=np.float64)
+    ground_z = float(data['ground_z'])
+    scans = [(scans_cat[splits[i]:splits[i + 1]], origins[i]) for i in range(len(splits) - 1)]
+    map_points = scans_cat
+
+    t0 = time.perf_counter()
+    _filtered, keep = dor.clean_map_by_visibility(
+        map_points, scans,
+        h_res_deg=1.0, v_res_deg=1.0, range_margin=0.5,
+        min_see_through=2, max_surface_hits=2, ground_z=ground_z,
+    )
+    ms = (time.perf_counter() - t0) * 1000.0
+
+    kept = map_points[keep]
+    removed = map_points[~keep]
+    kept_r, c1 = _subsample(kept, _MAX_RENDER)
+    removed_r, c2 = _subsample(removed, _MAX_RENDER)
+    span = float((map_points.max(axis=0) - map_points.min(axis=0)).max()) if map_points.shape[0] else 1.0
+    return {
+        'kept_buf': kept_r.astype(np.float32).tobytes(),
+        'removed_buf': removed_r.astype(np.float32).tobytes(),
+        'total': int(map_points.shape[0]),
+        'removed_n': int((~keep).sum()),
+        'rendered': int(kept_r.shape[0] + removed_r.shape[0]),
+        'render_capped': bool(c1 or c2),
+        'ms': float(ms),
+        'span': span,
+        'boxes': [],
+    }
 `;
 
       async function boot() {
@@ -409,7 +455,47 @@ def run_box_removal(filename, boxes_json, margin):
         }
       }
 
+      function runRangeRemoval() {
+        if (!pyodide) return;
+        try {
+          setStatus('<span class="spinner"></span> Cleaning map by visibility…');
+          const t0 = performance.now();
+          const proxy = pyodide.runPython("run_range_removal()");
+          const res = proxy.toJs({ dict_converter: Object.fromEntries });
+          proxy.destroy();
+          const keptBuf = res.kept_buf,
+            remBuf = res.removed_buf;
+          res.kept = new Float32Array(keptBuf.buffer, keptBuf.byteOffset, keptBuf.byteLength / 4);
+          res.removed = new Float32Array(remBuf.buffer, remBuf.byteOffset, remBuf.byteLength / 4);
+          renderResult(res);
+          const wall = (performance.now() - t0).toFixed(0);
+          setStatus("✓ Removed " + res.removed_n.toLocaleString() + " dynamic points across " +
+            "6 pose-aligned scans (" + wall + " ms).");
+        } catch (e) {
+          setStatus("Error: " + (e.message || e), true);
+          console.error(e);
+        }
+      }
+
+      async function loadRangeSample() {
+        setStatus('<span class="spinner"></span> Fetching multi-scan sample (Argoverse 2)…');
+        try {
+          if (!rangeSampleLoaded) {
+            const resp = await fetch("./sample_av2_range.npz");
+            if (!resp.ok) throw new Error("could not fetch sample_av2_range.npz");
+            const bytes = new Uint8Array(await resp.arrayBuffer());
+            pyodide.FS.writeFile("/work/sample_av2_range.npz", bytes);
+            rangeSampleLoaded = true;
+          }
+          document.getElementById("runBtn").disabled = false;
+          runRangeRemoval();
+        } catch (e) {
+          setStatus("Sample load failed: " + e.message, true);
+        }
+      }
+
       function runRemoval() {
+        if (mode === "range") return runRangeRemoval();
         if (!pyodide || !currentCloud) return;
         const margin = parseFloat(document.getElementById("margin").value);
         try {
@@ -436,6 +522,7 @@ def run_box_removal(filename, boxes_json, margin):
       }
 
       async function loadSample() {
+        if (mode === "range") return loadRangeSample();
         setStatus('<span class="spinner"></span> Fetching sample scene (Argoverse 2)…');
         try {
           const [cloudResp, objResp] = await Promise.all([
@@ -476,6 +563,26 @@ def run_box_removal(filename, boxes_json, margin):
       }
 
       // ---------- UI wiring ----------
+      function setMode(next) {
+        mode = next;
+        const isRange = next === "range";
+        document.getElementById("modeBox").className = isRange ? "" : "primary";
+        document.getElementById("modeRange").className = isRange ? "primary" : "";
+        // Box-only controls.
+        document.getElementById("margin").style.display = isRange ? "none" : "";
+        document.querySelector(".dropzone").style.display = isRange ? "none" : "";
+        document.getElementById("tBoxes").parentElement.style.display = isRange ? "none" : "";
+        document.getElementById("marginVal").parentElement.style.display = isRange ? "none" : "";
+        document.getElementById("sampleBtn").textContent = isRange
+          ? "▶ Run multi-scan sample"
+          : "▶ Run sample scene";
+        document.getElementById("modeHint").innerHTML = isRange
+          ? "<b>Range mode:</b> detector-free. Cleans an accumulated map by range-image visibility across 6 pose-aligned scans — no boxes, no labels. Removed points = dynamic objects seen through by other scans."
+          : "<b>Box mode:</b> crop points inside detected 3D boxes (needs boxes). Drop your own scan below.";
+        if (pyodide) loadSample();
+      }
+      document.getElementById("modeBox").addEventListener("click", () => { if (mode !== "box") setMode("box"); });
+      document.getElementById("modeRange").addEventListener("click", () => { if (mode !== "range") setMode("range"); });
       document.getElementById("sampleBtn").addEventListener("click", loadSample);
       document.getElementById("runBtn").addEventListener("click", runRemoval);
       document.getElementById("margin").addEventListener("input", (e) => {

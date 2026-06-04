@@ -26,6 +26,11 @@ import numpy as np
 DEFAULT_BOX_MARGIN = (0.05, 0.05, 0.05)
 DEFAULT_TEMPORAL_VOXEL_SIZE = 0.10
 
+# Range-image (visibility) ghost removal defaults.
+DEFAULT_RANGE_H_RES_DEG = 0.4
+DEFAULT_RANGE_V_RES_DEG = 1.0
+DEFAULT_RANGE_MARGIN = 0.5
+
 
 @dataclass(frozen=True)
 class DetectionBox:
@@ -658,6 +663,244 @@ class TemporalConsistencyFilter:
         return points[keep_mask], keep_mask
 
 
+def _spherical_pixels(
+    points: np.ndarray,
+    sensor_origin: np.ndarray,
+    h_res_deg: float,
+    v_res_deg: float,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Project points into a spherical range image around ``sensor_origin``.
+
+    Returns ``(ranges, col, row, valid)`` where ``col``/``row`` are integer pixel
+    indices (azimuth/elevation bins) and ``valid`` masks out points at the origin.
+    """
+    rel = np.asarray(points, dtype=np.float64) - sensor_origin
+    x = rel[:, 0]
+    y = rel[:, 1]
+    z = rel[:, 2]
+    ranges = np.sqrt(x * x + y * y + z * z)
+    valid = ranges > 1e-9
+    safe = np.where(valid, ranges, 1.0)
+    azimuth = np.degrees(np.arctan2(y, x))  # (-180, 180]
+    elevation = np.degrees(np.arcsin(np.clip(z / safe, -1.0, 1.0)))  # [-90, 90]
+    col = np.floor((azimuth + 180.0) / h_res_deg).astype(np.int64)
+    row = np.floor((elevation + 90.0) / v_res_deg).astype(np.int64)
+    return ranges, col, row, valid
+
+
+def remove_ghost_by_range_image(
+    map_points: np.ndarray,
+    query_points: np.ndarray,
+    sensor_origin: Sequence[float] = (0.0, 0.0, 0.0),
+    *,
+    h_res_deg: float = DEFAULT_RANGE_H_RES_DEG,
+    v_res_deg: float = DEFAULT_RANGE_V_RES_DEG,
+    range_margin: float = DEFAULT_RANGE_MARGIN,
+    min_query_points_per_pixel: int = 1,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Remove ghost (dynamic) points from an accumulated map by visibility.
+
+    This is the numpy "remove" step of range-image dynamic removal (Removert-style).
+    Both ``map_points`` and ``query_points`` must be in the same frame. The query scan
+    is the live sweep observed from ``sensor_origin``; a map point is considered a ghost
+    when the query beam along its bearing passed *through* it and hit something farther,
+    meaning that space is now free and the map point must have moved.
+
+    A map point is removed when ``query_range - map_range > range_margin`` for its pixel.
+    Pixels with no query return (unknown free space) are kept (conservative).
+
+    Returns ``(kept_points, keep_mask)`` over ``map_points`` (same contract as
+    :func:`remove_points_in_boxes`).
+    """
+    map_points = np.asarray(map_points, dtype=np.float64)
+    if map_points.size == 0 or len(map_points) == 0:
+        return map_points, np.ones(0, dtype=bool)
+
+    query_points = np.asarray(query_points, dtype=np.float64)
+    if query_points.size == 0 or len(query_points) == 0:
+        # Nothing to test visibility against: keep everything.
+        return map_points, np.ones(map_points.shape[0], dtype=bool)
+
+    origin = np.asarray(sensor_origin, dtype=np.float64)
+    if origin.shape != (3,):
+        raise ValueError("sensor_origin must have 3 elements")
+
+    n_cols = int(np.ceil(360.0 / h_res_deg))
+    n_rows = int(np.ceil(180.0 / v_res_deg))
+
+    q_ranges, q_col, q_row, q_valid = _spherical_pixels(query_points, origin, h_res_deg, v_res_deg)
+    m_ranges, m_col, m_row, m_valid = _spherical_pixels(map_points, origin, h_res_deg, v_res_deg)
+
+    # Build the query range image: nearest live return per pixel + a hit counter.
+    q_col = np.clip(q_col, 0, n_cols - 1)
+    q_row = np.clip(q_row, 0, n_rows - 1)
+    flat_q = q_row * n_cols + q_col
+    flat_q = flat_q[q_valid]
+
+    nearest = np.full(n_rows * n_cols, np.inf, dtype=np.float64)
+    np.minimum.at(nearest, flat_q, q_ranges[q_valid])
+    counts = np.zeros(n_rows * n_cols, dtype=np.int64)
+    np.add.at(counts, flat_q, 1)
+
+    # Gather the query range at each map point's pixel.
+    m_col_c = np.clip(m_col, 0, n_cols - 1)
+    m_row_c = np.clip(m_row, 0, n_rows - 1)
+    flat_m = m_row_c * n_cols + m_col_c
+    pixel_query_range = nearest[flat_m]
+    pixel_count = counts[flat_m]
+
+    # Ghost when the live beam reached well past the map point in a sufficiently
+    # observed pixel. Points at the origin (invalid) are kept.
+    enough = pixel_count >= max(1, int(min_query_points_per_pixel))
+    observed = np.isfinite(pixel_query_range) & enough
+    ghost = observed & m_valid & ((pixel_query_range - m_ranges) > range_margin)
+    keep_mask = ~ghost
+    return map_points[keep_mask], keep_mask
+
+
+def _visibility_votes(
+    map_points: np.ndarray,
+    query_points: np.ndarray,
+    sensor_origin: np.ndarray,
+    h_res_deg: float,
+    v_res_deg: float,
+    range_margin: float,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Per-map-point ``(seen_through, confirmed_surface)`` booleans for one query scan.
+
+    ``seen_through``: the query beam reached well past the map point (free space).
+    ``confirmed_surface``: the query saw a return at ~the map point's range (a real
+    surface there). A point can be neither (unobserved pixel) but not both.
+    """
+    n_cols = int(np.ceil(360.0 / h_res_deg))
+    n_rows = int(np.ceil(180.0 / v_res_deg))
+    q_ranges, q_col, q_row, q_valid = _spherical_pixels(query_points, sensor_origin, h_res_deg, v_res_deg)
+    flat_q = (np.clip(q_row, 0, n_rows - 1) * n_cols + np.clip(q_col, 0, n_cols - 1))[q_valid]
+    nearest = np.full(n_rows * n_cols, np.inf, dtype=np.float64)
+    np.minimum.at(nearest, flat_q, q_ranges[q_valid])
+
+    m_ranges, m_col, m_row, m_valid = _spherical_pixels(map_points, sensor_origin, h_res_deg, v_res_deg)
+    flat_m = np.clip(m_row, 0, n_rows - 1) * n_cols + np.clip(m_col, 0, n_cols - 1)
+    pixel_q = nearest[flat_m]
+    observed = np.isfinite(pixel_q) & m_valid
+    seen_through = observed & ((pixel_q - m_ranges) > range_margin)
+    confirmed = observed & (np.abs(pixel_q - m_ranges) < range_margin)
+    return seen_through, confirmed
+
+
+def clean_map_by_visibility(
+    map_points: np.ndarray,
+    scans: Sequence[tuple[np.ndarray, Sequence[float]]],
+    *,
+    h_res_deg: float = 1.0,
+    v_res_deg: float = 1.0,
+    range_margin: float = DEFAULT_RANGE_MARGIN,
+    min_see_through: int = 2,
+    max_surface_hits: int = 2,
+    ground_z: float | None = None,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Clean an accumulated map of dynamic points using multi-scan visibility.
+
+    This is the full range-image dynamic-removal pipeline (Removert/ERASOR family),
+    pure numpy: each scan votes on every map point, and a point is removed only when
+    the evidence agrees across scans.
+
+    ``scans``: sequence of ``(points, sensor_origin)`` -- the pose-aligned sweeps that
+    built the map (same frame as ``map_points``), each with the sensor position it was
+    observed from.
+
+    A map point is removed (dynamic) when it is **seen through** by at least
+    ``min_see_through`` scans (free space along that beam) **and** confirmed as a real
+    **surface** by at most ``max_surface_hits`` scans. The surface count is the *revert*
+    guard from Removert: a repeatedly-observed static surface is kept even if a few
+    scans see past it through occlusion gaps -- this is what stops the naive
+    "remove-only" step from eroding static structure.
+
+    ``ground_z``: if given, map points with ``z <= ground_z`` are protected (never
+    removed); ground returns are sampled at shifting angles between scans and would
+    otherwise generate spurious see-through votes.
+
+    Returns ``(kept_points, keep_mask)`` over ``map_points``.
+    """
+    map_points = np.asarray(map_points, dtype=np.float64)
+    if map_points.size == 0 or len(map_points) == 0:
+        return map_points, np.ones(0, dtype=bool)
+    if not scans:
+        return map_points, np.ones(map_points.shape[0], dtype=bool)
+
+    see_through_votes = np.zeros(map_points.shape[0], dtype=np.int64)
+    surface_votes = np.zeros(map_points.shape[0], dtype=np.int64)
+    for pts, origin in scans:
+        pts = np.asarray(pts, dtype=np.float64)
+        if pts.size == 0:
+            continue
+        origin = np.asarray(origin, dtype=np.float64)
+        st, sf = _visibility_votes(map_points, pts, origin, h_res_deg, v_res_deg, range_margin)
+        see_through_votes += st.astype(np.int64)
+        surface_votes += sf.astype(np.int64)
+
+    dynamic = (see_through_votes >= max(1, int(min_see_through))) & (surface_votes <= int(max_surface_hits))
+    if ground_z is not None:
+        dynamic &= map_points[:, 2] > ground_z
+    keep_mask = ~dynamic
+    return map_points[keep_mask], keep_mask
+
+
+@dataclass
+class RangeImageGhostFilter:
+    """Streaming range-image ghost removal against a rolling local map.
+
+    Keeps the last ``window_size`` scans as the reference map and, on each
+    :meth:`filter` call, removes ghost points from the *incoming* scan by checking
+    visibility against that rolling map, then appends the scan to the history.
+
+    Assumes incoming scans share a frame (e.g. ego-motion compensated, or a static
+    sensor). When that does not hold, pass per-scan ``sensor_origin`` and pre-aligned
+    points. The first scan (empty history) is returned unchanged.
+    """
+
+    window_size: int = 5
+    h_res_deg: float = DEFAULT_RANGE_H_RES_DEG
+    v_res_deg: float = DEFAULT_RANGE_V_RES_DEG
+    range_margin: float = DEFAULT_RANGE_MARGIN
+    min_query_points_per_pixel: int = 1
+
+    def __post_init__(self) -> None:
+        if self.window_size <= 0:
+            raise ValueError("window_size must be positive")
+        self._history: deque[np.ndarray] = deque(maxlen=self.window_size)
+
+    def filter(
+        self,
+        points: np.ndarray,
+        sensor_origin: Sequence[float] = (0.0, 0.0, 0.0),
+    ) -> tuple[np.ndarray, np.ndarray]:
+        points = np.asarray(points, dtype=np.float64)
+        if points.size == 0 or len(points) == 0:
+            return points, np.ones(0, dtype=bool)
+
+        if not self._history:
+            self._history.append(points)
+            return points, np.ones(points.shape[0], dtype=bool)
+
+        ref_map = np.concatenate(list(self._history), axis=0)
+        # Clean the incoming scan: it is the candidate set (map_points) and the rolling
+        # history of past scans is the reference (query_points). A new point that the
+        # past observed *past* (past range > new-point range) sits in previously-free
+        # space -> it is a freshly-arrived dynamic point and is removed.
+        kept, keep_mask = remove_ghost_by_range_image(
+            points,
+            ref_map,
+            sensor_origin,
+            h_res_deg=self.h_res_deg,
+            v_res_deg=self.v_res_deg,
+            range_margin=self.range_margin,
+            min_query_points_per_pixel=self.min_query_points_per_pixel,
+        )
+        self._history.append(points)
+        return kept, keep_mask
+
+
 def _rotate_by_yaw(points: np.ndarray, yaw: float) -> np.ndarray:
     if points.size == 0 or abs(yaw) < 1e-12:
         return points
@@ -744,10 +987,16 @@ def save_points(path: Path, points: np.ndarray, *, fmt: str) -> None:
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Remove points inside detection boxes from point clouds.")
-    parser.add_argument("--input-cloud", required=True, help="Input point cloud path (csv/txt/xyz/pcd/npy).")
-    parser.add_argument("--input-objects", required=True, help="Detected object boxes JSON or CSV path.")
+    parser = argparse.ArgumentParser(description="Remove dynamic points from point clouds (box or range-image visibility).")
+    parser.add_argument("--input-cloud", required=True, help="Input point cloud path (csv/txt/xyz/pcd/npy). For --algorithm range this is the query scan.")
+    parser.add_argument("--input-objects", help="Detected object boxes JSON or CSV path (required for --algorithm box).")
     parser.add_argument("--output-cloud", required=True, help="Output point cloud path.")
+    parser.add_argument("--algorithm", choices=["box", "range"], default="box", help="box: crop by detection boxes. range: range-image visibility removal of an accumulated map.")
+    parser.add_argument("--input-map", help="Accumulated map point cloud to clean (required for --algorithm range).")
+    parser.add_argument("--sensor-origin", nargs=3, type=float, default=[0.0, 0.0, 0.0], metavar=("X", "Y", "Z"), help="Sensor origin of the query scan (meters), for --algorithm range.")
+    parser.add_argument("--range-margin", type=float, default=DEFAULT_RANGE_MARGIN, help="Free-space margin for range-image removal (meters).")
+    parser.add_argument("--range-h-res", type=float, default=DEFAULT_RANGE_H_RES_DEG, help="Range-image azimuth resolution (degrees).")
+    parser.add_argument("--range-v-res", type=float, default=DEFAULT_RANGE_V_RES_DEG, help="Range-image elevation resolution (degrees).")
     parser.add_argument("--cloud-format", default="auto", choices=["auto", "csv", "pcd", "text", "npy", "bin", "feather"], help="Output/input point cloud format.")
     parser.add_argument("--objects-format", default="auto", choices=["auto", "json", "csv", "kitti", "av2"], help="Object file format.")
     parser.add_argument("--calib-path", default=None, help="KITTI calibration file path (required when --objects-format=kitti).")
@@ -791,12 +1040,55 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     cloud_path = Path(args.input_cloud)
-    obj_path = Path(args.input_objects)
     out_path = Path(args.output_cloud)
 
     if not cloud_path.exists():
         _eprint(f"input cloud not found: {cloud_path}")
         return 1
+
+    if args.algorithm == "range":
+        if not args.input_map:
+            _eprint("algorithm=range requires --input-map (the accumulated map to clean)")
+            return 1
+        map_path = Path(args.input_map)
+        if not map_path.exists():
+            _eprint(f"input map not found: {map_path}")
+            return 1
+        map_points = load_points(map_path, fmt=args.cloud_format)
+        query_points = load_points(cloud_path, fmt=args.cloud_format)
+        filtered, keep_mask = remove_ghost_by_range_image(
+            map_points,
+            query_points,
+            tuple(args.sensor_origin),
+            h_res_deg=args.range_h_res,
+            v_res_deg=args.range_v_res,
+            range_margin=args.range_margin,
+        )
+        removed = map_points.shape[0] - filtered.shape[0]
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        save_points(out_path, filtered, fmt=args.cloud_format)
+        if not args.quiet:
+            ratio = 0.0 if map_points.shape[0] == 0 else removed / map_points.shape[0]
+            _eprint(f"algorithm: range (visibility)")
+            _eprint(f"map: {map_points.shape[0]} points, query: {query_points.shape[0]} points")
+            _eprint(f"removed: {removed} points ({ratio:.2%})")
+            _eprint(f"output: {filtered.shape[0]} points -> {out_path}")
+        if args.summary_json:
+            payload = {
+                "algorithm": "range",
+                "total_points": int(map_points.shape[0]),
+                "kept_points": int(filtered.shape[0]),
+                "removed_points": int(removed),
+                "removed_ratio": float(removed / map_points.shape[0]) if map_points.shape[0] else 0.0,
+            }
+            Path(args.summary_json).write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        return 0
+
+    # algorithm == "box"
+    if not args.input_objects:
+        _eprint("algorithm=box requires --input-objects")
+        return 1
+    obj_path = Path(args.input_objects)
     if not obj_path.exists():
         _eprint(f"object file not found: {obj_path}")
         return 1

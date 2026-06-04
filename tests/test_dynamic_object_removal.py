@@ -562,7 +562,8 @@ class TestCLI:
             cwd=str(Path(__file__).resolve().parent.parent),
         )
         assert result.returncode == 0
-        assert "Remove points" in result.stdout
+        assert "Remove dynamic points" in result.stdout
+        assert "--algorithm" in result.stdout
 
     def test_main_with_demo_data(self, tmp_path: Path, demo_pcd_path: Path, demo_objects_path: Path):
         out_file = tmp_path / "output.pcd"
@@ -598,3 +599,147 @@ class TestCLI:
         )
         assert result.returncode == 0
         assert "0.1.0" in result.stdout
+
+
+# ---------------------------------------------------------------------------
+# Range-image visibility removal
+# ---------------------------------------------------------------------------
+
+from dynamic_object_removal import (
+    remove_ghost_by_range_image,
+    RangeImageGhostFilter,
+    clean_map_by_visibility,
+)
+
+
+def _dense_wall(x=10.0, n=121, half=3.0):
+    ys, zs = np.meshgrid(np.linspace(-half, half, n), np.linspace(-half, half, n))
+    return np.column_stack([np.full(ys.size, x), ys.ravel(), zs.ravel()])
+
+
+class TestRangeImageRemoval:
+    def test_removes_seen_through_point(self):
+        wall = _dense_wall()
+        ghost = np.array([[3.0, 0.0, 0.0], [3.0, 0.1, 0.05]])  # in front of the wall
+        mp = np.vstack([wall, ghost])
+        kept, mask = remove_ghost_by_range_image(mp, wall, (0, 0, 0), range_margin=0.5)
+        assert mask[:-2].all()          # wall kept
+        assert not mask[-1] and not mask[-2]  # both ghosts removed
+        assert len(kept) == len(wall)
+
+    def test_keeps_coincident_and_occluded(self):
+        wall = _dense_wall()
+        coincident = np.array([[10.0, 0.0, 0.0]])
+        occluded = np.array([[15.0, 0.0, 0.0]])  # behind the wall
+        for extra in (coincident, occluded):
+            _, mask = remove_ghost_by_range_image(np.vstack([wall, extra]), wall, (0, 0, 0))
+            assert mask[-1]  # kept
+
+    def test_self_comparison_removes_nothing(self):
+        wall = _dense_wall()
+        _, mask = remove_ghost_by_range_image(wall, wall, (0, 0, 0), range_margin=0.5)
+        assert mask.all()
+
+    def test_empty_inputs(self):
+        wall = _dense_wall()
+        empty = np.zeros((0, 3))
+        assert remove_ghost_by_range_image(empty, wall)[1].shape == (0,)
+        # No query -> keep everything.
+        assert remove_ghost_by_range_image(wall, empty)[1].all()
+
+    def test_streaming_filter(self):
+        wall = _dense_wall()
+        ghost = np.array([[3.0, 0.0, 0.0]])
+        f = RangeImageGhostFilter(window_size=3, range_margin=0.5)
+        _, m0 = f.filter(wall, (0, 0, 0))
+        assert m0.all()  # first scan: no history -> unchanged
+        _, m1 = f.filter(np.vstack([wall, ghost]), (0, 0, 0))
+        assert m1[:-1].all() and not m1[-1]  # the freshly-appeared point is removed
+
+
+class TestCleanMapByVisibility:
+    def test_revert_keeps_repeatedly_observed_surface(self):
+        wall = _dense_wall()
+        ghost = np.array([[3.0, 0.0, 0.0]])
+        mp = np.vstack([wall, ghost])
+        # Two scans both see the wall (confirm surface) and see past the ghost.
+        scans = [(wall, (0, 0, 0)), (wall, (0, 0, 0))]
+        _, keep = clean_map_by_visibility(
+            mp, scans, range_margin=0.5, min_see_through=1, max_surface_hits=1
+        )
+        assert keep[:-1].all()   # wall confirmed as surface -> kept
+        assert not keep[-1]      # ghost seen-through, never a surface -> removed
+
+    def test_ground_protected(self):
+        wall = _dense_wall()
+        ghost = np.array([[3.0, 0.0, -2.0]])  # below ground_z
+        mp = np.vstack([wall, ghost])
+        scans = [(wall, (0, 0, 0)), (wall, (0, 0, 0))]
+        _, keep = clean_map_by_visibility(
+            mp, scans, range_margin=0.5, min_see_through=1, max_surface_hits=0, ground_z=-1.4
+        )
+        assert keep[-1]  # protected by ground_z despite being seen-through
+
+    def test_empty(self):
+        assert clean_map_by_visibility(np.zeros((0, 3)), [(_dense_wall(), (0, 0, 0))])[1].shape == (0,)
+        wall = _dense_wall()
+        assert clean_map_by_visibility(wall, [])[1].all()  # no scans -> keep all
+
+
+class TestRangeCLI:
+    def test_cli_range_algorithm(self, tmp_path: Path):
+        wall = _dense_wall()
+        ghost = np.array([[3.0, 0.0, 0.0], [3.0, 0.1, 0.05]])
+        map_path = tmp_path / "map.npy"
+        query_path = tmp_path / "q.npy"
+        out_path = tmp_path / "out.npy"
+        np.save(map_path, np.vstack([wall, ghost]).astype(np.float32))
+        np.save(query_path, wall.astype(np.float32))
+        ret = main([
+            "--algorithm", "range",
+            "--input-map", str(map_path),
+            "--input-cloud", str(query_path),
+            "--sensor-origin", "0", "0", "0",
+            "--output-cloud", str(out_path),
+            "--cloud-format", "npy",
+        ])
+        assert ret == 0
+        assert len(np.load(out_path)) == len(wall)  # both ghosts removed
+
+    def test_cli_range_requires_map(self, tmp_path: Path):
+        q = tmp_path / "q.npy"
+        np.save(q, _dense_wall().astype(np.float32))
+        ret = main([
+            "--algorithm", "range",
+            "--input-cloud", str(q),
+            "--output-cloud", str(tmp_path / "out.npy"),
+            "--cloud-format", "npy",
+        ])
+        assert ret == 1
+
+
+# ---------------------------------------------------------------------------
+# Accuracy metrics (bench)
+# ---------------------------------------------------------------------------
+
+def test_accuracy_metrics():
+    import bench
+    removed = np.array([1, 1, 0, 0, 1], dtype=bool)
+    gt = np.array([1, 0, 0, 1, 1], dtype=bool)
+    m = bench.compute_accuracy_metrics(removed, gt)
+    assert m["true_positive"] == 2 and m["false_positive"] == 1
+    assert m["false_negative"] == 1 and m["true_negative"] == 1
+    assert abs(m["precision"] - 2 / 3) < 1e-9
+    assert abs(m["recall"] - 2 / 3) < 1e-9
+    assert abs(m["iou"] - 0.5) < 1e-9
+
+
+def test_dynamic_gt_mask():
+    import bench
+    pts = np.array([[0.0, 0.0, 0.0], [5.0, 5.0, 5.0]])
+    box = DetectionBox(center=np.array([0.0, 0.0, 0.0]), size=np.array([1.0, 1.0, 1.0]), label="vehicle")
+    mask = bench.dynamic_gt_mask(pts, [box], dynamic_labels={"vehicle"})
+    assert mask[0] and not mask[1]
+    # Non-dynamic label is filtered out -> no GT.
+    box2 = DetectionBox(center=np.array([0.0, 0.0, 0.0]), size=np.array([1.0, 1.0, 1.0]), label="BOLLARD")
+    assert not bench.dynamic_gt_mask(pts, [box2], dynamic_labels={"vehicle"}).any()

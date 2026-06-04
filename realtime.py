@@ -485,9 +485,9 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--algorithm",
-        choices=["box", "temporal"],
+        choices=["box", "temporal", "range"],
         default="box",
-        help="Filter mode: box (requires detection input) or temporal.",
+        help="Filter mode: box (requires detection input), temporal, or range (range-image visibility, detector-free).",
     )
     parser.add_argument(
         "--box-margin",
@@ -509,6 +509,10 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--voxel-size", type=float, default=core.DEFAULT_TEMPORAL_VOXEL_SIZE, help="Temporal filter voxel size.")
     parser.add_argument("--temporal-window", type=int, default=5, help="Temporal filter window size.")
     parser.add_argument("--temporal-min-hits", type=int, default=3, help="Temporal filter minimum hits.")
+    parser.add_argument("--range-window", type=int, default=5, help="Range filter rolling-map window (number of recent scans).")
+    parser.add_argument("--range-margin", type=float, default=core.DEFAULT_RANGE_MARGIN, help="Range filter free-space margin (meters).")
+    parser.add_argument("--range-h-res", type=float, default=core.DEFAULT_RANGE_H_RES_DEG, help="Range filter azimuth resolution (degrees).")
+    parser.add_argument("--range-v-res", type=float, default=core.DEFAULT_RANGE_V_RES_DEG, help="Range filter elevation resolution (degrees).")
     parser.add_argument("--queue-size", type=int, default=20, help="ROS subscription queue size.")
     parser.add_argument("--stats-period", type=int, default=100, help="Log summary every N frames.")
     parser.add_argument("--quiet", action="store_true", help="Reduce logs.")
@@ -610,6 +614,15 @@ class DynamicObjectRemovalNode:
                 voxel_size=float(kwargs["voxel_size"]),
                 window_size=int(kwargs["temporal_window"]),
                 min_hits=int(kwargs["temporal_min_hits"]),
+            )
+
+        self._range_filter = None
+        if self._algorithm == "range":
+            self._range_filter = core.RangeImageGhostFilter(
+                window_size=int(kwargs.get("range_window", 5)),
+                range_margin=float(kwargs.get("range_margin", core.DEFAULT_RANGE_MARGIN)),
+                h_res_deg=float(kwargs.get("range_h_res", core.DEFAULT_RANGE_H_RES_DEG)),
+                v_res_deg=float(kwargs.get("range_v_res", core.DEFAULT_RANGE_V_RES_DEG)),
             )
 
         try:
@@ -745,6 +758,13 @@ class DynamicObjectRemovalNode:
                     filtered = points
                     used_boxes = False
 
+            elif self._algorithm == "range":
+                assert self._range_filter is not None
+                # LiDAR frame: sensor at the origin of each incoming scan.
+                filtered = self._range_filter.filter(points, (0.0, 0.0, 0.0))[0]
+                used_boxes = False
+                stale = False
+
             else:
                 assert self._temporal_filter is not None
                 filtered = self._temporal_filter.filter(points)[0]
@@ -816,6 +836,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             voxel_size=args.voxel_size,
             temporal_window=args.temporal_window,
             temporal_min_hits=args.temporal_min_hits,
+            range_window=args.range_window,
+            range_margin=args.range_margin,
+            range_h_res=args.range_h_res,
+            range_v_res=args.range_v_res,
             queue_size=args.queue_size,
             stats_period=args.stats_period,
             quiet=args.quiet,

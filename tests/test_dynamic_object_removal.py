@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import subprocess
 import sys
 from pathlib import Path
@@ -743,3 +744,29 @@ def test_dynamic_gt_mask():
     # Non-dynamic label is filtered out -> no GT.
     box2 = DetectionBox(center=np.array([0.0, 0.0, 0.0]), size=np.array([1.0, 1.0, 1.0]), label="BOLLARD")
     assert not bench.dynamic_gt_mask(pts, [box2], dynamic_labels={"vehicle"}).any()
+
+
+def _load_nuscenes_script():
+    """Import the nuScenes benchmark script as a module (no network / argparse)."""
+    import importlib.util
+
+    path = Path(__file__).resolve().parents[1] / "scripts" / "run_nuscenes_benchmark.py"
+    spec = importlib.util.spec_from_file_location("run_nuscenes_benchmark", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_nuscenes_quaternion_helpers():
+    """A wrong quaternion convention would silently corrupt every benchmark number."""
+    nb = _load_nuscenes_script()
+    # Identity quaternion -> identity rotation.
+    assert np.allclose(nb._quat_to_rot(1.0, 0.0, 0.0, 0.0), np.eye(3))
+    # 90 deg about +z (nuScenes/pyquaternion order w, x, y, z): x-axis maps to +y.
+    s = math.sqrt(0.5)
+    rot = nb._quat_to_rot(s, 0.0, 0.0, s)
+    assert np.allclose(rot @ np.array([1.0, 0.0, 0.0]), [0.0, 1.0, 0.0], atol=1e-9)
+    assert rot.shape == (3, 3) and np.allclose(rot @ rot.T, np.eye(3), atol=1e-9)
+    # Yaw extraction matches the rotation about z.
+    assert abs(nb._yaw_from_quat(s, 0.0, 0.0, s) - math.pi / 2) < 1e-9
+    assert abs(nb._yaw_from_quat(1.0, 0.0, 0.0, 0.0)) < 1e-9

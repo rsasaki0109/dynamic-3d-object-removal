@@ -89,6 +89,31 @@ pip install awscli pyarrow
 python3 scripts/run_av2_benchmark.py --frames 12
 ```
 
+### Also measured on nuScenes (a second dataset / sensor)
+
+To check the range-image method isn't tuned to one sensor, it is also measured on the
+public **nuScenes mini** split (also no signup — served anonymously over HTTPS). nuScenes
+uses a **32-beam** LiDAR, roughly **5× sparser per range-image pixel** than AV2's dense
+sweep (~5 vs ~27 points per occupied pixel). The single change that matters is to **match
+the range-image resolution to the beam density** — a coarser image (`2.5°` vs AV2's `1.0°`)
+so each pixel still aggregates enough points. With that one change the method generalizes:
+
+| method (detector-free) | precision | recall | F1 | static points kept |
+|---|---|---|---|---|
+| **range-image visibility** (`range`) | 0.48 | **0.92** | **0.63** | 0.81 |
+| temporal consistency (`temporal`) | 0.07 | 0.22 | 0.11 | 0.47 |
+
+> Scene `scene-0757` (busy intersection), 12 pose-aligned keyframes, 303 k points, 49 k
+> ground-truth points on moving objects. Using AV2's fine `1.0°` resolution here instead
+> collapses F1 to ~0.30: with too few points per pixel the nearest-range estimate gets
+> noisy and static structure is spuriously *seen through*. Coarsening the image is the fix —
+> the same see-through-voting + *revert* algorithm, just sized to the sensor.
+
+```bash
+# Reproduce (downloads nuScenes mini once, ~3.9 GB stream, no signup, no extra deps):
+python3 scripts/run_nuscenes_benchmark.py
+```
+
 ## Installation
 
 ```bash

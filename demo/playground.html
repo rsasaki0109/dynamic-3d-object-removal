@@ -142,6 +142,7 @@
         <div class="row" id="modeRow">
           <button id="modeBox" class="primary">Box · detector</button>
           <button id="modeRange">Range · detector-free</button>
+          <button id="modeTemporal">Temporal · detector-free</button>
         </div>
         <p class="hint" id="modeHint">
           <b>Box mode:</b> crop points inside detected 3D boxes (needs boxes). Drop your own scan below.
@@ -316,7 +317,7 @@
       let pyodide = null;
       let currentCloud = null; // {bytes: Uint8Array, name: string}
       let currentBoxes = null; // string (json text)
-      let mode = "box"; // "box" | "range"
+      let mode = "box"; // "box" | "range" | "temporal"
       let rangeSampleLoaded = false;
       const statusEl = document.getElementById("status");
 
@@ -427,6 +428,44 @@ def run_range_removal():
         'span': span,
         'boxes': [],
     }
+
+def run_temporal_removal():
+    # Detector-free temporal voxel-consistency cleaning. Reuses the same multi-scan
+    # sample as range mode. Every scan is streamed through the real
+    # TemporalConsistencyFilter (exactly as the ROS node does), then the union map is
+    # passed as a final frame to classify it: a point is kept when its voxel was
+    # occupied in enough scans, removed when it shows up too rarely (a moving object).
+    data = np.load('/work/sample_av2_range.npz')
+    scans_cat = np.ascontiguousarray(data['scans'], dtype=np.float64)
+    splits = data['splits']
+    scans = [scans_cat[splits[i]:splits[i + 1]] for i in range(len(splits) - 1)]
+    map_points = scans_cat
+
+    filt = dor.TemporalConsistencyFilter(
+        voxel_size=0.3, window_size=len(scans) + 1, min_hits=3,
+    )
+    t0 = time.perf_counter()
+    for s in scans:
+        filt.filter(s)            # warm up voxel-hit counts over the window
+    _filtered, keep = filt.filter(map_points)
+    ms = (time.perf_counter() - t0) * 1000.0
+
+    kept = map_points[keep]
+    removed = map_points[~keep]
+    kept_r, c1 = _subsample(kept, _MAX_RENDER)
+    removed_r, c2 = _subsample(removed, _MAX_RENDER)
+    span = float((map_points.max(axis=0) - map_points.min(axis=0)).max()) if map_points.shape[0] else 1.0
+    return {
+        'kept_buf': kept_r.astype(np.float32).tobytes(),
+        'removed_buf': removed_r.astype(np.float32).tobytes(),
+        'total': int(map_points.shape[0]),
+        'removed_n': int((~keep).sum()),
+        'rendered': int(kept_r.shape[0] + removed_r.shape[0]),
+        'render_capped': bool(c1 or c2),
+        'ms': float(ms),
+        'span': span,
+        'boxes': [],
+    }
 `;
 
       async function boot() {
@@ -477,16 +516,20 @@ def run_range_removal():
         }
       }
 
+      async function ensureRangeSample() {
+        if (!rangeSampleLoaded) {
+          const resp = await fetch("./sample_av2_range.npz");
+          if (!resp.ok) throw new Error("could not fetch sample_av2_range.npz");
+          const bytes = new Uint8Array(await resp.arrayBuffer());
+          pyodide.FS.writeFile("/work/sample_av2_range.npz", bytes);
+          rangeSampleLoaded = true;
+        }
+      }
+
       async function loadRangeSample() {
         setStatus('<span class="spinner"></span> Fetching multi-scan sample (Argoverse 2)…');
         try {
-          if (!rangeSampleLoaded) {
-            const resp = await fetch("./sample_av2_range.npz");
-            if (!resp.ok) throw new Error("could not fetch sample_av2_range.npz");
-            const bytes = new Uint8Array(await resp.arrayBuffer());
-            pyodide.FS.writeFile("/work/sample_av2_range.npz", bytes);
-            rangeSampleLoaded = true;
-          }
+          await ensureRangeSample();
           document.getElementById("runBtn").disabled = false;
           runRangeRemoval();
         } catch (e) {
@@ -494,8 +537,42 @@ def run_range_removal():
         }
       }
 
+      function runTemporalRemoval() {
+        if (!pyodide) return;
+        try {
+          setStatus('<span class="spinner"></span> Filtering by temporal voxel consistency…');
+          const t0 = performance.now();
+          const proxy = pyodide.runPython("run_temporal_removal()");
+          const res = proxy.toJs({ dict_converter: Object.fromEntries });
+          proxy.destroy();
+          const keptBuf = res.kept_buf,
+            remBuf = res.removed_buf;
+          res.kept = new Float32Array(keptBuf.buffer, keptBuf.byteOffset, keptBuf.byteLength / 4);
+          res.removed = new Float32Array(remBuf.buffer, remBuf.byteOffset, remBuf.byteLength / 4);
+          renderResult(res);
+          const wall = (performance.now() - t0).toFixed(0);
+          setStatus("✓ Removed " + res.removed_n.toLocaleString() + " inconsistent points across " +
+            "6 scans (" + wall + " ms).");
+        } catch (e) {
+          setStatus("Error: " + (e.message || e), true);
+          console.error(e);
+        }
+      }
+
+      async function loadTemporalSample() {
+        setStatus('<span class="spinner"></span> Fetching multi-scan sample (Argoverse 2)…');
+        try {
+          await ensureRangeSample();
+          document.getElementById("runBtn").disabled = false;
+          runTemporalRemoval();
+        } catch (e) {
+          setStatus("Sample load failed: " + e.message, true);
+        }
+      }
+
       function runRemoval() {
         if (mode === "range") return runRangeRemoval();
+        if (mode === "temporal") return runTemporalRemoval();
         if (!pyodide || !currentCloud) return;
         const margin = parseFloat(document.getElementById("margin").value);
         try {
@@ -523,6 +600,7 @@ def run_range_removal():
 
       async function loadSample() {
         if (mode === "range") return loadRangeSample();
+        if (mode === "temporal") return loadTemporalSample();
         setStatus('<span class="spinner"></span> Fetching sample scene (Argoverse 2)…');
         try {
           const [cloudResp, objResp] = await Promise.all([
@@ -563,26 +641,32 @@ def run_range_removal():
       }
 
       // ---------- UI wiring ----------
+      const MODE_HINTS = {
+        box: "<b>Box mode:</b> crop points inside detected 3D boxes (needs boxes). Drop your own scan below.",
+        range: "<b>Range mode:</b> detector-free. Cleans an accumulated map by range-image visibility across 6 pose-aligned scans — no boxes, no labels. Removed points = dynamic objects seen through by other scans.",
+        temporal: "<b>Temporal mode:</b> detector-free. Keeps a voxel only when it is occupied consistently across scans; rarely-seen voxels (moving objects) are removed. Simplest of the three — more aggressive, lower precision than range.",
+      };
+
       function setMode(next) {
         mode = next;
-        const isRange = next === "range";
-        document.getElementById("modeBox").className = isRange ? "" : "primary";
-        document.getElementById("modeRange").className = isRange ? "primary" : "";
-        // Box-only controls.
-        document.getElementById("margin").style.display = isRange ? "none" : "";
-        document.querySelector(".dropzone").style.display = isRange ? "none" : "";
-        document.getElementById("tBoxes").parentElement.style.display = isRange ? "none" : "";
-        document.getElementById("marginVal").parentElement.style.display = isRange ? "none" : "";
-        document.getElementById("sampleBtn").textContent = isRange
-          ? "▶ Run multi-scan sample"
-          : "▶ Run sample scene";
-        document.getElementById("modeHint").innerHTML = isRange
-          ? "<b>Range mode:</b> detector-free. Cleans an accumulated map by range-image visibility across 6 pose-aligned scans — no boxes, no labels. Removed points = dynamic objects seen through by other scans."
-          : "<b>Box mode:</b> crop points inside detected 3D boxes (needs boxes). Drop your own scan below.";
+        const isBox = next === "box";
+        document.getElementById("modeBox").className = next === "box" ? "primary" : "";
+        document.getElementById("modeRange").className = next === "range" ? "primary" : "";
+        document.getElementById("modeTemporal").className = next === "temporal" ? "primary" : "";
+        // Box-only controls (margin slider, drop zone, detection-box toggle).
+        document.getElementById("margin").style.display = isBox ? "" : "none";
+        document.querySelector(".dropzone").style.display = isBox ? "" : "none";
+        document.getElementById("tBoxes").parentElement.style.display = isBox ? "" : "none";
+        document.getElementById("marginVal").parentElement.style.display = isBox ? "" : "none";
+        document.getElementById("sampleBtn").textContent = isBox
+          ? "▶ Run sample scene"
+          : "▶ Run multi-scan sample";
+        document.getElementById("modeHint").innerHTML = MODE_HINTS[next];
         if (pyodide) loadSample();
       }
       document.getElementById("modeBox").addEventListener("click", () => { if (mode !== "box") setMode("box"); });
       document.getElementById("modeRange").addEventListener("click", () => { if (mode !== "range") setMode("range"); });
+      document.getElementById("modeTemporal").addEventListener("click", () => { if (mode !== "temporal") setMode("temporal"); });
       document.getElementById("sampleBtn").addEventListener("click", loadSample);
       document.getElementById("runBtn").addEventListener("click", runRemoval);
       document.getElementById("margin").addEventListener("input", (e) => {

@@ -8,7 +8,7 @@
 
 ## Start Here
 
-- **🕹️ Interactive browser playground (no install)**: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/playground.html — the real `numpy` library runs in your browser via Pyodide. **Box mode**: drop your own LiDAR scan and watch dynamic objects get removed in 3D. **Range mode**: detector-free range-image visibility cleaning across pose-aligned scans — no boxes, no labels.
+- **🕹️ Interactive browser playground (no install)**: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/playground.html — the real `numpy` library runs in your browser via Pyodide. Flip between all three algorithms on the same scene: **Box mode** (drop your own LiDAR scan and watch dynamic objects get removed in 3D), **Range mode** (detector-free range-image visibility across pose-aligned scans), and **Temporal mode** (detector-free voxel consistency — simplest, more aggressive) — a live look at the precision/recall trade-off, no boxes or labels needed for the two detector-free modes.
 
   [![Browser playground demo](demo/playground_demo.gif)](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/playground.html)
 

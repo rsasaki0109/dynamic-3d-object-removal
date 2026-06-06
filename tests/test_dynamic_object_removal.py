@@ -686,6 +686,39 @@ class TestCleanMapByVisibility:
         wall = _dense_wall()
         assert clean_map_by_visibility(wall, [])[1].all()  # no scans -> keep all
 
+    def test_multi_resolution_consensus(self):
+        wall = _dense_wall()
+        ghost = np.array([[3.0, 0.0, 0.0]])
+        mp = np.vstack([wall, ghost])
+        scans = [(wall, (0, 0, 0)), (wall, (0, 0, 0))]
+        # A single-entry resolutions list is identical to the scalar h/v args.
+        _, keep_scalar = clean_map_by_visibility(
+            mp, scans, h_res_deg=2.0, v_res_deg=2.0, range_margin=0.5,
+            min_see_through=1, max_surface_hits=1)
+        _, keep_list = clean_map_by_visibility(
+            mp, scans, range_margin=0.5, min_see_through=1, max_surface_hits=1,
+            resolutions=[2.0])
+        assert np.array_equal(keep_scalar, keep_list)
+        # Tuple (h, v) form is accepted and equivalent.
+        _, keep_tuple = clean_map_by_visibility(
+            mp, scans, range_margin=0.5, min_see_through=1, max_surface_hits=1,
+            resolutions=[(2.0, 2.0)])
+        assert np.array_equal(keep_tuple, keep_list)
+        # Consensus (surface guard off) removes only points seen through at EVERY
+        # resolution -> a subset of either single resolution, never more.
+        kw = dict(range_margin=0.5, min_see_through=1, max_surface_hits=10_000)
+        _, keep_fine = clean_map_by_visibility(mp, scans, h_res_deg=2.0, v_res_deg=2.0, **kw)
+        _, keep_coarse = clean_map_by_visibility(mp, scans, h_res_deg=8.0, v_res_deg=8.0, **kw)
+        _, keep_consensus = clean_map_by_visibility(mp, scans, resolutions=[2.0, 8.0], **kw)
+        removed_consensus = ~keep_consensus
+        assert not keep_fine[removed_consensus].any()    # also removed at the fine image
+        assert not keep_coarse[removed_consensus].any()  # and at the coarse image
+        assert keep_consensus.sum() >= keep_fine.sum()
+        assert keep_consensus.sum() >= keep_coarse.sum()
+        assert not keep_consensus[-1]                    # the clear ghost is still removed
+        with pytest.raises(ValueError):
+            clean_map_by_visibility(mp, scans, resolutions=[])
+
 
 class TestRangeCLI:
     def test_cli_range_algorithm(self, tmp_path: Path):

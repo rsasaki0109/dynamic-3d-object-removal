@@ -252,7 +252,7 @@ Main public APIs:
 - `remove_points_in_boxes(points, boxes, margin=(0.05, 0.05, 0.05))`
 - `TemporalConsistencyFilter(voxel_size=0.10, window_size=5, min_hits=3)`
 - `remove_ghost_by_range_image(map_points, query_points, sensor_origin, range_margin=0.5)` — single map-vs-scan visibility removal
-- `clean_map_by_visibility(map_points, scans, min_see_through=2, max_surface_hits=2, ground_z=None)` — multi-scan map cleaner (remove + revert)
+- `clean_map_by_visibility(map_points, scans, min_see_through=2, max_surface_hits=2, ground_z=None, resolutions=None)` — multi-scan map cleaner (remove + revert); pass `resolutions=[2.5, 4.0]` for multi-resolution consensus (higher precision)
 - `RangeImageGhostFilter(window_size=5, range_margin=0.5)` — streaming range-image filter for ROS2
 - `save_points(path, fmt="auto")`
 
@@ -269,6 +269,8 @@ kept, keep_mask = clean_map_by_visibility(
 ```
 
 A map point is removed only when enough scans see *through* it (free space) **and** few scans confirm it as a real surface — the Removert-style *revert* guard that stops static structure from being eroded. Try it live (detector-free, runs in your browser) in the **Range mode** of the [playground](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/playground.html).
+
+**Higher-precision (multi-resolution consensus).** Pass `resolutions=[2.5, 4.0]` (Removert-style): a point is removed only if it is seen through at *every* listed resolution, which filters resolution-specific noise. This trades a little recall for precision — on the AV2 benchmark it lifts precision **0.68 → 0.78** (static-points-kept 0.98 → 0.99), and on sparse sensors it also nudges F1 up. Prefer it when wrongly deleting static structure is worse than missing a few dynamic points. Both benchmark scripts expose it via `--resolutions 2.5 4.0`.
 
 ## Supported Formats
 

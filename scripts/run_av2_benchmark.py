@@ -116,6 +116,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--max-surface-hits", type=int, default=3, help="Max scans confirming a point as surface (revert guard).")
     parser.add_argument("--h-res", type=float, default=1.0)
     parser.add_argument("--v-res", type=float, default=1.0)
+    parser.add_argument("--resolutions", type=float, nargs="+", default=None,
+                        help="Multi-resolution consensus (e.g. --resolutions 1.0 2.0): "
+                             "higher precision, slightly lower recall. Overrides --h/--v-res.")
     parser.add_argument("--moving-thresh", type=float, default=2.0, help="Track center displacement (m) to count as moving GT.")
     parser.add_argument("--voxel-size", type=float, default=core.DEFAULT_TEMPORAL_VOXEL_SIZE)
     parser.add_argument("--temporal-min-hits", type=int, default=2)
@@ -188,7 +191,7 @@ def main(argv: list[str] | None = None) -> int:
         acc_map, scans,
         h_res_deg=args.h_res, v_res_deg=args.v_res, range_margin=args.range_margin,
         min_see_through=args.min_see_through, max_surface_hits=args.max_surface_hits,
-        ground_z=GROUND_Z,
+        ground_z=GROUND_Z, resolutions=args.resolutions,
     )
     range_metrics = bench.compute_accuracy_metrics(~keep_range, gt_mask)
 

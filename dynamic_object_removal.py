@@ -798,6 +798,7 @@ def clean_map_by_visibility(
     min_see_through: int = 2,
     max_surface_hits: int = 2,
     ground_z: float | None = None,
+    resolutions: Sequence[float | tuple[float, float]] | None = None,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Clean an accumulated map of dynamic points using multi-scan visibility.
 
@@ -820,6 +821,15 @@ def clean_map_by_visibility(
     removed); ground returns are sampled at shifting angles between scans and would
     otherwise generate spurious see-through votes.
 
+    ``resolutions``: optional list of range-image resolutions for **multi-resolution
+    consensus** (Removert-style). Each entry is a single degree value (square pixels) or
+    an ``(h_deg, v_deg)`` pair. When given, a point is removed only if it is seen through
+    at *every* resolution -- this filters resolution-specific noise and raises precision
+    at the cost of a little recall, which helps on sparse sensors (e.g. nuScenes 32-beam,
+    where a single fine image leaves too few points per pixel). The surface *revert* guard
+    uses the finest resolution, where a real surface is best localized. When ``None``
+    (default), a single ``(h_res_deg, v_res_deg)`` image is used (unchanged behaviour).
+
     Returns ``(kept_points, keep_mask)`` over ``map_points``.
     """
     map_points = np.asarray(map_points, dtype=np.float64)
@@ -828,18 +838,36 @@ def clean_map_by_visibility(
     if not scans:
         return map_points, np.ones(map_points.shape[0], dtype=bool)
 
-    see_through_votes = np.zeros(map_points.shape[0], dtype=np.int64)
-    surface_votes = np.zeros(map_points.shape[0], dtype=np.int64)
-    for pts, origin in scans:
-        pts = np.asarray(pts, dtype=np.float64)
-        if pts.size == 0:
-            continue
-        origin = np.asarray(origin, dtype=np.float64)
-        st, sf = _visibility_votes(map_points, pts, origin, h_res_deg, v_res_deg, range_margin)
-        see_through_votes += st.astype(np.int64)
-        surface_votes += sf.astype(np.int64)
+    if resolutions is None:
+        res_list = [(float(h_res_deg), float(v_res_deg))]
+    else:
+        res_list = [((float(r), float(r)) if np.isscalar(r) else (float(r[0]), float(r[1])))
+                    for r in resolutions]
+        if not res_list:
+            raise ValueError("resolutions must be a non-empty sequence")
+    # Surface confirmation comes from the finest (smallest-cell) image, where a real
+    # surface is most tightly localized; see-through must agree across all resolutions.
+    finest = min(res_list, key=lambda hv: hv[0] * hv[1])
 
-    dynamic = (see_through_votes >= max(1, int(min_see_through))) & (surface_votes <= int(max_surface_hits))
+    n = map_points.shape[0]
+    consensus_seen_through = np.ones(n, dtype=bool)
+    surface_votes = np.zeros(n, dtype=np.int64)
+    for h_deg, v_deg in res_list:
+        see_through_votes = np.zeros(n, dtype=np.int64)
+        sf_votes = np.zeros(n, dtype=np.int64)
+        for pts, origin in scans:
+            pts = np.asarray(pts, dtype=np.float64)
+            if pts.size == 0:
+                continue
+            origin = np.asarray(origin, dtype=np.float64)
+            st, sf = _visibility_votes(map_points, pts, origin, h_deg, v_deg, range_margin)
+            see_through_votes += st.astype(np.int64)
+            sf_votes += sf.astype(np.int64)
+        consensus_seen_through &= see_through_votes >= max(1, int(min_see_through))
+        if (h_deg, v_deg) == finest:
+            surface_votes = sf_votes
+
+    dynamic = consensus_seen_through & (surface_votes <= int(max_surface_hits))
     if ground_z is not None:
         dynamic &= map_points[:, 2] > ground_z
     keep_mask = ~dynamic

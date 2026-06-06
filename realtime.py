@@ -517,7 +517,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--stats-period", type=int, default=100, help="Log summary every N frames.")
     parser.add_argument("--quiet", action="store_true", help="Reduce logs.")
     parser.add_argument("--summary-json", help="Save runtime summary JSON at shutdown.")
-    parser.add_argument("--version", action="version", version="dynamic-object-removal-realtime 0.1.0")
+    parser.add_argument("--version", action="version", version="dynamic-object-removal-realtime 0.2.0")
     return parser
 
 

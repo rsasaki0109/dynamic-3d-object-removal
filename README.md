@@ -127,6 +127,18 @@ python3 scripts/run_nuscenes_benchmark.py
 ## Installation
 
 ```bash
+pip install dynamic-object-removal
+```
+
+That is the whole install — one pure-Python wheel, `numpy` its only dependency (no GPU,
+no compiler, no deep-learning stack). It gives you the `dynamic_object_removal` library and
+the `dynamic-object-removal` CLI. Optional extras: `pip install "dynamic-object-removal[ros2]"`
+for the ROS2 node, `pip install "dynamic-object-removal[benchmarks]"` for the AV2/nuScenes
+reproduction scripts.
+
+From source (for development):
+
+```bash
 git clone https://github.com/rsasaki0109/dynamic-3d-object-removal.git
 cd dynamic-3d-object-removal
 python3 -m pip install -e .
@@ -212,6 +224,18 @@ Detector-free range-image visibility removal (clean an accumulated map with a qu
 ```bash
 dynamic-object-removal \
   --algorithm range \
+  --input-map accumulated_map.npy \
+  --input-cloud query_sweep.npy \
+  --sensor-origin 0 0 0 \
+  --output-cloud cleaned_map.npy
+```
+
+Detector-free scan-ratio (pseudo-occupancy) removal — swap `--algorithm range` for
+`--algorithm scan_ratio` (same map + query inputs):
+
+```bash
+dynamic-object-removal \
+  --algorithm scan_ratio \
   --input-map accumulated_map.npy \
   --input-cloud query_sweep.npy \
   --sensor-origin 0 0 0 \
@@ -307,3 +331,21 @@ An **independent** geometric signal from the visibility methods (ERASOR-style): 
 ## Related Work
 
 - [UTS-RI/dynamic_object_detection](https://github.com/UTS-RI/dynamic_object_detection)
+
+## Releasing (maintainers)
+
+Releases publish to PyPI automatically via [Trusted Publishing](https://docs.pypi.org/trusted-publishers/) — no API token is stored.
+
+One-time PyPI setup: on the project's *Publishing* settings add a trusted publisher with
+owner `rsasaki0109`, repository `dynamic-3d-object-removal`, workflow `publish.yml`, and
+environment `pypi`.
+
+To cut a release: bump `__version__` in `dynamic_object_removal.py` (the package version is
+read from it), commit, then push a matching tag:
+
+```bash
+git tag v0.2.0
+git push origin v0.2.0
+```
+
+The `Publish to PyPI` workflow builds the sdist + wheel, runs `twine check`, and uploads.

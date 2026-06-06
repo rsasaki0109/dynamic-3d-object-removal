@@ -599,7 +599,8 @@ class TestCLI:
             cwd=str(Path(__file__).resolve().parent.parent),
         )
         assert result.returncode == 0
-        assert "0.1.0" in result.stdout
+        import dynamic_object_removal
+        assert dynamic_object_removal.__version__ in result.stdout
 
 
 # ---------------------------------------------------------------------------
@@ -809,6 +810,39 @@ class TestRangeCLI:
         np.save(q, _dense_wall().astype(np.float32))
         ret = main([
             "--algorithm", "range",
+            "--input-cloud", str(q),
+            "--output-cloud", str(tmp_path / "out.npy"),
+            "--cloud-format", "npy",
+        ])
+        assert ret == 1
+
+    def test_cli_scan_ratio_algorithm(self, tmp_path: Path):
+        ground = _flat_ground()
+        obj = _tall_box(8.0, 0.0)
+        map_path = tmp_path / "map.npy"
+        query_path = tmp_path / "q.npy"
+        out_path = tmp_path / "out.npy"
+        np.save(map_path, np.vstack([ground, obj]).astype(np.float32))
+        np.save(query_path, ground.astype(np.float32))  # object gone
+        ret = main([
+            "--algorithm", "scan_ratio",
+            "--input-map", str(map_path),
+            "--input-cloud", str(query_path),
+            "--sensor-origin", "0", "0", "0",
+            "--output-cloud", str(out_path),
+            "--cloud-format", "npy",
+            "--scan-ratio-ground-margin", "0.25",
+        ])
+        assert ret == 0
+        kept = len(np.load(out_path))
+        assert kept < len(ground) + len(obj)  # object body removed
+        assert kept >= len(ground)            # ground reverted, kept
+
+    def test_cli_scan_ratio_requires_map(self, tmp_path: Path):
+        q = tmp_path / "q.npy"
+        np.save(q, _flat_ground().astype(np.float32))
+        ret = main([
+            "--algorithm", "scan_ratio",
             "--input-cloud", str(q),
             "--output-cloud", str(tmp_path / "out.npy"),
             "--cloud-format", "npy",

@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-"""Dynamic object removal CLI.
+"""Dynamic object removal for LiDAR point clouds (numpy-only, no deep learning).
 
-This tool removes points that lie inside detected 3D bounding boxes.
-It follows the same practical idea as the `dynamic_object_removal` ROS node:
-crop each incoming point cloud by detected object boxes and keep only static points.
+Four geometric algorithms in one small module: ``box`` (crop by detected 3D boxes),
+``temporal`` (voxel hit-consistency over a window), ``range`` (range-image visibility,
+Removert-style remove + revert), and ``scan_ratio`` (per-column pseudo-occupancy,
+ERASOR-style). The latter three are detector-free map cleaners. No GPU, no model.
 """
 
 from __future__ import annotations
+
+__version__ = "0.2.0"
 
 import argparse
 import csv
@@ -1233,12 +1236,15 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--input-cloud", required=True, help="Input point cloud path (csv/txt/xyz/pcd/npy). For --algorithm range this is the query scan.")
     parser.add_argument("--input-objects", help="Detected object boxes JSON or CSV path (required for --algorithm box).")
     parser.add_argument("--output-cloud", required=True, help="Output point cloud path.")
-    parser.add_argument("--algorithm", choices=["box", "range"], default="box", help="box: crop by detection boxes. range: range-image visibility removal of an accumulated map.")
-    parser.add_argument("--input-map", help="Accumulated map point cloud to clean (required for --algorithm range).")
-    parser.add_argument("--sensor-origin", nargs=3, type=float, default=[0.0, 0.0, 0.0], metavar=("X", "Y", "Z"), help="Sensor origin of the query scan (meters), for --algorithm range.")
+    parser.add_argument("--algorithm", choices=["box", "range", "scan_ratio"], default="box", help="box: crop by detection boxes. range: range-image visibility removal of an accumulated map. scan_ratio: ERASOR-style per-column pseudo-occupancy removal of an accumulated map.")
+    parser.add_argument("--input-map", help="Accumulated map point cloud to clean (required for --algorithm range/scan_ratio).")
+    parser.add_argument("--sensor-origin", nargs=3, type=float, default=[0.0, 0.0, 0.0], metavar=("X", "Y", "Z"), help="Sensor origin of the query scan (meters), for --algorithm range/scan_ratio.")
     parser.add_argument("--range-margin", type=float, default=DEFAULT_RANGE_MARGIN, help="Free-space margin for range-image removal (meters).")
     parser.add_argument("--range-h-res", type=float, default=DEFAULT_RANGE_H_RES_DEG, help="Range-image azimuth resolution (degrees).")
     parser.add_argument("--range-v-res", type=float, default=DEFAULT_RANGE_V_RES_DEG, help="Range-image elevation resolution (degrees).")
+    parser.add_argument("--scan-ratio-threshold", type=float, default=DEFAULT_SR_RATIO, help="scan_ratio: a column is dynamic when query/map height ratio is below this.")
+    parser.add_argument("--scan-ratio-min-map-height", type=float, default=DEFAULT_SR_MIN_MAP_HEIGHT, help="scan_ratio: ignore columns whose map height spread is below this (meters).")
+    parser.add_argument("--scan-ratio-ground-margin", type=float, default=DEFAULT_SR_GROUND_MARGIN, help="scan_ratio: keep points within this height of the per-column ground (meters).")
     parser.add_argument("--cloud-format", default="auto", choices=["auto", "csv", "pcd", "text", "npy", "bin", "feather"], help="Output/input point cloud format.")
     parser.add_argument("--objects-format", default="auto", choices=["auto", "json", "csv", "kitti", "av2"], help="Object file format.")
     parser.add_argument("--calib-path", default=None, help="KITTI calibration file path (required when --objects-format=kitti).")
@@ -1248,7 +1254,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--min-size", type=float, default=0.01, help="Skip boxes smaller than this size in any axis.")
     parser.add_argument("--summary-json", help="Write filtering statistics as JSON to this path.")
     parser.add_argument("--quiet", action="store_true", help="Suppress stdout summary.")
-    parser.add_argument("--version", action="version", version="dynamic-object-removal 0.1.0")
+    parser.add_argument("--version", action="version", version=f"dynamic-object-removal {__version__}")
     return parser
 
 
@@ -1318,6 +1324,44 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.summary_json:
             payload = {
                 "algorithm": "range",
+                "total_points": int(map_points.shape[0]),
+                "kept_points": int(filtered.shape[0]),
+                "removed_points": int(removed),
+                "removed_ratio": float(removed / map_points.shape[0]) if map_points.shape[0] else 0.0,
+            }
+            Path(args.summary_json).write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        return 0
+
+    if args.algorithm == "scan_ratio":
+        if not args.input_map:
+            _eprint("algorithm=scan_ratio requires --input-map (the accumulated map to clean)")
+            return 1
+        map_path = Path(args.input_map)
+        if not map_path.exists():
+            _eprint(f"input map not found: {map_path}")
+            return 1
+        map_points = load_points(map_path, fmt=args.cloud_format)
+        query_points = load_points(cloud_path, fmt=args.cloud_format)
+        filtered, keep_mask = remove_dynamic_by_scan_ratio(
+            map_points,
+            query_points,
+            tuple(args.sensor_origin),
+            scan_ratio_threshold=args.scan_ratio_threshold,
+            min_map_height=args.scan_ratio_min_map_height,
+            ground_margin=args.scan_ratio_ground_margin,
+        )
+        removed = map_points.shape[0] - filtered.shape[0]
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        save_points(out_path, filtered, fmt=args.cloud_format)
+        if not args.quiet:
+            ratio = 0.0 if map_points.shape[0] == 0 else removed / map_points.shape[0]
+            _eprint(f"algorithm: scan_ratio (pseudo-occupancy)")
+            _eprint(f"map: {map_points.shape[0]} points, query: {query_points.shape[0]} points")
+            _eprint(f"removed: {removed} points ({ratio:.2%})")
+            _eprint(f"output: {filtered.shape[0]} points -> {out_path}")
+        if args.summary_json:
+            payload = {
+                "algorithm": "scan_ratio",
                 "total_points": int(map_points.shape[0]),
                 "kept_points": int(filtered.shape[0]),
                 "removed_points": int(removed),

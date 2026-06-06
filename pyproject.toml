@@ -4,21 +4,35 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dynamic-object-removal"
-version = "0.1.0"
-description = "Utility to remove dynamic objects from LiDAR point clouds using detected bounding boxes."
+dynamic = ["version"]
+description = "Numpy-only, no-deep-learning dynamic object removal for LiDAR point clouds (box / temporal / range-image visibility / scan-ratio)."
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
 authors = [{ name = "rsasaki0109 contributors" }]
 dependencies = ["numpy>=1.24"]
-keywords = ["lidar", "slam", "ros2", "point-cloud", "dynamic-object-removal", "mapping"]
+keywords = [
+    "lidar", "slam", "ros2", "point-cloud", "dynamic-object-removal",
+    "mapping", "removert", "erasor", "static-map", "moving-object",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+    "Operating System :: OS Independent",
+]
 
 [project.optional-dependencies]
 ros2 = ["rclpy"]
+benchmarks = ["pyarrow>=12", "awscli"]
 
 [project.urls]
 Homepage = "https://github.com/rsasaki0109/dynamic-3d-object-removal"
 Repository = "https://github.com/rsasaki0109/dynamic-3d-object-removal"
+Playground = "https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/playground.html"
 
 [project.scripts]
 dynamic-object-removal = "dynamic_object_removal:main"
@@ -27,6 +41,9 @@ dynamic-object-removal-bench = "bench:main"
 
 [tool.setuptools]
 py-modules = ["dynamic_object_removal", "realtime", "bench"]
+
+[tool.setuptools.dynamic]
+version = { attr = "dynamic_object_removal.__version__" }
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

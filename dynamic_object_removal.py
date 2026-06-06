@@ -31,6 +31,14 @@ DEFAULT_RANGE_H_RES_DEG = 0.4
 DEFAULT_RANGE_V_RES_DEG = 1.0
 DEFAULT_RANGE_MARGIN = 0.5
 
+# Scan-ratio (ERASOR R-POD) pseudo-occupancy removal defaults.
+DEFAULT_SR_RINGS = 20
+DEFAULT_SR_SECTORS = 108
+DEFAULT_SR_MAX_RANGE = 80.0
+DEFAULT_SR_RATIO = 0.2
+DEFAULT_SR_MIN_MAP_HEIGHT = 0.5
+DEFAULT_SR_GROUND_MARGIN = 0.2
+
 
 @dataclass(frozen=True)
 class DetectionBox:
@@ -927,6 +935,212 @@ class RangeImageGhostFilter:
         )
         self._history.append(points)
         return kept, keep_mask
+
+
+def _polar_bins(
+    points: np.ndarray,
+    sensor_origin: np.ndarray,
+    n_rings: int,
+    n_sectors: int,
+    max_range: float,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Assign points to egocentric polar (ring x sector) bins around ``sensor_origin``.
+
+    Returns ``(flat_bin, valid)`` where ``flat_bin = ring * n_sectors + sector`` and
+    ``valid`` masks out the origin and anything beyond ``max_range``.
+    """
+    rel = np.asarray(points, dtype=np.float64) - sensor_origin
+    x = rel[:, 0]
+    y = rel[:, 1]
+    radius = np.hypot(x, y)
+    azimuth = np.arctan2(y, x)  # (-pi, pi]
+    ring = np.floor(radius / max_range * n_rings).astype(np.int64)
+    sector = np.clip(np.floor((azimuth + np.pi) / (2.0 * np.pi) * n_sectors).astype(np.int64), 0, n_sectors - 1)
+    valid = (radius > 1e-9) & (ring >= 0) & (ring < n_rings)
+    flat = ring * n_sectors + sector
+    return flat, valid
+
+
+def _ground_residual(pts: np.ndarray, seed_height: float) -> np.ndarray:
+    """Height of each point above the local ground in one polar bin (R-GPF revert).
+
+    Fits a ground plane ``z = a*x + b*y + c`` by least squares on the lowest points
+    (within ``seed_height`` of the bin floor), refines once on the inliers, and returns
+    ``z - plane(x, y)``. Falls back to "height above the lowest point" when the bin has
+    too few points to fit a plane. Used to keep the ground while removing the object body
+    that sits on top of it in a flagged column.
+    """
+    z = pts[:, 2]
+    if pts.shape[0] < 3:
+        return z - z.min()
+    seed = z <= z.min() + seed_height
+    if seed.sum() < 3:
+        order = np.argsort(z)[:3]
+        seed = np.zeros(z.shape[0], dtype=bool)
+        seed[order] = True
+    a = np.column_stack((pts[:, 0], pts[:, 1], np.ones(pts.shape[0])))
+    coef, *_ = np.linalg.lstsq(a[seed], z[seed], rcond=None)
+    resid = z - a @ coef
+    # One refit on points close to the first plane, for robustness to the seed choice.
+    inliers = np.abs(resid) <= seed_height
+    if inliers.sum() >= 3:
+        coef, *_ = np.linalg.lstsq(a[inliers], z[inliers], rcond=None)
+        resid = z - a @ coef
+    return resid
+
+
+def _scan_ratio_dynamic(
+    map_points: np.ndarray,
+    query_points: np.ndarray,
+    sensor_origin: np.ndarray,
+    n_rings: int,
+    n_sectors: int,
+    max_range: float,
+    scan_ratio_threshold: float,
+    min_map_height: float,
+    ground_margin: float,
+) -> np.ndarray:
+    """Boolean mask of map points flagged dynamic by one query scan (ERASOR R-POD).
+
+    A polar bin is "of interest" when the map has real vertical structure there
+    (``map_height > min_map_height``) yet the live query bin is much flatter
+    (``query_height / map_height < scan_ratio_threshold``) -- i.e. a tall thing in the
+    map is gone in the current sweep. Inside such bins, points sitting above the local
+    ground (residual ``> ground_margin``) are flagged dynamic; the ground is reverted.
+    """
+    n = map_points.shape[0]
+    dynamic = np.zeros(n, dtype=bool)
+    n_bins = n_rings * n_sectors
+
+    m_flat, m_valid = _polar_bins(map_points, sensor_origin, n_rings, n_sectors, max_range)
+    q_flat, q_valid = _polar_bins(query_points, sensor_origin, n_rings, n_sectors, max_range)
+    mz = map_points[:, 2]
+    qz = query_points[:, 2]
+
+    def spread(flat: np.ndarray, valid: np.ndarray, z: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        hi = np.full(n_bins, -np.inf)
+        lo = np.full(n_bins, np.inf)
+        np.maximum.at(hi, flat[valid], z[valid])
+        np.minimum.at(lo, flat[valid], z[valid])
+        cnt = np.zeros(n_bins, dtype=np.int64)
+        np.add.at(cnt, flat[valid], 1)
+        height = np.where(cnt > 0, hi - lo, 0.0)
+        return height, cnt
+
+    map_h, map_cnt = spread(m_flat, m_valid, mz)
+    q_h, q_cnt = spread(q_flat, q_valid, qz)
+
+    ratio = q_h / np.maximum(map_h, 1e-9)
+    bin_interest = (map_cnt > 0) & (q_cnt > 0) & (map_h > min_map_height) & (ratio < scan_ratio_threshold)
+    interest = np.nonzero(bin_interest)[0]
+    if interest.size == 0:
+        return dynamic
+
+    # Group valid map points by bin (one sort) so each flagged bin is a cheap slice.
+    valid_idx = np.nonzero(m_valid)[0]
+    bins_v = m_flat[valid_idx]
+    order = np.argsort(bins_v, kind="stable")
+    sorted_bins = bins_v[order]
+    sorted_idx = valid_idx[order]
+    starts = np.searchsorted(sorted_bins, interest, side="left")
+    ends = np.searchsorted(sorted_bins, interest, side="right")
+
+    seed_height = max(ground_margin * 2.0, 0.3)
+    for b, s, e in zip(interest, starts, ends):
+        if e <= s:
+            continue
+        idx = sorted_idx[s:e]
+        resid = _ground_residual(map_points[idx], seed_height)
+        dynamic[idx[resid > ground_margin]] = True
+    return dynamic
+
+
+def remove_dynamic_by_scan_ratio(
+    map_points: np.ndarray,
+    query_points: np.ndarray,
+    sensor_origin: Sequence[float] = (0.0, 0.0, 0.0),
+    *,
+    n_rings: int = DEFAULT_SR_RINGS,
+    n_sectors: int = DEFAULT_SR_SECTORS,
+    max_range: float = DEFAULT_SR_MAX_RANGE,
+    scan_ratio_threshold: float = DEFAULT_SR_RATIO,
+    min_map_height: float = DEFAULT_SR_MIN_MAP_HEIGHT,
+    ground_margin: float = DEFAULT_SR_GROUND_MARGIN,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Remove dynamic points from a map by the ERASOR pseudo-occupancy scan-ratio test.
+
+    Pure-numpy implementation of ERASOR's R-POD + scan-ratio + region-wise ground revert.
+    This is a *different signal* from the range-image visibility family: instead of
+    line-of-sight occlusion, it compares the **vertical occupancy** of each egocentric
+    polar column between the accumulated ``map_points`` and a live ``query_points`` sweep
+    (both in the same frame, observed from ``sensor_origin``). A column where the map is
+    tall but the current scan is flat held a dynamic object whose trace must be removed;
+    the ground underneath is reverted via a per-column least-squares plane fit.
+
+    This catches dynamic traces that are never occluded (so visibility misses them) but is
+    blind to objects floating off the ground and assumes dynamics rest on a visible ground.
+
+    Returns ``(kept_points, keep_mask)`` over ``map_points`` (same contract as
+    :func:`remove_points_in_boxes`).
+    """
+    map_points = np.asarray(map_points, dtype=np.float64)
+    if map_points.size == 0 or len(map_points) == 0:
+        return map_points, np.ones(0, dtype=bool)
+    query_points = np.asarray(query_points, dtype=np.float64)
+    if query_points.size == 0 or len(query_points) == 0:
+        return map_points, np.ones(map_points.shape[0], dtype=bool)
+    origin = np.asarray(sensor_origin, dtype=np.float64)
+    if origin.shape != (3,):
+        raise ValueError("sensor_origin must have 3 elements")
+
+    dynamic = _scan_ratio_dynamic(
+        map_points, query_points, origin, int(n_rings), int(n_sectors), float(max_range),
+        float(scan_ratio_threshold), float(min_map_height), float(ground_margin),
+    )
+    keep_mask = ~dynamic
+    return map_points[keep_mask], keep_mask
+
+
+def clean_map_by_scan_ratio(
+    map_points: np.ndarray,
+    scans: Sequence[tuple[np.ndarray, Sequence[float]]],
+    *,
+    n_rings: int = DEFAULT_SR_RINGS,
+    n_sectors: int = DEFAULT_SR_SECTORS,
+    max_range: float = DEFAULT_SR_MAX_RANGE,
+    scan_ratio_threshold: float = DEFAULT_SR_RATIO,
+    min_map_height: float = DEFAULT_SR_MIN_MAP_HEIGHT,
+    ground_margin: float = DEFAULT_SR_GROUND_MARGIN,
+    min_votes: int = 1,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Clean an accumulated map with the scan-ratio test, voting across multiple scans.
+
+    Runs :func:`remove_dynamic_by_scan_ratio` for each ``(points, sensor_origin)`` sweep
+    and removes a map point only when at least ``min_votes`` scans flag it dynamic. Voting
+    suppresses one-off false positives from a single occluded sweep (the main weakness of
+    the per-column ratio test). Mirrors :func:`clean_map_by_visibility`'s multi-scan shape.
+
+    Returns ``(kept_points, keep_mask)`` over ``map_points``.
+    """
+    map_points = np.asarray(map_points, dtype=np.float64)
+    if map_points.size == 0 or len(map_points) == 0:
+        return map_points, np.ones(0, dtype=bool)
+    if not scans:
+        return map_points, np.ones(map_points.shape[0], dtype=bool)
+
+    votes = np.zeros(map_points.shape[0], dtype=np.int64)
+    for pts, origin in scans:
+        pts = np.asarray(pts, dtype=np.float64)
+        if pts.size == 0:
+            continue
+        origin = np.asarray(origin, dtype=np.float64)
+        votes += _scan_ratio_dynamic(
+            map_points, pts, origin, int(n_rings), int(n_sectors), float(max_range),
+            float(scan_ratio_threshold), float(min_map_height), float(ground_margin),
+        ).astype(np.int64)
+    dynamic = votes >= max(1, int(min_votes))
+    keep_mask = ~dynamic
+    return map_points[keep_mask], keep_mask
 
 
 def _rotate_by_yaw(points: np.ndarray, yaw: float) -> np.ndarray:

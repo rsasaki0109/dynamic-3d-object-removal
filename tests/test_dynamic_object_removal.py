@@ -610,6 +610,8 @@ from dynamic_object_removal import (
     remove_ghost_by_range_image,
     RangeImageGhostFilter,
     clean_map_by_visibility,
+    remove_dynamic_by_scan_ratio,
+    clean_map_by_scan_ratio,
 )
 
 
@@ -718,6 +720,68 @@ class TestCleanMapByVisibility:
         assert not keep_consensus[-1]                    # the clear ghost is still removed
         with pytest.raises(ValueError):
             clean_map_by_visibility(mp, scans, resolutions=[])
+
+
+def _flat_ground(half=15.0, n=60):
+    gx, gy = np.meshgrid(np.linspace(-half, half, n), np.linspace(-half, half, n))
+    return np.column_stack([gx.ravel(), gy.ravel(), np.zeros(gx.size)])
+
+
+def _tall_box(cx, cy, top=2.0):
+    ox, oy, oz = np.meshgrid(
+        np.linspace(cx - 0.5, cx + 0.5, 6),
+        np.linspace(cy - 0.5, cy + 0.5, 6),
+        np.linspace(0.1, top, 12),
+    )
+    return np.column_stack([ox.ravel(), oy.ravel(), oz.ravel()])
+
+
+class TestScanRatioRemoval:
+    def test_removes_tall_dynamic_keeps_static(self):
+        ground = _flat_ground()
+        obj = _tall_box(8.0, 0.0)        # dynamic: present in map, gone in query
+        wall = _tall_box(-8.0, 0.0, 3.0)  # static: present in both -> ratio ~1, kept
+        mp = np.vstack([ground, obj, wall])
+        query = np.vstack([ground, wall])
+        _, keep = remove_dynamic_by_scan_ratio(
+            mp, query, (0, 0, 0), max_range=30.0, min_map_height=0.5, ground_margin=0.25
+        )
+        ng, no = len(ground), len(obj)
+        obj_keep = keep[ng:ng + no]
+        wall_keep = keep[ng + no:]
+        ground_keep = keep[:ng]
+        assert (~obj_keep).sum() > no // 2   # most of the dynamic object body removed
+        assert wall_keep.all()               # static tall structure untouched
+        assert ground_keep.all()             # ground reverted, never removed
+
+    def test_no_query_keeps_all(self):
+        mp = np.vstack([_flat_ground(), _tall_box(8.0, 0.0)])
+        _, keep = remove_dynamic_by_scan_ratio(mp, np.zeros((0, 3)), (0, 0, 0))
+        assert keep.all()
+
+    def test_empty_map(self):
+        kept, keep = remove_dynamic_by_scan_ratio(np.zeros((0, 3)), _flat_ground())
+        assert keep.shape == (0,) and kept.shape == (0, 3)
+
+    def test_bad_origin_raises(self):
+        with pytest.raises(ValueError):
+            remove_dynamic_by_scan_ratio(_flat_ground(), _flat_ground(), (0, 0))
+
+    def test_voting_threshold(self):
+        ground = _flat_ground()
+        obj = _tall_box(8.0, 0.0)
+        mp = np.vstack([ground, obj])
+        query_gone = np.vstack([ground])           # flags the object
+        query_present = np.vstack([ground, obj])    # does not flag it
+        scans = [(query_gone, (0, 0, 0)), (query_present, (0, 0, 0))]
+        kw = dict(max_range=30.0, min_map_height=0.5, ground_margin=0.25)
+        _, keep1 = clean_map_by_scan_ratio(mp, scans, min_votes=1, **kw)
+        _, keep2 = clean_map_by_scan_ratio(mp, scans, min_votes=2, **kw)
+        ng = len(ground)
+        # 1 vote removes the object (one scan saw it gone); 2 votes spares it (only one did).
+        assert (~keep1[ng:]).sum() > 0
+        assert keep2[ng:].all()
+        assert clean_map_by_scan_ratio(mp, [], **kw)[1].all()  # no scans -> keep all
 
 
 class TestRangeCLI:

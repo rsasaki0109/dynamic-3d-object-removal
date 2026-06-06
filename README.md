@@ -35,7 +35,7 @@ These two hero images are **not single scans**. They show a **20-frame accumulat
 ### Features
 
 - **No deep learning**: give it detected 3D boxes and it removes points geometrically. No GPU, training data, or model inference required
-- **Three algorithms, all numpy**: `box` (per-scan, needs boxes), `temporal` (detector-free voxel consistency), and `range` (detector-free range-image visibility — Removert-style remove + revert for cleaning accumulated maps)
+- **Four algorithms, all numpy**: `box` (per-scan, needs boxes), `temporal` (detector-free voxel consistency), `range` (detector-free range-image visibility — Removert-style remove + revert), and `scan_ratio` (detector-free per-column pseudo-occupancy — ERASOR-style scan-ratio + ground revert) for cleaning accumulated maps
 - **Fast**: 1.5 ms for 24k points on CPU
 - **ROS2 realtime node**: subscribe to `PointCloud2`, filter, and publish. Supports `box`, `temporal`, and `range` algorithms
 - **Minimal dependencies**: `numpy` only. `pyarrow` is only needed for Argoverse 2 Feather input
@@ -79,9 +79,12 @@ These numbers **are** re-measured here, on real public data, and are reproducibl
 | method (detector-free) | precision | recall | F1 | static points kept |
 |---|---|---|---|---|
 | **range-image visibility** (`range`) | **0.68** | 0.54 | **0.60** | 0.98 |
+| **scan-ratio** pseudo-occupancy (`scan_ratio`) | 0.66 | 0.56 | **0.61** | 0.98 |
 | temporal consistency (`temporal`) | 0.19 | 0.72 | 0.30 | 0.78 |
 
 > Scene `0b5142c1…`, 1.24 M points, 84 k ground-truth points on moving objects. The range-image cleaner uses see-through voting + a Removert-style *revert* (a repeatedly-observed surface is kept even if a few scans see past it) + ground protection. Tunable for higher precision (e.g. `--min-see-through 4` → precision ≈ 0.89).
+>
+> **scan-ratio** is a *different geometric signal* (ERASOR-style): it compares the **vertical occupancy of each egocentric polar column** between the map and a live sweep — a column that is tall in the map but flat now held a moving object — and reverts the ground underneath with a per-column plane fit. It reaches the same ~0.60 F1 as the visibility method by an **independent** mechanism (column occupancy vs line-of-sight), and tends toward **higher recall** (it also catches dynamics that are never occluded). Voting across scans (`--sr-min-votes 2`) controls the precision/recall trade.
 
 ```bash
 # Reproduce (downloads a few AV2 sweeps, no signup):
@@ -101,6 +104,7 @@ so each pixel still aggregates enough points. With that one change the method ge
 | method (detector-free) | precision | recall | F1 | static points kept |
 |---|---|---|---|---|
 | **range-image visibility** (`range`) | 0.48 | **0.92** | **0.63** | 0.81 |
+| scan-ratio pseudo-occupancy (`scan_ratio`) | 0.30 | **0.97** | 0.45 | 0.56 |
 | temporal consistency (`temporal`) | 0.07 | 0.22 | 0.11 | 0.47 |
 
 > Scene `scene-0757` (busy intersection), 12 pose-aligned keyframes, 303 k points, 49 k
@@ -108,6 +112,12 @@ so each pixel still aggregates enough points. With that one change the method ge
 > collapses F1 to ~0.30: with too few points per pixel the nearest-range estimate gets
 > noisy and static structure is spuriously *seen through*. Coarsening the image is the fix —
 > the same see-through-voting + *revert* algorithm, just sized to the sensor.
+>
+> The **scan-ratio** method is the honest cautionary case for the same beam-density lesson:
+> its column-occupancy signal is *more* sensitive to sparsity than visibility (a 32-beam
+> sweep often leaves a column nearly empty → flat → flagged), so on nuScenes it keeps recall
+> very high but precision and static-preservation drop. It is strongest on dense (64-beam+)
+> sensors like AV2; on sparse sensors prefer `range`, or raise `--sr-min-votes`.
 
 ```bash
 # Reproduce (downloads nuScenes mini once, ~3.9 GB stream, no signup, no extra deps):
@@ -253,6 +263,8 @@ Main public APIs:
 - `TemporalConsistencyFilter(voxel_size=0.10, window_size=5, min_hits=3)`
 - `remove_ghost_by_range_image(map_points, query_points, sensor_origin, range_margin=0.5)` — single map-vs-scan visibility removal
 - `clean_map_by_visibility(map_points, scans, min_see_through=2, max_surface_hits=2, ground_z=None, resolutions=None)` — multi-scan map cleaner (remove + revert); pass `resolutions=[2.5, 4.0]` for multi-resolution consensus (higher precision)
+- `remove_dynamic_by_scan_ratio(map_points, query_points, sensor_origin, scan_ratio_threshold=0.2, ground_margin=0.2)` — single map-vs-scan ERASOR-style per-column pseudo-occupancy removal
+- `clean_map_by_scan_ratio(map_points, scans, scan_ratio_threshold=0.2, min_votes=1)` — multi-scan scan-ratio cleaner (vote across sweeps)
 - `RangeImageGhostFilter(window_size=5, range_margin=0.5)` — streaming range-image filter for ROS2
 - `save_points(path, fmt="auto")`
 
@@ -269,6 +281,20 @@ kept, keep_mask = clean_map_by_visibility(
 ```
 
 A map point is removed only when enough scans see *through* it (free space) **and** few scans confirm it as a real surface — the Removert-style *revert* guard that stops static structure from being eroded. Try it live (detector-free, runs in your browser) in the **Range mode** of the [playground](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/playground.html).
+
+### Scan-ratio (pseudo-occupancy) removal
+
+```python
+from dynamic_object_removal import clean_map_by_scan_ratio
+
+# scans: list of (points_in_map_frame, sensor_origin) from the sweeps that built the map.
+kept, keep_mask = clean_map_by_scan_ratio(
+    map_points, scans,
+    scan_ratio_threshold=0.2, min_map_height=0.5, ground_margin=0.2, min_votes=2,
+)
+```
+
+An **independent** geometric signal from the visibility methods (ERASOR-style): each egocentric polar column stores its vertical occupancy (height spread). A column that is tall in the accumulated map but flat in a live sweep held a moving object, so its above-ground points are removed and the ground is reverted by a per-column plane fit. It complements `range` — same ~0.60 F1 on AV2 by a different mechanism, with a recall bias — and is strongest on dense (64-beam+) LiDAR; on sparse sensors (e.g. nuScenes 32-beam) prefer `range` or raise `min_votes`.
 
 **Higher-precision (multi-resolution consensus).** Pass `resolutions=[2.5, 4.0]` (Removert-style): a point is removed only if it is seen through at *every* listed resolution, which filters resolution-specific noise. This trades a little recall for precision — on the AV2 benchmark it lifts precision **0.68 → 0.78** (static-points-kept 0.98 → 0.99), and on sparse sensors it also nudges F1 up. Prefer it when wrongly deleting static structure is worse than missing a few dynamic points. Both benchmark scripts expose it via `--resolutions 2.5 4.0`.
 

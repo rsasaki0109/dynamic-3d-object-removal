@@ -122,6 +122,15 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--moving-thresh", type=float, default=2.0, help="Track center displacement (m) to count as moving GT.")
     parser.add_argument("--voxel-size", type=float, default=core.DEFAULT_TEMPORAL_VOXEL_SIZE)
     parser.add_argument("--temporal-min-hits", type=int, default=2)
+    parser.add_argument("--sr-rings", type=int, default=core.DEFAULT_SR_RINGS)
+    parser.add_argument("--sr-sectors", type=int, default=core.DEFAULT_SR_SECTORS)
+    parser.add_argument("--sr-max-range", type=float, default=core.DEFAULT_SR_MAX_RANGE)
+    parser.add_argument("--sr-ratio", type=float, default=core.DEFAULT_SR_RATIO,
+                        help="Column dynamic if query/map height ratio is below this.")
+    parser.add_argument("--sr-min-map-height", type=float, default=core.DEFAULT_SR_MIN_MAP_HEIGHT)
+    parser.add_argument("--sr-ground-margin", type=float, default=core.DEFAULT_SR_GROUND_MARGIN)
+    parser.add_argument("--sr-min-votes", type=int, default=2,
+                        help="Scans that must flag a point before the scan-ratio test removes it.")
     parser.add_argument("--summary-json", default=None)
     args = parser.parse_args(argv)
 
@@ -205,6 +214,15 @@ def main(argv: list[str] | None = None) -> int:
         keep_temporal[s:e] = keep_f
     temporal_metrics = bench.compute_accuracy_metrics(~keep_temporal, gt_mask)
 
+    # --- scan-ratio: ERASOR-style per-column pseudo-occupancy (a different signal) ---
+    _, keep_sr = core.clean_map_by_scan_ratio(
+        acc_map, scans,
+        n_rings=args.sr_rings, n_sectors=args.sr_sectors, max_range=args.sr_max_range,
+        scan_ratio_threshold=args.sr_ratio, min_map_height=args.sr_min_map_height,
+        ground_margin=args.sr_ground_margin, min_votes=args.sr_min_votes,
+    )
+    scanratio_metrics = bench.compute_accuracy_metrics(~keep_sr, gt_mask)
+
     def row(name: str, m: dict) -> str:
         return (f"| {name} | {m['precision']:.3f} | {m['recall']:.3f} | {m['f1']:.3f} | "
                 f"{m['static_preservation']:.3f} |")
@@ -216,6 +234,7 @@ def main(argv: list[str] | None = None) -> int:
         "| method | precision | recall | F1 | static kept |\n"
         "|---|---|---|---|---|\n"
         f"{row('range-image visibility', range_metrics)}\n"
+        f"{row('scan-ratio (pseudo-occupancy)', scanratio_metrics)}\n"
         f"{row('temporal consistency', temporal_metrics)}\n"
     )
     print(table)
@@ -227,7 +246,7 @@ def main(argv: list[str] | None = None) -> int:
         "config": {"h_res": args.h_res, "v_res": args.v_res, "range_margin": args.range_margin,
                    "min_see_through": args.min_see_through, "max_surface_hits": args.max_surface_hits,
                    "ground_z": GROUND_Z, "moving_thresh": args.moving_thresh},
-        "range": range_metrics, "temporal": temporal_metrics,
+        "range": range_metrics, "temporal": temporal_metrics, "scan_ratio": scanratio_metrics,
     }
     out_json = args.summary_json or str(_scene_dir(args.scene) / "benchmark_result.json")
     Path(out_json).write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")

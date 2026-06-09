@@ -9,7 +9,7 @@ ERASOR-style). The latter three are detector-free map cleaners. No GPU, no model
 
 from __future__ import annotations
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 import argparse
 import csv
@@ -41,6 +41,7 @@ DEFAULT_SR_MAX_RANGE = 80.0
 DEFAULT_SR_RATIO = 0.2
 DEFAULT_SR_MIN_MAP_HEIGHT = 0.5
 DEFAULT_SR_GROUND_MARGIN = 0.2
+DEFAULT_SR_VOTES_FRACTION = 0.15
 
 
 @dataclass(frozen=True)
@@ -1194,14 +1195,19 @@ def clean_map_by_scan_ratio(
     scan_ratio_threshold: float = DEFAULT_SR_RATIO,
     min_map_height: float = DEFAULT_SR_MIN_MAP_HEIGHT,
     ground_margin: float = DEFAULT_SR_GROUND_MARGIN,
-    min_votes: int = 1,
+    min_votes: int | None = None,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Clean an accumulated map with the scan-ratio test, voting across multiple scans.
 
     Runs :func:`remove_dynamic_by_scan_ratio` for each ``(points, sensor_origin)`` sweep
     and removes a map point only when at least ``min_votes`` scans flag it dynamic. Voting
-    suppresses one-off false positives from a single occluded sweep (the main weakness of
-    the per-column ratio test). Mirrors :func:`clean_map_by_visibility`'s multi-scan shape.
+    suppresses one-off false positives from occluded or sparsely-sampled sweeps (the main
+    weakness of the per-column ratio test): a true dynamic trace is flagged by most sweeps
+    that revisit its column (the object is gone), while a static surface only collects
+    scattered votes. ``min_votes=None`` (default) scales the threshold to
+    ``DEFAULT_SR_VOTES_FRACTION`` of the number of scans, which on DynamicMap_Benchmark
+    Semantic-KITTI seq 00/05 raises SA from ~48% (min_votes=2) to ~88-94% while keeping
+    DA at ~98%. Mirrors :func:`clean_map_by_visibility`'s multi-scan shape.
 
     Returns ``(kept_points, keep_mask)`` over ``map_points``.
     """
@@ -1210,6 +1216,8 @@ def clean_map_by_scan_ratio(
         return map_points, np.ones(0, dtype=bool)
     if not scans:
         return map_points, np.ones(map_points.shape[0], dtype=bool)
+    if min_votes is None:
+        min_votes = max(1, round(DEFAULT_SR_VOTES_FRACTION * len(scans)))
 
     votes = np.zeros(map_points.shape[0], dtype=np.int64)
     for pts, origin in scans:

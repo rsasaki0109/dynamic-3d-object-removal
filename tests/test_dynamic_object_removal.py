@@ -785,6 +785,9 @@ class TestScanRatioRemoval:
         assert (~keep1[ng:]).sum() > 0
         assert keep2[ng:].all()
         assert clean_map_by_scan_ratio(mp, [], **kw)[1].all()  # no scans -> keep all
+        # Default min_votes=None scales with the scan count (30% of 2 scans -> 1 vote).
+        _, keep_auto = clean_map_by_scan_ratio(mp, scans, **kw)
+        assert np.array_equal(keep_auto, keep1)
 
 
 class TestRangeCLI:

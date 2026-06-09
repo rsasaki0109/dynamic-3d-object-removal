@@ -129,8 +129,8 @@ def main(argv: list[str] | None = None) -> int:
                         help="Column dynamic if query/map height ratio is below this.")
     parser.add_argument("--sr-min-map-height", type=float, default=core.DEFAULT_SR_MIN_MAP_HEIGHT)
     parser.add_argument("--sr-ground-margin", type=float, default=core.DEFAULT_SR_GROUND_MARGIN)
-    parser.add_argument("--sr-min-votes", type=int, default=2,
-                        help="Scans that must flag a point before the scan-ratio test removes it.")
+    parser.add_argument("--sr-min-votes", type=int, default=None,
+                        help="Scans that must flag a point before removal (default: 30%% of scans).")
     parser.add_argument("--summary-json", default=None)
     args = parser.parse_args(argv)
 

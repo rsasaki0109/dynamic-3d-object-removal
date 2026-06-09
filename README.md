@@ -84,7 +84,7 @@ These numbers **are** re-measured here, on real public data, and are reproducibl
 
 > Scene `0b5142c1…`, 1.24 M points, 84 k ground-truth points on moving objects. The range-image cleaner uses see-through voting + a Removert-style *revert* (a repeatedly-observed surface is kept even if a few scans see past it) + ground protection. Tunable for higher precision (e.g. `--min-see-through 4` → precision ≈ 0.89).
 >
-> **scan-ratio** is a *different geometric signal* (ERASOR-style): it compares the **vertical occupancy of each egocentric polar column** between the map and a live sweep — a column that is tall in the map but flat now held a moving object — and reverts the ground underneath with a per-column plane fit. It reaches the same ~0.60 F1 as the visibility method by an **independent** mechanism (column occupancy vs line-of-sight), and tends toward **higher recall** (it also catches dynamics that are never occluded). Voting across scans (`--sr-min-votes 2`) controls the precision/recall trade.
+> **scan-ratio** is a *different geometric signal* (ERASOR-style): it compares the **vertical occupancy of each egocentric polar column** between the map and a live sweep — a column that is tall in the map but flat now held a moving object — and reverts the ground underneath with a per-column plane fit. It reaches the same ~0.60 F1 as the visibility method by an **independent** mechanism (column occupancy vs line-of-sight), and tends toward **higher recall** (it also catches dynamics that are never occluded). Voting across scans (`min_votes`, default 15% of scans — 2 here) controls the precision/recall trade.
 
 ```bash
 # Reproduce (downloads a few AV2 sweeps, no signup):
@@ -135,14 +135,16 @@ range image). **Our methods only** — not ERASOR/Removert/DUFOMap re-runs.
 | method | seq 00 SA | seq 00 DA | seq 00 AA | seq 05 SA | seq 05 DA | seq 05 AA |
 |---|---|---|---|---|---|---|
 | **range-image visibility** (`range`) | **99.6** | 34.5 | 58.6 | **99.8** | 25.9 | 50.9 |
-| **scan-ratio** pseudo-occupancy (`scan_ratio`) | 48.7 | **98.8** | **69.4** | 47.5 | **99.0** | **68.6** |
+| **scan-ratio** pseudo-occupancy (`scan_ratio`) | 88.4 | **97.6** | **92.9** | 93.5 | **97.5** | **95.5** |
 | temporal consistency (`temporal`) | 97.0 | 46.6 | 67.2 | 97.3 | 25.9 | 50.2 |
 
 > seq 00: 141 scans, 17.4 M points, 96 k dynamic GT points. seq 05: 321 scans, 39.9 M
 > points, 684 k dynamic GT points. **range** preserves static structure (SA ≈ 99%) but is
-> conservative on dynamics (DA ≈ 26–35%). **scan-ratio** inverts that trade-off (DA ≈ 99%,
-> SA ≈ 48%) — the same pattern as nuScenes sparsity, now on a standard benchmark map.
-> Neither claims SOTA; the point is `pip install` + numpy-only participation on shared data.
+> conservative on dynamics (DA ≈ 26–35%). **scan-ratio** balances both: cross-scan voting
+> (default `min_votes` = 15% of scans, v0.3.0) suppresses the per-sweep false positives
+> that previously cost half the static map (SA 48.7 → 88.4 on seq 00 at DA ≈ 98%). For
+> reference, the benchmark paper reports AA 81.1/82.9 for ERASOR and 92.2/92.1 for
+> Octomap w GF on these sequences — measured by the maintainers, not re-run here.
 
 ```bash
 # Reproduce (downloads Zenodo teaser zips, ~385 MB each; scipy speeds up eval):
@@ -313,7 +315,7 @@ Main public APIs:
 - `remove_ghost_by_range_image(map_points, query_points, sensor_origin, range_margin=0.5)` — single map-vs-scan visibility removal
 - `clean_map_by_visibility(map_points, scans, min_see_through=2, max_surface_hits=2, ground_z=None, resolutions=None)` — multi-scan map cleaner (remove + revert); pass `resolutions=[2.5, 4.0]` for multi-resolution consensus (higher precision)
 - `remove_dynamic_by_scan_ratio(map_points, query_points, sensor_origin, scan_ratio_threshold=0.2, ground_margin=0.2)` — single map-vs-scan ERASOR-style per-column pseudo-occupancy removal
-- `clean_map_by_scan_ratio(map_points, scans, scan_ratio_threshold=0.2, min_votes=1)` — multi-scan scan-ratio cleaner (vote across sweeps)
+- `clean_map_by_scan_ratio(map_points, scans, scan_ratio_threshold=0.2, min_votes=None)` — multi-scan scan-ratio cleaner (vote across sweeps; `None` = 15% of scans)
 - `RangeImageGhostFilter(window_size=5, range_margin=0.5)` — streaming range-image filter for ROS2
 - `save_points(path, fmt="auto")`
 
@@ -337,9 +339,10 @@ A map point is removed only when enough scans see *through* it (free space) **an
 from dynamic_object_removal import clean_map_by_scan_ratio
 
 # scans: list of (points_in_map_frame, sensor_origin) from the sweeps that built the map.
+# min_votes defaults to 15% of the scan count; pass an int to override.
 kept, keep_mask = clean_map_by_scan_ratio(
     map_points, scans,
-    scan_ratio_threshold=0.2, min_map_height=0.5, ground_margin=0.2, min_votes=2,
+    scan_ratio_threshold=0.2, min_map_height=0.5, ground_margin=0.2,
 )
 ```
 

@@ -484,38 +484,50 @@ def _pcd_scalar_dtype(type_code: str, size: int) -> np.dtype:
     raise ValueError(f"unsupported PCD field type: type={type_code} size={size}")
 
 
-def _load_pcd(path: Path) -> np.ndarray:
+@dataclass(frozen=True)
+class PcdScan:
+    """One PCD scan with optional per-point intensity and sensor pose (VIEWPOINT)."""
+
+    points: np.ndarray  # (N, 3)
+    intensity: np.ndarray | None = None  # (N,)
+    viewpoint: np.ndarray | None = None  # (7,) tx, ty, tz, qw, qx, qy, qz
+
+
+def _parse_pcd_header(header_lines: list[str]) -> tuple[dict[str, Any], str, bytes]:
     fields: list[str] = []
     sizes: list[int] = []
     types: list[str] = []
     counts: list[int] = []
     points = 0
+    width = 0
+    height = 1
+    viewpoint: list[float] = [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0]
     data_kind = ""
     payload = b""
 
-    with path.open("rb") as f:
-        while True:
-            raw = f.readline()
-            if not raw:
-                break
-            line = raw.decode("ascii", errors="strict").strip()
-            if not line or line.startswith("#"):
-                continue
-            low = line.lower()
-            if low.startswith("fields "):
-                fields = [token.lower() for token in line.split()[1:]]
-            elif low.startswith("size "):
-                sizes = [int(token) for token in line.split()[1:]]
-            elif low.startswith("type "):
-                types = [token.upper() for token in line.split()[1:]]
-            elif low.startswith("count "):
-                counts = [int(token) for token in line.split()[1:]]
-            elif low.startswith("points "):
-                points = int(line.split()[1])
-            elif low.startswith("data "):
-                data_kind = low.split()[1]
-                payload = f.read()
-                break
+    for line in header_lines:
+        if not line or line.startswith("#"):
+            continue
+        low = line.lower()
+        if low.startswith("fields "):
+            fields = [token.lower() for token in line.split()[1:]]
+        elif low.startswith("size "):
+            sizes = [int(token) for token in line.split()[1:]]
+        elif low.startswith("type "):
+            types = [token.upper() for token in line.split()[1:]]
+        elif low.startswith("count "):
+            counts = [int(token) for token in line.split()[1:]]
+        elif low.startswith("width "):
+            width = int(line.split()[1])
+        elif low.startswith("height "):
+            height = int(line.split()[1])
+        elif low.startswith("points "):
+            points = int(line.split()[1])
+        elif low.startswith("viewpoint "):
+            viewpoint = [float(token) for token in line.split()[1:]]
+        elif low.startswith("data "):
+            data_kind = low.split()[1]
+            break
 
     if not fields:
         raise ValueError("PCD header missing FIELDS line")
@@ -531,46 +543,114 @@ def _load_pcd(path: Path) -> np.ndarray:
         raise ValueError("PCD COUNT does not match FIELDS")
     if points < 0:
         raise ValueError("PCD POINTS must be non-negative")
+    if len(viewpoint) != 7:
+        raise ValueError("PCD VIEWPOINT must have 7 values: tx ty tz qw qx qy qz")
 
-    idx = {k: fields.index(k) for k in ("x", "y", "z") if k in fields}
-    if len(idx) != 3:
-        raise ValueError("PCD FIELDS must include x,y,z")
-    if data_kind == "binary_compressed":
-        raise ValueError("PCD DATA binary_compressed is not supported")
+    metadata = {
+        "fields": fields,
+        "sizes": sizes,
+        "types": types,
+        "counts": counts,
+        "points": points,
+        "width": width,
+        "height": height,
+        "viewpoint": viewpoint,
+        "data_kind": data_kind,
+    }
+    return metadata, data_kind, payload
 
-    if data_kind == "ascii":
-        point_lines = [ln for ln in payload.decode("utf-8").splitlines() if ln.strip() and not ln.lstrip().startswith("#")]
-        if not point_lines:
-            return np.zeros((0, 3), dtype=np.float64)
-        data = np.loadtxt(io.StringIO("\n".join(point_lines)), dtype=np.float64)
-        if data.ndim == 1:
-            data = data[None, :]
-        if data.shape[1] < len(fields):
-            raise ValueError("PCD point format is shorter than expected")
-        return data[:, [idx["x"], idx["y"], idx["z"]]]
 
-    if data_kind != "binary":
-        raise ValueError(f"unsupported PCD DATA type: {data_kind}")
-
+def _pcd_structured_dtype(metadata: dict[str, Any]) -> np.dtype:
     dtype_fields: list[tuple[Any, ...]] = []
-    for name, size, type_code, count in zip(fields, sizes, types, counts):
+    for name, size, type_code, count in zip(
+        metadata["fields"], metadata["sizes"], metadata["types"], metadata["counts"]
+    ):
         scalar_dtype = _pcd_scalar_dtype(type_code, size)
         if count == 1:
             dtype_fields.append((name, scalar_dtype))
         else:
             dtype_fields.append((name, scalar_dtype, (count,)))
-    point_dtype = np.dtype(dtype_fields)
-    expected_size = point_dtype.itemsize * points
-    if len(payload) < expected_size:
-        raise ValueError("PCD binary payload is shorter than expected")
-    data = np.frombuffer(payload[:expected_size], dtype=point_dtype, count=points)
-    return np.column_stack(
+    return np.dtype(dtype_fields)
+
+
+def _structured_pcd_to_scan(data: np.ndarray, metadata: dict[str, Any]) -> PcdScan:
+    fields = metadata["fields"]
+    if not all(k in fields for k in ("x", "y", "z")):
+        raise ValueError("PCD FIELDS must include x,y,z")
+    points = np.column_stack(
         (
             np.asarray(data["x"], dtype=np.float64),
             np.asarray(data["y"], dtype=np.float64),
             np.asarray(data["z"], dtype=np.float64),
         )
     )
+    intensity = None
+    if "intensity" in fields:
+        intensity = np.asarray(data["intensity"], dtype=np.float64)
+    viewpoint = np.asarray(metadata["viewpoint"], dtype=np.float64)
+    default_view = np.array([0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0], dtype=np.float64)
+    vp = viewpoint if not np.allclose(viewpoint, default_view) else None
+    return PcdScan(points=points, intensity=intensity, viewpoint=vp)
+
+
+def load_pcd_scan(path: Path) -> PcdScan:
+    """Load a PCD file including optional intensity and VIEWPOINT sensor pose."""
+    header_lines: list[str] = []
+    payload = b""
+    data_kind = ""
+
+    with path.open("rb") as f:
+        while True:
+            raw = f.readline()
+            if not raw:
+                break
+            line = raw.decode("ascii", errors="strict").strip()
+            header_lines.append(line)
+            if line.lower().startswith("data "):
+                data_kind = line.split()[1].lower()
+                payload = f.read()
+                break
+
+    metadata, data_kind, _ = _parse_pcd_header(header_lines)
+    if data_kind == "binary_compressed":
+        raise ValueError("PCD DATA binary_compressed is not supported")
+
+    fields = metadata["fields"]
+    points = metadata["points"]
+    idx = {k: fields.index(k) for k in ("x", "y", "z")}
+
+    if data_kind == "ascii":
+        point_lines = [
+            ln for ln in payload.decode("utf-8").splitlines()
+            if ln.strip() and not ln.lstrip().startswith("#")
+        ]
+        if not point_lines:
+            return PcdScan(points=np.zeros((0, 3), dtype=np.float64))
+        table = np.loadtxt(io.StringIO("\n".join(point_lines)), dtype=np.float64)
+        if table.ndim == 1:
+            table = table[None, :]
+        if table.shape[1] < len(fields):
+            raise ValueError("PCD point format is shorter than expected")
+        xyz = table[:, [idx["x"], idx["y"], idx["z"]]]
+        intensity = table[:, fields.index("intensity")] if "intensity" in fields else None
+        viewpoint = np.asarray(metadata["viewpoint"], dtype=np.float64)
+        default_view = np.array([0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0], dtype=np.float64)
+        vp = viewpoint if not np.allclose(viewpoint, default_view) else None
+        return PcdScan(points=xyz, intensity=intensity, viewpoint=vp)
+
+    if data_kind != "binary":
+        raise ValueError(f"unsupported PCD DATA type: {data_kind}")
+
+    point_dtype = _pcd_structured_dtype(metadata)
+    expected_size = point_dtype.itemsize * points
+    if len(payload) < expected_size:
+        raise ValueError("PCD binary payload is shorter than expected")
+    structured = np.frombuffer(payload[:expected_size], dtype=point_dtype, count=points)
+    return _structured_pcd_to_scan(structured, metadata)
+
+
+def _load_pcd(path: Path) -> np.ndarray:
+    return load_pcd_scan(path).points
 
 
 def _load_kitti_bin(path: Path) -> np.ndarray:

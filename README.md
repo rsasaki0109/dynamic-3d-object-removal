@@ -8,7 +8,7 @@
 
 ## Start Here
 
-- **🕹️ Interactive browser playground (no install)**: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/playground.html — the real `numpy` library runs in your browser via Pyodide. Flip between all three algorithms on the same scene: **Box mode** (drop your own LiDAR scan and watch dynamic objects get removed in 3D), **Range mode** (detector-free range-image visibility across pose-aligned scans), and **Temporal mode** (detector-free voxel consistency — simplest, more aggressive) — a live look at the precision/recall trade-off, no boxes or labels needed for the two detector-free modes.
+- **🕹️ Interactive browser playground (no install)**: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/playground.html — the real `numpy` library runs in your browser via Pyodide. Flip between all three algorithms on the same scene: **Box mode** (drop your own LiDAR scan and watch dynamic objects get removed in 3D), **Range mode** (detector-free range-image visibility across pose-aligned scans), and **Temporal mode** (detector-free voxel consistency — simplest, more aggressive) — a live look at the precision/recall trade-off, no boxes or labels needed for the two detector-free modes. **Shareable URLs** preserve mode, preset (AV2 64-beam or nuScenes 32-beam), and algorithm knobs — use the **Share** button to copy a link.
 
   [![Browser playground demo](demo/playground_demo.gif)](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/playground.html)
 
@@ -122,6 +122,31 @@ so each pixel still aggregates enough points. With that one change the method ge
 ```bash
 # Reproduce (downloads nuScenes mini once, ~3.9 GB stream, no signup, no extra deps):
 python3 scripts/run_nuscenes_benchmark.py
+```
+
+### Measured on Semantic-KITTI (DynamicMap_Benchmark format)
+
+These numbers use the [KTH-RPL DynamicMap_Benchmark](https://github.com/KTH-RPL/DynamicMap_Benchmark)
+teaser sequences on Zenodo (pose-attached per-scan PCDs, human-labeled `gt_cloud.pcd`).
+Metrics are the benchmark's **SA / DA / AA / HA** (static accuracy, dynamic accuracy,
+geometric & harmonic means). Same detector-free defaults as the AV2 run (VLP-64 → `1.0°`
+range image). **Our methods only** — not ERASOR/Removert/DUFOMap re-runs.
+
+| method | seq 00 SA | seq 00 DA | seq 00 AA | seq 05 SA | seq 05 DA | seq 05 AA |
+|---|---|---|---|---|---|---|
+| **range-image visibility** (`range`) | **99.6** | 34.5 | 58.6 | **99.8** | 25.9 | 50.9 |
+| **scan-ratio** pseudo-occupancy (`scan_ratio`) | 48.7 | **98.8** | **69.4** | 47.5 | **99.0** | **68.6** |
+| temporal consistency (`temporal`) | 97.0 | 46.6 | 67.2 | 97.3 | 25.9 | 50.2 |
+
+> seq 00: 141 scans, 17.4 M points, 96 k dynamic GT points. seq 05: 321 scans, 39.9 M
+> points, 684 k dynamic GT points. **range** preserves static structure (SA ≈ 99%) but is
+> conservative on dynamics (DA ≈ 26–35%). **scan-ratio** inverts that trade-off (DA ≈ 99%,
+> SA ≈ 48%) — the same pattern as nuScenes sparsity, now on a standard benchmark map.
+> Neither claims SOTA; the point is `pip install` + numpy-only participation on shared data.
+
+```bash
+# Reproduce (downloads Zenodo teaser zips, ~385 MB each; scipy speeds up eval):
+python3 scripts/run_dynamicmap_benchmark.py --sequences 00 05
 ```
 
 ## Installation

@@ -120,6 +120,15 @@
         position: absolute; top: 12px; left: 12px; background: rgba(8,14,32,0.72);
         border: 1px solid var(--line); border-radius: 10px; padding: 6px 12px; font-size: 12px; color: var(--muted);
       }
+      .toast {
+        position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+        background: rgba(16, 24, 46, 0.95); border: 1px solid var(--line);
+        padding: 10px 16px; border-radius: 10px; font-size: 13px; color: var(--text);
+        opacity: 0; transition: opacity 0.25s; pointer-events: none; z-index: 99;
+      }
+      .toast.show { opacity: 1; }
+      .param-block { display: none; flex-direction: column; gap: 8px; }
+      .param-block.visible { display: flex; }
       @media (max-width: 820px) {
         .layout { grid-template-columns: 1fr; }
         .stage { min-height: 60vh; }
@@ -144,12 +153,37 @@
           <button id="modeRange">Range · detector-free</button>
           <button id="modeTemporal">Temporal · detector-free</button>
         </div>
+        <div class="row" id="presetRow" style="display: none">
+          <button id="presetAv2" class="primary">AV2 · 64-beam</button>
+          <button id="presetNuscenes">nuScenes · 32-beam</button>
+        </div>
         <p class="hint" id="modeHint">
           <b>Box mode:</b> crop points inside detected 3D boxes (needs boxes). Drop your own scan below.
         </p>
 
         <div class="row">
           <button id="sampleBtn" class="primary" disabled>▶ Run sample scene</button>
+          <button id="shareBtn" disabled title="Copy link with current settings">Share</button>
+        </div>
+
+        <div id="rangeParams" class="param-block">
+          <label class="ctl">Range margin <span id="rangeMarginVal">0.50 m</span></label>
+          <input id="rangeMargin" type="range" min="0.1" max="1.5" step="0.05" value="0.5" />
+          <label class="ctl">See-through votes <span id="seeVal">2</span></label>
+          <input id="seeThrough" type="range" min="1" max="6" step="1" value="2" />
+          <label class="ctl">Surface revert max <span id="surfVal">2</span></label>
+          <input id="surfHits" type="range" min="1" max="8" step="1" value="2" />
+          <label class="ctl">H resolution <span id="hresVal">1.0°</span></label>
+          <input id="hRes" type="range" min="0.5" max="4" step="0.5" value="1.0" />
+          <label class="ctl">V resolution <span id="vresVal">1.0°</span></label>
+          <input id="vRes" type="range" min="0.5" max="4" step="0.5" value="1.0" />
+        </div>
+
+        <div id="temporalParams" class="param-block">
+          <label class="ctl">Voxel size <span id="voxelVal">0.30 m</span></label>
+          <input id="voxelSize" type="range" min="0.1" max="1.0" step="0.05" value="0.3" />
+          <label class="ctl">Min hits <span id="hitsVal">3</span></label>
+          <input id="minHits" type="range" min="1" max="8" step="1" value="3" />
         </div>
 
         <div id="dropzone" class="dropzone">
@@ -191,8 +225,8 @@
           <code>{"objects":[{"center":[x,y,z],"size":[l,w,h],"yaw":r}]}</code> JSON next to your scan to remove your own.
           Feather/AV2 input needs pyarrow and only works in the CLI.
           <br /><br />
-          Sample scene: Argoverse 2 Sensor Dataset (CC BY-NC-SA 4.0),
-          95,381 points / 23 dynamic objects.
+          Sample scenes: Argoverse 2 (64-beam, 95k pts) and nuScenes mini (32-beam, coarser range image).
+          Shareable URLs preserve mode, preset, and algorithm knobs.
           <br /><br />
           ← back to <a href="./index.html">all demos</a> ·
           <a href="https://github.com/rsasaki0109/dynamic-3d-object-removal">source on GitHub</a>
@@ -204,6 +238,7 @@
         <div class="overlay-tag" id="overlayTag">drag-orbit · scroll-zoom</div>
       </main>
     </div>
+    <div id="toast" class="toast">Link copied</div>
 
     <script>
       // ---------- Three.js scene ----------
@@ -318,8 +353,159 @@
       let currentCloud = null; // {bytes: Uint8Array, name: string}
       let currentBoxes = null; // string (json text)
       let mode = "box"; // "box" | "range" | "temporal"
-      let rangeSampleLoaded = false;
+      let preset = "av2"; // "av2" | "nuscenes"
+      const loadedSamples = new Set();
+      let urlBootstrapping = false;
       const statusEl = document.getElementById("status");
+
+      const PRESET_META = {
+        av2: {
+          file: "sample_av2_range.npz",
+          label: "Argoverse 2",
+          hRes: 1.0,
+          vRes: 1.0,
+          see: 2,
+          surf: 2,
+          voxel: 0.3,
+          hits: 3,
+        },
+        nuscenes: {
+          file: "sample_nuscenes_range.npz",
+          label: "nuScenes mini",
+          hRes: 2.5,
+          vRes: 2.5,
+          see: 2,
+          surf: 2,
+          voxel: 0.35,
+          hits: 3,
+        },
+      };
+
+      function readUrlState() {
+        const p = new URLSearchParams(window.location.search);
+        const state = {
+          mode: p.get("mode") || "box",
+          preset: p.get("preset") || "av2",
+          margin: p.has("margin") ? parseFloat(p.get("margin")) : 0.05,
+          see: p.has("see") ? parseInt(p.get("see"), 10) : null,
+          surf: p.has("surf") ? parseInt(p.get("surf"), 10) : null,
+          hres: p.has("hres") ? parseFloat(p.get("hres")) : null,
+          vres: p.has("vres") ? parseFloat(p.get("vres")) : null,
+          voxel: p.has("voxel") ? parseFloat(p.get("voxel")) : null,
+          hits: p.has("hits") ? parseInt(p.get("hits"), 10) : null,
+        };
+        if (!["box", "range", "temporal"].includes(state.mode)) state.mode = "box";
+        if (!["av2", "nuscenes"].includes(state.preset)) state.preset = "av2";
+        return state;
+      }
+
+      function syncUrl() {
+        const p = new URLSearchParams();
+        if (mode !== "box") p.set("mode", mode);
+        if (mode !== "box" && preset !== "av2") p.set("preset", preset);
+        const margin = parseFloat(document.getElementById("margin").value);
+        if (mode === "box" && Math.abs(margin - 0.05) > 1e-6) p.set("margin", margin.toFixed(2));
+        if (mode === "range") {
+          const meta = PRESET_META[preset];
+          const see = parseInt(document.getElementById("seeThrough").value, 10);
+          const surf = parseInt(document.getElementById("surfHits").value, 10);
+          const hres = parseFloat(document.getElementById("hRes").value);
+          const vres = parseFloat(document.getElementById("vRes").value);
+          const rm = parseFloat(document.getElementById("rangeMargin").value);
+          if (see !== meta.see) p.set("see", String(see));
+          if (surf !== meta.surf) p.set("surf", String(surf));
+          if (Math.abs(hres - meta.hRes) > 1e-6) p.set("hres", String(hres));
+          if (Math.abs(vres - meta.vRes) > 1e-6) p.set("vres", String(vres));
+          if (Math.abs(rm - 0.5) > 1e-6) p.set("rmargin", rm.toFixed(2));
+        }
+        if (mode === "temporal") {
+          const meta = PRESET_META[preset];
+          const voxel = parseFloat(document.getElementById("voxelSize").value);
+          const hits = parseInt(document.getElementById("minHits").value, 10);
+          if (Math.abs(voxel - meta.voxel) > 1e-6) p.set("voxel", voxel.toFixed(2));
+          if (hits !== meta.hits) p.set("hits", String(hits));
+        }
+        const qs = p.toString();
+        const next = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
+        history.replaceState(null, "", next);
+      }
+
+      function showToast(msg) {
+        const el = document.getElementById("toast");
+        el.textContent = msg;
+        el.classList.add("show");
+        setTimeout(() => el.classList.remove("show"), 2200);
+      }
+
+      async function copyShareLink() {
+        syncUrl();
+        const url = window.location.href;
+        try {
+          await navigator.clipboard.writeText(url);
+          showToast("Link copied to clipboard");
+        } catch (_) {
+          showToast(url);
+        }
+      }
+
+      function applyPresetDefaults(nextPreset, fromUrl) {
+        preset = nextPreset;
+        const meta = PRESET_META[preset];
+        document.getElementById("presetAv2").className = preset === "av2" ? "primary" : "";
+        document.getElementById("presetNuscenes").className = preset === "nuscenes" ? "primary" : "";
+        if (!fromUrl) {
+          document.getElementById("hRes").value = meta.hRes;
+          document.getElementById("vRes").value = meta.vRes;
+          document.getElementById("seeThrough").value = meta.see;
+          document.getElementById("surfHits").value = meta.surf;
+          document.getElementById("voxelSize").value = meta.voxel;
+          document.getElementById("minHits").value = meta.hits;
+        }
+        updateParamLabels();
+      }
+
+      function updateParamLabels() {
+        document.getElementById("rangeMarginVal").textContent =
+          parseFloat(document.getElementById("rangeMargin").value).toFixed(2) + " m";
+        document.getElementById("seeVal").textContent = document.getElementById("seeThrough").value;
+        document.getElementById("surfVal").textContent = document.getElementById("surfHits").value;
+        document.getElementById("hresVal").textContent =
+          parseFloat(document.getElementById("hRes").value).toFixed(1) + "°";
+        document.getElementById("vresVal").textContent =
+          parseFloat(document.getElementById("vRes").value).toFixed(1) + "°";
+        document.getElementById("voxelVal").textContent =
+          parseFloat(document.getElementById("voxelSize").value).toFixed(2) + " m";
+        document.getElementById("hitsVal").textContent = document.getElementById("minHits").value;
+      }
+
+      function applyUrlState(state) {
+        urlBootstrapping = true;
+        if (state.margin != null && !Number.isNaN(state.margin)) {
+          document.getElementById("margin").value = state.margin;
+          document.getElementById("marginVal").textContent = state.margin.toFixed(2) + " m";
+        }
+        applyPresetDefaults(state.preset, true);
+        const meta = PRESET_META[state.preset];
+        if (state.see == null) document.getElementById("seeThrough").value = meta.see;
+        if (state.surf == null) document.getElementById("surfHits").value = meta.surf;
+        if (state.hres == null) document.getElementById("hRes").value = meta.hRes;
+        if (state.vres == null) document.getElementById("vRes").value = meta.vRes;
+        if (state.voxel == null) document.getElementById("voxelSize").value = meta.voxel;
+        if (state.hits == null) document.getElementById("minHits").value = meta.hits;
+        if (state.see != null) document.getElementById("seeThrough").value = state.see;
+        if (state.surf != null) document.getElementById("surfHits").value = state.surf;
+        if (state.hres != null) document.getElementById("hRes").value = state.hres;
+        if (state.vres != null) document.getElementById("vRes").value = state.vres;
+        if (state.voxel != null) document.getElementById("voxelSize").value = state.voxel;
+        if (state.hits != null) document.getElementById("minHits").value = state.hits;
+        if (new URLSearchParams(window.location.search).has("rmargin")) {
+          const rm = parseFloat(new URLSearchParams(window.location.search).get("rmargin"));
+          if (!Number.isNaN(rm)) document.getElementById("rangeMargin").value = rm;
+        }
+        updateParamLabels();
+        setMode(state.mode, { skipSample: true, skipUrl: true });
+        urlBootstrapping = false;
+      }
 
       function setStatus(msg, isErr) {
         statusEl.innerHTML = msg;
@@ -393,10 +579,8 @@ def run_box_removal(filename, boxes_json, margin):
         ],
     }
 
-def run_range_removal():
-    # Detector-free range-image visibility cleaning over a multi-scan accumulated map.
-    # The sample is already centroid-centered. Map = union of the pose-aligned scans.
-    data = np.load('/work/sample_av2_range.npz')
+def run_range_removal(sample_name, h_res, v_res, range_margin, min_see, max_surf):
+    data = np.load('/work/' + sample_name)
     scans_cat = np.ascontiguousarray(data['scans'], dtype=np.float64)
     splits = data['splits']
     origins = np.asarray(data['origins'], dtype=np.float64)
@@ -407,8 +591,8 @@ def run_range_removal():
     t0 = time.perf_counter()
     _filtered, keep = dor.clean_map_by_visibility(
         map_points, scans,
-        h_res_deg=1.0, v_res_deg=1.0, range_margin=0.5,
-        min_see_through=2, max_surface_hits=2, ground_z=ground_z,
+        h_res_deg=float(h_res), v_res_deg=float(v_res), range_margin=float(range_margin),
+        min_see_through=int(min_see), max_surface_hits=int(max_surf), ground_z=ground_z,
     )
     ms = (time.perf_counter() - t0) * 1000.0
 
@@ -429,24 +613,19 @@ def run_range_removal():
         'boxes': [],
     }
 
-def run_temporal_removal():
-    # Detector-free temporal voxel-consistency cleaning. Reuses the same multi-scan
-    # sample as range mode. Every scan is streamed through the real
-    # TemporalConsistencyFilter (exactly as the ROS node does), then the union map is
-    # passed as a final frame to classify it: a point is kept when its voxel was
-    # occupied in enough scans, removed when it shows up too rarely (a moving object).
-    data = np.load('/work/sample_av2_range.npz')
+def run_temporal_removal(sample_name, voxel_size, min_hits):
+    data = np.load('/work/' + sample_name)
     scans_cat = np.ascontiguousarray(data['scans'], dtype=np.float64)
     splits = data['splits']
     scans = [scans_cat[splits[i]:splits[i + 1]] for i in range(len(splits) - 1)]
     map_points = scans_cat
 
     filt = dor.TemporalConsistencyFilter(
-        voxel_size=0.3, window_size=len(scans) + 1, min_hits=3,
+        voxel_size=float(voxel_size), window_size=len(scans) + 1, min_hits=int(min_hits),
     )
     t0 = time.perf_counter()
     for s in scans:
-        filt.filter(s)            # warm up voxel-hit counts over the window
+        filt.filter(s)
     _filtered, keep = filt.filter(map_points)
     ms = (time.perf_counter() - t0) * 1000.0
 
@@ -470,11 +649,13 @@ def run_temporal_removal():
 
       async function boot() {
         try {
+          const urlState = readUrlState();
+          if (window.location.search) applyUrlState(urlState);
+
           pyodide = await loadPyodide();
           setStatus('<span class="spinner"></span> Loading numpy…');
           await pyodide.loadPackage("numpy");
           setStatus('<span class="spinner"></span> Loading the removal library…');
-          // Fetch the REAL library source from the repo and run it as-is.
           const resp = await fetch("../dynamic_object_removal.py");
           if (!resp.ok) throw new Error("could not fetch dynamic_object_removal.py");
           const src = await resp.text();
@@ -485,9 +666,9 @@ def run_temporal_removal():
           await pyodide.runPythonAsync(PY_GLUE);
           setStatus("✓ Ready. Loading sample scene…");
           document.getElementById("sampleBtn").disabled = false;
-          // Auto-run the sample for an instant first impression (unless the user
-          // already dropped their own scan while Python was booting).
+          document.getElementById("shareBtn").disabled = false;
           if (!currentCloud) loadSample();
+          syncUrl();
         } catch (e) {
           setStatus("Boot failed: " + e.message, true);
           console.error(e);
@@ -498,8 +679,17 @@ def run_temporal_removal():
         if (!pyodide) return;
         try {
           setStatus('<span class="spinner"></span> Cleaning map by visibility…');
+          const sample = PRESET_META[preset].file;
+          pyodide.globals.set("g_sample", sample);
+          pyodide.globals.set("g_hres", parseFloat(document.getElementById("hRes").value));
+          pyodide.globals.set("g_vres", parseFloat(document.getElementById("vRes").value));
+          pyodide.globals.set("g_rmargin", parseFloat(document.getElementById("rangeMargin").value));
+          pyodide.globals.set("g_see", parseInt(document.getElementById("seeThrough").value, 10));
+          pyodide.globals.set("g_surf", parseInt(document.getElementById("surfHits").value, 10));
           const t0 = performance.now();
-          const proxy = pyodide.runPython("run_range_removal()");
+          const proxy = pyodide.runPython(
+            "run_range_removal(g_sample, g_hres, g_vres, g_rmargin, g_see, g_surf)"
+          );
           const res = proxy.toJs({ dict_converter: Object.fromEntries });
           proxy.destroy();
           const keptBuf = res.kept_buf,
@@ -508,28 +698,31 @@ def run_temporal_removal():
           res.removed = new Float32Array(remBuf.buffer, remBuf.byteOffset, remBuf.byteLength / 4);
           renderResult(res);
           const wall = (performance.now() - t0).toFixed(0);
-          setStatus("✓ Removed " + res.removed_n.toLocaleString() + " dynamic points across " +
-            "6 pose-aligned scans (" + wall + " ms).");
+          const label = PRESET_META[preset].label;
+          setStatus("✓ [" + label + "] Removed " + res.removed_n.toLocaleString() + " dynamic points (" + wall + " ms).");
+          if (!urlBootstrapping) syncUrl();
         } catch (e) {
           setStatus("Error: " + (e.message || e), true);
           console.error(e);
         }
       }
 
-      async function ensureRangeSample() {
-        if (!rangeSampleLoaded) {
-          const resp = await fetch("./sample_av2_range.npz");
-          if (!resp.ok) throw new Error("could not fetch sample_av2_range.npz");
-          const bytes = new Uint8Array(await resp.arrayBuffer());
-          pyodide.FS.writeFile("/work/sample_av2_range.npz", bytes);
-          rangeSampleLoaded = true;
-        }
+      async function ensureMultiScanSample() {
+        const file = PRESET_META[preset].file;
+        if (loadedSamples.has(file)) return file;
+        const resp = await fetch("./" + file);
+        if (!resp.ok) throw new Error("could not fetch " + file);
+        const bytes = new Uint8Array(await resp.arrayBuffer());
+        pyodide.FS.writeFile("/work/" + file, bytes);
+        loadedSamples.add(file);
+        return file;
       }
 
       async function loadRangeSample() {
-        setStatus('<span class="spinner"></span> Fetching multi-scan sample (Argoverse 2)…');
+        const label = PRESET_META[preset].label;
+        setStatus('<span class="spinner"></span> Fetching multi-scan sample (' + label + ')…');
         try {
-          await ensureRangeSample();
+          await ensureMultiScanSample();
           document.getElementById("runBtn").disabled = false;
           runRangeRemoval();
         } catch (e) {
@@ -541,8 +734,12 @@ def run_temporal_removal():
         if (!pyodide) return;
         try {
           setStatus('<span class="spinner"></span> Filtering by temporal voxel consistency…');
+          const sample = PRESET_META[preset].file;
+          pyodide.globals.set("g_sample", sample);
+          pyodide.globals.set("g_voxel", parseFloat(document.getElementById("voxelSize").value));
+          pyodide.globals.set("g_hits", parseInt(document.getElementById("minHits").value, 10));
           const t0 = performance.now();
-          const proxy = pyodide.runPython("run_temporal_removal()");
+          const proxy = pyodide.runPython("run_temporal_removal(g_sample, g_voxel, g_hits)");
           const res = proxy.toJs({ dict_converter: Object.fromEntries });
           proxy.destroy();
           const keptBuf = res.kept_buf,
@@ -551,8 +748,9 @@ def run_temporal_removal():
           res.removed = new Float32Array(remBuf.buffer, remBuf.byteOffset, remBuf.byteLength / 4);
           renderResult(res);
           const wall = (performance.now() - t0).toFixed(0);
-          setStatus("✓ Removed " + res.removed_n.toLocaleString() + " inconsistent points across " +
-            "6 scans (" + wall + " ms).");
+          const label = PRESET_META[preset].label;
+          setStatus("✓ [" + label + "] Removed " + res.removed_n.toLocaleString() + " inconsistent points (" + wall + " ms).");
+          if (!urlBootstrapping) syncUrl();
         } catch (e) {
           setStatus("Error: " + (e.message || e), true);
           console.error(e);
@@ -560,9 +758,10 @@ def run_temporal_removal():
       }
 
       async function loadTemporalSample() {
-        setStatus('<span class="spinner"></span> Fetching multi-scan sample (Argoverse 2)…');
+        const label = PRESET_META[preset].label;
+        setStatus('<span class="spinner"></span> Fetching multi-scan sample (' + label + ')…');
         try {
-          await ensureRangeSample();
+          await ensureMultiScanSample();
           document.getElementById("runBtn").disabled = false;
           runTemporalRemoval();
         } catch (e) {
@@ -592,6 +791,7 @@ def run_temporal_removal():
           renderResult(res);
           const wall = (performance.now() - t0).toFixed(0);
           setStatus("✓ Removed " + res.removed_n.toLocaleString() + " points (" + wall + " ms incl. parse).");
+          if (!urlBootstrapping) syncUrl();
         } catch (e) {
           setStatus("Error: " + (e.message || e), true);
           console.error(e);
@@ -647,13 +847,19 @@ def run_temporal_removal():
         temporal: "<b>Temporal mode:</b> detector-free. Keeps a voxel only when it is occupied consistently across scans; rarely-seen voxels (moving objects) are removed. Simplest of the three — more aggressive, lower precision than range.",
       };
 
-      function setMode(next) {
+      function setMode(next, opts = {}) {
+        const skipSample = opts.skipSample || false;
+        const skipUrl = opts.skipUrl || false;
         mode = next;
         const isBox = next === "box";
+        const isRange = next === "range";
+        const isTemporal = next === "temporal";
         document.getElementById("modeBox").className = next === "box" ? "primary" : "";
         document.getElementById("modeRange").className = next === "range" ? "primary" : "";
         document.getElementById("modeTemporal").className = next === "temporal" ? "primary" : "";
-        // Box-only controls (margin slider, drop zone, detection-box toggle).
+        document.getElementById("presetRow").style.display = isBox ? "none" : "flex";
+        document.getElementById("rangeParams").classList.toggle("visible", isRange);
+        document.getElementById("temporalParams").classList.toggle("visible", isTemporal);
         document.getElementById("margin").style.display = isBox ? "" : "none";
         document.querySelector(".dropzone").style.display = isBox ? "" : "none";
         document.getElementById("tBoxes").parentElement.style.display = isBox ? "" : "none";
@@ -662,16 +868,31 @@ def run_temporal_removal():
           ? "▶ Run sample scene"
           : "▶ Run multi-scan sample";
         document.getElementById("modeHint").innerHTML = MODE_HINTS[next];
-        if (pyodide) loadSample();
+        if (!skipUrl && !urlBootstrapping) syncUrl();
+        if (!skipSample && pyodide) loadSample();
       }
       document.getElementById("modeBox").addEventListener("click", () => { if (mode !== "box") setMode("box"); });
       document.getElementById("modeRange").addEventListener("click", () => { if (mode !== "range") setMode("range"); });
       document.getElementById("modeTemporal").addEventListener("click", () => { if (mode !== "temporal") setMode("temporal"); });
+      document.getElementById("presetAv2").addEventListener("click", () => {
+        if (preset !== "av2") { applyPresetDefaults("av2", false); if (pyodide) loadSample(); else syncUrl(); }
+      });
+      document.getElementById("presetNuscenes").addEventListener("click", () => {
+        if (preset !== "nuscenes") { applyPresetDefaults("nuscenes", false); if (pyodide) loadSample(); else syncUrl(); }
+      });
       document.getElementById("sampleBtn").addEventListener("click", loadSample);
+      document.getElementById("shareBtn").addEventListener("click", copyShareLink);
       document.getElementById("runBtn").addEventListener("click", runRemoval);
       document.getElementById("margin").addEventListener("input", (e) => {
         document.getElementById("marginVal").textContent = parseFloat(e.target.value).toFixed(2) + " m";
+        syncUrl();
       });
+      for (const id of ["seeThrough", "surfHits", "hRes", "vRes", "rangeMargin", "voxelSize", "minHits"]) {
+        document.getElementById(id).addEventListener("input", () => {
+          updateParamLabels();
+          syncUrl();
+        });
+      }
       document.getElementById("psize").addEventListener("input", (e) => {
         document.getElementById("psVal").textContent = parseFloat(e.target.value).toFixed(1);
         if (keptPoints) keptPoints.material.size = parseFloat(e.target.value) * 0.35;

@@ -18,11 +18,13 @@ from dynamic_object_removal import (
     TemporalConsistencyFilter,
     load_boxes,
     load_points,
+    load_pcd_scan,
     remove_points_in_boxes,
     save_points,
     main,
     _parse_kitti_calib,
 )
+import bench
 
 
 # ---------------------------------------------------------------------------
@@ -901,3 +903,50 @@ def test_nuscenes_quaternion_helpers():
     # Yaw extraction matches the rotation about z.
     assert abs(nb._yaw_from_quat(s, 0.0, 0.0, s) - math.pi / 2) < 1e-9
     assert abs(nb._yaw_from_quat(1.0, 0.0, 0.0, 0.0)) < 1e-9
+
+
+def _write_binary_pcd(path: Path, xyz: np.ndarray, intensity: np.ndarray, viewpoint: list[float]) -> None:
+    n = len(xyz)
+    header = (
+        "VERSION .7\n"
+        "FIELDS x y z intensity\n"
+        "SIZE 4 4 4 4\n"
+        "TYPE F F F F\n"
+        "COUNT 1 1 1 1\n"
+        f"WIDTH {n}\n"
+        "HEIGHT 1\n"
+        f"VIEWPOINT {' '.join(str(v) for v in viewpoint)}\n"
+        f"POINTS {n}\n"
+        "DATA binary\n"
+    )
+    payload = bytearray()
+    for (x, y, z), i in zip(xyz, intensity):
+        payload.extend(struct.pack("<ffff", float(x), float(y), float(z), float(i)))
+    path.write_bytes(header.encode("ascii") + bytes(payload))
+
+
+def test_load_pcd_scan_binary_viewpoint_and_intensity(tmp_path: Path):
+    xyz = np.array([[0.0, 0.0, 0.0], [1.0, 2.0, 3.0]], dtype=np.float64)
+    intensity = np.array([0.0, 1.0], dtype=np.float64)
+    vp = [4.0, 5.0, 6.0, 1.0, 0.0, 0.0, 0.0]
+    pcd = tmp_path / "scan.pcd"
+    _write_binary_pcd(pcd, xyz, intensity, vp)
+
+    scan = load_pcd_scan(pcd)
+    assert np.allclose(scan.points, xyz)
+    assert scan.intensity is not None and np.allclose(scan.intensity, intensity)
+    assert scan.viewpoint is not None and np.allclose(scan.viewpoint, vp)
+
+
+def test_dynamicmap_eval_perfect_and_removed(tmp_path: Path):
+    gt = np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [2.0, 0.0, 0.0]], dtype=np.float64)
+    gt_labels = np.array([0, 1, 0], dtype=np.int64)
+    cleaned = np.array([[0.0, 0.0, 0.0], [2.0, 0.0, 0.0]], dtype=np.float64)
+
+    est = bench.export_dynamicmap_eval_labels(gt, cleaned, max_dist=0.05)
+    metrics = bench.compute_dynamicmap_metrics(est, gt_labels)
+    assert est[0] == 0.0
+    assert est[1] == 1.0  # dynamic point removed
+    assert est[2] == 0.0
+    assert metrics["SA"] == pytest.approx(100.0)
+    assert metrics["DA"] == pytest.approx(100.0)

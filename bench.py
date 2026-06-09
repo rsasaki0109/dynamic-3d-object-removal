@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from pathlib import Path
 from typing import Any, Sequence
 
@@ -50,6 +51,98 @@ def dynamic_gt_mask(
         return np.zeros(points.shape[0], dtype=bool)
     _, keep = core.remove_points_in_boxes(points, boxes, margin)
     return ~keep
+
+
+def export_dynamicmap_eval_labels(
+    gt_xyz: np.ndarray,
+    cleaned_xyz: np.ndarray,
+    *,
+    max_dist: float = 0.05,
+) -> np.ndarray:
+    """Map each GT point to 0=kept(static) or 1=removed(dynamic) via nearest-neighbor match.
+
+    Mirrors ``export_eval_pcd.cpp`` in KTH-RPL/DynamicMap_Benchmark (numpy-only).
+    Uses ``scipy.spatial.cKDTree`` when available for large maps; falls back to a
+    pure-numpy voxel lookup otherwise.
+    """
+    gt_xyz = np.asarray(gt_xyz, dtype=np.float64)
+    cleaned_xyz = np.asarray(cleaned_xyz, dtype=np.float64)
+    if gt_xyz.size == 0:
+        return np.zeros(0, dtype=np.float32)
+    if cleaned_xyz.size == 0:
+        return np.ones(len(gt_xyz), dtype=np.float32)
+
+    try:
+        from scipy.spatial import cKDTree
+    except ImportError:
+        cKDTree = None
+
+    if cKDTree is not None and len(gt_xyz) + len(cleaned_xyz) > 100_000:
+        dist, _ = cKDTree(cleaned_xyz).query(gt_xyz, k=1, workers=-1)
+        return np.where(dist <= max_dist, 0.0, 1.0).astype(np.float32)
+
+    cell = max(max_dist, 1e-6)
+    inv_cell = 1.0 / cell
+    max_dist_sq = max_dist * max_dist
+
+    cleaned_keys = np.floor(cleaned_xyz * inv_cell).astype(np.int64)
+    grid: dict[tuple[int, int, int], np.ndarray] = {}
+    for i, key in enumerate(map(tuple, cleaned_keys)):
+        grid.setdefault(key, []).append(i)
+    for key in grid:
+        grid[key] = np.asarray(grid[key], dtype=np.int64)
+
+    gt_keys = np.floor(gt_xyz * inv_cell).astype(np.int64)
+    labels = np.ones(len(gt_xyz), dtype=np.float32)
+    offsets = [(dx, dy, dz) for dx in (-1, 0, 1) for dy in (-1, 0, 1) for dz in (-1, 0, 1)]
+
+    unique_keys = {tuple(k) for k in map(tuple, gt_keys)}
+    for base_key in unique_keys:
+        gt_idx = np.where(np.all(gt_keys == np.array(base_key), axis=1))[0]
+        if gt_idx.size == 0:
+            continue
+        ref_idx: list[int] = []
+        for dx, dy, dz in offsets:
+            bucket = grid.get((base_key[0] + dx, base_key[1] + dy, base_key[2] + dz))
+            if bucket is not None:
+                ref_idx.extend(bucket.tolist())
+        if not ref_idx:
+            continue
+        refs = cleaned_xyz[np.asarray(ref_idx, dtype=np.int64)]
+        batch = gt_xyz[gt_idx]
+        diff = batch[:, None, :] - refs[None, :, :]
+        min_sq = np.min(np.sum(diff * diff, axis=2), axis=1)
+        labels[gt_idx] = np.where(min_sq <= max_dist_sq, 0.0, 1.0)
+    return labels
+
+
+def compute_dynamicmap_metrics(
+    est_labels: np.ndarray,
+    gt_labels: np.ndarray,
+) -> dict[str, float]:
+    """SA / DA / AA / HA per DynamicMap_Benchmark ``evaluate_all.py``."""
+    est = np.asarray(est_labels).astype(np.int64)
+    gt = np.asarray(gt_labels).astype(np.int64)
+    gt_static = gt == 0
+    gt_dynamic = gt == 1
+    num_static = int(np.count_nonzero(gt_static))
+    num_dynamic = int(np.count_nonzero(gt_dynamic))
+    correct_static = int(np.count_nonzero((est == 0) & gt_static))
+    correct_dynamic = int(np.count_nonzero((est == 1) & gt_dynamic))
+    sa = (correct_static / num_static * 100.0) if num_static else 0.0
+    da = (correct_dynamic / num_dynamic * 100.0) if num_dynamic else 0.0
+    aa = math.sqrt(sa * da) if sa > 0.0 and da > 0.0 else 0.0
+    ha = (2.0 * sa * da / (sa + da)) if (sa + da) > 0.0 else 0.0
+    return {
+        "SA": float(sa),
+        "DA": float(da),
+        "AA": float(aa),
+        "HA": float(ha),
+        "num_static": num_static,
+        "num_dynamic": num_dynamic,
+        "correct_static": correct_static,
+        "correct_dynamic": correct_dynamic,
+    }
 
 
 def compute_accuracy_metrics(removed_mask: np.ndarray, gt_dynamic_mask: np.ndarray) -> dict[str, float]:

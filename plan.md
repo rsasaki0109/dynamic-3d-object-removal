@@ -1,9 +1,9 @@
 # dynamic-3d-object-removal plan
 
-Last updated: 2026-06-10 (Asia/Tokyo)
+Last updated: 2026-06-11 (Asia/Tokyo)
 Repo: `rsasaki0109/dynamic-3d-object-removal`
 Branch: `master`
-Latest pushed commit: `47393b2` (v0.2.0)
+Latest pushed commit: `8af8504` (library v0.5.0)
 Stars: **74 / 100 (目標)** — fork 4, created 2026-03-05
 
 ---
@@ -14,86 +14,178 @@ LiDAR 点群から動的物体（車両・歩行者・自転車など）を除�
 **deep learning を使わない** — 幾何ベースのみ。依存は numpy だけ
 （pyarrow は Argoverse 2 形式を読む場合のみ必要）。
 
-アルゴリズムは 4 つ、すべて numpy:
+アルゴリズムは 5 つ、すべて numpy:
 
 1. **box** — 検出 3D box による per-scan crop（検出器 or annotation が必要）
 2. **temporal** — voxel hit-count の時系列一貫性（検出器不要、最も単純・高 recall）
-3. **range** — range-image 可視性（Removert 系 remove + revert、検出器不要）
-4. **scan_ratio** — 極座標カラムの擬似 occupancy（ERASOR 系 scan-ratio + ground revert、検出器不要）
+3. **range** — range-image 可視性（Removert 系 remove + revert、検出器不要、multi-resolution consensus 対応）
+4. **scan_ratio** — 極座標カラムの擬似 occupancy（ERASOR 系 scan-ratio + ground revert、検出器不要。
+   v0.4.0 から votes をカラム再訪数で正規化）
+5. **fusion** (v0.5.0) — 検出器不要 3 チャネルの OR 合成: ray-sampled free-space carving
+   （per-scan hit precedence 付き）+ DUFOMap 系 eroded void 確認（hit inflation +
+   full-26-neighborhood erosion）+ scan-ratio votes（より厳しい fraction）。
+   **Semantic-KITTI で DUFOMap 級（AA 98.6 / 98.0）** — 本 repo の看板手法
 
 3 つの形態で提供:
 
-1. **Python ライブラリ** (`dynamic_object_removal.py`, 1421 行)
-2. **CLI** (`dynamic-object-removal`) — PyPI 公開済み (`pip install dynamic-object-removal`)
+1. **Python ライブラリ** (`dynamic_object_removal.py`, 1937 行)
+2. **CLI** (`dynamic-object-removal`) — packaging 済みだが **PyPI 未公開（下記 Step 0 参照）**
 3. **ROS2 リアルタイムノード** (`realtime.py`, 859 行) — box / temporal / range 対応
 
-ベンチマーク (`bench.py` + `scripts/run_av2_benchmark.py` + `scripts/run_nuscenes_benchmark.py`)
-とテスト (`tests/`, 84 passed + 1 skipped) 付き。
-ブラウザ Playground（Pyodide で実ライブラリがクライアントサイド実行、Box / Range / Temporal の 3 モード）が GitHub Pages にある。
+ベンチマーク 3 本（AV2 / nuScenes mini / Semantic-KITTI(DynamicMap_Benchmark)）と
+テスト（89 passed + 1 skipped）付き。
+ブラウザ Playground（Pyodide、Box / Range / Temporal の 3 モード、**共有 URL +
+AV2/nuScenes プリセット切替対応**）が GitHub Pages にある。
+
+---
+
+## Headline numbers (2026-06-11 時点、全て再現スクリプト付き)
+
+| ベンチ | センサー | ベスト手法 | 数字 | 次点 |
+|---|---|---|---|---|
+| Semantic-KITTI seq 00 / 05 (DynamicMap_Benchmark) | VLP-64, 141/321 scans | **fusion** | AA **98.6 / 98.0**（リーダーボード首位 DUFOMap は 98.6 / 96.3） | scan_ratio 95.4 / 96.9 |
+| Argoverse 2 (12 sweeps 短窓) | 64-beam | **fusion**（short-window 閾値 0.7/3/4） | F1 **0.657** / static 0.974 | range 0.600 |
+| nuScenes mini scene-0757 (12 keyframes) | 32-beam（疎） | **range ∧ scan_ratio**（マスク積） | F1 **0.642** / static 0.842 | range 単独 0.628 |
+
+転移の教訓（README に全部明記済みの誠実路線）:
+
+- **fusion は密センサー向け**。短窓ではデフォルト閾値（0.9/2/11）が構造的に発火しない →
+  12 スキャンなら `free_votes_fraction=0.7, free_votes_floor=3, void_min_scans=4`（F1 0.39 → 0.66）
+- **疎 32-beam では fusion は不適**: ~13 m 以遠で垂直ビーム間隔が carving voxel を超え、
+  自スキャンのヒットが静的構造を守れずビーム間が彫り抜かれる。voxel を粗くしても回復しない
+  （チャネル単離まで実測して F1 < 0.3 を確認）。疎センサーは range（解像度をビーム密度に合わせる）
+- **range と scan_ratio の誤検出源は独立**（距離画像の自己遮蔽 vs 極座標カラムの空虚判定）なので、
+  疎センサーでは dynamic マスクの積が両指標を同時改善する（追加コストゼロ）
 
 ---
 
 ## Architecture
 
 ```
-dynamic_object_removal.py   # コアライブラリ + CLI (v0.2.0)
-├── load_points()           # PCD, CSV, TXT, XYZ, NPY, BIN(KITTI), Feather(AV2)
+dynamic_object_removal.py   # コアライブラリ + CLI (v0.5.0, 1937 行)
+├── load_points()           # PCD(VIEWPOINT 対応), CSV, TXT, XYZ, NPY, BIN(KITTI), Feather(AV2)
 ├── load_boxes()            # JSON, CSV, KITTI label_2, Feather(AV2)
 ├── remove_points_in_boxes()
 ├── TemporalConsistencyFilter
-├── remove_ghost_by_range_image() / clean_map_by_visibility()   # range (multi-resolution consensus 対応)
-├── remove_dynamic_by_scan_ratio() / clean_map_by_scan_ratio()  # scan_ratio
+├── remove_ghost_by_range_image() / clean_map_by_visibility()   # range (multi-resolution consensus)
+├── remove_dynamic_by_scan_ratio() / clean_map_by_scan_ratio()  # scan_ratio (votes 正規化)
+├── clean_map_by_fusion()   # fusion: free-space carving + eroded voids + scan-ratio votes (OR)
 ├── RangeImageGhostFilter   # ROS2 用ストリーミング range filter
 └── save_points()
 
 realtime.py                 # ROS2 PointCloud2 subscriber/publisher ノード (box/temporal/range)
-bench.py                    # 速度ベンチマーク
+bench.py                    # 速度 + 精度指標 (compute_accuracy_metrics, dynamic_gt_mask)
 
 demo/
-├── playground.html         # Pyodide Playground (704 行, GitHub Pages の主力導線)
-├── run_scan_demo.py / run_scan_sequence_demo.py
-├── index_3d_*.html         # checked-in self-contained デモ群
-├── sample_av2_cloud.npy / sample_av2_objects.json / sample_av2_range.npz  # Playground 用データ
+├── playground.html         # Pyodide Playground (925 行)。共有 URL (?mode=&preset=…) + Share ボタン
+├── sample_av2_cloud.npy / sample_av2_range.npz / sample_nuscenes_range.npz  # 2 プリセット
+├── run_scan_demo.py / run_scan_sequence_demo.py / index_3d_*.html
 └── av2_before_after.png / av2_zoom.png / playground_demo.gif / story_mode.gif
 
 scripts/
 ├── download_av2_sample.py / download_kitti_sample.py
-├── run_av2_benchmark.py      # 再現可能な AV2 ベンチ (12 sweeps, P/R/F1)
-└── run_nuscenes_benchmark.py # nuScenes mini ベンチ (32-beam 汎化の証明)
+├── build_playground_nuscenes_sample.py   # nuScenes プリセット npz の再現生成
+├── run_av2_benchmark.py          # AV2 12 sweeps (P/R/F1/static)。fusion 行 + short-window フラグ付き
+├── run_nuscenes_benchmark.py     # nuScenes mini。range∧scan_ratio 行 + fusion 行付き
+└── run_dynamicmap_benchmark.py   # Zenodo teaser DL → 除去 → SA/DA/AA/HA 評価まで 1 コマンド
+
+examples/
+└── dynamicmap_benchmark/   # KTH-RPL/DynamicMap_Benchmark への methods/dor_numpy アダプタ (PR #28 の中身)
 ```
 
 ---
 
-## Current state (2026-06-10)
+## Current state (2026-06-11)
 
-### 完了済み（前回 plan 以降の追加分を含む）
+### 完了済み（前回 plan 2026-06-10 以降の追加分に ★）
 
-- [x] コアライブラリ: box + temporal + **range** + **scan_ratio** の 4 アルゴリズム
+- [x] コアライブラリ: box + temporal + range + scan_ratio の 4 アルゴリズム
+- [x] ★ **fusion 追加 (v0.5.0)** — KITTI seq 00/05 で AA 98.6 / 98.0、リーダーボード水準
+- [x] ★ scan_ratio 改良: min_votes のスキャン数スケール (v0.3.0) → カラム再訪数で正規化 (v0.4.0)
 - [x] multi-resolution consensus（`resolutions=[2.5, 4.0]` で precision 0.68 → 0.78）
-- [x] **PyPI 公開** (v0.2.0, Trusted Publishing で release 自動化)
-- [x] 再現可能ベンチマーク 2 本: AV2 (64-beam) + nuScenes mini (32-beam) — どちらも登録不要・1 コマンド
-- [x] ブラウザ Playground (Pyodide): Box / Range / Temporal の 3 モード、ユーザー自身の PCD ドロップ対応
-- [x] README: How It Compares (ERASOR / Removert とのポジショニング表) + 実測値テーブル
-- [x] GitHub Pages デモ群、hero image、social card
-- [x] テスト 84 件、CI (`test.yml`)、publish workflow (`publish.yml`)
-- [x] GitHub About / topics 設定済み (lidar, slam, ros2, …)
+- [x] 再現可能ベンチマーク 3 本: AV2 (64-beam) + nuScenes mini (32-beam) + ★ Semantic-KITTI
+      (DynamicMap_Benchmark teaser) — すべて登録不要・1 コマンド
+- [x] ★ **Step B 完了**: `run_dynamicmap_benchmark.py` + PCD VIEWPOINT 対応 +
+      KTH-RPL/DynamicMap_Benchmark へ **PR #28 open（draft）** — `methods/dor_numpy/`、
+      本文に SA/DA/AA 実測表 + 再現コマンド
+- [x] ★ **fusion の転移評価**: AV2 短窓で best-in-table（short-window 閾値、F1 0.657）、
+      nuScenes 32-beam は不適と実測で確定（チャネル単離まで）→ README に「sized to the sensor」
+      の使い分け指針として明文化
+- [x] ★ **range ∧ scan_ratio 交差** — nuScenes のベスト数字を更新（F1 0.628 → 0.642、static 0.808 → 0.842）
+- [x] ★ **Step C の実装部分完了**: Playground 共有 URL（`?mode=&preset=`、Share ボタン）+
+      nuScenes 32-beam プリセット（`sample_nuscenes_range.npz`、生成スクリプト付き）
+- [x] ブラウザ Playground (Pyodide): Box / Range / Temporal、ユーザー自身の PCD ドロップ対応
+- [x] README: How It Compares + AV2 / nuScenes / KITTI 実測テーブル + fusion API sizing 指針
+- [x] GitHub Pages デモ群、hero image、social card、About / topics 設定
+- [x] テスト 89 件、CI (`test.yml`)、publish workflow (`publish.yml`)
 
-### 未完了
+### 未完了（→ 下の Roadmap）
 
-- [ ] ★100 ロードマップ（本ファイルの主題、下の Roadmap 参照）
+- [ ] **Step 0: PyPI 公開が実は未完**（重要 — README は既に `pip install dynamic-object-removal`
+      を案内しているが、PyPI は 404。git tag は v0.1.0 のみで `publish.yml` は一度も発火していない）
+- [ ] Step A: lidarslam_ros2 連携（未着手 — `examples/lidarslam_ros2/` なし）
+- [ ] PR #28 の draft 解除（ready for review）とメンテナ対応
+- [ ] Step C の投稿部分（Show HN / Reddit）— 実装は済み、投稿タイミング待ち
 
 ---
 
-## ★100 Roadmap — 残り 26★ を取りに行く
+## ★100 Roadmap — 残り 26★
 
-優先順に 3 本。**Step A (lidarslam_ros2 連携) → Step B (SemanticKITTI / DynamicMap_Benchmark) → Step C (Playground 共有性 + Show HN)**。
-A は即効性（自分の既存オーディエンスからの導線）、B は持続性（この問題を探している層への恒久導線）、C は単発スパイク狙い。
+優先順: **Step 0 (PyPI 実公開・即日) → PR #28 ready 化 → Step A (lidarslam_ros2 連携) → Step C 投稿 (Show HN)**。
 
-それぞれ独立して出荷できる。1 本ずつ完結させてから次に進む。
+前回 plan から の変更: Step B は完了（PR open まで）。代わりに「README が案内する
+インストール手段が存在しない」という信用問題（Step 0）が見つかったので最優先に置く。
 
 ---
 
-### Step A. lidarslam_ros2 連携例（最優先・即効性）
+### Step 0. PyPI v0.5.0 実公開（最優先・~30 分）
+
+#### 問題
+
+- README の Installation は `pip install dynamic-object-removal` を第一手段として案内、
+  extras (`[ros2]` / `[benchmarks]`) まで書いてある
+- しかし `https://pypi.org/pypi/dynamic-object-removal/json` は **404**。
+  `pip index versions` も "No matching distribution found"
+- 原因: `publish.yml`（GitHub release トリガの Trusted Publishing）が一度も発火していない。
+  git tag は `v0.1.0` のみで GitHub release を作っていない
+- PR #28 / README / Playground から来た新規ユーザーの最初のコマンドが失敗する状態。
+  星目的以前の信用問題なので他より先に直す
+
+#### 手順
+
+1. PyPI 側で Trusted Publishing の設定が済んでいるか確認（pending publisher 登録が必要なら先に）
+2. `git tag v0.5.0 && git push --tags` → GitHub release v0.5.0 作成（リリースノートは
+   v0.2.0 以降の CHANGELOG 相当: scan_ratio 正規化 / fusion / ベンチ 3 本 / Playground 共有 URL）
+3. `publish.yml` の実行を確認 → 失敗したら fallback: ローカルで
+   `python3 -m build && /tmp/venv-twine/bin/twine upload dist/*`
+4. fresh venv で `pip install dynamic-object-removal && dynamic-object-removal --version` を検証
+5. PR #28 の Reproduce 節は `pip install git+https://…` なのでそのままでも動くが、
+   PyPI 公開後は `pip install dynamic-object-removal` に揃えると一貫する（任意）
+
+#### 受け入れ条件
+
+- [ ] `pip install dynamic-object-removal` が fresh venv で成功し v0.5.0 が入る
+- [ ] README のインストール手順がコピペで完走する
+
+---
+
+### PR #28 フォローアップ（随時・軽量）
+
+- 現状: KTH-RPL/DynamicMap_Benchmark に **open / draft=true**。
+  タイトル "Add dor_numpy: numpy-only detector-free cleaner (AA 98.6 / 98.0 on seq 00 / 05)"
+- 本文には KITTI 実測表 + fusion の設計説明 + 転移結果（AV2 best-in-table / nuScenes 不適）+
+  再現コマンドまで記載済み。チューニング caveat も明記（誠実路線）
+- 残作業:
+  1. **draft 解除**（Step 0 完了後すぐ。インストール手段が生きてから見てもらう）
+  2. メンテナのレビュー対応（出力形式・フォルダ規約の指摘に即応できるよう
+     fork `/tmp/DynamicMap_Benchmark_fork` は保持）
+  3. merge されたら README の DynamicMap セクションに「upstream に merge 済み」を 1 行
+- gh CLI 注意: `gh pr edit` は GraphQL 廃止フィールドで壊れる →
+  `gh api -X PATCH repos/KTH-RPL/DynamicMap_Benchmark/pulls/28 -F body=@file.md` を使う
+
+---
+
+### Step A. lidarslam_ros2 連携例（PyPI 公開後の本命）
 
 #### ゴール
 
@@ -111,36 +203,24 @@ launch 一発 + before/after 画像で見せ、lidarslam_ros2 README からリ�
 
 1. `examples/lidarslam_ros2/README.md` — 手順書（英語）。bag 取得 → 連携 launch → 地図比較まで
 2. `examples/lidarslam_ros2/dor_lidarslam.launch.py` — `dynamic-object-removal-realtime` を
-   前段に挟む composable な launch（lidarslam 側はユーザー環境の launch をそのまま include or
-   トピック remap で接続）
-3. `examples/lidarslam_ros2/map_comparison.png` — 除去なし/ありの最終地図 before/after（hero 画像と同じ 2-panel 様式）
+   前段に挟む launch（lidarslam 側はトピック remap で接続）
+3. `examples/lidarslam_ros2/map_comparison.png` — 除去なし/ありの最終地図 before/after
 4. README (this repo): `## Works with your SLAM` セクション新設、画像 + 3 行
 5. lidarslam_ros2 側: README に 1 ブロック（画像 + リンク）を追加する commit
 
 #### 設計
 
-- **データ**: lidarslam_ros2 の quickstart と同じ **NTU VIRAL `tnp_01`**（Ouster OS1-16, 約 580 秒, 屋外）を使う。
-  ユーザーが既に持っている bag なので追加ダウンロード不要、再現条件も lidarslam_ros2 側と完全一致
+- **データ**: lidarslam_ros2 quickstart と同じ **NTU VIRAL `tnp_01`**（Ouster OS1-16, ~580 s, 屋外）
 - **トピック接続**:
   ```
   /os_cloud_node/points ──> dynamic-object-removal-realtime ──> /cleaned_points ──> (lidarslam input に remap)
   ```
-  lidarslam 側はデフォルト入力 `/os_cloud_node/points` を `/cleaned_points` に remap するだけ
-- **アルゴリズム選定**: 検出器なし前提なので `temporal` が第一候補
-  （`--voxel-size 0.10 --temporal-window 5 --temporal-min-hits 3` を起点にチューニング）。
-  OS1-16 は 16-beam と疎なので、nuScenes で得た「ビーム密度に解像度を合わせる」知見から
-  `range` を使うなら粗い解像度が必要 — まず temporal で出し、range は発展項目として README に一言
-- **比較プロトコル**: 同じ bag・同じ SLAM パラメータで 2 回走らせ、`/map_save` で保存した
-  地図 PCD を同一視点でレンダリングして 2-panel に。可能なら除去点数 / 地図点数の差も数字で併記
-
-#### 作業手順
-
-1. ローカルに ROS2 + lidarslam_ros2 環境を用意し、NTU VIRAL `tnp_01` で素の SLAM を再現（baseline 地図保存）
-2. `dynamic-object-removal-realtime` を挟んだ構成で同一 bag を処理（cleaned 地図保存）
-3. パラメータ調整: 歩行者・車両 ghost が消えつつ静的構造が保たれる点を目視確認
-4. 2-panel 画像生成（既存 hero 画像と同じ matplotlib トーンで）
-5. `examples/lidarslam_ros2/` 一式 + README セクションを commit
-6. lidarslam_ros2 側 README 更新（別リポジトリで commit & push）
+- **アルゴリズム選定**: 検出器なし・リアルタイムなので `temporal` 第一候補
+  （`--voxel-size 0.10 --temporal-window 5 --temporal-min-hits 3` 起点）。
+  OS1-16 は 16-beam と疎 — nuScenes での教訓（疎センサーは range を粗解像度で / fusion は不適）
+  がそのまま効く。realtime ノードは fusion 非対応のままで良い（fusion はオフライン map cleaner）
+- **比較プロトコル**: 同 bag・同 SLAM パラメータで 2 回、`/map_save` の地図 PCD を
+  同一視点レンダリングで 2-panel。除去点数 / 地図点数の差も数字で併記
 
 #### 受け入れ条件
 
@@ -152,176 +232,43 @@ launch 一発 + before/after 画像で見せ、lidarslam_ros2 README からリ�
 #### リスク / 確認事項
 
 - NTU VIRAL tnp_01 に十分な動的物体（歩行者等）が映っているか **要確認**。
-  乏しければ動的物体の多い別の公開 bag（例: 都市部の Ouster/Velodyne bag）に切り替える。
-  その場合も「lidarslam_ros2 で動く公開データ」であることを優先
+  乏しければ動的物体の多い別の公開 bag に切り替える
 - OS1-16 の疎さで temporal の voxel パラメータが合わない可能性 → voxel-size を粗めに振る
-- lidarslam_ros2 の現行 frontend は RKO-LIO（IMU 併用）。点群だけ差し替えても IMU 系は素通しで OK のはずだが、TF/タイムスタンプの整合を実機で確認
+- lidarslam_ros2 の現行 frontend は RKO-LIO（IMU 併用）。TF/タイムスタンプの整合を実機で確認
 
 ---
 
-### Step B. SemanticKITTI 対応 + DynamicMap_Benchmark 接続（持続性）
+### Step C 残り. Show HN / Reddit 投稿（実装済み・タイミング待ち）
 
-#### ゴール
+実装（共有 URL + Share ボタン + nuScenes プリセット）は **完了済み**（commit `100b6bf`）。
+残りは投稿のみ。
 
-動的物体除去コミュニティの標準土俵 **KTH-RPL/DynamicMap_Benchmark** で
-本プロジェクトの検出器不要 3 手法（range / scan_ratio / temporal）を評価し、
-(a) 本 repo に再現スクリプト + 結果表を載せ、
-(b) 先方 repo の `methods/` に numpy-only アダプタを PR する。
+#### 投稿の前提条件（揃ってから出す）
 
-#### なぜ星になるか
+- [x] 標準ベンチの数字が README にある（KITTI fusion AA 98.6 / 98.0 — DUFOMap 級）
+- [ ] Step 0: `pip install dynamic-object-removal` が生きている（**必須** — HN の最初のコメントで試される）
+- [ ] できれば Step A の SLAM 連携画像（なくても可）
+- [ ] Pyodide 初期ロードのプログレス表示が貧弱でないか当日確認
 
-- ERASOR / Removert / DUFOMap / BeautyMap / dynablox が載る同一ベンチに
-  「**pip install 一発・numpy-only**」で参加する初の実装になる — 差別化が数字で立つ
-- README の比較表が「positioning guide（再計測ではない）」という断り書きから
-  「**同一データ・同一指標の実測**」に格上げされる
-- 先方 README に method として載れば、この問題を能動的に探している層
-  （研究者・SLAM エンジニア）への恒久的な被リンクになる
-- plan の「benchmark 寄せ集めにしない」方針と矛盾しない:
-  third-party 実装は一切取り込まず、**自分の手法を標準データで走らせるだけ**
+#### 素材
 
-#### DynamicMap_Benchmark の仕様（2026-06-10 時点の調査メモ）
-
-- データ: Zenodo (record `10886629`) から DL。Semantic-KITTI (VLP-64) / Argoverse 2 /
-  UDI-Plane (VLP-16) / KTH-Campus / Indoor-Floor (Livox mid-360) の 5 種
-- 入力形式: **pose-attached な per-scan PCD**（pose は PCD の VIEWPOINT フィールドと推定 — **要確認**）
-- 出力形式: 動的点を除去した cleaned map PCD
-- 評価: `scripts/py/eval` のスクリプトが ground truth と比較して定量表を出す
-  （指標は SA / DA / AA 系のはず — **先方論文 (ITSC 2023) で要確認**）
-- メソッド追加: `methods/` フォルダに実行可能な `main.py` を置く構造。PR 歓迎と明記あり
-
-#### 成果物
-
-1. `scripts/run_dynamicmap_benchmark.py` — Zenodo からデータ DL → pose-attached PCD 読込 →
-   累積 map 構築 → `clean_map_by_visibility` / `clean_map_by_scan_ratio` / temporal で除去 →
-   先方の期待形式で cleaned map PCD を出力 → （先方 eval が pure-python なら）そのまま指標まで出す
-2. `dynamic_object_removal.py` への最小追加:
-   - PCD **VIEWPOINT 読み取り**（pose-attached PCD 対応）— `load_points` の拡張 or 専用ローダ
-   - 既存 PCD ローダで不足があれば binary PCD の堅牢化
-3. README: 「Measured on SemanticKITTI (DynamicMap_Benchmark)」セクション + 結果表
-   （AV2 / nuScenes 表と同じ様式: precision/recall/F1 or 先方指標）
-4. 先方への PR: `methods/dor_numpy/`（`main.py` + 依存は `pip install dynamic-object-removal` のみ）
-   + 先方 README の手法表への追記
-
-#### 設計方針
-
-- まず **Semantic-KITTI seq 00 / 05** だけに絞る（先方の主要シーケンス）。5 データセット全部は追わない
-- スクリプトは AV2 / nuScenes ベンチと同じ流儀:
-  1 コマンド・登録不要・進捗ログ・最後に markdown 表を print
-- 解像度はビーム密度に合わせる既存知見を適用（VLP-64 → AV2 並みの細かさ、
-  UDI-Plane をやる場合は nuScenes の教訓で粗く — ただし初回スコープ外）
-- 数字が ERASOR / DUFOMap に負ける項目は**隠さずそのまま載せる**。
-  売りは「同等〜健闘する数字を numpy だけ・pip 一発で」であり、SOTA 主張ではない。
-  README の文言もそのトーンで書く（nuScenes の scan_ratio の cautionary case と同じ誠実路線）
-
-#### 作業手順
-
-1. 先方 repo を clone し、データ形式・eval スクリプト・既存 method の `main.py` を精読
-   （VIEWPOINT 仕様・指標定義・map/scan の座標系を確定 → 本ファイルの調査メモを更新）
-2. Zenodo から Semantic-KITTI seq 00 を DL、pose-attached PCD ローダを実装（テスト付き）
-3. range で end-to-end を通す → 先方 eval で数字を出す → scan_ratio / temporal を追加
-4. パラメータを 1 セットに固定（過剰チューニングしない。AV2/nuScenes と同じ「sensor 密度で解像度を選ぶ」原則のみ）
-5. `scripts/run_dynamicmap_benchmark.py` を仕上げ、README に結果セクション追加、commit
-6. 先方フォーマットの `methods/dor_numpy/main.py` を書き、fork → PR
-   （PR 本文に再現コマンドと数字、numpy-only という特徴を簡潔に）
-
-#### 受け入れ条件
-
-- [ ] `python3 scripts/run_dynamicmap_benchmark.py` 1 コマンドで DL から指標出力まで完走
-- [ ] 3 手法 × seq 00（+05）の数字が README に載り、再現コマンドが併記されている
-- [ ] 先方への PR が open される（merge は先方次第なので条件にしない）
-- [ ] 本 repo に third-party 実装・重い依存が増えていない（`open3d` 等を足さない。
-      PCD I/O は自前 numpy 実装を貫く）
-
-#### リスク / 確認事項
-
-- 先方 eval スクリプトが C++ / Open3D 依存の場合: 本 repo のスクリプトは
-  「先方期待形式の cleaned map PCD を出力するところまで」を担当し、
-  指標計算は先方スクリプト実行手順を README で案内する形に倒す（依存を持ち込まない）
-- ground truth が「cleaned map 基準で抽出」とあるため、ダウンサンプリングの扱いに罠がありうる —
-  既存 method の出力仕様を必ず踏襲する
-- 数字が大幅に負ける可能性: それでも出す。ただし `min_see_through` / `resolutions` の
-  precision 重視設定など、既存ノブの範囲で 1 回だけ調整パスを置く
-
----
-
-### Step C. Playground 共有性強化 + Show HN（スパイク）
-
-#### ゴール
-
-Playground に (1) **共有 URL**（モード・パラメータ・プリセットを URL に保存）と
-(2) **シーンプリセット**を追加し、素材を整えてから
-「LiDAR dynamic object removal running entirely in your browser (Pyodide, numpy-only)」
-として Show HN / Reddit に出す。
-
-#### なぜ星になるか
-
-- Playground は本 repo 最大の資産。だが現状 URL に状態がなく（`location.hash` /
-  `URLSearchParams` 不使用 — 2026-06-10 確認済み）、「この設定を見て」が共有できない
-- HN は「実ライブラリがブラウザで動く」「サーバ不要」「numpy が Pyodide で」型の話に強い。
-  共有 URL があると、コメント欄で「この設定だと壊れる/すごい」が拡散ループになる
-- Step A/B の成果（820★ repo からの導線、標準ベンチの数字）が出てから投稿すると
-  着地ページ (README) の説得力が最大になる — **投稿は A/B 完了後**
-
-#### 成果物
-
-1. `demo/playground.html` 改修:
-   - **URL 状態同期**: `mode`（box/range/temporal）+ 主要パラメータ
-     （range: `margin` / `see-through` / `surface-hits`、temporal: `voxel` / `window` / `min-hits`）+
-     プリセット ID を `URLSearchParams`（`?mode=range&see=4&preset=av2`）で読み書き。
-     ページロード時に復元、変更時に `history.replaceState` で更新
-   - **Share ボタン**: 現在状態の URL をクリップボードへコピー（コピー成功のトースト表示）
-   - **シーンプリセット切替**: 既存 AV2 シーンに加え **nuScenes 32-beam シーン**を 1 つ追加
-     （疎なセンサーで解像度を合わせる話が Playground 上で体験できる = README の nuScenes 節の実演）
-2. `demo/sample_nuscenes_range.npz` — nuScenes mini から生成したプリセットデータ。
-   **サイズ予算: 既存 `sample_av2_range.npz` と同程度以下**（Pages の初期ロードを悪化させない）。
-   生成スクリプトは `scripts/run_nuscenes_benchmark.py` 系から派生させ、再現手順をコメントに残す
-3. README: Playground 節に「共有 URL 対応」と nuScenes プリセットの 1 行追記
-4. 投稿素材:
-   - Show HN タイトル案: *Show HN: Dynamic object removal for LiDAR point clouds, in the browser (numpy + Pyodide)*
-   - 1 段落の説明文（no GPU / no upload / 実ライブラリそのまま / 検出器不要モードあり）
-   - 投稿先: HN、r/computervision、r/robotics、ROS Discourse(Show & Tell 相当カテゴリ)。
-     各 1 回・誇張なし・数字は README の実測のみ
-
-#### 設計メモ
-
-- 状態は **query param** 採用（`#hash` より共有時の見た目が素直、GitHub Pages で問題なし）
-- パラメータ名は短く安定させる（一度共有された URL を壊さない — 以後 rename しない契約）
-- プリセットデータの読込は現行の `sample_av2_range.npz` ロードパス（fetch → npz parse）を共通化して分岐
-- Playground は依存追加なし・単一 HTML を維持（ビルドステップを入れない）
-
-#### 作業手順
-
-1. URL 同期 + Share ボタン実装（mode 3 種 × 主要パラメータ。全パラメータは追わない）
-2. nuScenes プリセットデータ生成 → サイズ確認 → 組み込み → モード切替 UI に追加
-3. Playwright スクリーンショットで 3 モード × 2 プリセットの表示確認
-   （既存の visual verification 手順を流用）
-4. 共有 URL を別ブラウザ/シークレットウィンドウで開いて状態復元を確認
-5. README 追記、playground_demo.gif を必要なら撮り直し
-6. （A/B 完了後）投稿。投稿日の Pages 死活確認、当日はコメント返信に張り付く
-
-#### 受け入れ条件
-
-- [ ] 任意の設定で Share → 新規タブで開くと同じモード・パラメータ・プリセットが復元される
-- [ ] nuScenes プリセットが追加され、初期ロードサイズの増分が +1 npz 以内
-- [ ] パラメータなし URL（既存リンク）の挙動が完全に後方互換
-- [ ] 単一 HTML・依存ゼロのまま
-
-#### リスク
-
-- Pyodide の初期ロードが遅い環境で HN コメントが「重い」に流れる →
-  ロード中プログレス表示が貧弱なら先に直す（要現状確認）
-- 投稿は各プラットフォーム 1 回きり。伸びなくても再投稿しない（スパム判定リスク）
+- タイトル案: *Show HN: Dynamic object removal for LiDAR point clouds, in the browser (numpy + Pyodide)*
+- 1 段落: no GPU / no upload / 実ライブラリそのまま / 検出器不要モード / KITTI ベンチで DUFOMap 級
+- 投稿先: HN、r/computervision、r/robotics、ROS Discourse。各 1 回・誇張なし・数字は README の実測のみ
+- 当日: Pages 死活確認、コメント返信に張り付く。再投稿はしない
 
 ---
 
 ## 実行順序と完了の定義
 
 ```
-Step A (lidarslam_ros2 連携)   … 数時間〜1日。出荷したら即 lidarslam_ros2 README 更新
+Step 0 (PyPI 実公開)            … ~30 分。即日。README の install が嘘でなくなる
   ↓
-Step B (DynamicMap_Benchmark)  … 数日。先方仕様の精読が先。PR open まで
+PR #28 draft 解除               … 5 分 + メンテナ対応は随時
   ↓
-Step C (Playground + Show HN)  … 実装は半日〜1日。投稿は A/B の成果が README に載ってから
+Step A (lidarslam_ros2 連携)    … 数時間〜1日。出荷したら即 lidarslam_ros2 README 更新
+  ↓
+Step C 投稿 (Show HN)           … 半日（投稿 + 当日対応）
 ```
 
 - 各 Step は独立に merge 可能。Step をまたぐ WIP を作らない
@@ -334,35 +281,83 @@ Step C (Playground + Show HN)  … 実装は半日〜1日。投稿は A/B の成
 ### なぜ deep learning を使わないか
 
 - LiDAR SLAM の後処理として使う想定。検出器は別にある（or 3D box annotation が既にある）
-- 除去自体は幾何で十分 — 高価な GPU 推論は不要
+- 除去自体は幾何で十分 — KITTI で fusion が学習なしに DUFOMap 級 AA を出すのがその実証
 - numpy only → pip install して即使える。Docker も GPU もいらない
-- ベンチマーク: 24k 点で 1.5ms (box crop), CPU のみ
 - **リアルタイム処理が可能**: ROS2 ノードとして PointCloud2 を受けて即座に filter → publish
+  （box / temporal / range。fusion はオフライン map cleaner でリアルタイム非対象）
+
+### 手法の使い分け（実測に基づく公式見解 — README と一致させること）
+
+- **密センサー (64-beam+) のオフライン map cleaning** → `fusion`。
+  長尺はデフォルト、~12 スキャンの短窓は `0.7 / 3 / 4`（README「Sizing to your data」）
+- **疎センサー (32-beam 以下)** → `range`（解像度をビーム密度に合わせる: nuScenes は 2.5°）、
+  さらに `scan_ratio` との dynamic マスク積で precision/static を上積み
+- **リアルタイム** → `temporal`（最速・単純）か `range`
+- **box annotation がある** → `box`
 
 ### ポジショニング
 
 詳細は README「How It Compares」参照。要点:
 
-- ERASOR / Removert はオフラインの map cleaning 専用・C++/PCL — 本プロジェクトは
+- ERASOR / Removert はオフライン map cleaning 専用・C++/PCL — 本プロジェクトは
   per-scan / realtime + map cleaning 両対応・numpy-only
-- 検出器不要モード（temporal / range / scan_ratio）は AV2 で F1 ≈ 0.60、
-  multi-resolution consensus で precision 0.78 まで引ける
-- nuScenes (32-beam) でも range は解像度をビーム密度に合わせれば汎化（F1 0.63）
+- DynamicMap_Benchmark の土俵で fusion が DUFOMap 級（AA 98.6 / 98.0 vs 98.6 / 96.3）。
+  学習系 4dNDF (AA ≈ 99) は別クラスとして README に明記
+- 負ける数字・不適な組み合わせ（nuScenes × fusion 等）も隠さず載せる誠実路線が差別化の一部
 
-### なぜ Argoverse 2 を選んだか
+### なぜ Argoverse 2 / nuScenes mini / Zenodo teaser か
 
-- **登録不要** で S3 から直接ダウンロードできる大規模 LiDAR データセット
-- 64-beam, ~95k 点/フレーム, 3D cuboid annotation 付き、CC BY-NC-SA 4.0
-- nuScenes mini も匿名 HTTPS で取得でき、第二データセットとして採用済み
-
-### hero image のシーン選定
-
-- scene `04994d08-156c-3018-9717-ba0e29be8153`: 平均 99 objects/frame
-- 20 フレーム accumulated → 233k ghost points (11.9%) で十分な視覚的インパクト
+- すべて**登録不要**で匿名ダウンロードできる — 「1 コマンドで再現」を成立させる唯一の条件
+- AV2: 64-beam 密、nuScenes: 32-beam 疎（汎化の検証）、Zenodo teaser: コミュニティ標準指標 (SA/DA/AA)
 
 ---
 
 ## Confirmed facts
+
+### DynamicMap_Benchmark（2026-06-10〜11 実装で確定）
+
+- pose は PCD の **VIEWPOINT フィールド**に格納（`load_points` で対応済み）
+- 指標は SA / DA / AA / HA。評価プロトコルは KDTree 半径 0.05 m の対応付け
+  （`run_dynamicmap_benchmark.py` に pure-python 実装、scipy があれば高速化）
+- メソッド追加は `methods/<name>/main.py`。本 repo のアダプタは `examples/dynamicmap_benchmark/`
+  → PR #28（fork: `rsasaki0109/DynamicMap_Benchmark`, branch `add-dor-numpy`,
+  ローカル clone `/tmp/DynamicMap_Benchmark_fork`）
+- teaser zip は各 ~385 MB。seq 00: 141 scans / 17.4 M 点 / 96 k 動的 GT 点、
+  seq 05: 321 scans / 39.9 M 点 / 684 k 動的 GT 点
+- fusion 実行時間: seq 00 654 s / seq 05 1728 s（workers=6）。kept 点数は
+  experiments / library / fork アダプタ間で bit-exact を確認済み
+
+### fusion 転移評価（2026-06-10〜11 確定）
+
+- AV2 12 sweeps: デフォルト閾値 F1 0.391（recall 0.26 — 単発ヒットの拒否権 + void 11 が貯まらない）
+  → `0.7 / 3 / 4` で F1 0.657 / static 0.974（best-in-table）
+- nuScenes 32-beam: ~13 m 以遠で垂直ビーム間隔 > carving voxel (0.3 m) が構造要因。
+  粗 voxel (1.0 m) / 近距離限定 / チャネル単離すべて F1 < 0.3（free 単独 0.154、void 単独 R 0.007）
+- nuScenes のベストは range ∧ scan_ratio の dynamic マスク積: F1 0.642 / static 0.842。
+  AV2 では同種の合成は fusion 単独を超えない（fusion∨scan_ratio 0.658 は誤差）—
+  fusion が既に 3 チャネル OR なので追加合成が効かない
+- 実験ハーネス: `/tmp/fusion_xfer.py`（閾値スイープ）、`/tmp/combo_test.py`（マスク合成総当たり）
+
+### PyPI / packaging（2026-06-11 確認）
+
+- **PyPI に `dynamic-object-removal` は存在しない**（API 404）。README の install 節は先行して
+  PyPI 前提の記述になっている → Step 0 で解消する
+- `publish.yml` は GitHub release トリガ（Trusted Publishing 想定）。git tag は `v0.1.0` のみ
+- ローカル twine 用 venv: `/tmp/venv-twine`（fallback 用）
+
+### Playground 現状（2026-06-10 実装済み）
+
+- `demo/playground.html` 925 行、単一 HTML、依存追加なし
+- 共有 URL: `URLSearchParams`（mode / preset / 主要パラメータ）+ Share ボタン実装済み
+- プリセット 2 種: AV2 64-beam (`sample_av2_range.npz`) / nuScenes 32-beam
+  (`sample_nuscenes_range.npz`、`scripts/build_playground_nuscenes_sample.py` で再現生成)
+
+### lidarslam_ros2（2026-06-10 調査）
+
+- 820★。frontend は RKO-LIO（LiDAR-inertial odometry）+ backend `graph_based_slam`
+- 入力トピック既定: 点群 `/os_cloud_node/points`, IMU `/os_cloud_node/imu`
+- quickstart データ: NTU VIRAL `tnp_01`（Ouster OS1-16, ~580 s, 屋外）
+- 地図保存: `/map_save` サービス。出力は Autoware-ready bundle
 
 ### Checked-in sequence source
 
@@ -374,44 +369,16 @@ Step C (Playground + Show HN)  … 実装は半日〜1日。投稿は A/B の成
 
 再生成パラメータ: `--frame-count 12 --stride 1 --max-render-points 9000 --fps 4 --voxel-size 0.35 --window-size 5 --min-hits 3`
 
-### Per-frame box JSON (2026-03-23 確定)
-
-`verify_1_16_5_final` 配下に per-frame detection / box JSON は存在しない。
-checked-in sequence の cleaned 側は temporal consistency ベースで確定。
-
 ### AV2 hero image source (2026-03-26 確定)
 
 scene: `04994d08-156c-3018-9717-ba0e29be8153` (val split)
 20 フレーム, 1,957,497 raw points, 233,123 ghost points removed (11.9%)
 
-```bash
-export SCENE=04994d08-156c-3018-9717-ba0e29be8153
-aws s3 cp --no-sign-request --recursive s3://argoverse/datasets/av2/sensor/val/${SCENE}/sensors/lidar/ /tmp/av2_dense/lidar/ # 最初の20件
-aws s3 cp --no-sign-request s3://argoverse/datasets/av2/sensor/val/${SCENE}/annotations.feather /tmp/av2_dense/
-aws s3 cp --no-sign-request s3://argoverse/datasets/av2/sensor/val/${SCENE}/city_SE3_egovehicle.feather /tmp/av2_dense/
-```
+### ローカルの大物 temp（消してよい候補 — 作業が落ち着いたら）
 
-### lidarslam_ros2 (2026-06-10 調査)
-
-- 820★。frontend は RKO-LIO（LiDAR-inertial odometry）+ backend `graph_based_slam`
-- 入力トピック既定: 点群 `/os_cloud_node/points`, IMU `/os_cloud_node/imu`
-- quickstart データ: NTU VIRAL `tnp_01`（Ouster OS1-16, ~580 s, 屋外）
-- 地図保存: `/map_save` サービス。出力は Autoware-ready bundle
-
-### DynamicMap_Benchmark (2026-06-10 調査)
-
-- KTH-RPL/DynamicMap_Benchmark。データは Zenodo record `10886629`
-- 5 データセット: Semantic-KITTI / Argoverse 2 / UDI-Plane / KTH-Campus / Indoor-Floor
-- 入力: pose-attached per-scan PCD → 出力: cleaned map PCD
-- 評価スクリプト: `scripts/py/eval`。メソッドは `methods/<name>/main.py` で追加、PR 歓迎
-- 収録 8 手法: DUFOMap, Octomap w/ GF, dynablox, Octomap, DeFlow, BeautyMap, ERASOR, Removert
-- **要確認**: pose の格納方式（VIEWPOINT?）、指標の正確な定義、eval の依存関係
-
-### Playground 現状 (2026-06-10 確認)
-
-- `demo/playground.html` 704 行、単一 HTML、依存追加なし
-- URL 状態管理なし（`location.hash` / `URLSearchParams` 不使用）→ Step C で追加
-- プリセットデータ: `sample_av2_cloud.npy` / `sample_av2_objects.json` / `sample_av2_range.npz`
+- `data/dynamicmap/00/dor_fusion_output.pcd`（~700 MB）ほか data/ 配下の生成物（untracked）
+- `/tmp` のデータキャッシュ ~1 GB、`/tmp/venv-dor-test05`、`/tmp/venv-twine`（Step 0 まで保持）
+- fork clone `/tmp/DynamicMap_Benchmark_fork`（PR #28 対応完了まで保持）
 
 ---
 
@@ -423,15 +390,24 @@ aws s3 cp --no-sign-request s3://argoverse/datasets/av2/sensor/val/${SCENE}/city
 - `__pycache__` / `data/` / `*.egg-info` を commit する (.gitignore 設定済み)
 - deep learning の依存を追加する（差別化ポイントは DL 不要であること）
 - 比較検証の名目で、この repo を third-party 手法の寄せ集めにしない
-  （Step B でも先方実装は取り込まない — 自手法を標準データで走らせるだけ）
+  （DynamicMap_Benchmark でも先方実装は取り込まなかった — 自手法を標準データで走らせるだけ）
 - Playground にビルドステップ・外部 JS 依存を足す
-- ベンチ数字が負ける項目を隠す・チューニングで盛る（誠実な cautionary case 路線を維持）
+- ベンチ数字が負ける項目を隠す・チューニングで盛る（nuScenes × fusion の不適も明記する誠実路線を維持）
 - C++/Rust ポート・新規手法の追加（★100 目的には寄与せず scope を薄める）
 - HN / Reddit への再投稿・複数アカウント投稿
+- KITTI での追加チューニング（1 回 30 分級 + 2 シーケンス過適合のリスク。現数字で十分）
 
 ---
 
 ## Useful commands
+
+### ベンチマーク再現（3 本）
+
+```bash
+python3 scripts/run_av2_benchmark.py --frames 12          # AV2 (64-beam, fusion 含む)
+python3 scripts/run_nuscenes_benchmark.py                 # nuScenes mini (32-beam, 交差含む)
+python3 scripts/run_dynamicmap_benchmark.py --sequences 00 05   # Semantic-KITTI (SA/DA/AA)
+```
 
 ### AV2 Quick start
 
@@ -442,13 +418,6 @@ dynamic-object-removal \
   --input-objects data/av2_sample/annotations.feather \
   --timestamp-ns 315969904359876000 \
   --output-cloud output/av2_cleaned.pcd
-```
-
-### ベンチマーク再現
-
-```bash
-python3 scripts/run_av2_benchmark.py --frames 12      # AV2 (64-beam)
-python3 scripts/run_nuscenes_benchmark.py             # nuScenes mini (32-beam)
 ```
 
 ### KITTI Quick start
@@ -473,16 +442,18 @@ dynamic-object-removal-realtime \
   --voxel-size 0.10 --temporal-window 5 --temporal-min-hits 3
 ```
 
-### テスト
+### テスト / Visual verification
 
 ```bash
 python3 -m pytest tests/ -v
-```
-
-### Visual verification
-
-```bash
 python3 -m http.server 8765
 npx playwright screenshot --device="Desktop Chrome" --wait-for-timeout=2200 --full-page \
   http://127.0.0.1:8765/demo/playground.html /tmp/playground_screenshot.png
+```
+
+### PR #28 の本文編集（gh pr edit は壊れている）
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+gh api -X PATCH repos/KTH-RPL/DynamicMap_Benchmark/pulls/28 -F body=@/tmp/pr28_body.md
 ```

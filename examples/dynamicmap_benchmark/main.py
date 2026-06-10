@@ -2,7 +2,7 @@
 """DynamicMap_Benchmark adapter for dynamic-object-removal (numpy-only).
 
 Usage (from a cloned DynamicMap_Benchmark repo, after
-``pip install git+https://github.com/rsasaki0109/dynamic-3d-object-removal.git``):
+``pip install "dynamic-object-removal>=0.5"``):
     python main.py --data_dir /path/to/00 --algorithm fusion
     python main.py --data_dir /path/to/00 --algorithm range
     python main.py --data_dir /path/to/00 --algorithm scan_ratio
@@ -23,7 +23,7 @@ try:
     import dynamic_object_removal as core
 except ImportError as exc:
     raise SystemExit(
-        "Install first: pip install git+https://github.com/rsasaki0109/dynamic-3d-object-removal.git"
+        'Install first: pip install "dynamic-object-removal>=0.5"'
     ) from exc
 
 

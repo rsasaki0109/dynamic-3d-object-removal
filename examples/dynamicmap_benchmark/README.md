@@ -3,7 +3,7 @@
 Source of [KTH-RPL/DynamicMap_Benchmark PR #28](https://github.com/KTH-RPL/DynamicMap_Benchmark/pull/28)
 (`methods/dor_numpy/` there mirrors this folder).
 
-After `pip install git+https://github.com/rsasaki0109/dynamic-3d-object-removal.git`,
+After `pip install "dynamic-object-removal>=0.5"`,
 copy this folder to `methods/dor_numpy/` in a DynamicMap_Benchmark checkout and run:
 
 ```bash

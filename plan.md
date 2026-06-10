@@ -3,7 +3,7 @@
 Last updated: 2026-06-11 (Asia/Tokyo)
 Repo: `rsasaki0109/dynamic-3d-object-removal`
 Branch: `master`
-Latest pushed commit: `8af8504` (library v0.5.0)
+Latest release: **v0.5.0**（tag + GitHub release + PyPI、2026-06-11）
 Stars: **74 / 100 (目標)** — fork 4, created 2026-03-05
 
 ---
@@ -29,7 +29,7 @@ LiDAR 点群から動的物体（車両・歩行者・自転車など）を除�
 3 つの形態で提供:
 
 1. **Python ライブラリ** (`dynamic_object_removal.py`, 1937 行)
-2. **CLI** (`dynamic-object-removal`) — packaging 済みだが **PyPI 未公開（下記 Step 0 参照）**
+2. **CLI** (`dynamic-object-removal`) — **PyPI 公開済み（v0.5.0, 2026-06-11）**
 3. **ROS2 リアルタイムノード** (`realtime.py`, 859 行) — box / temporal / range 対応
 
 ベンチマーク 3 本（AV2 / nuScenes mini / Semantic-KITTI(DynamicMap_Benchmark)）と
@@ -121,51 +121,21 @@ examples/
 
 ### 未完了（→ 下の Roadmap）
 
-- [ ] **Step 0: PyPI 公開が実は未完**（重要 — README は既に `pip install dynamic-object-removal`
-      を案内しているが、PyPI は 404。git tag は v0.1.0 のみで `publish.yml` は一度も発火していない）
+- [x] ★ **Step 0: PyPI v0.5.0 公開 — 完了（2026-06-11）**。tag v0.5.0 + GitHub release 作成、
+      Trusted Publishing（pending publisher 登録は owner がブラウザで実施）経由で publish.yml 成功。
+      fresh venv で `pip install dynamic-object-removal` → CLI 0.5.0 → import まで検証済み
 - [ ] Step A: lidarslam_ros2 連携（未着手 — `examples/lidarslam_ros2/` なし）
-- [ ] PR #28 の draft 解除（ready for review）とメンテナ対応
+- [ ] PR #28 の draft 解除（**owner の指示があるまで保留** — 2026-06-11 owner 判断）とメンテナ対応
 - [ ] Step C の投稿部分（Show HN / Reddit）— 実装は済み、投稿タイミング待ち
 
 ---
 
 ## ★100 Roadmap — 残り 26★
 
-優先順: **Step 0 (PyPI 実公開・即日) → PR #28 ready 化 → Step A (lidarslam_ros2 連携) → Step C 投稿 (Show HN)**。
+優先順: **PR #28 ready 化（owner の GO 待ち） → Step A (lidarslam_ros2 連携) → Step C 投稿 (Show HN)**。
 
-前回 plan から の変更: Step B は完了（PR open まで）。代わりに「README が案内する
-インストール手段が存在しない」という信用問題（Step 0）が見つかったので最優先に置く。
-
----
-
-### Step 0. PyPI v0.5.0 実公開（最優先・~30 分）
-
-#### 問題
-
-- README の Installation は `pip install dynamic-object-removal` を第一手段として案内、
-  extras (`[ros2]` / `[benchmarks]`) まで書いてある
-- しかし `https://pypi.org/pypi/dynamic-object-removal/json` は **404**。
-  `pip index versions` も "No matching distribution found"
-- 原因: `publish.yml`（GitHub release トリガの Trusted Publishing）が一度も発火していない。
-  git tag は `v0.1.0` のみで GitHub release を作っていない
-- PR #28 / README / Playground から来た新規ユーザーの最初のコマンドが失敗する状態。
-  星目的以前の信用問題なので他より先に直す
-
-#### 手順
-
-1. PyPI 側で Trusted Publishing の設定が済んでいるか確認（pending publisher 登録が必要なら先に）
-2. `git tag v0.5.0 && git push --tags` → GitHub release v0.5.0 作成（リリースノートは
-   v0.2.0 以降の CHANGELOG 相当: scan_ratio 正規化 / fusion / ベンチ 3 本 / Playground 共有 URL）
-3. `publish.yml` の実行を確認 → 失敗したら fallback: ローカルで
-   `python3 -m build && /tmp/venv-twine/bin/twine upload dist/*`
-4. fresh venv で `pip install dynamic-object-removal && dynamic-object-removal --version` を検証
-5. PR #28 の Reproduce 節は `pip install git+https://…` なのでそのままでも動くが、
-   PyPI 公開後は `pip install dynamic-object-removal` に揃えると一貫する（任意）
-
-#### 受け入れ条件
-
-- [ ] `pip install dynamic-object-removal` が fresh venv で成功し v0.5.0 が入る
-- [ ] README のインストール手順がコピペで完走する
+Step 0 (PyPI) と Step B (DynamicMap PR) は完了。なお owner は一度「PyPI 公開しない」に
+傾いた後、公開する方針に確定した（2026-06-11）。
 
 ---
 
@@ -183,8 +153,10 @@ examples/
   range 行が再現しなかった）、identity VIEWPOINT を有効な原点として受理、
   evaluate_all.py のハードコード `algorithms` リスト編集手順を README に明記。
   `examples/dynamicmap_benchmark/` ミラーも同期済み
+- ★ PyPI 公開後、install 行を `pip install "dynamic-object-removal>=0.5"` に統一（`ab0a2b9`）
 - 残作業:
-  1. **draft 解除**（Step 0 完了後すぐ。インストール手段が生きてから見てもらう）
+  1. **draft 解除 — owner の指示があるまでしない**（2026-06-11 owner 判断。技術的ブロッカーは
+     すべて解消済みで、GO が出ればすぐ ready 化できる）
   2. メンテナのレビュー対応（出力形式・フォルダ規約の指摘に即応できるよう
      fork `/tmp/DynamicMap_Benchmark_fork` は保持）
   3. merge されたら README の DynamicMap セクションに「upstream に merge 済み」を 1 行
@@ -254,7 +226,7 @@ launch 一発 + before/after 画像で見せ、lidarslam_ros2 README からリ�
 #### 投稿の前提条件（揃ってから出す）
 
 - [x] 標準ベンチの数字が README にある（KITTI fusion AA 98.6 / 98.0 — DUFOMap 級）
-- [ ] Step 0: `pip install dynamic-object-removal` が生きている（**必須** — HN の最初のコメントで試される）
+- [x] `pip install dynamic-object-removal` が生きている（v0.5.0、fresh venv 検証済み 2026-06-11）
 - [ ] できれば Step A の SLAM 連携画像（なくても可）
 - [ ] Pyodide 初期ロードのプログレス表示が貧弱でないか当日確認
 
@@ -270,9 +242,7 @@ launch 一発 + before/after 画像で見せ、lidarslam_ros2 README からリ�
 ## 実行順序と完了の定義
 
 ```
-Step 0 (PyPI 実公開)            … ~30 分。即日。README の install が嘘でなくなる
-  ↓
-PR #28 draft 解除               … 5 分 + メンテナ対応は随時
+PR #28 draft 解除               … owner の GO 待ち（技術的準備は完了）。解除後メンテナ対応は随時
   ↓
 Step A (lidarslam_ros2 連携)    … 数時間〜1日。出荷したら即 lidarslam_ros2 README 更新
   ↓
@@ -348,10 +318,11 @@ Step C 投稿 (Show HN)           … 半日（投稿 + 当日対応）
 
 ### PyPI / packaging（2026-06-11 確認）
 
-- **PyPI に `dynamic-object-removal` は存在しない**（API 404）。README の install 節は先行して
-  PyPI 前提の記述になっている → Step 0 で解消する
-- `publish.yml` は GitHub release トリガ（Trusted Publishing 想定）。git tag は `v0.1.0` のみ
-- ローカル twine 用 venv: `/tmp/venv-twine`（fallback 用）
+- **PyPI に `dynamic-object-removal` v0.5.0 公開済み**（2026-06-11、wheel + sdist）。
+  Trusted Publishing 設定済み（owner: rsasaki0109 / repo: dynamic-3d-object-removal /
+  workflow: publish.yml / environment: pypi）— 以後は tag push だけで公開される
+- `publish.yml` のトリガは **tag push (`v*`)**（release 作成ではない）+ workflow_dispatch
+- fresh venv 検証済み: `pip install dynamic-object-removal` → CLI/--version/import OK
 
 ### Playground 現状（2026-06-10 実装済み）
 
@@ -385,7 +356,7 @@ scene: `04994d08-156c-3018-9717-ba0e29be8153` (val split)
 ### ローカルの大物 temp（消してよい候補 — 作業が落ち着いたら）
 
 - `data/dynamicmap/00/dor_fusion_output.pcd`（~700 MB）ほか data/ 配下の生成物（untracked）
-- `/tmp` のデータキャッシュ ~1 GB、`/tmp/venv-dor-test05`、`/tmp/venv-twine`（Step 0 まで保持）
+- `/tmp` のデータキャッシュ ~1 GB、`/tmp/venv-dor-test05`、`/tmp/venv-twine`（PyPI 公開済みのため不要）
 - fork clone `/tmp/DynamicMap_Benchmark_fork`（PR #28 対応完了まで保持）
 
 ---

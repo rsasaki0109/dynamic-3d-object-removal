@@ -127,6 +127,16 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--sr-ground-margin", type=float, default=core.DEFAULT_SR_GROUND_MARGIN)
     parser.add_argument("--sr-min-votes", type=int, default=None,
                         help="Fixed absolute vote threshold (default: normalized, 35%% of each point's column revisits).")
+    parser.add_argument("--fusion-workers", type=int, default=6,
+                        help="Process pool size for the fusion carving channels.")
+    # Same short-window adaptation as the AV2 script (12 scans). Note fusion's voxel
+    # carving is still a poor fit for this sparse 32-beam sensor: beyond ~13 m the
+    # vertical beam spacing exceeds the carving voxel, so a scan's own surface hits no
+    # longer protect static structure and it gets carved between beams. Coarser voxels
+    # do not recover it (measured F1 stays < 0.3); prefer `range` here.
+    parser.add_argument("--fusion-free-fraction", type=float, default=0.7)
+    parser.add_argument("--fusion-free-floor", type=int, default=3)
+    parser.add_argument("--fusion-void-min-scans", type=int, default=4)
     parser.add_argument("--root", default=str(ROOT_DIR), help="Where the mini data lives / is downloaded.")
     parser.add_argument("--summary-json", default=None)
     args = parser.parse_args(argv)
@@ -231,6 +241,16 @@ def main(argv: list[str] | None = None) -> int:
     )
     scanratio_metrics = bench.compute_accuracy_metrics(~keep_sr, gt_mask)
 
+    # --- fusion: free-space carving + eroded voids + scan-ratio votes (OR) ---
+    _, keep_fusion = core.clean_map_by_fusion(
+        acc_map, scans,
+        free_votes_fraction=args.fusion_free_fraction,
+        free_votes_floor=args.fusion_free_floor,
+        void_min_scans=args.fusion_void_min_scans,
+        workers=args.fusion_workers,
+    )
+    fusion_metrics = bench.compute_accuracy_metrics(~keep_fusion, gt_mask)
+
     def row(name: str, m: dict) -> str:
         return (f"| {name} | {m['precision']:.3f} | {m['recall']:.3f} | {m['f1']:.3f} | "
                 f"{m['static_preservation']:.3f} |")
@@ -242,6 +262,7 @@ def main(argv: list[str] | None = None) -> int:
         f"{args.h_res}deg, coarsened to match the 32-beam sensor.\n\n"
         "| method | precision | recall | F1 | static kept |\n"
         "|---|---|---|---|---|\n"
+        f"{row('free-space fusion', fusion_metrics)}\n"
         f"{row('range-image visibility', range_metrics)}\n"
         f"{row('scan-ratio (pseudo-occupancy)', scanratio_metrics)}\n"
         f"{row('temporal consistency', temporal_metrics)}\n"
@@ -256,6 +277,7 @@ def main(argv: list[str] | None = None) -> int:
                    "min_see_through": args.min_see_through, "max_surface_hits": args.max_surface_hits,
                    "ground_z_sensor": GROUND_Z_SENSOR, "moving_thresh": args.moving_thresh},
         "range": range_metrics, "temporal": temporal_metrics, "scan_ratio": scanratio_metrics,
+        "fusion": fusion_metrics,
     }
     out_json = args.summary_json or str(root / f"benchmark_{args.scene}.json")
     Path(out_json).write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")

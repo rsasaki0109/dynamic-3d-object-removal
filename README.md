@@ -78,11 +78,19 @@ These numbers **are** re-measured here, on real public data, and are reproducibl
 
 | method (detector-free) | precision | recall | F1 | static points kept |
 |---|---|---|---|---|
-| **range-image visibility** (`range`) | **0.68** | 0.54 | **0.60** | 0.98 |
-| **scan-ratio** pseudo-occupancy (`scan_ratio`, `--sr-min-votes 2`) | 0.66 | 0.56 | **0.61** | 0.98 |
+| **free-space fusion** (`fusion`, short-window thresholds) | 0.65 | **0.66** | **0.66** | 0.97 |
+| **range-image visibility** (`range`) | **0.68** | 0.54 | 0.60 | 0.98 |
+| **scan-ratio** pseudo-occupancy (`scan_ratio`, `--sr-min-votes 2`) | 0.66 | 0.56 | 0.61 | 0.98 |
 | temporal consistency (`temporal`) | 0.19 | 0.72 | 0.30 | 0.78 |
 
 > Scene `0b5142c1…`, 1.24 M points, 84 k ground-truth points on moving objects. The range-image cleaner uses see-through voting + a Removert-style *revert* (a repeatedly-observed surface is kept even if a few scans see past it) + ground protection. Tunable for higher precision (e.g. `--min-see-through 4` → precision ≈ 0.89).
+>
+> **fusion** transfers to this dense-sensor short window with one adaptation: the
+> library's thresholds (`free_votes_fraction=0.9`, `void_min_scans=11`) assume a long
+> KITTI-style sequence — with only 12 sweeps a single same-scan hit would veto the
+> fractional vote and 11 absolute voids can never accumulate. The benchmark script
+> relaxes them to `0.7 / floor 3 / 4` (its defaults), which lifts fusion from F1 0.39
+> to 0.66 — the best F1 here.
 >
 > **scan-ratio** is a *different geometric signal* (ERASOR-style): it compares the **vertical occupancy of each egocentric polar column** between the map and a live sweep — a column that is tall in the map but flat now held a moving object — and reverts the ground underneath with a per-column plane fit. It reaches the same ~0.60 F1 as the visibility method by an **independent** mechanism (column occupancy vs line-of-sight), and tends toward **higher recall** (it also catches dynamics that are never occluded). Voting across scans controls the precision/recall trade: the default (majority of each point's column revisits, v0.4.0) targets long accumulated maps (100+ scans) and on this 12-sweep snapshot trades recall for precision (0.89 precision / 0.18 recall — most of a trace's revisits still contain the object); a small fixed `--sr-min-votes 2` is the right setting for short windows and is what this row reports.
 
@@ -105,6 +113,7 @@ so each pixel still aggregates enough points. With that one change the method ge
 |---|---|---|---|---|
 | **range-image visibility** (`range`) | 0.48 | **0.92** | **0.63** | 0.81 |
 | scan-ratio pseudo-occupancy (`scan_ratio`) | 0.36 | **0.90** | 0.51 | 0.69 |
+| free-space fusion (`fusion`, short-window thresholds) | 0.16 | 0.32 | 0.22 | 0.68 |
 | temporal consistency (`temporal`) | 0.07 | 0.22 | 0.11 | 0.47 |
 
 > Scene `scene-0757` (busy intersection), 12 pose-aligned keyframes, 303 k points, 49 k
@@ -118,6 +127,14 @@ so each pixel still aggregates enough points. With that one change the method ge
 > sweep often leaves a column nearly empty → flat → flagged), so on nuScenes it keeps recall
 > very high but precision and static-preservation drop. It is strongest on dense (64-beam+)
 > sensors like AV2; on sparse sensors prefer `range`, or raise `votes_fraction`.
+>
+> **fusion** is the same lesson taken further: its voxel free-space carving relies on a
+> scan's own surface hits protecting static structure, but beyond ~13 m the 32-beam
+> vertical spacing exceeds the carving voxel, so static walls get carved *between* beams.
+> Unlike the range image, coarsening the voxels does not recover it (measured F1 stays
+> < 0.3 across coarser voxel / shorter range / per-channel variants). `fusion` is the
+> right tool for dense sensors (best-in-table on AV2 and Semantic-KITTI); on sparse
+> 32-beam data use `range`.
 
 ```bash
 # Reproduce (downloads nuScenes mini once, ~3.9 GB stream, no signup, no extra deps):
@@ -152,7 +169,10 @@ range image). **Our methods only** — not ERASOR/Removert/DUFOMap re-runs.
 > `fusion` matches it on seq 00 and exceeds every listed method on seq 05 (the
 > learning-based, GPU-trained 4dNDF reports AA ≈ 99 on both — outside this
 > numpy-only, detector-free class). Channel thresholds were tuned on these two
-> sequences, like most leaderboard entries; treat cross-dataset transfer with care.
+> sequences, like most leaderboard entries; cross-dataset transfer is measured in the
+> sections above — fusion is also best-in-table on the dense-sensor AV2 short window
+> (with relaxed short-window thresholds), but not suited to sparse 32-beam nuScenes,
+> where `range` is the right tool.
 
 ```bash
 # Reproduce (downloads Zenodo teaser zips, ~385 MB each; scipy speeds up eval):
@@ -386,6 +406,13 @@ channel flags it):
 This is the method behind the `fusion` row in the table above (AA **98.6 / 98.0** on
 Semantic-KITTI 00 / 05). Carving is the cost: minutes per hundred 64-beam scans with
 `workers=6`, versus seconds for `range`/`scan_ratio` alone.
+
+Sizing to your data: the default thresholds assume a long (100+ scan) dense-sensor
+sequence. For short windows (~12 scans) relax them —
+`free_votes_fraction=0.7, free_votes_floor=3, void_min_scans=4` is what the AV2
+benchmark script uses (best F1 there). On sparse (32-beam) sensors the carving
+channels misfire between beams regardless of voxel size — use `range` instead
+(measured on nuScenes above).
 
 ## Supported Formats
 

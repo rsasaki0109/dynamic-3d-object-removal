@@ -251,6 +251,12 @@ def main(argv: list[str] | None = None) -> int:
     )
     fusion_metrics = bench.compute_accuracy_metrics(~keep_fusion, gt_mask)
 
+    # --- range ∧ scan-ratio: intersect the two high-recall channels. Their false
+    # positives come from different physics (range-image self-occlusion vs polar-column
+    # vacancy), so the intersection trades a little recall for better precision AND
+    # better static preservation — the best single number on this sparse sensor.
+    combo_metrics = bench.compute_accuracy_metrics(~keep_range & ~keep_sr, gt_mask)
+
     def row(name: str, m: dict) -> str:
         return (f"| {name} | {m['precision']:.3f} | {m['recall']:.3f} | {m['f1']:.3f} | "
                 f"{m['static_preservation']:.3f} |")
@@ -262,6 +268,7 @@ def main(argv: list[str] | None = None) -> int:
         f"{args.h_res}deg, coarsened to match the 32-beam sensor.\n\n"
         "| method | precision | recall | F1 | static kept |\n"
         "|---|---|---|---|---|\n"
+        f"{row('range ∧ scan-ratio (intersection)', combo_metrics)}\n"
         f"{row('free-space fusion', fusion_metrics)}\n"
         f"{row('range-image visibility', range_metrics)}\n"
         f"{row('scan-ratio (pseudo-occupancy)', scanratio_metrics)}\n"
@@ -277,7 +284,7 @@ def main(argv: list[str] | None = None) -> int:
                    "min_see_through": args.min_see_through, "max_surface_hits": args.max_surface_hits,
                    "ground_z_sensor": GROUND_Z_SENSOR, "moving_thresh": args.moving_thresh},
         "range": range_metrics, "temporal": temporal_metrics, "scan_ratio": scanratio_metrics,
-        "fusion": fusion_metrics,
+        "fusion": fusion_metrics, "range_and_scan_ratio": combo_metrics,
     }
     out_json = args.summary_json or str(root / f"benchmark_{args.scene}.json")
     Path(out_json).write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")

@@ -210,7 +210,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--voxel-size", type=float, default=core.DEFAULT_TEMPORAL_VOXEL_SIZE)
     parser.add_argument("--temporal-min-hits", type=int, default=2)
     parser.add_argument("--sr-min-votes", type=int, default=None,
-                        help="Scans that must flag a point before removal (default: 30%% of scans).")
+                        help="Fixed absolute vote threshold (default: normalized, 35%% of each point's column revisits).")
     parser.add_argument("--summary-json", default=None)
     args = parser.parse_args(argv)
 

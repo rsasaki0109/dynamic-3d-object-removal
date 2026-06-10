@@ -9,7 +9,7 @@ ERASOR-style). The latter three are detector-free map cleaners. No GPU, no model
 
 from __future__ import annotations
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 import argparse
 import csv
@@ -41,7 +41,8 @@ DEFAULT_SR_MAX_RANGE = 80.0
 DEFAULT_SR_RATIO = 0.2
 DEFAULT_SR_MIN_MAP_HEIGHT = 0.5
 DEFAULT_SR_GROUND_MARGIN = 0.2
-DEFAULT_SR_VOTES_FRACTION = 0.15
+DEFAULT_SR_VOTES_FRACTION = 0.5  # majority of the scans that actually revisit a point's column
+DEFAULT_SR_VOTES_FLOOR = 3
 
 
 @dataclass(frozen=True)
@@ -1083,14 +1084,18 @@ def _scan_ratio_dynamic(
     scan_ratio_threshold: float,
     min_map_height: float,
     ground_margin: float,
-) -> np.ndarray:
-    """Boolean mask of map points flagged dynamic by one query scan (ERASOR R-POD).
+) -> tuple[np.ndarray, np.ndarray]:
+    """Per-scan ``(dynamic, observed)`` masks over map points (ERASOR R-POD).
 
     A polar bin is "of interest" when the map has real vertical structure there
     (``map_height > min_map_height``) yet the live query bin is much flatter
     (``query_height / map_height < scan_ratio_threshold``) -- i.e. a tall thing in the
     map is gone in the current sweep. Inside such bins, points sitting above the local
     ground (residual ``> ground_margin``) are flagged dynamic; the ground is reverted.
+
+    ``observed`` marks map points whose polar column is revisited by this scan
+    (in-range and the query bin is non-empty) -- the points this sweep could have
+    voted on at all. Used to normalize votes in :func:`clean_map_by_scan_ratio`.
     """
     n = map_points.shape[0]
     dynamic = np.zeros(n, dtype=bool)
@@ -1114,11 +1119,14 @@ def _scan_ratio_dynamic(
     map_h, map_cnt = spread(m_flat, m_valid, mz)
     q_h, q_cnt = spread(q_flat, q_valid, qz)
 
+    observed = np.zeros(n, dtype=bool)
+    observed[m_valid] = q_cnt[m_flat[m_valid]] > 0
+
     ratio = q_h / np.maximum(map_h, 1e-9)
     bin_interest = (map_cnt > 0) & (q_cnt > 0) & (map_h > min_map_height) & (ratio < scan_ratio_threshold)
     interest = np.nonzero(bin_interest)[0]
     if interest.size == 0:
-        return dynamic
+        return dynamic, observed
 
     # Group valid map points by bin (one sort) so each flagged bin is a cheap slice.
     valid_idx = np.nonzero(m_valid)[0]
@@ -1136,7 +1144,7 @@ def _scan_ratio_dynamic(
         idx = sorted_idx[s:e]
         resid = _ground_residual(map_points[idx], seed_height)
         dynamic[idx[resid > ground_margin]] = True
-    return dynamic
+    return dynamic, observed
 
 
 def remove_dynamic_by_scan_ratio(
@@ -1177,7 +1185,7 @@ def remove_dynamic_by_scan_ratio(
     if origin.shape != (3,):
         raise ValueError("sensor_origin must have 3 elements")
 
-    dynamic = _scan_ratio_dynamic(
+    dynamic, _ = _scan_ratio_dynamic(
         map_points, query_points, origin, int(n_rings), int(n_sectors), float(max_range),
         float(scan_ratio_threshold), float(min_map_height), float(ground_margin),
     )
@@ -1196,18 +1204,28 @@ def clean_map_by_scan_ratio(
     min_map_height: float = DEFAULT_SR_MIN_MAP_HEIGHT,
     ground_margin: float = DEFAULT_SR_GROUND_MARGIN,
     min_votes: int | None = None,
+    votes_fraction: float = DEFAULT_SR_VOTES_FRACTION,
+    votes_floor: int = DEFAULT_SR_VOTES_FLOOR,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Clean an accumulated map with the scan-ratio test, voting across multiple scans.
 
     Runs :func:`remove_dynamic_by_scan_ratio` for each ``(points, sensor_origin)`` sweep
-    and removes a map point only when at least ``min_votes`` scans flag it dynamic. Voting
-    suppresses one-off false positives from occluded or sparsely-sampled sweeps (the main
-    weakness of the per-column ratio test): a true dynamic trace is flagged by most sweeps
-    that revisit its column (the object is gone), while a static surface only collects
-    scattered votes. ``min_votes=None`` (default) scales the threshold to
-    ``DEFAULT_SR_VOTES_FRACTION`` of the number of scans, which on DynamicMap_Benchmark
-    Semantic-KITTI seq 00/05 raises SA from ~48% (min_votes=2) to ~88-94% while keeping
-    DA at ~98%. Mirrors :func:`clean_map_by_visibility`'s multi-scan shape.
+    and removes a map point only when enough scans flag it dynamic. Voting suppresses
+    one-off false positives from occluded or sparsely-sampled sweeps (the main weakness
+    of the per-column ratio test): a true dynamic trace is flagged by most sweeps that
+    revisit its column (the object is gone), while a static surface only collects
+    scattered votes.
+
+    With ``min_votes=None`` (default) the vote threshold is normalized per point: a point
+    is dynamic when ``votes >= max(votes_floor, ceil(votes_fraction * observed))``
+    (``votes_floor`` is clamped to the number of scans), where
+    ``observed`` counts the scans that actually revisited that point's polar column. The
+    default ``votes_fraction=0.5`` is a majority rule over revisits: it protects static
+    points seen only a handful of times (a fixed global threshold either over-deletes
+    them or under-deletes well-observed traces). On DynamicMap_Benchmark Semantic-KITTI
+    seq 00/05 this reaches SA 98.0/96.0 and DA 92.8/97.9 (AA 95.4/96.9) versus SA ~48%
+    for a fixed ``min_votes=2``. Pass an integer ``min_votes`` to use a fixed absolute
+    threshold instead. Mirrors :func:`clean_map_by_visibility`'s multi-scan shape.
 
     Returns ``(kept_points, keep_mask)`` over ``map_points``.
     """
@@ -1216,20 +1234,29 @@ def clean_map_by_scan_ratio(
         return map_points, np.ones(0, dtype=bool)
     if not scans:
         return map_points, np.ones(map_points.shape[0], dtype=bool)
-    if min_votes is None:
-        min_votes = max(1, round(DEFAULT_SR_VOTES_FRACTION * len(scans)))
 
     votes = np.zeros(map_points.shape[0], dtype=np.int64)
+    observed = np.zeros(map_points.shape[0], dtype=np.int64)
     for pts, origin in scans:
         pts = np.asarray(pts, dtype=np.float64)
         if pts.size == 0:
             continue
         origin = np.asarray(origin, dtype=np.float64)
-        votes += _scan_ratio_dynamic(
+        dyn, obs = _scan_ratio_dynamic(
             map_points, pts, origin, int(n_rings), int(n_sectors), float(max_range),
             float(scan_ratio_threshold), float(min_map_height), float(ground_margin),
-        ).astype(np.int64)
-    dynamic = votes >= max(1, int(min_votes))
+        )
+        votes += dyn.astype(np.int64)
+        observed += obs.astype(np.int64)
+    if min_votes is None:
+        floor = max(1, min(int(votes_floor), len(scans)))
+        threshold = np.maximum(
+            floor,
+            np.ceil(float(votes_fraction) * observed).astype(np.int64),
+        )
+        dynamic = votes >= threshold
+    else:
+        dynamic = votes >= max(1, int(min_votes))
     keep_mask = ~dynamic
     return map_points[keep_mask], keep_mask
 

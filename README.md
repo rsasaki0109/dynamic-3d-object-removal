@@ -79,12 +79,12 @@ These numbers **are** re-measured here, on real public data, and are reproducibl
 | method (detector-free) | precision | recall | F1 | static points kept |
 |---|---|---|---|---|
 | **range-image visibility** (`range`) | **0.68** | 0.54 | **0.60** | 0.98 |
-| **scan-ratio** pseudo-occupancy (`scan_ratio`) | 0.66 | 0.56 | **0.61** | 0.98 |
+| **scan-ratio** pseudo-occupancy (`scan_ratio`, `--sr-min-votes 2`) | 0.66 | 0.56 | **0.61** | 0.98 |
 | temporal consistency (`temporal`) | 0.19 | 0.72 | 0.30 | 0.78 |
 
 > Scene `0b5142c1…`, 1.24 M points, 84 k ground-truth points on moving objects. The range-image cleaner uses see-through voting + a Removert-style *revert* (a repeatedly-observed surface is kept even if a few scans see past it) + ground protection. Tunable for higher precision (e.g. `--min-see-through 4` → precision ≈ 0.89).
 >
-> **scan-ratio** is a *different geometric signal* (ERASOR-style): it compares the **vertical occupancy of each egocentric polar column** between the map and a live sweep — a column that is tall in the map but flat now held a moving object — and reverts the ground underneath with a per-column plane fit. It reaches the same ~0.60 F1 as the visibility method by an **independent** mechanism (column occupancy vs line-of-sight), and tends toward **higher recall** (it also catches dynamics that are never occluded). Voting across scans (`min_votes`, default 15% of scans — 2 here) controls the precision/recall trade.
+> **scan-ratio** is a *different geometric signal* (ERASOR-style): it compares the **vertical occupancy of each egocentric polar column** between the map and a live sweep — a column that is tall in the map but flat now held a moving object — and reverts the ground underneath with a per-column plane fit. It reaches the same ~0.60 F1 as the visibility method by an **independent** mechanism (column occupancy vs line-of-sight), and tends toward **higher recall** (it also catches dynamics that are never occluded). Voting across scans controls the precision/recall trade: the default (majority of each point's column revisits, v0.4.0) targets long accumulated maps (100+ scans) and on this 12-sweep snapshot trades recall for precision (0.89 precision / 0.18 recall — most of a trace's revisits still contain the object); a small fixed `--sr-min-votes 2` is the right setting for short windows and is what this row reports.
 
 ```bash
 # Reproduce (downloads a few AV2 sweeps, no signup):
@@ -104,7 +104,7 @@ so each pixel still aggregates enough points. With that one change the method ge
 | method (detector-free) | precision | recall | F1 | static points kept |
 |---|---|---|---|---|
 | **range-image visibility** (`range`) | 0.48 | **0.92** | **0.63** | 0.81 |
-| scan-ratio pseudo-occupancy (`scan_ratio`) | 0.30 | **0.97** | 0.45 | 0.56 |
+| scan-ratio pseudo-occupancy (`scan_ratio`) | 0.36 | **0.90** | 0.51 | 0.69 |
 | temporal consistency (`temporal`) | 0.07 | 0.22 | 0.11 | 0.47 |
 
 > Scene `scene-0757` (busy intersection), 12 pose-aligned keyframes, 303 k points, 49 k
@@ -117,7 +117,7 @@ so each pixel still aggregates enough points. With that one change the method ge
 > its column-occupancy signal is *more* sensitive to sparsity than visibility (a 32-beam
 > sweep often leaves a column nearly empty → flat → flagged), so on nuScenes it keeps recall
 > very high but precision and static-preservation drop. It is strongest on dense (64-beam+)
-> sensors like AV2; on sparse sensors prefer `range`, or raise `--sr-min-votes`.
+> sensors like AV2; on sparse sensors prefer `range`, or raise `votes_fraction`.
 
 ```bash
 # Reproduce (downloads nuScenes mini once, ~3.9 GB stream, no signup, no extra deps):
@@ -135,16 +135,17 @@ range image). **Our methods only** — not ERASOR/Removert/DUFOMap re-runs.
 | method | seq 00 SA | seq 00 DA | seq 00 AA | seq 05 SA | seq 05 DA | seq 05 AA |
 |---|---|---|---|---|---|---|
 | **range-image visibility** (`range`) | **99.6** | 34.5 | 58.6 | **99.8** | 25.9 | 50.9 |
-| **scan-ratio** pseudo-occupancy (`scan_ratio`) | 88.4 | **97.6** | **92.9** | 93.5 | **97.5** | **95.5** |
+| **scan-ratio** pseudo-occupancy (`scan_ratio`) | 98.0 | **92.8** | **95.4** | 96.0 | **97.9** | **96.9** |
 | temporal consistency (`temporal`) | 97.0 | 46.6 | 67.2 | 97.3 | 25.9 | 50.2 |
 
 > seq 00: 141 scans, 17.4 M points, 96 k dynamic GT points. seq 05: 321 scans, 39.9 M
 > points, 684 k dynamic GT points. **range** preserves static structure (SA ≈ 99%) but is
-> conservative on dynamics (DA ≈ 26–35%). **scan-ratio** balances both: cross-scan voting
-> (default `min_votes` = 15% of scans, v0.3.0) suppresses the per-sweep false positives
-> that previously cost half the static map (SA 48.7 → 88.4 on seq 00 at DA ≈ 98%). For
-> reference, the benchmark paper reports AA 81.1/82.9 for ERASOR and 92.2/92.1 for
-> Octomap w GF on these sequences — measured by the maintainers, not re-run here.
+> conservative on dynamics (DA ≈ 26–35%). **scan-ratio** balances both: votes are
+> normalized per point by the number of scans that actually revisit its polar column
+> (majority rule, v0.4.0), which protects rarely-observed static points — SA 48.7 → 98.0
+> on seq 00 (AA 69.4 → 95.4) versus a fixed vote threshold. For reference, the benchmark
+> paper reports AA 81.1/82.9 for ERASOR and 92.2/92.1 for Octomap w GF on these
+> sequences — measured by the maintainers, not re-run here.
 
 ```bash
 # Reproduce (downloads Zenodo teaser zips, ~385 MB each; scipy speeds up eval):
@@ -315,7 +316,7 @@ Main public APIs:
 - `remove_ghost_by_range_image(map_points, query_points, sensor_origin, range_margin=0.5)` — single map-vs-scan visibility removal
 - `clean_map_by_visibility(map_points, scans, min_see_through=2, max_surface_hits=2, ground_z=None, resolutions=None)` — multi-scan map cleaner (remove + revert); pass `resolutions=[2.5, 4.0]` for multi-resolution consensus (higher precision)
 - `remove_dynamic_by_scan_ratio(map_points, query_points, sensor_origin, scan_ratio_threshold=0.2, ground_margin=0.2)` — single map-vs-scan ERASOR-style per-column pseudo-occupancy removal
-- `clean_map_by_scan_ratio(map_points, scans, scan_ratio_threshold=0.2, min_votes=None)` — multi-scan scan-ratio cleaner (vote across sweeps; `None` = 15% of scans)
+- `clean_map_by_scan_ratio(map_points, scans, scan_ratio_threshold=0.2, min_votes=None, votes_fraction=0.5, votes_floor=3)` — multi-scan scan-ratio cleaner (vote across sweeps; `min_votes=None` = majority of each point's column revisits)
 - `RangeImageGhostFilter(window_size=5, range_margin=0.5)` — streaming range-image filter for ROS2
 - `save_points(path, fmt="auto")`
 
@@ -339,14 +340,15 @@ A map point is removed only when enough scans see *through* it (free space) **an
 from dynamic_object_removal import clean_map_by_scan_ratio
 
 # scans: list of (points_in_map_frame, sensor_origin) from the sweeps that built the map.
-# min_votes defaults to 15% of the scan count; pass an int to override.
+# By default a point is removed when a majority of the scans revisiting its
+# column vote dynamic; pass an int min_votes for a fixed absolute threshold.
 kept, keep_mask = clean_map_by_scan_ratio(
     map_points, scans,
     scan_ratio_threshold=0.2, min_map_height=0.5, ground_margin=0.2,
 )
 ```
 
-An **independent** geometric signal from the visibility methods (ERASOR-style): each egocentric polar column stores its vertical occupancy (height spread). A column that is tall in the accumulated map but flat in a live sweep held a moving object, so its above-ground points are removed and the ground is reverted by a per-column plane fit. It complements `range` — same ~0.60 F1 on AV2 by a different mechanism, with a recall bias — and is strongest on dense (64-beam+) LiDAR; on sparse sensors (e.g. nuScenes 32-beam) prefer `range` or raise `min_votes`.
+An **independent** geometric signal from the visibility methods (ERASOR-style): each egocentric polar column stores its vertical occupancy (height spread). A column that is tall in the accumulated map but flat in a live sweep held a moving object, so its above-ground points are removed and the ground is reverted by a per-column plane fit. It complements `range` — same ~0.60 F1 on AV2 by a different mechanism, with a recall bias — and is strongest on dense (64-beam+) LiDAR; on sparse sensors (e.g. nuScenes 32-beam) prefer `range` or raise `votes_fraction`.
 
 **Higher-precision (multi-resolution consensus).** Pass `resolutions=[2.5, 4.0]` (Removert-style): a point is removed only if it is seen through at *every* listed resolution, which filters resolution-specific noise. This trades a little recall for precision — on the AV2 benchmark it lifts precision **0.68 → 0.78** (static-points-kept 0.98 → 0.99), and on sparse sensors it also nudges F1 up. Prefer it when wrongly deleting static structure is worse than missing a few dynamic points. Both benchmark scripts expose it via `--resolutions 2.5 4.0`.
 

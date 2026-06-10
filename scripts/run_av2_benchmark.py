@@ -130,7 +130,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--sr-min-map-height", type=float, default=core.DEFAULT_SR_MIN_MAP_HEIGHT)
     parser.add_argument("--sr-ground-margin", type=float, default=core.DEFAULT_SR_GROUND_MARGIN)
     parser.add_argument("--sr-min-votes", type=int, default=None,
-                        help="Scans that must flag a point before removal (default: 30%% of scans).")
+                        help="Fixed absolute vote threshold (default: normalized, 35%% of each point's column revisits).")
     parser.add_argument("--summary-json", default=None)
     args = parser.parse_args(argv)
 

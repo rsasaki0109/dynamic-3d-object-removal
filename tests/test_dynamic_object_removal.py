@@ -785,9 +785,14 @@ class TestScanRatioRemoval:
         assert (~keep1[ng:]).sum() > 0
         assert keep2[ng:].all()
         assert clean_map_by_scan_ratio(mp, [], **kw)[1].all()  # no scans -> keep all
-        # Default min_votes=None scales with the scan count (30% of 2 scans -> 1 vote).
+        # Default min_votes=None normalizes by each point's revisit count: both scans
+        # revisit the column, so threshold = max(floor clamped to 2, ceil(0.35*2)) = 2
+        # and a single vote is not enough.
         _, keep_auto = clean_map_by_scan_ratio(mp, scans, **kw)
-        assert np.array_equal(keep_auto, keep1)
+        assert np.array_equal(keep_auto, keep2)
+        # Lowering the floor and fraction makes one vote out of two decisive again.
+        _, keep_loose = clean_map_by_scan_ratio(mp, scans, votes_fraction=0.5, votes_floor=1, **kw)
+        assert np.array_equal(keep_loose, keep1)
 
 
 class TestRangeCLI:

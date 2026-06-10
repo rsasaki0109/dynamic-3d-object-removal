@@ -175,6 +175,14 @@ examples/
   タイトル "Add dor_numpy: numpy-only detector-free cleaner (AA 98.6 / 98.0 on seq 00 / 05)"
 - 本文には KITTI 実測表 + fusion の設計説明 + 転移結果（AV2 best-in-table / nuScenes 不適）+
   再現コマンドまで記載済み。チューニング caveat も明記（誠実路線）
+- メンテナ Kin-Zhang から 6/10 にコメント「Thanks for merging. Let me know once it's ready to test.」
+  — ready 化待ちの状態
+- ★ 2026-06-11 レビュー済み（self + codex gpt-5.5 xhigh）、修正 4 件を push 済み（`46a87e1`）:
+  install 行を git+https に（PyPI 404 + `>=0.3` は fusion に対し低すぎた）、range に
+  `min_see_through=3 / max_surface_hits=3` を明示（ライブラリ既定 2/2 では README 表の
+  range 行が再現しなかった）、identity VIEWPOINT を有効な原点として受理、
+  evaluate_all.py のハードコード `algorithms` リスト編集手順を README に明記。
+  `examples/dynamicmap_benchmark/` ミラーも同期済み
 - 残作業:
   1. **draft 解除**（Step 0 完了後すぐ。インストール手段が生きてから見てもらう）
   2. メンテナのレビュー対応（出力形式・フォルダ規約の指摘に即応できるよう

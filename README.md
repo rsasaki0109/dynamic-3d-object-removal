@@ -111,7 +111,7 @@ so each pixel still aggregates enough points. With that one change the method ge
 
 | method (detector-free) | precision | recall | F1 | static points kept |
 |---|---|---|---|---|
-| **range ∧ scan-ratio** (intersection) | 0.51 | 0.87 | **0.64** | 0.84 |
+| **range ∧ scan-ratio** (intersection) | **0.51** | 0.87 | **0.64** | **0.84** |
 | range-image visibility (`range`) | 0.48 | **0.92** | 0.63 | 0.81 |
 | scan-ratio pseudo-occupancy (`scan_ratio`) | 0.36 | **0.90** | 0.51 | 0.69 |
 | free-space fusion (`fusion`, short-window thresholds) | 0.16 | 0.32 | 0.22 | 0.68 |
@@ -179,7 +179,7 @@ range image). **Our methods only** — not ERASOR/Removert/DUFOMap re-runs.
 > sequences, like most leaderboard entries; cross-dataset transfer is measured in the
 > sections above — fusion is also best-in-table on the dense-sensor AV2 short window
 > (with relaxed short-window thresholds), but not suited to sparse 32-beam nuScenes,
-> where `range` is the right tool.
+> where `range` ∧ `scan_ratio` is the right tool.
 
 ```bash
 # Reproduce (downloads Zenodo teaser zips, ~385 MB each; scipy speeds up eval):

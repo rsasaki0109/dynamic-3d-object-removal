@@ -269,9 +269,9 @@ def main(argv: list[str] | None = None) -> int:
         "| method | precision | recall | F1 | static kept |\n"
         "|---|---|---|---|---|\n"
         f"{row('range ∧ scan-ratio (intersection)', combo_metrics)}\n"
-        f"{row('free-space fusion', fusion_metrics)}\n"
         f"{row('range-image visibility', range_metrics)}\n"
         f"{row('scan-ratio (pseudo-occupancy)', scanratio_metrics)}\n"
+        f"{row('free-space fusion', fusion_metrics)}\n"
         f"{row('temporal consistency', temporal_metrics)}\n"
     )
     print(table)

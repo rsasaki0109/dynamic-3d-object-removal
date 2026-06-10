@@ -615,6 +615,7 @@ from dynamic_object_removal import (
     clean_map_by_visibility,
     remove_dynamic_by_scan_ratio,
     clean_map_by_scan_ratio,
+    clean_map_by_fusion,
 )
 
 
@@ -793,6 +794,53 @@ class TestScanRatioRemoval:
         # Lowering the floor and fraction makes one vote out of two decisive again.
         _, keep_loose = clean_map_by_scan_ratio(mp, scans, votes_fraction=0.5, votes_floor=1, **kw)
         assert np.array_equal(keep_loose, keep1)
+
+
+def _fusion_scene(n_scans=12):
+    """Sensor at (0,0,1) facing a dense wall at x=10; a box at x=5 appears only
+    in the first scan. Returns (map_points, scans, slices) where slices maps
+    each region of map_points to (wall+ground, object)."""
+    wy, wz = np.meshgrid(np.linspace(-2, 2, 41), np.linspace(0, 2, 21))
+    wall = np.column_stack([np.full(wy.size, 10.0), wy.ravel(), wz.ravel()])
+    gx, gy = np.meshgrid(np.linspace(1.5, 9.5, 33), np.linspace(-2, 2, 17))
+    ground = np.column_stack([gx.ravel(), gy.ravel(), np.zeros(gx.size)])
+    static = np.vstack([wall, ground])
+    ox, oy, oz = np.meshgrid(
+        np.linspace(4.6, 5.4, 9), np.linspace(-0.4, 0.4, 9), np.linspace(0.4, 1.4, 11)
+    )
+    obj = np.column_stack([ox.ravel(), oy.ravel(), oz.ravel()])
+    origin = (0.0, 0.0, 1.0)
+    scans = [(np.vstack([static, obj]), origin)]
+    scans += [(static, origin) for _ in range(n_scans - 1)]
+    map_points = np.vstack([s[0] for s in scans])
+    return map_points, scans, (len(static), len(obj))
+
+
+class TestFusionRemoval:
+    def test_removes_transient_keeps_static(self):
+        map_points, scans, (n_static, n_obj) = _fusion_scene()
+        kw = dict(max_range=20.0, sr_max_range=20.0)
+        _, keep = clean_map_by_fusion(map_points, scans, **kw)
+        obj_keep = keep[n_static:n_static + n_obj]
+        static_keep = np.ones(len(map_points), dtype=bool)
+        static_keep[n_static:n_static + n_obj] = False
+        # The transient box is carved out; static wall/ground survive nearly intact.
+        assert (~obj_keep).mean() > 0.8
+        assert keep[static_keep].mean() > 0.99
+
+    def test_empty_inputs(self):
+        kept, keep = clean_map_by_fusion(np.zeros((0, 3)), [])
+        assert keep.shape == (0,) and kept.shape == (0, 3)
+        mp = _flat_ground()
+        kept, keep = clean_map_by_fusion(mp, [])
+        assert keep.all() and len(kept) == len(mp)
+
+    def test_workers_equivalence(self):
+        map_points, scans, _ = _fusion_scene(n_scans=6)
+        kw = dict(max_range=20.0, sr_max_range=20.0, void_min_scans=4)
+        _, keep_seq = clean_map_by_fusion(map_points, scans, workers=1, **kw)
+        _, keep_par = clean_map_by_fusion(map_points, scans, workers=2, **kw)
+        assert np.array_equal(keep_seq, keep_par)
 
 
 class TestRangeCLI:

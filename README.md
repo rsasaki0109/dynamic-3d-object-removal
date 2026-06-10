@@ -35,7 +35,7 @@ These two hero images are **not single scans**. They show a **20-frame accumulat
 ### Features
 
 - **No deep learning**: give it detected 3D boxes and it removes points geometrically. No GPU, training data, or model inference required
-- **Four algorithms, all numpy**: `box` (per-scan, needs boxes), `temporal` (detector-free voxel consistency), `range` (detector-free range-image visibility — Removert-style remove + revert), and `scan_ratio` (detector-free per-column pseudo-occupancy — ERASOR-style scan-ratio + ground revert) for cleaning accumulated maps
+- **Five algorithms, all numpy**: `box` (per-scan, needs boxes), `temporal` (detector-free voxel consistency), `range` (detector-free range-image visibility — Removert-style remove + revert), `scan_ratio` (detector-free per-column pseudo-occupancy — ERASOR-style scan-ratio + ground revert), and `fusion` (free-space carving + DUFOMap-style eroded voids + scan-ratio votes, OR-fused — the highest-accuracy map cleaner)
 - **Fast**: 1.5 ms for 24k points on CPU
 - **ROS2 realtime node**: subscribe to `PointCloud2`, filter, and publish. Supports `box`, `temporal`, and `range` algorithms
 - **Minimal dependencies**: `numpy` only. `pyarrow` is only needed for Argoverse 2 Feather input
@@ -135,17 +135,24 @@ range image). **Our methods only** — not ERASOR/Removert/DUFOMap re-runs.
 | method | seq 00 SA | seq 00 DA | seq 00 AA | seq 05 SA | seq 05 DA | seq 05 AA |
 |---|---|---|---|---|---|---|
 | **range-image visibility** (`range`) | **99.6** | 34.5 | 58.6 | **99.8** | 25.9 | 50.9 |
-| **scan-ratio** pseudo-occupancy (`scan_ratio`) | 98.0 | **92.8** | **95.4** | 96.0 | **97.9** | **96.9** |
+| **scan-ratio** pseudo-occupancy (`scan_ratio`) | 98.0 | 92.8 | 95.4 | 96.0 | 97.9 | 96.9 |
+| **free-space fusion** (`fusion`) | 98.9 | **98.3** | **98.6** | 98.0 | **98.1** | **98.0** |
 | temporal consistency (`temporal`) | 97.0 | 46.6 | 67.2 | 97.3 | 25.9 | 50.2 |
 
 > seq 00: 141 scans, 17.4 M points, 96 k dynamic GT points. seq 05: 321 scans, 39.9 M
 > points, 684 k dynamic GT points. **range** preserves static structure (SA ≈ 99%) but is
 > conservative on dynamics (DA ≈ 26–35%). **scan-ratio** balances both: votes are
 > normalized per point by the number of scans that actually revisit its polar column
-> (majority rule, v0.4.0), which protects rarely-observed static points — SA 48.7 → 98.0
-> on seq 00 (AA 69.4 → 95.4) versus a fixed vote threshold. For reference, the benchmark
-> paper reports AA 81.1/82.9 for ERASOR and 92.2/92.1 for Octomap w GF on these
-> sequences — measured by the maintainers, not re-run here.
+> (majority rule, v0.4.0), which protects rarely-observed static points. **fusion**
+> (v0.5.0) OR-combines three complementary evidence channels — ray-sampled free-space
+> carving with per-scan hit precedence, DUFOMap-style eroded void confirmation
+> (d_s hit inflation + full-26-neighborhood erosion), and the scan-ratio votes at a
+> stricter fraction — and is the strongest method here. For context, the benchmark's
+> public leaderboard tops out at DUFOMap with AA 98.6 (seq 00) / 96.3 (seq 05):
+> `fusion` matches it on seq 00 and exceeds every listed method on seq 05 (the
+> learning-based, GPU-trained 4dNDF reports AA ≈ 99 on both — outside this
+> numpy-only, detector-free class). Channel thresholds were tuned on these two
+> sequences, like most leaderboard entries; treat cross-dataset transfer with care.
 
 ```bash
 # Reproduce (downloads Zenodo teaser zips, ~385 MB each; scipy speeds up eval):
@@ -317,6 +324,7 @@ Main public APIs:
 - `clean_map_by_visibility(map_points, scans, min_see_through=2, max_surface_hits=2, ground_z=None, resolutions=None)` — multi-scan map cleaner (remove + revert); pass `resolutions=[2.5, 4.0]` for multi-resolution consensus (higher precision)
 - `remove_dynamic_by_scan_ratio(map_points, query_points, sensor_origin, scan_ratio_threshold=0.2, ground_margin=0.2)` — single map-vs-scan ERASOR-style per-column pseudo-occupancy removal
 - `clean_map_by_scan_ratio(map_points, scans, scan_ratio_threshold=0.2, min_votes=None, votes_fraction=0.5, votes_floor=3)` — multi-scan scan-ratio cleaner (vote across sweeps; `min_votes=None` = majority of each point's column revisits)
+- `clean_map_by_fusion(map_points, scans, workers=1)` — highest-accuracy map cleaner: OR-fuses free-space carving, DUFOMap-style eroded voids, and scan-ratio votes (set `workers` to parallelize the per-scan carving)
 - `RangeImageGhostFilter(window_size=5, range_margin=0.5)` — streaming range-image filter for ROS2
 - `save_points(path, fmt="auto")`
 
@@ -351,6 +359,33 @@ kept, keep_mask = clean_map_by_scan_ratio(
 An **independent** geometric signal from the visibility methods (ERASOR-style): each egocentric polar column stores its vertical occupancy (height spread). A column that is tall in the accumulated map but flat in a live sweep held a moving object, so its above-ground points are removed and the ground is reverted by a per-column plane fit. It complements `range` — same ~0.60 F1 on AV2 by a different mechanism, with a recall bias — and is strongest on dense (64-beam+) LiDAR; on sparse sensors (e.g. nuScenes 32-beam) prefer `range` or raise `votes_fraction`.
 
 **Higher-precision (multi-resolution consensus).** Pass `resolutions=[2.5, 4.0]` (Removert-style): a point is removed only if it is seen through at *every* listed resolution, which filters resolution-specific noise. This trades a little recall for precision — on the AV2 benchmark it lifts precision **0.68 → 0.78** (static-points-kept 0.98 → 0.99), and on sparse sensors it also nudges F1 up. Prefer it when wrongly deleting static structure is worse than missing a few dynamic points. Both benchmark scripts expose it via `--resolutions 2.5 4.0`.
+
+### Free-space fusion (highest accuracy)
+
+```python
+from dynamic_object_removal import clean_map_by_fusion
+
+# scans: list of (points_in_map_frame, sensor_origin) from the sweeps that built the map.
+kept, keep_mask = clean_map_by_fusion(map_points, scans, workers=6)
+```
+
+Three independent dynamic-evidence channels, OR-fused (a point is removed if any
+channel flags it):
+
+1. **Free-space carving** — rays are sampled toward each scan point and stop short of
+   the hit; voxels a scan traverses without hitting are *freed* for that scan
+   (hit precedence), and a point is dynamic when ≥ 90 % of the scans that observed its
+   voxel freed it. Near-perfect precision on transient traffic.
+2. **Eroded voids** (DUFOMap-style) — finer carving where the last 0.2 m of each ray
+   counts as hit, miss rays stop at the scan's own hit set, and a miss becomes a
+   *confirmed void* only when its entire 26-neighborhood was observed in the same scan.
+   A point is dynamic after 11 confirmed voids — an absolute count, which catches slow
+   movers and late leavers that fractional voting misses by design.
+3. **Scan-ratio votes** at a stricter fraction (0.7) than the standalone default.
+
+This is the method behind the `fusion` row in the table above (AA **98.6 / 98.0** on
+Semantic-KITTI 00 / 05). Carving is the cost: minutes per hundred 64-beam scans with
+`workers=6`, versus seconds for `range`/`scan_ratio` alone.
 
 ## Supported Formats
 

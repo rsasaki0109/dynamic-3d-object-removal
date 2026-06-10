@@ -101,6 +101,7 @@ def _run_methods(
     voxel_size: float,
     temporal_min_hits: int,
     sr_min_votes: int,
+    fusion_workers: int,
 ) -> dict[str, np.ndarray]:
     ground_z = float(np.percentile(acc_map[:, 2], 2))
 
@@ -126,6 +127,14 @@ def _run_methods(
     )
     print(f"    kept {int(keep_sr.sum()):,} / {len(acc_map):,}", flush=True)
 
+    print("  running free-space fusion ...", flush=True)
+    _, keep_fusion = core.clean_map_by_fusion(
+        acc_map,
+        scans,
+        workers=fusion_workers,
+    )
+    print(f"    kept {int(keep_fusion.sum()):,} / {len(acc_map):,}", flush=True)
+
     print("  running temporal consistency ...", flush=True)
     keep_temporal = np.ones(len(acc_map), dtype=bool)
     tfilter = core.TemporalConsistencyFilter(
@@ -143,6 +152,7 @@ def _run_methods(
     return {
         "range": acc_map[keep_range],
         "scan_ratio": acc_map[keep_sr],
+        "fusion": acc_map[keep_fusion],
         "temporal": acc_map[keep_temporal],
     }
 
@@ -210,7 +220,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--voxel-size", type=float, default=core.DEFAULT_TEMPORAL_VOXEL_SIZE)
     parser.add_argument("--temporal-min-hits", type=int, default=2)
     parser.add_argument("--sr-min-votes", type=int, default=None,
-                        help="Fixed absolute vote threshold (default: normalized, 35%% of each point's column revisits).")
+                        help="Fixed absolute vote threshold (default: normalized, majority of each point's column revisits).")
+    parser.add_argument("--fusion-workers", type=int, default=6,
+                        help="Process pool size for the free-space fusion channels.")
     parser.add_argument("--summary-json", default=None)
     args = parser.parse_args(argv)
 
@@ -225,6 +237,7 @@ def main(argv: list[str] | None = None) -> int:
         "voxel_size": args.voxel_size,
         "temporal_min_hits": args.temporal_min_hits,
         "sr_min_votes": args.sr_min_votes,
+        "fusion_workers": args.fusion_workers,
     }
 
     all_results: dict[str, dict[str, dict[str, float]]] = {}

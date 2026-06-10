@@ -41,6 +41,27 @@ These two hero images are **not single scans**. They show a **20-frame accumulat
 - **Minimal dependencies**: `numpy` only. `pyarrow` is only needed for Argoverse 2 Feather input
 - **Public proof artifacts**: checked-in single-scan, local sequence proof, and AV2 public sequence demos
 
+### Which algorithm?
+
+Every branch below is backed by a measurement in this README (AV2 64-beam, nuScenes 32-beam, Semantic-KITTI):
+
+```mermaid
+flowchart TD
+    Q1{"Do you have 3D boxes<br/>(detector or annotations)?"}
+    Q2{"Filtering live, per scan<br/>(e.g. ROS2 in a SLAM pipeline)?"}
+    Q3{"Sensor density?"}
+    BOX["<b>box</b><br/>geometric crop per scan"]
+    RT["<b>temporal</b> (fastest, simplest)<br/>or <b>range</b>"]
+    FUSION["<b>fusion</b> — highest accuracy<br/>(Semantic-KITTI AA 98.6 / 98.0)"]
+    SPARSE["<b>range</b> sized to beam density,<br/>optionally ∧ <b>scan_ratio</b> mask"]
+    Q1 -- "yes" --> BOX
+    Q1 -- "no" --> Q2
+    Q2 -- "yes" --> RT
+    Q2 -- "no — offline map cleaning" --> Q3
+    Q3 -- "dense (64-beam+)" --> FUSION
+    Q3 -- "sparse (≤ 32-beam)" --> SPARSE
+```
+
 What the sequence demos are meant to show:
 
 - Raw accumulation creates ghost contamination
@@ -398,6 +419,23 @@ kept, keep_mask = clean_map_by_fusion(map_points, scans, workers=6)
 
 Three independent dynamic-evidence channels, OR-fused (a point is removed if any
 channel flags it):
+
+```mermaid
+flowchart LR
+    MAP["accumulated map<br/>+ per-scan (points, sensor origin)"]
+    FS["<b>free-space carving</b><br/>ray-sampled, per-scan hit precedence<br/>dynamic when ≥ 90% of observers freed it"]
+    EV["<b>eroded voids</b> (DUFOMap-style)<br/>hit inflation + 26-neighborhood erosion<br/>dynamic after ≥ 11 confirmed voids"]
+    SR["<b>scan-ratio votes</b><br/>polar-column occupancy, fraction 0.7"]
+    OR(("OR"))
+    OUT["dynamic mask removed →<br/>cleaned static map"]
+    MAP --> FS
+    MAP --> EV
+    MAP --> SR
+    FS --> OR
+    EV --> OR
+    SR --> OR
+    OR --> OUT
+```
 
 1. **Free-space carving** — rays are sampled toward each scan point and stop short of
    the hit; voxels a scan traverses without hitting are *freed* for that scan

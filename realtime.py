@@ -9,9 +9,10 @@ import json
 import math
 import sys
 import time
-from collections import deque
+from collections import OrderedDict, deque
 from dataclasses import dataclass
 from pathlib import Path
+from threading import Condition, Lock
 from typing import Any, Mapping, Sequence
 
 import numpy as np
@@ -144,6 +145,18 @@ def _extract_msg_stamp(msg: Any) -> float | None:
         if ts is not None:
             return ts
     return _stamp_to_sec(_first_value(msg, "stamp", "time", "timestamp"))
+
+
+def _stamp_key(msg: Any) -> int | None:
+    """Return an exact integer nanosecond key for a stamped ROS message."""
+    header = _first_value(msg, "header")
+    stamp = _first_value(header, "stamp")
+    if stamp is None or not hasattr(stamp, "sec") or not hasattr(stamp, "nanosec"):
+        return None
+    try:
+        return int(stamp.sec) * 1_000_000_000 + int(stamp.nanosec)
+    except Exception:
+        return None
 
 
 def _extract_box_entry_center(entry: Any) -> np.ndarray | None:
@@ -348,18 +361,128 @@ def _load_ros_message_class(spec: str) -> Any:
 
 def _ros_imports() -> dict[str, Any]:
     import rclpy
+    from rclpy.executors import MultiThreadedExecutor
+    from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
     from rclpy.node import Node
 
     from std_msgs.msg import String
     from sensor_msgs.msg import PointCloud2, PointField
+    from nav_msgs.msg import Odometry
 
     return {
         "rclpy": rclpy,
+        "MultiThreadedExecutor": MultiThreadedExecutor,
+        "MutuallyExclusiveCallbackGroup": MutuallyExclusiveCallbackGroup,
         "Node": Node,
         "String": String,
         "PointCloud2": PointCloud2,
         "PointField": PointField,
+        "Odometry": Odometry,
     }
+
+
+def _tf_imports() -> dict[str, Any]:
+    """Import ROS2 TF types only when fixed-frame filtering is requested."""
+    from rclpy.duration import Duration
+    from rclpy.time import Time
+    from tf2_ros import Buffer, TransformListener
+
+    return {
+        "Buffer": Buffer,
+        "TransformListener": TransformListener,
+        "Duration": Duration,
+        "Time": Time,
+    }
+
+
+@dataclass(frozen=True)
+class _RigidTransform:
+    """Rigid transform from a source frame into a fixed frame."""
+
+    rotation: np.ndarray
+    translation: np.ndarray
+
+    @classmethod
+    def identity(cls) -> "_RigidTransform":
+        return cls(np.eye(3, dtype=np.float64), np.zeros(3, dtype=np.float64))
+
+
+class _TransformUnavailable(RuntimeError):
+    pass
+
+
+class _TransformStale(_TransformUnavailable):
+    pass
+
+
+def _rotation_matrix_from_quaternion(value: Any) -> np.ndarray:
+    quat = _as_quat(value)
+    if quat is None:
+        raise ValueError("transform rotation must contain x,y,z,w")
+    x, y, z, w = quat
+    norm = math.sqrt(x * x + y * y + z * z + w * w)
+    if norm <= 1e-12:
+        raise ValueError("transform quaternion has zero norm")
+    x, y, z, w = x / norm, y / norm, z / norm, w / norm
+    return np.array(
+        [
+            [1.0 - 2.0 * (y * y + z * z), 2.0 * (x * y - z * w), 2.0 * (x * z + y * w)],
+            [2.0 * (x * y + z * w), 1.0 - 2.0 * (x * x + z * z), 2.0 * (y * z - x * w)],
+            [2.0 * (x * z - y * w), 2.0 * (y * z + x * w), 1.0 - 2.0 * (x * x + y * y)],
+        ],
+        dtype=np.float64,
+    )
+
+
+def _rigid_transform_from_message(msg: Any) -> _RigidTransform:
+    transform = _first_value(msg, "transform") or msg
+    translation = _as_vec3(_first_value(transform, "translation"))
+    if translation is None:
+        raise ValueError("transform must contain translation x,y,z")
+    rotation = _rotation_matrix_from_quaternion(_first_value(transform, "rotation"))
+    return _RigidTransform(rotation=rotation, translation=translation)
+
+
+def _transform_points(points: np.ndarray, transform: _RigidTransform) -> np.ndarray:
+    points = np.asarray(points, dtype=np.float64).reshape(-1, 3)
+    return points @ transform.rotation.T + transform.translation
+
+
+def _rigid_transform_from_odometry(
+    msg: Any, lidar_to_base: _RigidTransform
+) -> _RigidTransform:
+    """Compose fixed<-base odometry with a calibrated base<-lidar transform."""
+    pose_with_covariance = _first_value(msg, "pose")
+    pose = _first_value(pose_with_covariance, "pose") or pose_with_covariance
+    translation = _as_vec3(_first_value(pose, "position"))
+    if translation is None:
+        raise ValueError("odometry pose must contain position x,y,z")
+    fixed_to_base_rotation = _rotation_matrix_from_quaternion(
+        _first_value(pose, "orientation")
+    )
+    return _RigidTransform(
+        rotation=fixed_to_base_rotation @ lidar_to_base.rotation,
+        translation=(
+            fixed_to_base_rotation @ lidar_to_base.translation + translation
+        ),
+    )
+
+
+def _transform_is_stale(
+    requested_stamp: float | None,
+    transform_stamp: float | None,
+    max_age: float,
+) -> bool:
+    """Return whether a dynamic transform is too far from the requested stamp.
+
+    A zero transform stamp is accepted because tf2 uses it for static transforms.
+    Set ``max_age`` below zero to disable this additional guard.
+    """
+    if max_age < 0.0 or requested_stamp is None or transform_stamp is None:
+        return False
+    if transform_stamp <= 0.0:
+        return False
+    return abs(requested_stamp - transform_stamp) > max_age
 
 
 def _point_field_dtype_code(point_field_type: int, endian: str, point_field: Any) -> str:
@@ -484,6 +607,29 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Output sensor_msgs/PointCloud2 topic.",
     )
     parser.add_argument(
+        "--odometry-topic",
+        default="",
+        help="Optional odometry input to relay with the matching cleaned cloud.",
+    )
+    parser.add_argument(
+        "--output-odometry-topic",
+        default="",
+        help="Output for stamp-paired odometry; requires --odometry-topic.",
+    )
+    parser.add_argument(
+        "--baseline-output-topic",
+        default="",
+        help="Optional unfiltered cloud relay emitted for the same paired stamps.",
+    )
+    parser.add_argument(
+        "--lidar-to-base",
+        nargs=7,
+        type=float,
+        default=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
+        metavar=("X", "Y", "Z", "QX", "QY", "QZ", "QW"),
+        help="Calibrated base<-lidar transform used with paired odometry.",
+    )
+    parser.add_argument(
         "--algorithm",
         choices=["box", "temporal", "range"],
         default="box",
@@ -513,7 +659,33 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--range-margin", type=float, default=core.DEFAULT_RANGE_MARGIN, help="Range filter free-space margin (meters).")
     parser.add_argument("--range-h-res", type=float, default=core.DEFAULT_RANGE_H_RES_DEG, help="Range filter azimuth resolution (degrees).")
     parser.add_argument("--range-v-res", type=float, default=core.DEFAULT_RANGE_V_RES_DEG, help="Range filter elevation resolution (degrees).")
+    parser.add_argument(
+        "--fixed-frame",
+        default="",
+        help=(
+            "TF frame used to align temporal/range history (for example odom or map). "
+            "Required on a moving platform; omit only for a fixed sensor or already aligned input."
+        ),
+    )
+    parser.add_argument(
+        "--tf-timeout",
+        type=float,
+        default=0.05,
+        help="Maximum seconds to wait for the timestamped fixed-frame transform.",
+    )
+    parser.add_argument(
+        "--tf-stale-time",
+        type=float,
+        default=0.25,
+        help="Reject transforms farther than this many seconds from the cloud stamp; negative disables the guard.",
+    )
     parser.add_argument("--queue-size", type=int, default=20, help="ROS subscription queue size.")
+    parser.add_argument(
+        "--expected-rate-hz",
+        type=float,
+        default=0.0,
+        help="Expected cloud rate used to infer timestamp-gap drops; zero disables.",
+    )
     parser.add_argument("--stats-period", type=int, default=100, help="Log summary every N frames.")
     parser.add_argument("--quiet", action="store_true", help="Reduce logs.")
     parser.add_argument("--summary-json", help="Save runtime summary JSON at shutdown.")
@@ -531,10 +703,23 @@ class _RealtimeStats:
     frames_with_boxes: int = 0
     frames_without_boxes: int = 0
     stale_box_frames: int = 0
+    tf_frames_aligned: int = 0
+    tf_lookup_failures: int = 0
+    tf_stale_frames: int = 0
+    fail_open_frames: int = 0
+    inferred_dropped_frames: int = 0
+    paired_odometry_published: int = 0
+    paired_odometry_cache_drops: int = 0
     callback_ms: deque[float] | None = None
+    decode_ms: deque[float] | None = None
+    filter_ms: deque[float] | None = None
+    publish_ms: deque[float] | None = None
 
     def __post_init__(self) -> None:
         self.callback_ms = deque(maxlen=4096)
+        self.decode_ms = deque(maxlen=4096)
+        self.filter_ms = deque(maxlen=4096)
+        self.publish_ms = deque(maxlen=4096)
 
     def update(
         self,
@@ -544,6 +729,13 @@ class _RealtimeStats:
         *,
         used_boxes: bool,
         no_boxes: bool,
+        tf_aligned: bool = False,
+        tf_failed: bool = False,
+        tf_stale: bool = False,
+        fail_open: bool = False,
+        decode_ms: float = 0.0,
+        filter_ms: float = 0.0,
+        publish_ms: float = 0.0,
     ) -> None:
         self.frames += 1
         self.input_points += in_count
@@ -554,8 +746,22 @@ class _RealtimeStats:
         if no_boxes:
             self.frames_without_boxes += 1
             self.stale_box_frames += 1
+        if tf_aligned:
+            self.tf_frames_aligned += 1
+        if tf_failed:
+            self.tf_lookup_failures += 1
+        if tf_stale:
+            self.tf_stale_frames += 1
+        if fail_open:
+            self.fail_open_frames += 1
         if self.callback_ms is not None:
             self.callback_ms.append(duration_ms)
+        if self.decode_ms is not None:
+            self.decode_ms.append(decode_ms)
+        if self.filter_ms is not None:
+            self.filter_ms.append(filter_ms)
+        if self.publish_ms is not None:
+            self.publish_ms.append(publish_ms)
 
     def summary(self) -> dict[str, Any]:
         times = _summarize_times(self.callback_ms or [])
@@ -569,6 +775,16 @@ class _RealtimeStats:
             "frames_with_boxes": self.frames_with_boxes,
             "frames_without_boxes": self.frames_without_boxes,
             "stale_box_frames": self.stale_box_frames,
+            "tf_frames_aligned": self.tf_frames_aligned,
+            "tf_lookup_failures": self.tf_lookup_failures,
+            "tf_stale_frames": self.tf_stale_frames,
+            "fail_open_frames": self.fail_open_frames,
+            "inferred_dropped_frames": self.inferred_dropped_frames,
+            "paired_odometry_published": self.paired_odometry_published,
+            "paired_odometry_cache_drops": self.paired_odometry_cache_drops,
+            "decode_latency": _summarize_times(self.decode_ms or []),
+            "filter_latency": _summarize_times(self.filter_ms or []),
+            "publish_latency": _summarize_times(self.publish_ms or []),
             **times,
         }
 
@@ -584,14 +800,38 @@ class DynamicObjectRemovalNode:
     def __init__(self, **kwargs: Any) -> None:
         imports = _ros_imports()
         self._rclpy = imports["rclpy"]
+        self._executor_class = imports["MultiThreadedExecutor"]
+        self._callback_group_class = imports["MutuallyExclusiveCallbackGroup"]
         Node = imports["Node"]
         self._PointCloud2 = imports["PointCloud2"]
+        self._Odometry = imports["Odometry"]
         PointField = imports["PointField"]
         self._String = imports["String"]
 
         self._pointcloud_topic = str(kwargs["pointcloud_topic"])
         self._objects_topic = str(kwargs["objects_topic"])
         self._output_topic = str(kwargs["output_topic"])
+        self._odometry_topic = str(kwargs.get("odometry_topic", "")).strip()
+        self._output_odometry_topic = str(kwargs.get("output_odometry_topic", "")).strip()
+        self._baseline_output_topic = str(kwargs.get("baseline_output_topic", "")).strip()
+        if bool(self._odometry_topic) != bool(self._output_odometry_topic):
+            raise ValueError(
+                "--odometry-topic and --output-odometry-topic must be provided together"
+            )
+        lidar_to_base = [float(value) for value in kwargs.get("lidar_to_base", [0, 0, 0, 0, 0, 0, 1])]
+        if len(lidar_to_base) != 7:
+            raise ValueError("lidar_to_base must contain x,y,z,qx,qy,qz,qw")
+        self._lidar_to_base = _RigidTransform(
+            rotation=_rotation_matrix_from_quaternion(
+                {
+                    "x": lidar_to_base[3],
+                    "y": lidar_to_base[4],
+                    "z": lidar_to_base[5],
+                    "w": lidar_to_base[6],
+                }
+            ),
+            translation=np.asarray(lidar_to_base[:3], dtype=np.float64),
+        )
         self._algorithm = str(kwargs["algorithm"])
         self._box_margin = [float(v) for v in kwargs["box_margin"]]
         self._min_size = float(kwargs["min_size"])
@@ -601,12 +841,22 @@ class DynamicObjectRemovalNode:
         self._quiet = bool(kwargs["quiet"])
         self._summary_json = kwargs.get("summary_json")
         self._queue_size = int(kwargs["queue_size"])
+        self._expected_rate_hz = max(0.0, float(kwargs.get("expected_rate_hz", 0.0)))
+        self._last_cloud_stamp: float | None = None
         self._max_object_history = max(1, int(kwargs["max_object_history"]))
         self._objects_msg_type = str(kwargs["objects_msg_type"])
         self._pointfield = PointField
+        self._fixed_frame = str(kwargs.get("fixed_frame", "")).strip()
+        self._tf_timeout = max(0.0, float(kwargs.get("tf_timeout", 0.05)))
+        self._tf_stale_time = float(kwargs.get("tf_stale_time", 0.25))
 
         self._timed_boxes: deque[_TimedBoxes] = deque(maxlen=self._max_object_history)
         self._stats = _RealtimeStats()
+        self._pair_lock = Lock()
+        self._pair_condition = Condition(self._pair_lock)
+        self._pair_cache_size = max(64, self._queue_size * 2)
+        self._odometry_by_stamp: OrderedDict[int, Any] = OrderedDict()
+        self._cloud_by_stamp: OrderedDict[int, Any] = OrderedDict()
 
         self._temporal_filter = None
         if self._algorithm == "temporal":
@@ -631,6 +881,21 @@ class DynamicObjectRemovalNode:
             raise RuntimeError(f"failed to load objects message type '{self._objects_msg_type}': {exc}") from exc
 
         self._node = Node("dynamic_object_removal_realtime")
+        self._tf_buffer = None
+        self._tf_listener = None
+        self._tf_duration_class = None
+        self._tf_time_class = None
+        if self._algorithm in {"temporal", "range"} and self._fixed_frame:
+            try:
+                tf_imports = _tf_imports()
+            except Exception as exc:
+                raise RuntimeError(
+                    "--fixed-frame requires ROS2 tf2_ros (install your ROS distro's tf2_ros package)"
+                ) from exc
+            self._tf_duration_class = tf_imports["Duration"]
+            self._tf_time_class = tf_imports["Time"]
+            self._tf_buffer = tf_imports["Buffer"]()
+            self._tf_listener = tf_imports["TransformListener"](self._tf_buffer, self._node)
         self._sub_pc = self._node.create_subscription(
             self._PointCloud2, self._pointcloud_topic, self._on_pointcloud, self._queue_size
         )
@@ -643,16 +908,135 @@ class DynamicObjectRemovalNode:
                 self._queue_size,
             )
         self._pub_pc = self._node.create_publisher(self._PointCloud2, self._output_topic, self._queue_size)
+        self._sub_odometry = None
+        self._pub_odometry = None
+        self._pub_baseline = None
+        if self._odometry_topic:
+            self._odometry_callback_group = self._callback_group_class()
+            self._sub_odometry = self._node.create_subscription(
+                self._Odometry,
+                self._odometry_topic,
+                self._on_odometry,
+                self._queue_size,
+                callback_group=self._odometry_callback_group,
+            )
+            self._pub_odometry = self._node.create_publisher(
+                self._Odometry, self._output_odometry_topic, self._queue_size
+            )
+            if self._baseline_output_topic:
+                self._pub_baseline = self._node.create_publisher(
+                    self._PointCloud2, self._baseline_output_topic, self._queue_size
+                )
 
         self._node.get_logger().info(
             f"dynamic-object-removal-realtime started: algorithm={self._algorithm}, "
             f"pointcloud={self._pointcloud_topic}, output={self._output_topic}"
         )
+        if self._odometry_topic:
+            self._node.get_logger().info(
+                f"stamp-paired odometry relay: {self._odometry_topic} -> "
+                f"{self._output_odometry_topic}"
+            )
+            if self._baseline_output_topic:
+                self._node.get_logger().info(
+                    f"same-stamp unfiltered relay: {self._baseline_output_topic}"
+                )
         if self._algorithm == "box":
             self._node.get_logger().info(
                 f"boxes from {self._objects_topic} type={self._objects_msg_type} stale={self._box_stale_time}s "
                 f"history={self._max_object_history}"
             )
+        elif self._fixed_frame:
+            self._node.get_logger().info(
+                f"pose-aware history enabled: fixed_frame={self._fixed_frame}, "
+                f"tf_timeout={self._tf_timeout}s, tf_stale_time={self._tf_stale_time}s"
+            )
+        else:
+            self._node.get_logger().warn(
+                "detector-free history is not pose-aligned; use --fixed-frame on a moving platform"
+            )
+
+    def _fixed_transform(self, msg: Any) -> _RigidTransform:
+        if not self._fixed_frame:
+            return _RigidTransform.identity()
+
+        header = _first_value(msg, "header")
+        source_frame = str(_first_value(header, "frame_id") or "").strip()
+        stamp = _first_value(header, "stamp")
+        requested_stamp = _stamp_to_sec(stamp)
+        if not source_frame:
+            raise _TransformUnavailable("PointCloud2 header.frame_id is empty")
+        if stamp is None or requested_stamp is None:
+            raise _TransformUnavailable("PointCloud2 header.stamp is missing or invalid")
+        if source_frame == self._fixed_frame:
+            return _RigidTransform.identity()
+        odometry_transform = self._matching_odometry_transform(msg)
+        if odometry_transform is not None:
+            return odometry_transform
+        if self._tf_buffer is None or self._tf_duration_class is None or self._tf_time_class is None:
+            raise _TransformUnavailable("TF buffer is not initialized")
+
+        try:
+            query_time = self._tf_time_class.from_msg(stamp)
+            timeout = self._tf_duration_class(seconds=self._tf_timeout)
+            tf_msg = self._tf_buffer.lookup_transform(
+                self._fixed_frame,
+                source_frame,
+                query_time,
+                timeout=timeout,
+            )
+        except Exception as exc:
+            raise _TransformUnavailable(
+                f"no transform {self._fixed_frame} <- {source_frame} at cloud timestamp: {exc}"
+            ) from exc
+
+        transform_stamp = _extract_msg_stamp(tf_msg)
+        if _transform_is_stale(requested_stamp, transform_stamp, self._tf_stale_time):
+            assert transform_stamp is not None
+            raise _TransformStale(
+                f"transform age {abs(requested_stamp - transform_stamp):.3f}s exceeds "
+                f"{self._tf_stale_time:.3f}s"
+            )
+        try:
+            return _rigid_transform_from_message(tf_msg)
+        except Exception as exc:
+            raise _TransformUnavailable(f"invalid TF transform: {exc}") from exc
+
+    def _matching_odometry_transform(self, cloud: Any) -> _RigidTransform | None:
+        if not getattr(self, "_odometry_topic", ""):
+            return None
+        key = _stamp_key(cloud)
+        if key is None:
+            return None
+        deadline = _now_sec() + self._tf_timeout
+        with self._pair_condition:
+            while key not in self._odometry_by_stamp:
+                remaining = deadline - _now_sec()
+                if remaining <= 0.0:
+                    return None
+                self._pair_condition.wait(timeout=remaining)
+            odometry = self._odometry_by_stamp[key]
+        header = _first_value(odometry, "header")
+        odometry_frame = str(_first_value(header, "frame_id") or "").strip()
+        if odometry_frame and odometry_frame != self._fixed_frame:
+            return None
+        try:
+            return _rigid_transform_from_odometry(odometry, self._lidar_to_base)
+        except Exception as exc:
+            self._node.get_logger().warn(f"invalid paired odometry pose: {exc}")
+            return None
+
+    def _filter_detector_free(self, points: np.ndarray, msg: Any) -> tuple[np.ndarray, bool]:
+        transform = self._fixed_transform(msg)
+        fixed_points = _transform_points(points, transform)
+        if self._algorithm == "range":
+            assert self._range_filter is not None
+            _, keep_mask = self._range_filter.filter(fixed_points, transform.translation)
+        else:
+            assert self._temporal_filter is not None
+            _, keep_mask = self._temporal_filter.filter(fixed_points)
+        # Preserve the exact incoming coordinates and header in the published cloud.
+        return points[keep_mask], bool(self._fixed_frame)
 
     def _select_boxes(self, point_stamp: float | None) -> tuple[list[core.DetectionBox], bool, bool]:
         if not self._timed_boxes:
@@ -738,12 +1122,33 @@ class DynamicObjectRemovalNode:
     def _on_pointcloud(self, msg: Any) -> None:
         start = _now_sec()
         try:
+            cloud_stamp = _extract_msg_stamp(msg)
+            if (
+                self._expected_rate_hz > 0.0
+                and cloud_stamp is not None
+                and self._last_cloud_stamp is not None
+            ):
+                delta = cloud_stamp - self._last_cloud_stamp
+                period = 1.0 / self._expected_rate_hz
+                if delta > 1.5 * period:
+                    self._stats.inferred_dropped_frames += max(
+                        1, int(round(delta / period)) - 1
+                    )
+            if cloud_stamp is not None and (
+                self._last_cloud_stamp is None or cloud_stamp > self._last_cloud_stamp
+            ):
+                self._last_cloud_stamp = cloud_stamp
             points = _point_cloud2_to_xyz(msg, self._PointCloud2, self._pointfield)
+            decoded_at = _now_sec()
             filtered = points
+            used_boxes = False
+            stale = False
+            tf_aligned = False
+            tf_failed = False
+            tf_stale = False
+            fail_open = False
             if points.size == 0:
                 filtered = points
-                used_boxes = False
-                stale = False
 
             elif self._algorithm == "box":
                 point_stamp = _extract_msg_stamp(msg)
@@ -758,33 +1163,48 @@ class DynamicObjectRemovalNode:
                     filtered = points
                     used_boxes = False
 
-            elif self._algorithm == "range":
-                assert self._range_filter is not None
-                # LiDAR frame: sensor at the origin of each incoming scan.
-                filtered = self._range_filter.filter(points, (0.0, 0.0, 0.0))[0]
-                used_boxes = False
-                stale = False
-
             else:
-                assert self._temporal_filter is not None
-                filtered = self._temporal_filter.filter(points)[0]
-                used_boxes = False
-                stale = False
+                try:
+                    filtered, tf_aligned = self._filter_detector_free(points, msg)
+                except _TransformUnavailable as exc:
+                    # Do not contaminate filter history with an unaligned scan. Publishing
+                    # the original cloud is safer than silently deleting static structure.
+                    filtered = points
+                    tf_failed = True
+                    tf_stale = isinstance(exc, _TransformStale)
+                    fail_open = True
+                    next_failure = self._stats.fail_open_frames + 1
+                    if next_failure == 1 or (
+                        not self._quiet and next_failure % self._stats_period == 0
+                    ):
+                        self._node.get_logger().warn(
+                            f"TF fail-open frame {next_failure}: {exc}"
+                        )
 
+            filtered_at = _now_sec()
             self._publish(msg, filtered)
+            published_at = _now_sec()
 
-            duration_ms = (_now_sec() - start) * 1000.0
+            duration_ms = (published_at - start) * 1000.0
             self._stats.update(
                 len(points),
                 len(filtered),
                 duration_ms,
                 used_boxes=used_boxes and not stale,
-                no_boxes=stale or not used_boxes,
+                no_boxes=self._algorithm == "box" and (stale or not used_boxes),
+                tf_aligned=tf_aligned,
+                tf_failed=tf_failed,
+                tf_stale=tf_stale,
+                fail_open=fail_open,
+                decode_ms=(decoded_at - start) * 1000.0,
+                filter_ms=(filtered_at - decoded_at) * 1000.0,
+                publish_ms=(published_at - filtered_at) * 1000.0,
             )
             if not self._quiet and self._stats.frames % self._stats_period == 0:
                 summary = self._stats.summary()
                 self._node.get_logger().info(
-                    "frames={} in={} out={} removed={:.2f}% p95={}ms boxes_with_msg={} stale_frames={}".format(
+                    "frames={} in={} out={} removed={:.2f}% p95={}ms boxes_with_msg={} "
+                    "stale_frames={} tf_aligned={} tf_failures={} fail_open={}".format(
                         summary["frames"],
                         summary["input_points"],
                         summary["output_points"],
@@ -792,6 +1212,9 @@ class DynamicObjectRemovalNode:
                         _percentile(self._stats.callback_ms or [], 95) if self._stats.callback_ms else 0.0,
                         summary["frames_with_boxes"],
                         summary["stale_box_frames"],
+                        summary["tf_frames_aligned"],
+                        summary["tf_lookup_failures"],
+                        summary["fail_open_frames"],
                     )
                 )
         except Exception as exc:
@@ -799,7 +1222,53 @@ class DynamicObjectRemovalNode:
 
     def _publish(self, template: Any, points: np.ndarray) -> None:
         out_msg = _xyz_to_point_cloud2(points, template, self._PointCloud2, self._pointfield)
-        self._pub_pc.publish(out_msg)
+        if self._pub_odometry is None:
+            self._pub_pc.publish(out_msg)
+            return
+        bundle = (out_msg, template if self._pub_baseline is not None else None)
+        key = _stamp_key(out_msg)
+        if key is None:
+            self._node.get_logger().warn("cleaned cloud has no exact stamp; publishing without paired odometry")
+            self._pub_pc.publish(out_msg)
+            return
+        odometry = None
+        with self._pair_lock:
+            odometry = self._odometry_by_stamp.pop(key, None)
+            if odometry is None:
+                self._cloud_by_stamp[key] = bundle
+                self._trim_pair_cache(self._cloud_by_stamp)
+        if odometry is not None:
+            self._publish_pair(bundle, odometry)
+
+    def _on_odometry(self, msg: Any) -> None:
+        key = _stamp_key(msg)
+        if key is None:
+            self._node.get_logger().warn("odometry has no exact stamp; cannot pair it")
+            return
+        cloud = None
+        with self._pair_lock:
+            cloud = self._cloud_by_stamp.pop(key, None)
+            if cloud is None:
+                self._odometry_by_stamp[key] = msg
+                self._trim_pair_cache(self._odometry_by_stamp)
+                self._pair_condition.notify_all()
+        if cloud is not None:
+            self._publish_pair(cloud, msg)
+
+    def _trim_pair_cache(self, cache: OrderedDict[int, Any]) -> None:
+        while len(cache) > self._pair_cache_size:
+            cache.popitem(last=False)
+            self._stats.paired_odometry_cache_drops += 1
+
+    def _publish_pair(self, bundle: tuple[Any, Any | None], odometry: Any) -> None:
+        cloud, baseline_cloud = bundle
+        self._pub_pc.publish(cloud)
+        if baseline_cloud is not None:
+            assert self._pub_baseline is not None
+            self._pub_baseline.publish(baseline_cloud)
+        assert self._pub_odometry is not None
+        self._pub_odometry.publish(odometry)
+        self._stats.paired_odometry_published += 1
 
     def write_summary(self) -> None:
         if not self._summary_json:
@@ -814,19 +1283,35 @@ class DynamicObjectRemovalNode:
         self._node.destroy_node()
 
     def spin(self) -> None:
-        self._rclpy.spin(self._node)
+        # TF subscriptions use a reentrant callback group. Two executor threads let
+        # a timestamped TF arrive while the PointCloud2 callback is waiting for it.
+        executor = self._executor_class(num_threads=2)
+        executor.add_node(self._node)
+        try:
+            executor.spin()
+        finally:
+            executor.remove_node(self._node)
+            executor.shutdown()
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
 
+    rclpy = None
+    node = None
     try:
+        rclpy = _ros_imports()["rclpy"]
+        rclpy.init(args=None)
         node = DynamicObjectRemovalNode(
             pointcloud_topic=args.pointcloud_topic,
             objects_topic=args.objects_topic,
             objects_msg_type=args.objects_msg_type,
             output_topic=args.output_topic,
+            odometry_topic=args.odometry_topic,
+            output_odometry_topic=args.output_odometry_topic,
+            baseline_output_topic=args.baseline_output_topic,
+            lidar_to_base=args.lidar_to_base,
             algorithm=args.algorithm,
             box_margin=args.box_margin,
             min_size=args.min_size,
@@ -840,19 +1325,27 @@ def main(argv: Sequence[str] | None = None) -> int:
             range_margin=args.range_margin,
             range_h_res=args.range_h_res,
             range_v_res=args.range_v_res,
+            fixed_frame=args.fixed_frame,
+            tf_timeout=args.tf_timeout,
+            tf_stale_time=args.tf_stale_time,
             queue_size=args.queue_size,
+            expected_rate_hz=args.expected_rate_hz,
             stats_period=args.stats_period,
             quiet=args.quiet,
             summary_json=args.summary_json,
         )
-        try:
-            node.spin()
-            return 0
-        finally:
-            node.destroy()
+        node.spin()
+        return 0
+    except KeyboardInterrupt:
+        return 0
     except Exception as exc:
         _eprint(f"failed to start realtime node: {exc}")
         return 1
+    finally:
+        if node is not None:
+            node.destroy()
+        if rclpy is not None and rclpy.ok():
+            rclpy.shutdown()
 
 
 if __name__ == "__main__":

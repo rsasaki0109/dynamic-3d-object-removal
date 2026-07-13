@@ -12,13 +12,20 @@
 
   [![Browser playground demo](demo/playground_demo.gif)](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/playground.html)
 
-- More demos: [AV2 sequence](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_sequence_av2.html) · [single scan](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_standalone.html) · [local sequence](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_sequence_standalone.html)
+- More demos: [AV2 box-driven sequence](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_sequence_av2.html) · [single scan](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_standalone.html) · [local temporal sequence](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_sequence_standalone.html)
 
-![Before/After](demo/av2_before_after.png)
+![AV2 detector-free map-cleaning proof with moving-track ground truth](demo/av2_gt_map_proof.png)
 
-![Ghost Trail Close-up](demo/av2_zoom.png)
+> Strict same-input proof: 12 pose-aligned AV2 sweeps, 1,235,563 points and 84,471
+> moving-track GT points. Detector-free `fusion` removes 66.3% of moving GT while
+> keeping 97.4% of static GT (precision 65.1%, F1 65.7%). Boxes define evaluation
+> GT only; inference does not use boxes. Full counts and configuration are checked in
+> at [`demo/av2_gt_map_proof.json`](demo/av2_gt_map_proof.json).
 
-> 20-frame accumulated Argoverse 2 map (not a single scan): 233k ghost points (11.9% of 2M) removed, static structure preserved.
+The interactive 20-frame AV2 sequence is a separate **box-driven annotation crop**:
+its 233,460 removed points include all annotated objects in those frames, including
+parked objects, so that count is intentionally not reported as moving-object GT or a
+detector-free accuracy result.
 
 ### Features
 
@@ -55,7 +62,7 @@ flowchart TD
 |---|---|---|---|
 | Primary goal | Per-scan / realtime removal + map cleaning | Offline static-map cleaning | Offline static-map cleaning |
 | Needs a detector / 3D boxes | `box`: yes · others: no | No | No |
-| Needs poses | `box`/`temporal`: no · map cleaners: yes | Yes | Yes |
+| Needs poses | `box`: no · streaming `temporal`/`range`: TF on a moving platform · map cleaners: yes | Yes | Yes |
 | Online / realtime | **Yes** (ROS2 node) | No (batch) | No (batch) |
 | Core stack | `numpy` only | C++ / ROS / PCL | C++ / ROS / PCL |
 
@@ -74,7 +81,9 @@ Detector-free methods only, reproducible with one command, no signup. Ground tru
 
 ```bash
 pip install awscli pyarrow
-python3 scripts/run_av2_benchmark.py --frames 12
+python3 scripts/run_av2_benchmark.py --frames 12 --stride 3 --sr-min-votes 2 \
+  --summary-json demo/av2_gt_map_proof.json \
+  --proof-png demo/av2_gt_map_proof.png
 ```
 
 ### Also measured on nuScenes (32-beam, sparse)
@@ -177,13 +186,93 @@ dynamic-object-removal-realtime \
   --output-topic /cleaned_points \
   --algorithm box
 
-# Detector-free temporal consistency
+# Detector-free temporal consistency on a moving platform.
+# The cloud timestamp and frame_id are used to query TF: odom <- velodyne.
 dynamic-object-removal-realtime \
   --pointcloud-topic /velodyne_points \
   --output-topic /cleaned_points \
   --algorithm temporal \
+  --fixed-frame odom \
   --voxel-size 0.10 --temporal-window 5 --temporal-min-hits 3
 ```
+
+`temporal` and streaming `range` compare the current scan with recent scans. On a
+moving platform, pass `--fixed-frame odom` (or `map`) so the node looks up the
+timestamped `fixed_frame <- PointCloud2.header.frame_id` transform and maintains its
+history in one coordinate frame. If TF is unavailable, invalid, or stale, the node
+fails open: it publishes that scan unchanged and does not add the unaligned scan to
+the filter history. TF alignment and fail-open counts are included in `--summary-json`.
+Pass `--expected-rate-hz 10` to also infer dropped frames from timestamp gaps; the
+summary separates decode, filter, publish, and total callback latency.
+
+Omit `--fixed-frame` only for a fixed sensor or when every incoming cloud is already
+expressed in one shared frame. The node applies one rigid transform at the cloud header
+timestamp; input clouds must already be deskewed when platform motion during a LiDAR
+sweep is significant. Published points retain the input coordinates and header.
+
+The ROS environment must provide `tf2_ros` when `--fixed-frame` is used (for example,
+`sudo apt install ros-$ROS_DISTRO-tf2-ros`).
+The node uses a two-thread executor, allowing a transform published just after a cloud
+at the same timestamp to satisfy the bounded lookup.
+
+### Online sequence benchmark
+
+`dynamic-object-removal-bench` is a single-cloud speed microbenchmark. To evaluate
+streaming behavior, replay a pose/GT sequence once in timestamp order:
+
+```bash
+# Reuse the public AV2 selection and its "tracks that actually moved" GT.
+python3 scripts/run_av2_benchmark.py \
+  --frames 12 --stride 3 \
+  --online-manifest data/av2_online.json --online-only
+
+python3 scripts/run_online_benchmark.py \
+  --manifest data/av2_online.json \
+  --algorithm range \
+  --range-window 3 --range-h-res 1.0 --range-v-res 1.0 \
+  --pose-noise-translation 0.02 0.05 0.10 \
+  --pose-noise-yaw 0.1 0.5 1.0 \
+  --summary-json data/av2_online_temporal.json
+```
+
+The JSON records point-wise precision/recall/F1/IoU, static preservation, warm-up and
+time-to-confirm, per-frame and p50/p95/max filter latency, deadline misses, fail-open
+frames, sensor profile, and pose-noise sweeps. This is an **online moving-object
+segmentation** result; do not compare it directly with the final-map SA/DA/AA numbers
+from the offline DynamicMap benchmark.
+
+### Keep the evaluation tasks separate
+
+The repository exercises three related tasks with different evidence. Their metrics
+are not interchangeable:
+
+| task | input/output | evidence in this repository |
+|---|---|---|
+| Online moving-object segmentation | Timestamped scans → per-scan moving/static mask | One-pass sequence F1/IoU, static preservation, confirmation delay, filter latency |
+| Online static mapping | Deskewed scans + live odometry → incrementally built map | Same-bag raw/cleaned ghost reduction, matched static retention, end-to-end callback latency |
+| Offline map cleaning | Finished pose-aligned scans/map → cleaned final map | AV2/nuScenes point metrics and DynamicMap SA/DA/AA |
+
+The experimental `lidarslam_ros2` wiring evaluates the second task: its frontend
+odometry is held fixed and DOR filters the deskewed cloud before the map backend. It
+does not establish an odometry improvement or an offline-cleaning result. See
+[`examples/lidarslam_ros2/README.md`](examples/lidarslam_ros2/README.md).
+
+The TIERS Indoor02 engineering run now builds both branches from one RKO-LIO frontend:
+377 exact-stamp paired frames, zero pose fail-open, identical pose graphs, 99.74%
+dense-structure proxy retention, and sparse baseline-only candidates. Because this bag
+has no dynamic point GT, that is an integration/map-structure result—not a ghost
+accuracy claim or the 10 Hz latency gate.
+
+![AV2 realtime range filter evaluated in the downstream SLAM map](demo/av2_downstream_gt_map_proof.png)
+
+The complementary AV2 downstream run uses the graph backend's deterministic bag
+runner: raw and cleaned branches each consume the same 11 exact-stamp cloud/odometry
+pairs and produce byte-identical raw/optimized trajectories and loop-edge artifacts.
+Against moving-track point GT, realtime `range` reduces moving-GT map points by 14.1%
+while retaining 96.2% of static-GT map points. Removed-point precision is only 21.8%,
+so this is integration evidence—not a replacement for the stronger offline `fusion`
+benchmark above. Labels are withheld from filtering and used only by the map evaluator.
+See the [full contract, counts, hashes, and commands](examples/lidarslam_ros2/README.md).
 
 ## Library API
 

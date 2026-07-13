@@ -31,6 +31,7 @@ import argparse
 import collections
 import json
 import math
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -106,6 +107,195 @@ def _load_poses(scene: str) -> dict[int, tuple[np.ndarray, np.ndarray]]:
     return out
 
 
+def _export_online_manifest(
+    output_path: Path,
+    *,
+    scene: str,
+    stride: int,
+    timestamps: list[int],
+    local_scans: list[np.ndarray],
+    gt_masks: list[np.ndarray],
+    poses: dict[int, tuple[np.ndarray, np.ndarray]],
+) -> None:
+    """Export the exact AV2 selection/GT as an online replay manifest."""
+    output_path = output_path.resolve()
+    assets = output_path.parent / f"{output_path.stem}_assets"
+    assets.mkdir(parents=True, exist_ok=True)
+    frames = []
+    for ts, points, gt_mask in zip(timestamps, local_scans, gt_masks):
+        cloud_path = assets / f"{ts}_cloud.npy"
+        labels_path = assets / f"{ts}_labels.npy"
+        np.save(cloud_path, np.asarray(points, dtype=np.float64))
+        np.save(labels_path, np.asarray(gt_mask, dtype=np.uint8))
+        rotation, translation = poses[ts]
+        frames.append(
+            {
+                "cloud": os.path.relpath(cloud_path, output_path.parent),
+                "point_labels": os.path.relpath(labels_path, output_path.parent),
+                "timestamp_ns": int(ts),
+                "timestamp_sec": ts * 1e-9,
+                "pose": {
+                    "rotation": np.asarray(rotation, dtype=np.float64).tolist(),
+                    "translation": np.asarray(translation, dtype=np.float64).tolist(),
+                },
+            }
+        )
+    payload = {
+        "dataset": "Argoverse 2 Sensor Dataset",
+        "scene": scene,
+        "sensor_profile": {
+            "name": "dual VLP-32C",
+            "beams": 64,
+            "rate_hz": 10.0 / max(1, stride),
+            "deskewed": True,
+            "source": "https://argoverse.github.io/user-guide/datasets/sensor.html",
+        },
+        "frames": frames,
+    }
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+
+def _sample_indices(mask: np.ndarray, max_points: int, rng: np.random.Generator) -> np.ndarray:
+    """Return deterministic indices for one proof layer without changing its population."""
+    indices = np.flatnonzero(np.asarray(mask, dtype=bool))
+    if max_points <= 0 or len(indices) <= max_points:
+        return indices
+    return np.sort(rng.choice(indices, size=max_points, replace=False))
+
+
+def _render_gt_proof(
+    output_path: Path,
+    *,
+    acc_map: np.ndarray,
+    gt_dynamic: np.ndarray,
+    keep_mask: np.ndarray,
+    metrics: dict[str, float],
+    scene: str,
+    frames: int,
+    moving_tracks: int,
+    moving_thresh: float,
+    max_points_per_layer: int,
+    seed: int,
+) -> None:
+    """Render a same-pose raw/cleaned proof with explicit moving-track GT and errors."""
+    try:
+        import matplotlib.pyplot as plt
+    except ImportError as exc:
+        raise SystemExit("--proof-png requires matplotlib") from exc
+
+    xyz = np.asarray(acc_map, dtype=np.float64)
+    gt = np.asarray(gt_dynamic, dtype=bool)
+    keep = np.asarray(keep_mask, dtype=bool)
+    if xyz.ndim != 2 or xyz.shape[1] < 3 or len(xyz) != len(gt) or len(gt) != len(keep):
+        raise ValueError("proof arrays must have matching point counts")
+
+    predicted_dynamic = ~keep
+    true_positive = predicted_dynamic & gt
+    false_positive = predicted_dynamic & ~gt
+    false_negative = keep & gt
+    kept_static = keep & ~gt
+    static = ~gt
+    rng = np.random.default_rng(seed)
+
+    layers = {
+        "raw_static": _sample_indices(static, max_points_per_layer, rng),
+        "raw_gt": _sample_indices(gt, max_points_per_layer, rng),
+        "kept_static": _sample_indices(kept_static, max_points_per_layer, rng),
+        "false_negative": _sample_indices(false_negative, max_points_per_layer, rng),
+        "true_positive": _sample_indices(true_positive, max_points_per_layer, rng),
+        "false_positive": _sample_indices(false_positive, max_points_per_layer, rng),
+    }
+
+    # One robust crop and identical axes prevent camera choice from exaggerating a branch.
+    xlo, xhi = np.percentile(xyz[:, 0], [0.5, 99.5])
+    ylo, yhi = np.percentile(xyz[:, 1], [0.5, 99.5])
+    # Put the trajectory's long map dimension on screen horizontally. This is a
+    # presentation rotation only; every panel still uses the identical city-frame crop.
+    if (yhi - ylo) > (xhi - xlo):
+        horizontal_dim, vertical_dim = 1, 0
+        hlo, hhi, vlo, vhi = ylo, yhi, xlo, xhi
+        horizontal_label, vertical_label = "city y [m]", "city x [m]"
+    else:
+        horizontal_dim, vertical_dim = 0, 1
+        hlo, hhi, vlo, vhi = xlo, xhi, ylo, yhi
+        horizontal_label, vertical_label = "city x [m]", "city y [m]"
+    xpad = max(1.0, 0.03 * (xhi - xlo))
+    ypad = max(1.0, 0.03 * (yhi - ylo))
+    hpad = ypad if horizontal_dim == 1 else xpad
+    vpad = xpad if vertical_dim == 0 else ypad
+
+    fig, axes = plt.subplots(1, 3, figsize=(16, 4.8))
+    fig.patch.set_facecolor("#f8fafc")
+    for ax in axes:
+        ax.set_facecolor("#ffffff")
+        ax.set_xlim(hlo - hpad, hhi + hpad)
+        ax.set_ylim(vlo - vpad, vhi + vpad)
+        ax.set_aspect("equal", adjustable="box")
+        ax.grid(color="#cbd5e1", linewidth=0.5, alpha=0.35)
+        ax.set_xlabel(horizontal_label)
+        ax.set_ylabel(vertical_label)
+
+    def scatter(ax: object, key: str, color: str, size: float, label: str, alpha: float = 0.8) -> None:
+        idx = layers[key]
+        if len(idx):
+            ax.scatter(xyz[idx, horizontal_dim], xyz[idx, vertical_dim], s=size, c=color, alpha=alpha,
+                       linewidths=0, rasterized=True, label=label)
+
+    scatter(axes[0], "raw_static", "#64748b", 0.7, "static GT", 0.42)
+    scatter(axes[0], "raw_gt", "#dc2626", 2.2, "moving-track GT", 0.9)
+    axes[0].set_title(
+        f"Raw pose-aligned accumulation\n{int(gt.sum()):,} moving-GT points remain",
+        fontsize=13,
+        fontweight="bold",
+    )
+    axes[0].legend(loc="upper right", markerscale=4, framealpha=0.92)
+
+    scatter(axes[1], "kept_static", "#2563eb", 0.7, "kept static", 0.48)
+    scatter(axes[1], "false_negative", "#f59e0b", 2.2, "remaining moving GT", 0.92)
+    axes[1].set_title(
+        "Detector-free fusion cleaned\n"
+        f"{100 * metrics['recall']:.1f}% moving GT removed · "
+        f"{100 * metrics['static_preservation']:.1f}% static kept",
+        fontsize=13,
+        fontweight="bold",
+    )
+    axes[1].legend(loc="upper right", markerscale=4, framealpha=0.92)
+
+    scatter(axes[2], "true_positive", "#dc2626", 2.0, "correctly removed (TP)", 0.88)
+    scatter(axes[2], "false_positive", "#7c3aed", 1.8, "static removed (FP)", 0.82)
+    axes[2].set_title(
+        "Removal audit against GT\n"
+        f"precision {100 * metrics['precision']:.1f}% · F1 {100 * metrics['f1']:.1f}%",
+        fontsize=13,
+        fontweight="bold",
+    )
+    axes[2].legend(loc="upper right", markerscale=4, framealpha=0.92)
+
+    fig.suptitle(
+        "Argoverse 2 strict map-cleaning proof — identical poses and frame set",
+        fontsize=18,
+        fontweight="bold",
+        color="#0f172a",
+        y=0.97,
+    )
+    fig.text(
+        0.5,
+        0.025,
+        f"scene {scene[:8]}… · {frames} sweeps · {moving_tracks} moving tracks · identical pose-aligned input\n"
+        f"GT = points inside tracks displaced > {moving_thresh:g} m · "
+        "method = numpy free-space fusion · no boxes/detector at inference",
+        ha="center",
+        va="bottom",
+        fontsize=9.5,
+        color="#475569",
+    )
+    fig.subplots_adjust(left=0.055, right=0.985, bottom=0.18, top=0.78, wspace=0.22)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(output_path, dpi=180, facecolor=fig.get_facecolor())
+    plt.close(fig)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Accuracy benchmark on real AV2 data.")
     parser.add_argument("--scene", default=DEFAULT_SCENE, help="AV2 val log id.")
@@ -141,7 +331,34 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--fusion-free-floor", type=int, default=3)
     parser.add_argument("--fusion-void-min-scans", type=int, default=4)
     parser.add_argument("--summary-json", default=None)
+    parser.add_argument(
+        "--proof-png",
+        type=Path,
+        default=None,
+        help="Write a same-pose raw/cleaned/GT audit image for the fusion result.",
+    )
+    parser.add_argument("--proof-max-points", type=int, default=180000,
+                        help="Maximum plotted points per proof layer (metrics always use all points).")
+    parser.add_argument("--proof-seed", type=int, default=7)
+    parser.add_argument("--sensor-aware-ablation", action="store_true",
+                        help="Report private O1 distance/beam-normalized visibility evidence.")
+    parser.add_argument("--sensor-h-spacing", type=float, default=0.2)
+    parser.add_argument("--sensor-v-spacing", type=float, default=0.625)
+    parser.add_argument("--sensor-support-size", type=float, default=0.5)
+    parser.add_argument(
+        "--online-manifest",
+        type=Path,
+        default=None,
+        help="Export this exact pose/GT selection for scripts/run_online_benchmark.py.",
+    )
+    parser.add_argument(
+        "--online-only",
+        action="store_true",
+        help="Stop after exporting --online-manifest instead of running offline map cleaners.",
+    )
     args = parser.parse_args(argv)
+    if args.online_only and args.online_manifest is None:
+        parser.error("--online-only requires --online-manifest")
 
     import pyarrow.feather as feather
 
@@ -154,6 +371,7 @@ def main(argv: list[str] | None = None) -> int:
 
     # Pose-aligned accumulated map (ground removed) + per-frame scans/origins/slices.
     chunks: list[np.ndarray] = []
+    local_chunks: list[np.ndarray] = []
     scans: list[tuple[np.ndarray, np.ndarray]] = []
     slices: list[tuple[int, int]] = []
     cursor = 0
@@ -162,6 +380,7 @@ def main(argv: list[str] | None = None) -> int:
         pts_ego = core.load_points(_scene_dir(args.scene) / "lidar" / f"{ts}.feather", fmt="feather")
         pts_ego = pts_ego[pts_ego[:, 2] > GROUND_Z]
         pts_city = pts_ego @ R.T + tvec
+        local_chunks.append(pts_ego)
         chunks.append(pts_city)
         scans.append((pts_city, tvec))
         slices.append((cursor, cursor + len(pts_city)))
@@ -204,6 +423,20 @@ def main(argv: list[str] | None = None) -> int:
     gt_mask = np.concatenate(gt_chunks)
     print(f"  map: {len(acc_map):,} pts | moving tracks: {len(moving)} | GT dynamic: {int(gt_mask.sum()):,} ({gt_mask.mean()*100:.2f}%)")
 
+    if args.online_manifest is not None:
+        _export_online_manifest(
+            args.online_manifest,
+            scene=args.scene,
+            stride=args.stride,
+            timestamps=selected,
+            local_scans=local_chunks,
+            gt_masks=gt_chunks,
+            poses=poses,
+        )
+        print(f"  online manifest: {args.online_manifest}")
+        if args.online_only:
+            return 0
+
     # --- range: multi-scan visibility cleaner ---
     _, keep_range = core.clean_map_by_visibility(
         acc_map, scans,
@@ -242,6 +475,55 @@ def main(argv: list[str] | None = None) -> int:
     )
     fusion_metrics = bench.compute_accuracy_metrics(~keep_fusion, gt_mask)
 
+    if args.proof_png is not None:
+        _render_gt_proof(
+            args.proof_png,
+            acc_map=acc_map,
+            gt_dynamic=gt_mask,
+            keep_mask=keep_fusion,
+            metrics=fusion_metrics,
+            scene=args.scene,
+            frames=len(selected),
+            moving_tracks=len(moving),
+            moving_thresh=args.moving_thresh,
+            max_points_per_layer=args.proof_max_points,
+            seed=args.proof_seed,
+        )
+        print(f"  GT proof image: {args.proof_png}")
+
+    sensor_aware = None
+    if args.sensor_aware_ablation:
+        evidence = core._sensor_aware_visibility_evidence(
+            acc_map,
+            scans,
+            h_res_deg=args.h_res,
+            v_res_deg=args.v_res,
+            range_margin=args.range_margin,
+            sensor_h_spacing_deg=args.sensor_h_spacing,
+            sensor_v_spacing_deg=args.sensor_v_spacing,
+            support_size_m=args.sensor_support_size,
+        )
+        normalized_range = core._sensor_aware_visibility_dynamic_mask(
+            evidence,
+            min_raw_see_through=args.min_see_through,
+            max_raw_surface_hits=args.max_surface_hits,
+            ground_mask=acc_map[:, 2] <= GROUND_Z,
+        )
+        normalized_metrics = bench.compute_accuracy_metrics(normalized_range, gt_mask)
+        sensor_aware = {
+            "status": "experimental_not_promoted",
+            "profile": {
+                "beams": 64,
+                "h_spacing_deg": args.sensor_h_spacing,
+                "v_spacing_deg": args.sensor_v_spacing,
+                "support_size_m": args.sensor_support_size,
+            },
+            "baseline_strategy": core._sensor_strategy(64, args.sensor_v_spacing),
+            "selected_metrics": fusion_metrics,
+            "normalized_visibility_candidate": normalized_metrics,
+            "evidence": core._sensor_aware_evidence_summary(evidence),
+        }
+
     def row(name: str, m: dict) -> str:
         return (f"| {name} | {m['precision']:.3f} | {m['recall']:.3f} | {m['f1']:.3f} | "
                 f"{m['static_preservation']:.3f} |")
@@ -268,6 +550,18 @@ def main(argv: list[str] | None = None) -> int:
                    "ground_z": GROUND_Z, "moving_thresh": args.moving_thresh},
         "range": range_metrics, "temporal": temporal_metrics, "scan_ratio": scanratio_metrics,
         "fusion": fusion_metrics,
+        "sensor_aware": sensor_aware,
+        "proof": ({
+            "task": "offline_map_cleaning",
+            "method": "fusion",
+            "same_pose_and_frame_set": True,
+            "ground_truth": f"points inside tracks displaced > {args.moving_thresh:g} m",
+            "inference_uses_boxes": False,
+            "image": str(args.proof_png),
+            "plot_sampling_only": True,
+            "max_points_per_layer": args.proof_max_points,
+            "seed": args.proof_seed,
+        } if args.proof_png is not None else None),
     }
     out_json = args.summary_json or str(_scene_dir(args.scene) / "benchmark_result.json")
     Path(out_json).write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")

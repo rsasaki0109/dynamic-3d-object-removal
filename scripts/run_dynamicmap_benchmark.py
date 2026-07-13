@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import sys
 import urllib.request
 import zipfile
@@ -28,10 +29,28 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import bench  # noqa: E402
 import dynamic_object_removal as core  # noqa: E402
+from scripts.run_height_candidate_ablation import height_persistence_candidate  # noqa: E402
 
 ZENODO_BASE = "https://zenodo.org/records/10886629/files"
 DEFAULT_SEQUENCES = ("00", "05")
 ROOT_DIR = Path(__file__).resolve().parents[1] / "data" / "dynamicmap"
+MIN_FREE_AFTER_EXTRACT = 256 * 1024 * 1024
+
+
+def _archive_uncompressed_bytes(path: Path) -> int:
+    with zipfile.ZipFile(path) as zf:
+        return sum(info.file_size for info in zf.infolist())
+
+
+def _require_extract_capacity(zip_path: Path, root: Path) -> None:
+    required = _archive_uncompressed_bytes(zip_path)
+    free = shutil.disk_usage(root).free
+    if required + MIN_FREE_AFTER_EXTRACT > free:
+        raise SystemExit(
+            f"Refusing to extract {zip_path.name}: {required / 2**30:.2f} GiB expanded "
+            f"with only {free / 2**30:.2f} GiB free; keep at least "
+            f"{MIN_FREE_AFTER_EXTRACT / 2**30:.2f} GiB free."
+        )
 
 
 def _download_sequence(seq: str, root: Path) -> Path:
@@ -54,6 +73,7 @@ def _download_sequence(seq: str, root: Path) -> Path:
         print(f"  saved {zip_path}")
 
     print(f"Extracting {zip_path.name} ...")
+    _require_extract_capacity(zip_path, root)
     with zipfile.ZipFile(zip_path) as zf:
         zf.extractall(root)
     if not (seq_dir / "gt_cloud.pcd").exists():
@@ -102,59 +122,110 @@ def _run_methods(
     temporal_min_hits: int,
     sr_min_votes: int,
     fusion_workers: int,
+    height_candidate_ablation: bool,
+    height_xy_cell: float,
+    height_coarse_z_bin: float,
+    height_fine_z_bin: float,
+    height_min_cell_height: float,
+    height_ground_margin: float,
+    height_min_visits: int,
+    height_max_persistence: float,
+    methods: list[str] | None,
 ) -> dict[str, np.ndarray]:
     ground_z = float(np.percentile(acc_map[:, 2], 2))
+    selected = set(methods or ("range", "scan_ratio", "fusion", "temporal"))
+    cleaned: dict[str, np.ndarray] = {}
 
-    print("  running range-image visibility ...", flush=True)
-    _, keep_range = core.clean_map_by_visibility(
-        acc_map,
-        scans,
-        h_res_deg=h_res,
-        v_res_deg=v_res,
-        range_margin=range_margin,
-        min_see_through=min_see_through,
-        max_surface_hits=max_surface_hits,
-        ground_z=ground_z,
-        resolutions=resolutions,
-    )
-    print(f"    kept {int(keep_range.sum()):,} / {len(acc_map):,}", flush=True)
+    if "range" in selected:
+        print("  running range-image visibility ...", flush=True)
+        _, keep_range = core.clean_map_by_visibility(
+            acc_map,
+            scans,
+            h_res_deg=h_res,
+            v_res_deg=v_res,
+            range_margin=range_margin,
+            min_see_through=min_see_through,
+            max_surface_hits=max_surface_hits,
+            ground_z=ground_z,
+            resolutions=resolutions,
+        )
+        print(f"    kept {int(keep_range.sum()):,} / {len(acc_map):,}", flush=True)
+        cleaned["range"] = acc_map[keep_range]
 
-    print("  running scan-ratio ...", flush=True)
-    _, keep_sr = core.clean_map_by_scan_ratio(
-        acc_map,
-        scans,
-        min_votes=sr_min_votes,
-    )
-    print(f"    kept {int(keep_sr.sum()):,} / {len(acc_map):,}", flush=True)
+    if "scan_ratio" in selected:
+        print("  running scan-ratio ...", flush=True)
+        _, keep_sr = core.clean_map_by_scan_ratio(
+            acc_map,
+            scans,
+            min_votes=sr_min_votes,
+        )
+        print(f"    kept {int(keep_sr.sum()):,} / {len(acc_map):,}", flush=True)
+        cleaned["scan_ratio"] = acc_map[keep_sr]
 
-    print("  running free-space fusion ...", flush=True)
-    _, keep_fusion = core.clean_map_by_fusion(
-        acc_map,
-        scans,
-        workers=fusion_workers,
-    )
-    print(f"    kept {int(keep_fusion.sum()):,} / {len(acc_map):,}", flush=True)
+    keep_fusion = None
+    if "fusion" in selected or height_candidate_ablation:
+        print("  running free-space fusion ...", flush=True)
+        _, keep_fusion = core.clean_map_by_fusion(
+            acc_map,
+            scans,
+            workers=fusion_workers,
+        )
+        print(f"    kept {int(keep_fusion.sum()):,} / {len(acc_map):,}", flush=True)
+        if "fusion" in selected:
+            cleaned["fusion"] = acc_map[keep_fusion]
 
-    print("  running temporal consistency ...", flush=True)
-    keep_temporal = np.ones(len(acc_map), dtype=bool)
-    tfilter = core.TemporalConsistencyFilter(
-        voxel_size=voxel_size,
-        window_size=len(scans),
-        min_hits=temporal_min_hits,
-    )
-    for s, e in slices:
-        tfilter.filter(acc_map[s:e])
-    for s, e in slices:
-        _, keep_f = tfilter.filter(acc_map[s:e])
-        keep_temporal[s:e] = keep_f
-    print(f"    kept {int(keep_temporal.sum()):,} / {len(acc_map):,}", flush=True)
-
-    return {
-        "range": acc_map[keep_range],
-        "scan_ratio": acc_map[keep_sr],
-        "fusion": acc_map[keep_fusion],
-        "temporal": acc_map[keep_temporal],
-    }
+    if "temporal" in selected:
+        print("  running temporal consistency ...", flush=True)
+        keep_temporal = np.ones(len(acc_map), dtype=bool)
+        tfilter = core.TemporalConsistencyFilter(
+            voxel_size=voxel_size,
+            window_size=len(scans),
+            min_hits=temporal_min_hits,
+        )
+        for s, e in slices:
+            tfilter.filter(acc_map[s:e])
+        for s, e in slices:
+            _, keep_f = tfilter.filter(acc_map[s:e])
+            keep_temporal[s:e] = keep_f
+        print(f"    kept {int(keep_temporal.sum()):,} / {len(acc_map):,}", flush=True)
+        cleaned["temporal"] = acc_map[keep_temporal]
+    if height_candidate_ablation:
+        assert keep_fusion is not None
+        print("  running private height-candidate ablation ...", flush=True)
+        scan_points = [points for points, _ in scans]
+        coarse, coarse_evidence = height_persistence_candidate(
+            acc_map,
+            scan_points,
+            xy_cell=height_xy_cell,
+            z_bin=height_coarse_z_bin,
+            min_cell_height=height_min_cell_height,
+            ground_margin=height_ground_margin,
+            min_visits=height_min_visits,
+            max_persistence=height_max_persistence,
+        )
+        fine, fine_evidence = height_persistence_candidate(
+            acc_map,
+            scan_points,
+            xy_cell=height_xy_cell,
+            z_bin=height_fine_z_bin,
+            min_cell_height=height_min_cell_height,
+            ground_margin=height_ground_margin,
+            min_visits=height_min_visits,
+            max_persistence=height_max_persistence,
+        )
+        candidate = (
+            coarse
+            & fine
+            & (coarse_evidence["persistence"] <= height_max_persistence)
+            & (fine_evidence["persistence"] <= height_max_persistence)
+        )
+        dynamic = ~keep_fusion & candidate
+        cleaned["fusion_height_candidate"] = acc_map[~dynamic]
+        print(
+            f"    proposed {int(candidate.sum()):,}; removed {int(dynamic.sum()):,} / {len(acc_map):,}",
+            flush=True,
+        )
+    return cleaned
 
 
 def _evaluate_sequence(
@@ -223,7 +294,25 @@ def main(argv: list[str] | None = None) -> int:
                         help="Fixed absolute vote threshold (default: normalized, majority of each point's column revisits).")
     parser.add_argument("--fusion-workers", type=int, default=6,
                         help="Process pool size for the free-space fusion channels.")
+    parser.add_argument(
+        "--methods",
+        nargs="+",
+        choices=("range", "scan_ratio", "fusion", "temporal"),
+        default=None,
+        help="Run only selected methods (default: all). Useful for a targeted gate rerun.",
+    )
     parser.add_argument("--summary-json", default=None)
+    parser.add_argument("--sensor-aware-ablation", action="store_true",
+                        help="Record the private O1 dense-sensor selector decision.")
+    parser.add_argument("--height-candidate-ablation", action="store_true",
+                        help="Evaluate the private O2 candidate intersected with fusion.")
+    parser.add_argument("--height-xy-cell", type=float, default=2.0)
+    parser.add_argument("--height-coarse-z-bin", type=float, default=0.5)
+    parser.add_argument("--height-fine-z-bin", type=float, default=0.25)
+    parser.add_argument("--height-min-cell-height", type=float, default=0.5)
+    parser.add_argument("--height-ground-margin", type=float, default=0.2)
+    parser.add_argument("--height-min-visits", type=int, default=3)
+    parser.add_argument("--height-max-persistence", type=float, default=1.0)
     args = parser.parse_args(argv)
 
     root = Path(args.data_root)
@@ -238,6 +327,15 @@ def main(argv: list[str] | None = None) -> int:
         "temporal_min_hits": args.temporal_min_hits,
         "sr_min_votes": args.sr_min_votes,
         "fusion_workers": args.fusion_workers,
+        "height_candidate_ablation": args.height_candidate_ablation,
+        "height_xy_cell": args.height_xy_cell,
+        "height_coarse_z_bin": args.height_coarse_z_bin,
+        "height_fine_z_bin": args.height_fine_z_bin,
+        "height_min_cell_height": args.height_min_cell_height,
+        "height_ground_margin": args.height_ground_margin,
+        "height_min_visits": args.height_min_visits,
+        "height_max_persistence": args.height_max_persistence,
+        "methods": args.methods,
     }
 
     all_results: dict[str, dict[str, dict[str, float]]] = {}
@@ -259,6 +357,12 @@ def main(argv: list[str] | None = None) -> int:
             **method_kw,
         },
         "results": all_results,
+        "sensor_aware": ({
+            "status": "experimental_not_promoted",
+            "profile": {"beams": 64, "v_spacing_deg": 0.4},
+            "baseline_strategy": core._sensor_strategy(64, 0.4),
+            "selected_method": "fusion",
+        } if args.sensor_aware_ablation else None),
     }
     out_json = args.summary_json or str(root / "benchmark_result.json")
     Path(out_json).write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")

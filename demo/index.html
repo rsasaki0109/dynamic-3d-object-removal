@@ -4,9 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dynamic Object Removal Demos</title>
-    <meta name="description" content="Start with the AV2 public sequence demo: pose-aligned raw vs cleaned accumulation, public data only, and clear proof of ghost contamination reduction." />
+    <meta name="description" content="AV2 same-pose detector-free map cleaning, audited against moving-track ground truth, plus public interactive demos." />
     <meta property="og:title" content="Dynamic Object Removal Demos" />
-    <meta property="og:description" content="Start with the AV2 public sequence demo: pose-aligned raw vs cleaned accumulation, public data only, and clear proof of ghost contamination reduction." />
+    <meta property="og:description" content="AV2 same-pose detector-free map cleaning, audited against moving-track ground truth, plus public interactive demos." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/" />
     <meta property="og:image" content="https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/social_card.png" />
@@ -14,7 +14,7 @@
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Dynamic Object Removal Demos" />
-    <meta name="twitter:description" content="Start with the AV2 public sequence demo: pose-aligned raw vs cleaned accumulation, public data only, and clear proof of ghost contamination reduction." />
+    <meta name="twitter:description" content="AV2 same-pose detector-free map cleaning, audited against moving-track ground truth, plus public interactive demos." />
     <meta name="twitter:image" content="https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/social_card.png" />
     <style>
       :root {
@@ -159,8 +159,8 @@
     <div class="wrap">
       <section class="hero">
         <div class="eyebrow">Demo Entry</div>
-        <h1>まずは AV2 public sequence demo を見る</h1>
-        <p class="lead">この repo の主張は、raw accumulation が ghost contamination を作り、cleaned accumulation がそれを減らし、静的構造は残ることです。単発スキャン除去もできますが、proof としてはいちばん強いので AV2 の公開 20-frame demo を最初の入口にしています。</p>
+        <h1>まずは AV2 moving-GT proof を見る</h1>
+        <p class="lead">同一pose・同一12 sweepsのraw/cleaned accumulationを、実際に2 m超移動したtrack内の84,471点で監査しました。detector-free fusionはmoving GTを66.3%除去し、static GTを97.4%保持します。</p>
       </section>
 
       <a class="card primary" href="playground.html" style="margin-top: 18px; display: block; border: 1.5px solid var(--accent);">
@@ -170,10 +170,20 @@
       </a>
 
       <section class="grid">
+        <a class="card primary" href="av2_gt_map_proof.png">
+          <span class="tag">Strict GT Proof</span>
+          <h2>Detector-free AV2 Map Audit</h2>
+          <p>1,235,563点を全点評価。raw、fusion-cleaned、TP/FPを同一city-frame cropで比較し、設定と全confusion countもJSONに保存しています。</p>
+          <div class="facts">
+            <div class="fact"><strong>66.3% moving GT removed</strong><span>precision 65.1% / F1 65.7%</span></div>
+            <div class="fact"><strong>97.4% static GT kept</strong><span>boxesは評価GTだけに使用</span></div>
+          </div>
+        </a>
+
         <a class="card primary" href="index_3d_sequence_av2.html">
-          <span class="tag">Start Here</span>
-          <h2>AV2 Public Sequence Demo</h2>
-          <p>公開データだけで再現できる proof。`annotations.feather` と `city_SE3_egovehicle.feather` を使って、pose-aligned な raw vs cleaned accumulation を比較します。</p>
+          <span class="tag">Interactive Box Preview</span>
+          <h2>AV2 Box-driven Sequence</h2>
+          <p>`annotations.feather`とposeを使う20-frame previewです。全注釈物体をcropするため、233,460 removedはmoving-GT値やdetector-free精度ではありません。</p>
           <div class="facts">
             <div class="fact">
               <strong>20-frame accumulated map</strong>

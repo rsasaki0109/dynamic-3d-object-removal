@@ -1,0 +1,73 @@
+{
+  "scene": "0b5142c1-420b-3fea-9e98-b87327ae22c6",
+  "frames": 12,
+  "stride": 3,
+  "map_points": 1235563,
+  "gt_dynamic_points": 84471,
+  "moving_tracks": 30,
+  "config": {
+    "h_res": 1.0,
+    "v_res": 1.0,
+    "range_margin": 0.5,
+    "min_see_through": 3,
+    "max_surface_hits": 3,
+    "ground_z": -1.4,
+    "moving_thresh": 2.0
+  },
+  "range": {
+    "precision": 0.6792393501534776,
+    "recall": 0.5370245409667223,
+    "f1": 0.5998175278997195,
+    "iou": 0.4283852568158424,
+    "static_preservation": 0.9813898454684769,
+    "true_positive": 45363,
+    "false_positive": 21422,
+    "false_negative": 39108,
+    "true_negative": 1129670
+  },
+  "temporal": {
+    "precision": 0.1909694322597992,
+    "recall": 0.7231002355838099,
+    "f1": 0.3021433624028611,
+    "iou": 0.177955756518091,
+    "static_preservation": 0.7751995496450327,
+    "true_positive": 61081,
+    "false_positive": 258766,
+    "false_negative": 23390,
+    "true_negative": 892326
+  },
+  "scan_ratio": {
+    "precision": 0.6630539091165679,
+    "recall": 0.5562145588426798,
+    "f1": 0.6049532932898134,
+    "iou": 0.43364375571081804,
+    "static_preservation": 0.9792579567923329,
+    "true_positive": 46984,
+    "false_positive": 23876,
+    "false_negative": 37487,
+    "true_negative": 1127216
+  },
+  "fusion": {
+    "precision": 0.6508454499001254,
+    "recall": 0.6634584650353376,
+    "f1": 0.6570914356397914,
+    "iou": 0.4893046727666411,
+    "static_preservation": 0.9738813231262141,
+    "true_positive": 56043,
+    "false_positive": 30065,
+    "false_negative": 28428,
+    "true_negative": 1121027
+  },
+  "sensor_aware": null,
+  "proof": {
+    "task": "offline_map_cleaning",
+    "method": "fusion",
+    "same_pose_and_frame_set": true,
+    "ground_truth": "points inside tracks displaced > 2 m",
+    "inference_uses_boxes": false,
+    "image": "demo/av2_gt_map_proof.png",
+    "plot_sampling_only": true,
+    "max_points_per_layer": 180000,
+    "seed": 7
+  }
+}

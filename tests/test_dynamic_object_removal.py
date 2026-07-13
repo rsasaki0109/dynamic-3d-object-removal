@@ -25,6 +25,7 @@ from dynamic_object_removal import (
     _parse_kitti_calib,
 )
 import bench
+import dynamic_object_removal as core
 
 
 # ---------------------------------------------------------------------------
@@ -503,6 +504,22 @@ class TestTemporalConsistencyFilter:
         result, _ = tcf.filter(pt_b)
         assert result.shape[0] == 0  # pt_b only has 1 hit
 
+    def test_large_coordinates_use_exact_voxel_keys(self):
+        """Coordinates outside the packed-key range remain collision-free."""
+        tcf = TemporalConsistencyFilter(voxel_size=0.1, window_size=2, min_hits=2)
+        points = np.array(
+            [[200_000.0, 0.0, 0.0], [-200_000.0, 0.0, 0.0]],
+            dtype=np.float64,
+        )
+
+        first, first_mask = tcf.filter(points)
+        second, second_mask = tcf.filter(points)
+
+        assert first.shape == (0, 3)
+        assert not np.any(first_mask)
+        np.testing.assert_array_equal(second, points)
+        assert np.all(second_mask)
+
 
 # ---------------------------------------------------------------------------
 # save_points (round-trip)
@@ -922,6 +939,43 @@ def test_accuracy_metrics():
     assert abs(m["precision"] - 2 / 3) < 1e-9
     assert abs(m["recall"] - 2 / 3) < 1e-9
     assert abs(m["iou"] - 0.5) < 1e-9
+
+
+def test_sensor_strategy_uses_explicit_density_metadata():
+    assert core._sensor_strategy(64, 0.4) == "fusion"
+    assert core._sensor_strategy(32, 1.3) == "range_and_scan_ratio"
+    assert core._sensor_strategy(None, 0.7) == "fusion"
+    assert core._sensor_strategy(None, None) == "unknown"
+
+
+def test_sensor_aware_visibility_downweights_sparse_long_range():
+    near = np.array([5.0, 0.0, 0.0])
+    angle = math.radians(20.0)
+    far = np.array([50.0 * math.cos(angle), 50.0 * math.sin(angle), 0.0])
+    map_points = np.vstack([near, far])
+    scans = []
+    for _ in range(3):
+        scans.append((np.vstack([[10.0, 0.0, 0.0],
+                                 [60.0 * math.cos(angle), 60.0 * math.sin(angle), 0.0]]),
+                      np.zeros(3)))
+
+    evidence = core._sensor_aware_visibility_evidence(
+        map_points,
+        scans,
+        h_res_deg=1.0,
+        v_res_deg=2.0,
+        range_margin=0.5,
+        sensor_h_spacing_deg=0.2,
+        sensor_v_spacing_deg=2.0,
+        support_size_m=0.5,
+    )
+
+    np.testing.assert_array_equal(evidence.raw_observations, [3, 3])
+    assert evidence.see_through_ratio[0] == pytest.approx(1.0)
+    assert evidence.see_through_ratio[1] == pytest.approx(1.0)
+    assert evidence.effective_observations[0] > evidence.effective_observations[1]
+    mask = core._sensor_aware_visibility_dynamic_mask(evidence)
+    assert mask[0] and not mask[1]
 
 
 def test_dynamic_gt_mask():

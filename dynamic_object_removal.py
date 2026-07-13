@@ -22,7 +22,6 @@ import math
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from collections import Counter
 from typing import Any, Sequence
 
 import numpy as np
@@ -389,7 +388,7 @@ def _load_boxes_from_av2_feather(
             qx = float(table["qx"][i].as_py())
             qy = float(table["qy"][i].as_py())
             qz = float(table["qz"][i].as_py())
-            yaw = math.atan2(2.0 * (qw * qz + qx * qy), 1.0 - 2.0 * (qy * qy + qz * qz))
+            yaw = _yaw_from_quaternion((qx, qy, qz, qw))
             label = table["category"][i].as_py() if "category" in table.column_names else None
             boxes.append(DetectionBox(
                 center=np.array([tx, ty, tz]),
@@ -595,6 +594,13 @@ def _pcd_structured_dtype(metadata: dict[str, Any]) -> np.dtype:
     return np.dtype(dtype_fields)
 
 
+def _viewpoint_or_none(metadata: dict[str, Any]) -> np.ndarray | None:
+    """VIEWPOINT as a pose array, or ``None`` when it is the PCD default (identity)."""
+    viewpoint = np.asarray(metadata["viewpoint"], dtype=np.float64)
+    default_view = np.array([0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0], dtype=np.float64)
+    return None if np.allclose(viewpoint, default_view) else viewpoint
+
+
 def _structured_pcd_to_scan(data: np.ndarray, metadata: dict[str, Any]) -> PcdScan:
     fields = metadata["fields"]
     if not all(k in fields for k in ("x", "y", "z")):
@@ -609,10 +615,7 @@ def _structured_pcd_to_scan(data: np.ndarray, metadata: dict[str, Any]) -> PcdSc
     intensity = None
     if "intensity" in fields:
         intensity = np.asarray(data["intensity"], dtype=np.float64)
-    viewpoint = np.asarray(metadata["viewpoint"], dtype=np.float64)
-    default_view = np.array([0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0], dtype=np.float64)
-    vp = viewpoint if not np.allclose(viewpoint, default_view) else None
-    return PcdScan(points=points, intensity=intensity, viewpoint=vp)
+    return PcdScan(points=points, intensity=intensity, viewpoint=_viewpoint_or_none(metadata))
 
 
 def load_pcd_scan(path: Path) -> PcdScan:
@@ -655,10 +658,7 @@ def load_pcd_scan(path: Path) -> PcdScan:
             raise ValueError("PCD point format is shorter than expected")
         xyz = table[:, [idx["x"], idx["y"], idx["z"]]]
         intensity = table[:, fields.index("intensity")] if "intensity" in fields else None
-        viewpoint = np.asarray(metadata["viewpoint"], dtype=np.float64)
-        default_view = np.array([0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0], dtype=np.float64)
-        vp = viewpoint if not np.allclose(viewpoint, default_view) else None
-        return PcdScan(points=xyz, intensity=intensity, viewpoint=vp)
+        return PcdScan(points=xyz, intensity=intensity, viewpoint=_viewpoint_or_none(metadata))
 
     if data_kind != "binary":
         raise ValueError(f"unsupported PCD DATA type: {data_kind}")
@@ -733,6 +733,45 @@ def load_points(path: Path, *, fmt: str) -> np.ndarray:
     raise ValueError(f"unsupported cloud format: {fmt}")
 
 
+_VOXEL_KEY_BITS = 21
+_VOXEL_KEY_BIAS = 1 << (_VOXEL_KEY_BITS - 1)
+_VOXEL_KEY_MAX = _VOXEL_KEY_BIAS - 1
+
+
+def _packed_voxel_keys(voxels: np.ndarray) -> np.ndarray | None:
+    """Collision-free uint64 keys for normal-scale signed voxel coordinates.
+
+    Three 21-bit signed coordinates cover roughly +/-104 km at 0.1 m voxels. For
+    unusually large coordinates, callers fall back to exact byte keys.
+    """
+    if voxels.size == 0:
+        return np.empty(0, dtype=np.uint64)
+    if np.any(voxels < -_VOXEL_KEY_BIAS) or np.any(voxels > _VOXEL_KEY_MAX):
+        return None
+    shifted = voxels + _VOXEL_KEY_BIAS
+    return (
+        (shifted[:, 0].astype(np.uint64) << np.uint64(2 * _VOXEL_KEY_BITS))
+        | (shifted[:, 1].astype(np.uint64) << np.uint64(_VOXEL_KEY_BITS))
+        | shifted[:, 2].astype(np.uint64)
+    )
+
+
+def _exact_voxel_keys(voxels: np.ndarray) -> np.ndarray:
+    contiguous = np.ascontiguousarray(voxels, dtype=np.int64)
+    return contiguous.view(np.dtype((np.void, contiguous.dtype.itemsize * 3))).reshape(-1)
+
+
+def _voxel_key_array(voxels: np.ndarray) -> np.ndarray:
+    packed = _packed_voxel_keys(voxels)
+    return packed if packed is not None else _exact_voxel_keys(voxels)
+
+
+def _unique_voxel_rows(voxels: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    keys = _voxel_key_array(voxels)
+    _, first, inverse = np.unique(keys, return_index=True, return_inverse=True)
+    return voxels[first], inverse
+
+
 @dataclass
 class TemporalConsistencyFilter:
     voxel_size: float = DEFAULT_TEMPORAL_VOXEL_SIZE
@@ -746,33 +785,22 @@ class TemporalConsistencyFilter:
             raise ValueError("window_size must be positive")
         if self.min_hits <= 0:
             raise ValueError("min_hits must be positive")
-        self._history: deque[set[tuple[int, int, int]]] = deque(maxlen=self.window_size)
-        self._voxel_hits: Counter[tuple[int, int, int]] = Counter()
+        self._history: deque[np.ndarray] = deque(maxlen=self.window_size)
 
     def filter(self, points: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         if points.size == 0 or len(points) == 0:
             return points, np.ones(0, dtype=bool)
 
         voxels = np.floor(points / self.voxel_size).astype(np.int64)
-        frame_voxels = {tuple(v) for v in np.unique(voxels, axis=0)}
-
-        if self._history.maxlen and len(self._history) >= self._history.maxlen:
-            old_frame = self._history.popleft()
-            for voxel in old_frame:
-                self._voxel_hits[voxel] -= 1
-                if self._voxel_hits[voxel] <= 0:
-                    del self._voxel_hits[voxel]
-
+        frame_voxels, inverse = _unique_voxel_rows(voxels)
         self._history.append(frame_voxels)
-        for voxel in frame_voxels:
-            self._voxel_hits[voxel] += 1
-
-        point_voxels = [tuple(v) for v in voxels]
-        keep_mask = np.fromiter(
-            (self._voxel_hits[voxel] >= self.min_hits for voxel in point_voxels),
-            dtype=bool,
-            count=points.shape[0],
-        )
+        active_voxels = np.concatenate(tuple(self._history), axis=0)
+        active_keys = _voxel_key_array(active_voxels)
+        unique_keys, hit_counts = np.unique(active_keys, return_counts=True)
+        frame_keys = _voxel_key_array(frame_voxels)
+        frame_indices = np.searchsorted(unique_keys, frame_keys)
+        frame_keep = hit_counts[frame_indices] >= self.min_hits
+        keep_mask = frame_keep[inverse]
         return points[keep_mask], keep_mask
 
 
@@ -799,6 +827,11 @@ def _spherical_pixels(
     col = np.floor((azimuth + 180.0) / h_res_deg).astype(np.int64)
     row = np.floor((elevation + 90.0) / v_res_deg).astype(np.int64)
     return ranges, col, row, valid
+
+
+def _pixel_indices(col: np.ndarray, row: np.ndarray, n_cols: int, n_rows: int) -> np.ndarray:
+    """Flatten (col, row) bins into clipped 1-D range-image pixel indices."""
+    return np.clip(row, 0, n_rows - 1) * n_cols + np.clip(col, 0, n_cols - 1)
 
 
 def remove_ghost_by_range_image(
@@ -845,20 +878,14 @@ def remove_ghost_by_range_image(
     m_ranges, m_col, m_row, m_valid = _spherical_pixels(map_points, origin, h_res_deg, v_res_deg)
 
     # Build the query range image: nearest live return per pixel + a hit counter.
-    q_col = np.clip(q_col, 0, n_cols - 1)
-    q_row = np.clip(q_row, 0, n_rows - 1)
-    flat_q = q_row * n_cols + q_col
-    flat_q = flat_q[q_valid]
-
+    flat_q = _pixel_indices(q_col, q_row, n_cols, n_rows)[q_valid]
     nearest = np.full(n_rows * n_cols, np.inf, dtype=np.float64)
     np.minimum.at(nearest, flat_q, q_ranges[q_valid])
     counts = np.zeros(n_rows * n_cols, dtype=np.int64)
     np.add.at(counts, flat_q, 1)
 
     # Gather the query range at each map point's pixel.
-    m_col_c = np.clip(m_col, 0, n_cols - 1)
-    m_row_c = np.clip(m_row, 0, n_rows - 1)
-    flat_m = m_row_c * n_cols + m_col_c
+    flat_m = _pixel_indices(m_col, m_row, n_cols, n_rows)
     pixel_query_range = nearest[flat_m]
     pixel_count = counts[flat_m]
 
@@ -899,6 +926,182 @@ def _visibility_votes(
     seen_through = observed & ((pixel_q - m_ranges) > range_margin)
     confirmed = observed & (np.abs(pixel_q - m_ranges) < range_margin)
     return seen_through, confirmed
+
+
+@dataclass(frozen=True)
+class _SensorAwareVisibilityEvidence:
+    """Experimental per-point visibility evidence used by O1 ablations."""
+
+    raw_observations: np.ndarray
+    raw_see_through: np.ndarray
+    raw_surface: np.ndarray
+    effective_observations: np.ndarray
+    see_through_ratio: np.ndarray
+    surface_ratio: np.ndarray
+    mean_observed_range: np.ndarray
+    mean_beam_spacing: np.ndarray
+
+
+def _sensor_strategy(beams: int | None, vertical_spacing_deg: float | None) -> str:
+    """Select the established offline baseline from explicit sensor metadata.
+
+    This is intentionally private until all non-regression gates pass. Unknown
+    profiles remain explicit instead of guessing from a dataset name.
+    """
+    if beams is not None and beams >= 64:
+        return "fusion"
+    if beams is not None and beams <= 32:
+        return "range_and_scan_ratio"
+    if vertical_spacing_deg is not None and vertical_spacing_deg <= 0.8:
+        return "fusion"
+    if vertical_spacing_deg is not None and vertical_spacing_deg >= 1.0:
+        return "range_and_scan_ratio"
+    return "unknown"
+
+
+def _sensor_aware_visibility_evidence(
+    map_points: np.ndarray,
+    scans: Sequence[tuple[np.ndarray, Sequence[float]]],
+    *,
+    h_res_deg: float,
+    v_res_deg: float,
+    range_margin: float,
+    sensor_h_spacing_deg: float,
+    sensor_v_spacing_deg: float,
+    support_size_m: float = 0.5,
+) -> _SensorAwareVisibilityEvidence:
+    """Accumulate observation-normalized, distance-aware visibility evidence.
+
+    A raw observation is a scan that either sees through a map point or confirms
+    a surface at its range; nearer returns are occlusions and do not count. Each
+    observation is weighted by the expected physical beam spacing at that range:
+    ``min(1, support_size / spacing)``. Sparse long-range samples therefore carry
+    less confidence than repeatedly observed near-range samples without changing
+    the underlying range-image decision.
+    """
+    map_points = np.asarray(map_points, dtype=np.float64).reshape(-1, 3)
+    if h_res_deg <= 0.0 or v_res_deg <= 0.0:
+        raise ValueError("range-image resolutions must be positive")
+    if sensor_h_spacing_deg <= 0.0 or sensor_v_spacing_deg <= 0.0:
+        raise ValueError("sensor beam spacings must be positive")
+    if support_size_m <= 0.0:
+        raise ValueError("support_size_m must be positive")
+
+    n = len(map_points)
+    raw_obs = np.zeros(n, dtype=np.int32)
+    raw_see = np.zeros(n, dtype=np.int32)
+    raw_surface = np.zeros(n, dtype=np.int32)
+    effective_obs = np.zeros(n, dtype=np.float64)
+    see_weight = np.zeros(n, dtype=np.float64)
+    surface_weight = np.zeros(n, dtype=np.float64)
+    range_sum = np.zeros(n, dtype=np.float64)
+    spacing_sum = np.zeros(n, dtype=np.float64)
+    angular_spacing = math.radians(max(sensor_h_spacing_deg, sensor_v_spacing_deg))
+
+    for points, origin_value in scans:
+        points = np.asarray(points, dtype=np.float64)
+        if points.size == 0:
+            continue
+        origin = np.asarray(origin_value, dtype=np.float64)
+        if origin.shape != (3,):
+            raise ValueError("sensor origins must have 3 elements")
+        seen, surface = _visibility_votes(
+            map_points,
+            points,
+            origin,
+            float(h_res_deg),
+            float(v_res_deg),
+            float(range_margin),
+        )
+        observed = seen | surface
+        if not observed.any():
+            continue
+        ranges = np.linalg.norm(map_points - origin, axis=1)
+        beam_spacing = np.maximum(ranges * math.tan(angular_spacing), 1e-9)
+        weight = np.minimum(1.0, float(support_size_m) / beam_spacing)
+        obs_weight = weight * observed
+        raw_obs += observed.astype(np.int32)
+        raw_see += seen.astype(np.int32)
+        raw_surface += surface.astype(np.int32)
+        effective_obs += obs_weight
+        see_weight += weight * seen
+        surface_weight += weight * surface
+        range_sum += ranges * observed
+        spacing_sum += beam_spacing * observed
+
+    denom = np.maximum(effective_obs, 1e-12)
+    raw_denom = np.maximum(raw_obs, 1)
+    return _SensorAwareVisibilityEvidence(
+        raw_observations=raw_obs,
+        raw_see_through=raw_see,
+        raw_surface=raw_surface,
+        effective_observations=effective_obs,
+        see_through_ratio=np.divide(
+            see_weight, denom, out=np.zeros(n, dtype=np.float64), where=effective_obs > 0.0
+        ),
+        surface_ratio=np.divide(
+            surface_weight, denom, out=np.zeros(n, dtype=np.float64), where=effective_obs > 0.0
+        ),
+        mean_observed_range=range_sum / raw_denom,
+        mean_beam_spacing=spacing_sum / raw_denom,
+    )
+
+
+def _sensor_aware_visibility_dynamic_mask(
+    evidence: _SensorAwareVisibilityEvidence,
+    *,
+    min_raw_observations: int = 2,
+    min_raw_see_through: int = 3,
+    max_raw_surface_hits: int | None = 5,
+    min_effective_observations: float = 1.5,
+    min_see_through_ratio: float = 0.6,
+    max_surface_ratio: float = 0.4,
+    ground_mask: np.ndarray | None = None,
+) -> np.ndarray:
+    """Threshold O1 evidence; kept private until cross-dataset gates pass."""
+    dynamic = (
+        (evidence.raw_observations >= max(1, int(min_raw_observations)))
+        & (evidence.raw_see_through >= max(1, int(min_raw_see_through)))
+        & (evidence.effective_observations >= float(min_effective_observations))
+        & (evidence.see_through_ratio >= float(min_see_through_ratio))
+        & (evidence.surface_ratio <= float(max_surface_ratio))
+    )
+    if max_raw_surface_hits is not None:
+        dynamic &= evidence.raw_surface <= max(0, int(max_raw_surface_hits))
+    if ground_mask is not None:
+        ground_mask = np.asarray(ground_mask, dtype=bool)
+        if ground_mask.shape != dynamic.shape:
+            raise ValueError("ground_mask shape must match evidence")
+        dynamic &= ~ground_mask
+    return dynamic
+
+
+def _sensor_aware_evidence_summary(
+    evidence: _SensorAwareVisibilityEvidence,
+) -> dict[str, Any]:
+    """Compact JSON-safe diagnostics for a sensor-aware ablation."""
+    observed = evidence.raw_observations > 0
+
+    def stats(values: np.ndarray) -> dict[str, float]:
+        values = np.asarray(values)[observed]
+        if values.size == 0:
+            return {"p50": 0.0, "p95": 0.0, "max": 0.0}
+        return {
+            "p50": float(np.percentile(values, 50)),
+            "p95": float(np.percentile(values, 95)),
+            "max": float(values.max()),
+        }
+
+    return {
+        "points": int(len(evidence.raw_observations)),
+        "observed_points": int(np.count_nonzero(observed)),
+        "raw_observations": stats(evidence.raw_observations),
+        "raw_see_through": stats(evidence.raw_see_through),
+        "raw_surface": stats(evidence.raw_surface),
+        "effective_observations": stats(evidence.effective_observations),
+        "mean_observed_range_m": stats(evidence.mean_observed_range),
+        "mean_beam_spacing_m": stats(evidence.mean_beam_spacing),
+    }
 
 
 def clean_map_by_visibility(

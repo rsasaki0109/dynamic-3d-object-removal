@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib.util
 import json
 from pathlib import Path
 
@@ -12,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PROOF = ROOT / "examples" / "lidarslam_ros2" / "av2_downstream_gt_map_proof.json"
 
 
+@pytest.mark.skipif(importlib.util.find_spec("scipy") is None, reason="optional scipy integration")
 def test_evaluate_maps_separates_dynamic_reduction_and_static_preservation():
     gt = np.array([
         [0.0, 0.0, 0.0],

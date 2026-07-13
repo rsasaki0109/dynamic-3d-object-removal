@@ -17,10 +17,20 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-from scipy.spatial import cKDTree
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import dynamic_object_removal as core  # noqa: E402
+
+
+def _spatial_tree(points: np.ndarray) -> Any:
+    """Create the optional SciPy tree only when the integration tool is run."""
+    try:
+        from scipy.spatial import cKDTree
+    except ImportError as exc:  # pragma: no cover - depends on integration environment
+        raise SystemExit(
+            "scipy is required for downstream map comparison; install scipy first"
+        ) from exc
+    return cKDTree(points)
 
 
 def _sha256(path: Path) -> str:
@@ -130,7 +140,7 @@ def _classify_map(
     *,
     match_tolerance_m: float,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    distances, indices = cKDTree(gt_points).query(map_points, k=1, workers=-1)
+    distances, indices = _spatial_tree(gt_points).query(map_points, k=1, workers=-1)
     matched = distances <= match_tolerance_m
     labels = np.zeros(len(map_points), dtype=bool)
     labels[matched] = gt_dynamic[indices[matched]]
@@ -233,7 +243,7 @@ def _plot(
     cleaned_dynamic = cleaned[labels["cleaned_labels"] & labels["cleaned_matched"]]
     cleaned_static = cleaned[~labels["cleaned_labels"] & labels["cleaned_matched"]]
 
-    clean_tree = cKDTree(cleaned)
+    clean_tree = _spatial_tree(cleaned)
     baseline_to_clean = clean_tree.query(baseline, k=1, workers=-1)[0]
     removed = baseline_to_clean > metrics["match_tolerance_m"]
     removed_dynamic = baseline[removed & labels["baseline_labels"]]

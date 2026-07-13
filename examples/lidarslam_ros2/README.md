@@ -137,6 +137,8 @@ byte-identical. Evaluation deliberately uses `map_optimized.pcd`, before the opt
 cloud-driven refinement, then transforms manifest GT with that same trajectory:
 
 ```bash
+python3 -m pip install scipy matplotlib
+
 python3 scripts/compare_downstream_gt_maps.py \
   --manifest /tmp/av2_manifest.json \
   --baseline-map /tmp/av2_raw_map/map_optimized.pcd \

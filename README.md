@@ -40,19 +40,52 @@ dynamic-object-removal \
 
 Use `fusion` for dense offline maps, `range` (optionally intersected with `scan_ratio`) for sparse sensors, and `temporal` or `range` for realtime filtering.
 
+## How It Compares
+
+[ERASOR](https://github.com/LimHyungTae/ERASOR) and [Removert](https://github.com/gisbi-kim/removert) are offline map cleaners; this project also supports online per-scan filtering. This positioning table is from their papers, not a re-run benchmark.
+
+| | This project | ERASOR | Removert |
+|---|---|---|---|
+| Per-scan realtime | yes | no | no |
+| Offline map cleaning | yes | yes | yes |
+| Detector required | only `box` | no | no |
+| Core stack | `numpy` | C++ / ROS / PCL | C++ / ROS / PCL |
+
 ## Measured Results
 
-| Dataset | Sensor / input | Best detector-free result |
-|---|---|---|
-| Argoverse 2 | 64-beam, 12 sweeps | `fusion`: F1 **0.657**, static kept **0.974** |
-| nuScenes mini | 32-beam, 12 keyframes | `range ∩ scan_ratio`: F1 **0.642**, static kept **0.842** |
-| DynamicMap seq 00 / 05 | VLP-64, 141 / 321 scans | `fusion`: AA **98.6 / 98.0** |
+### Argoverse 2 — 64-beam, 12 sweeps
+
+| Detector-free method | Precision | Recall | F1 | Static kept |
+|---|---:|---:|---:|---:|
+| **`fusion`** | 0.65 | **0.66** | **0.66** | 0.97 |
+| `range` | **0.68** | 0.54 | 0.60 | 0.98 |
+| `scan_ratio` | 0.66 | 0.56 | 0.61 | 0.98 |
+| `temporal` | 0.19 | 0.72 | 0.30 | 0.78 |
 
 ![AV2 detector-free proof](demo/av2_gt_map_proof.png)
 
 The AV2 proof uses 12 pose-aligned sweeps, 1,235,563 points, and 84,471 moving-track GT points. `fusion` removes 66.3% of moving GT while keeping 97.4% of static GT; boxes are used only for evaluation. [Counts and configuration](demo/av2_gt_map_proof.json).
 
 For short windows, use `free_votes_fraction=0.7`, `free_votes_floor=3`, and `void_min_scans=4`; long-map defaults assume 100+ scans. Sparse 32-beam data favors a coarser range-image resolution (`2.5°` on nuScenes) and should not use `fusion` by default.
+
+### nuScenes mini — 32-beam, 12 keyframes
+
+| Detector-free method | Precision | Recall | F1 | Static kept |
+|---|---:|---:|---:|---:|
+| **`range ∩ scan_ratio`** | **0.51** | 0.87 | **0.64** | **0.84** |
+| `range` | 0.48 | **0.92** | 0.63 | 0.81 |
+| `scan_ratio` | 0.36 | 0.90 | 0.51 | 0.69 |
+| `fusion` | 0.16 | 0.32 | 0.22 | 0.68 |
+| `temporal` | 0.07 | 0.22 | 0.11 | 0.47 |
+
+### Semantic-KITTI — DynamicMap Benchmark
+
+| Method | seq 00 SA | seq 00 DA | seq 00 AA | seq 05 SA | seq 05 DA | seq 05 AA |
+|---|---:|---:|---:|---:|---:|---:|
+| **`fusion`** | 98.9 | **98.3** | **98.6** | 98.0 | **98.1** | **98.0** |
+| `scan_ratio` | 98.0 | 92.8 | 95.4 | 96.0 | 97.9 | 96.9 |
+| `range` | **99.6** | 34.5 | 58.6 | **99.8** | 25.9 | 50.9 |
+| `temporal` | 97.0 | 46.6 | 67.2 | 97.3 | 25.9 | 50.2 |
 
 The separate [20-frame AV2 sequence](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_sequence_av2.html) is a **box-driven annotation crop**. Its 233,460 removed points include parked objects and are not reported as moving-object GT.
 

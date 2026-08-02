@@ -1,0 +1,123 @@
+{
+  "dataset": "Argoverse 2 Sensor Dataset",
+  "scene": "0b5142c1-420b-3fea-9e98-b87327ae22c6",
+  "sensor_profile": {
+    "name": "dual VLP-32C",
+    "beams": 64,
+    "rate_hz": 3.3333333333333335,
+    "deskewed": true,
+    "source": "https://argoverse.github.io/user-guide/datasets/sensor.html"
+  },
+  "filter": {
+    "algorithm": "range",
+    "range_window": 3,
+    "range_margin_m": 0.5,
+    "range_horizontal_resolution_deg": 1.0,
+    "range_vertical_resolution_deg": 2.0,
+    "realtime_summary": {
+      "frames": 11,
+      "input_points": 1132807,
+      "output_points": 1081968,
+      "removed_points": 50839,
+      "removed_ratio": 0.04487878341147256,
+      "boxes_received": 0,
+      "frames_with_boxes": 0,
+      "frames_without_boxes": 0,
+      "stale_box_frames": 0,
+      "tf_frames_aligned": 11,
+      "tf_lookup_failures": 0,
+      "tf_stale_frames": 0,
+      "fail_open_frames": 0,
+      "inferred_dropped_frames": 0,
+      "paired_odometry_published": 11,
+      "paired_odometry_cache_drops": 0,
+      "decode_latency": {
+        "mean_ms": 2.617637558035891,
+        "p50_ms": 1.830524008255452,
+        "p95_ms": 5.641580995870754,
+        "max_ms": 6.66586501756683
+      },
+      "filter_latency": {
+        "mean_ms": 75.42786936127496,
+        "p50_ms": 66.99941999977455,
+        "p95_ms": 119.3119844829198,
+        "max_ms": 123.04618896450847
+      },
+      "publish_latency": {
+        "mean_ms": 5.223258991133083,
+        "p50_ms": 3.5318649606779218,
+        "p95_ms": 11.66635099798441,
+        "max_ms": 13.354105991311371
+      },
+      "mean_ms": 83.26876591044393,
+      "p50_ms": 72.53167900489643,
+      "p95_ms": 124.40449048881419,
+      "max_ms": 130.78694400610402
+    },
+    "realtime_summary_sha256": "4cb9ea387fbb07d4343103fe0b60063ef59ab1b419c0be7572d8b81f485c8f72"
+  },
+  "proof_contract": {
+    "frames": 11,
+    "timestamps_ns": [
+      315968121560163000,
+      315968121860089000,
+      315968122160002000,
+      315968122459927000,
+      315968122759853000,
+      315968123059766000,
+      315968123359692000,
+      315968123660281000,
+      315968123960207000,
+      315968124260120000,
+      315968124560046000
+    ],
+    "baseline_and_cleaned_optimized_trajectory_byte_identical": true,
+    "optimized_trajectory_sha256": "9a2f22eff7da302082ecb3a596b22e42fe83d01a093c31bb342a8f464ff3d096",
+    "baseline_and_cleaned_raw_trajectory_byte_identical": true,
+    "raw_trajectory_sha256": "9a2f22eff7da302082ecb3a596b22e42fe83d01a093c31bb342a8f464ff3d096",
+    "baseline_and_cleaned_loop_edges_byte_identical": true,
+    "loop_edges_sha256": "4c90fb5921414b59a43d90c7c5ff9bef82681c77254fa48f9ba683dff8f3768d",
+    "loop_edge_count": 0,
+    "labels_available_to_filter": false,
+    "evaluated_map": "map_optimized.pcd (before optional cloud-driven refinement)"
+  },
+  "metrics": {
+    "match_tolerance_m": 0.01,
+    "gt_map_points": 1132807,
+    "gt_dynamic_points": 78270,
+    "gt_static_points": 1054537,
+    "baseline": {
+      "map_points": 1132807,
+      "matched_points": 1132807,
+      "matched_ratio": 1.0,
+      "max_match_distance_m": 7.681542922577677e-06,
+      "dynamic_points": 78270,
+      "static_points": 1054537,
+      "dynamic_contamination_ratio": 0.06909385270394693
+    },
+    "cleaned": {
+      "map_points": 1081968,
+      "matched_points": 1081968,
+      "matched_ratio": 1.0,
+      "max_match_distance_m": 7.681542922577677e-06,
+      "dynamic_points": 67212,
+      "static_points": 1014756,
+      "dynamic_contamination_ratio": 0.062120136639900625
+    },
+    "removal": {
+      "total_points": 50839,
+      "dynamic_points": 11058,
+      "static_points": 39781,
+      "dynamic_gt_reduction": 0.14128018397853584,
+      "static_gt_preservation": 0.9622763354913104,
+      "removed_point_precision": 0.2175101791931391
+    }
+  },
+  "inputs": {
+    "manifest": "av2_downstream_manifest.json",
+    "baseline_map": "map_optimized.pcd",
+    "cleaned_map": "map_optimized.pcd",
+    "baseline_map_sha256": "7a09c88915ec42d1055f636a21a35a76400a4bf44a5c5581a25db6d8e197c315",
+    "cleaned_map_sha256": "dfb2a8b9f53ea1be794f00f8579ce65ef5a0f22e73255b56f1c0dba1fdc6da84"
+  }
+}

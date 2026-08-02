@@ -1,0 +1,46 @@
+{
+  "dataset": "TIERS Indoor02 (local public ROS 2 bag)",
+  "date": "2026-07-13",
+  "task": "online static mapping integration proof",
+  "replay": {
+    "source_lidar_frames": 420,
+    "prepared_lidar_frames": 419,
+    "paired_frames_used_by_both_backends": 377,
+    "inferred_input_drops": 40,
+    "rate": 0.5,
+    "effective_lidar_rate_hz": 5.0,
+    "note": "Both maps use exactly the same 377 stamps; this is not the 10 Hz latency gate."
+  },
+  "dor": {
+    "algorithm": "range",
+    "window": 3,
+    "horizontal_resolution_deg": 1.0,
+    "vertical_resolution_deg": 1.0,
+    "input_points": 8771425,
+    "output_points": 8675242,
+    "removed_points": 96183,
+    "removed_ratio": 0.01096549306412584,
+    "tf_frames_aligned": 377,
+    "tf_lookup_failures": 0,
+    "fail_open_frames": 0,
+    "paired_odometry_published": 377
+  },
+  "maps": {
+    "pose_graph_sha256": "c83cbdace5ef0e9bd0e50fc02aa3205057189c504ff36232d662eec6948ccfc3",
+    "pose_graph_identical": true,
+    "baseline_points": 13272,
+    "filtered_points": 13111,
+    "baseline_only_candidates_at_0_2m": 70,
+    "baseline_only_candidate_ratio": 0.005274261603375527,
+    "filtered_supported_ratio_at_0_2m": 1.0,
+    "dense_proxy_preserved_ratio_at_0_2m": 0.9973753280839895,
+    "candidate_neighbor_count_median_at_0_5m": 6.0,
+    "supported_neighbor_count_median_at_0_5m": 29.0
+  },
+  "limitations": [
+    "The bag has no point-wise dynamic-object ground truth, so baseline-only points are candidates, not confirmed ghosts.",
+    "LiDAR-to-base and IMU-to-base extrinsics are identity engineering approximations, not a metrology claim.",
+    "The final same-stamp map comparison replayed at 5 Hz and does not replace the separate 10 Hz callback latency profile.",
+    "The final source LiDAR frame was omitted because no later IMU sample exists beyond its scan end."
+  ]
+}

@@ -1,0 +1,16 @@
+# TIERS Indoor02 Ouster OS1 + internal IMU engineering approximation.
+# Both streams are restamped into one clock domain in the local rosbag2 fixture.
+# The OS1 IMU is approximately rotation-aligned with os_sensor; this is suitable
+# for an integration proof, not a metrology claim about the sensor extrinsic.
+rko_lio_offline_node:
+  ros__parameters:
+    extrinsic_imu2base_quat_xyzw_xyz: [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0]
+    extrinsic_lidar2base_quat_xyzw_xyz: [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0]
+    initialization_phase: true
+
+rko_lio_online_node:
+  ros__parameters:
+    # Same engineering approximation as the offline integration path above.
+    extrinsic_imu2base_quat_xyzw_xyz: [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0]
+    extrinsic_lidar2base_quat_xyzw_xyz: [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0]
+    initialization_phase: true

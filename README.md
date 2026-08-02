@@ -4,15 +4,13 @@
 [![Live demo](https://img.shields.io/badge/demo-live-brightgreen)](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/playground.html)
 [![Release](https://img.shields.io/github/v/release/rsasaki0109/dynamic-3d-object-removal)](https://github.com/rsasaki0109/dynamic-3d-object-removal/releases)
 
-**No GPU, numpy-only, geometry-based.** Removes dynamic objects (vehicles, pedestrians, cyclists) from LiDAR scans and accumulated maps — no deep learning, `numpy` the only dependency.
+Geometry-based LiDAR dynamic-object removal: **no GPU, no deep learning, `numpy` only**.
 
-## Start Here
+[Try the browser playground](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/playground.html) — Box / Range / Temporal modes, AV2 and nuScenes presets, or drop your own PCD.
 
-- **🕹️ Browser playground (no install)**: https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/playground.html — the real library running client-side via Pyodide. **Box / Range / Temporal** modes, AV2 64-beam and nuScenes 32-beam presets, shareable URLs, or drop your own PCD.
+[![Browser playground](demo/playground_demo.gif)](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/playground.html)
 
-  [![Browser playground demo](demo/playground_demo.gif)](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/playground.html)
-
-- More demos: [AV2 sequence](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_sequence_av2.html) · [single scan](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_standalone.html) · [local sequence](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_sequence_standalone.html)
+More demos: [AV2 sequence](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_sequence_av2.html) · [single scan](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_standalone.html) · [local sequence](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_sequence_standalone.html)
 
 ![Before/After](demo/av2_before_after.png)
 
@@ -20,43 +18,58 @@
 
 > 20-frame accumulated Argoverse 2 map (not a single scan): 233k ghost points (11.9% of 2M) removed, static structure preserved.
 
-### Features
+## Install
+
+```bash
+pip install dynamic-object-removal
+```
+
+Pure-Python wheel, with `numpy` as the only required dependency. Optional extras are `[ros2]` for the ROS2 node and `[benchmarks]` for AV2/nuScenes scripts. From source: `git clone` followed by `pip install -e .`.
+
+```bash
+# Box-driven single scan
+dynamic-object-removal \
+  --input-cloud scan.pcd --input-objects objects.json \
+  --output-cloud cleaned.pcd
+```
 
 - **Five algorithms, all numpy**: `box` (per-scan crop, needs 3D boxes), `temporal` (voxel consistency, optional visibility gate), `range` (range-image visibility, Removert-style remove + revert), `scan_ratio` (ERASOR-style per-column pseudo-occupancy + ground revert), `fusion` (highest-accuracy map cleaner) — the last four are detector-free
 - **Fast**: 1.5 ms for 24k points on CPU; **ROS2 realtime node** (`box` / `temporal` / `range`)
 - **Minimal dependencies**: `numpy` only (`pyarrow` just for Argoverse 2 Feather input)
 
-### Which algorithm?
-
-Every branch is backed by a measurement below:
-
-```mermaid
-flowchart TD
-    Q1{"Do you have 3D boxes<br/>(detector or annotations)?"}
-    Q2{"Filtering live, per scan<br/>(e.g. ROS2 in a SLAM pipeline)?"}
-    Q3{"Sensor density?"}
-    BOX["<b>box</b><br/>geometric crop per scan"]
-    RT["<b>temporal</b> (fastest, simplest)<br/>or <b>range</b>"]
-    FUSION["<b>fusion</b> — highest accuracy<br/>(Semantic-KITTI AA 98.6 / 98.0)"]
-    SPARSE["<b>range</b> sized to beam density,<br/>optionally ∧ <b>scan_ratio</b> mask"]
-    Q1 -- "yes" --> BOX
-    Q1 -- "no" --> Q2
-    Q2 -- "yes" --> RT
-    Q2 -- "no — offline map cleaning" --> Q3
-    Q3 -- "dense (64-beam+)" --> FUSION
-    Q3 -- "sparse (≤ 32-beam)" --> SPARSE
+```bash
+# Detector-free map cleaning
+dynamic-object-removal \
+  --algorithm range --input-map map.npy --input-cloud sweep.npy \
+  --sensor-origin 0 0 0 --output-cloud cleaned.npy
 ```
+
+## Algorithms
+
+| Method | Use | Detector | Poses |
+|---|---|---:|---:|
+| `box` | Per-scan 3D-box crop | required | no |
+| `temporal` | Streaming voxel consistency | no | moving sensors: yes |
+| `range` | Range-image visibility + revert | no | yes |
+| `scan_ratio` | Polar pseudo-occupancy + ground revert | no | yes |
+| `fusion` | Offline free-space + void + scan-ratio fusion | no | yes |
+
+Use `fusion` for dense offline maps, `range` (optionally intersected with `scan_ratio`) for sparse sensors, and `temporal` or `range` for realtime filtering.
+
+For live per-scan filtering, use `box` when detections are available, or pose-aligned `temporal`/`range` without a detector. For offline maps, use `fusion` on dense sensors and `range` sized to the beam density (optionally intersected with `scan_ratio`) on sparse sensors.
 
 ## How It Compares
 
-[ERASOR](https://github.com/LimHyungTae/ERASOR) (RA-L '21) and [Removert](https://github.com/gisbi-kim/removert) (IROS '20) clean a *finished, pose-aligned map offline*; this project also covers *online, per-scan* use. Positioning guide (from their papers, **not** a re-run benchmark):
+[ERASOR](https://github.com/LimHyungTae/ERASOR) and [Removert](https://github.com/gisbi-kim/removert) are offline map cleaners; this project also supports online per-scan filtering. This positioning table is from their papers, not a re-run benchmark.
 
-| | **This project** | ERASOR | Removert |
+| | This project | ERASOR | Removert |
 |---|---|---|---|
 | Primary goal | Per-scan / realtime removal + map cleaning | Offline static-map cleaning | Offline static-map cleaning |
 | Needs a detector / 3D boxes | `box`: yes · others: no | No | No |
 | Needs poses | `box`/`temporal`: no · map cleaners: yes | Yes | Yes |
 | Online / realtime | **Yes** (ROS2 node) | No (batch) | No (batch) |
+| Per-scan realtime | yes | no | no |
+| Offline map cleaning | yes | yes | yes |
 | Core stack | `numpy` only | C++ / ROS / PCL | C++ / ROS / PCL |
 
 ### Measured on Argoverse 2 (64-beam, 12 sweeps; 3-scene mean)
@@ -97,48 +110,68 @@ Single-scene results overstate transfer; means over all eligible mini scenes are
 python3 scripts/run_nuscenes_benchmark.py --scenes all   # downloads nuScenes mini once, ~3.9 GB, no signup
 ```
 
-### Measured on Semantic-KITTI (DynamicMap_Benchmark)
+### Historical single-scene proof snapshots
 
-[KTH-RPL DynamicMap_Benchmark](https://github.com/KTH-RPL/DynamicMap_Benchmark) teaser sequences (Zenodo, no signup), the benchmark's SA / DA / AA metrics. Our methods only.
+The upstream proof artifacts are retained here as single-scene reference points. They are useful for reproducing the checked-in images, but the multi-scene means above are the transfer-oriented headline numbers.
 
-| method | seq 00 SA | seq 00 DA | seq 00 AA | seq 05 SA | seq 05 DA | seq 05 AA |
-|---|---|---|---|---|---|---|
-| **free-space fusion** (`fusion`) | 98.9 | **98.3** | **98.6** | 98.0 | **98.1** | **98.0** |
-| **scan-ratio** pseudo-occupancy (`scan_ratio`) | 98.0 | 92.8 | 95.4 | 96.0 | 97.9 | 96.9 |
-| **range-image visibility** (`range`) | **99.6** | 34.5 | 58.6 | **99.8** | 25.9 | 50.9 |
-| temporal consistency (`temporal`) | 97.0 | 46.6 | 67.2 | 97.3 | 25.9 | 50.2 |
+#### Argoverse 2 — 64-beam, 12 sweeps
 
-> seq 00: 141 scans / 17.4 M points; seq 05: 321 scans / 39.9 M points. `fusion` matches the leaderboard-topping DUFOMap on seq 00 (AA 98.6) and exceeds every listed method on seq 05 (98.0 vs 96.3); the learning-based, GPU-trained 4dNDF (AA ≈ 99) is outside this numpy-only class. Channel thresholds were tuned on these two sequences, like most leaderboard entries — cross-dataset transfer is what the AV2/nuScenes sections above measure.
+| Detector-free method | Precision | Recall | F1 | Static kept |
+|---|---:|---:|---:|---:|
+| **`fusion`** | 0.65 | **0.66** | **0.66** | 0.97 |
+| `range` | **0.68** | 0.54 | 0.60 | 0.98 |
+| `scan_ratio` | 0.66 | 0.56 | 0.61 | 0.98 |
+| `temporal` | 0.19 | 0.72 | 0.30 | 0.78 |
+
+![AV2 detector-free proof](demo/av2_gt_map_proof.png)
+
+The AV2 proof uses 12 pose-aligned sweeps, 1,235,563 points, and 84,471 moving-track GT points. `fusion` removes 66.3% of moving GT while keeping 97.4% of static GT; boxes are used only for evaluation. [Counts and configuration](demo/av2_gt_map_proof.json).
+
+For short windows, use `free_votes_fraction=0.7`, `free_votes_floor=3`, and `void_min_scans=4`; long-map defaults assume 100+ scans. Sparse 32-beam data favors a coarser range-image resolution (`2.5°` on nuScenes) and should not use `fusion` by default.
+
+#### nuScenes mini — 32-beam, 12 keyframes
+
+| Detector-free method | Precision | Recall | F1 | Static kept |
+|---|---:|---:|---:|---:|
+| **`range ∩ scan_ratio`** | **0.51** | 0.87 | **0.64** | **0.84** |
+| `range` | 0.48 | **0.92** | 0.63 | 0.81 |
+| `scan_ratio` | 0.36 | 0.90 | 0.51 | 0.69 |
+| `fusion` | 0.16 | 0.32 | 0.22 | 0.68 |
+| `temporal` | 0.07 | 0.22 | 0.11 | 0.47 |
+
+### Semantic-KITTI — DynamicMap Benchmark
+
+| Method | seq 00 SA | seq 00 DA | seq 00 AA | seq 05 SA | seq 05 DA | seq 05 AA |
+|---|---:|---:|---:|---:|---:|---:|
+| **`fusion`** | 98.9 | **98.3** | **98.6** | 98.0 | **98.1** | **98.0** |
+| `scan_ratio` | 98.0 | 92.8 | 95.4 | 96.0 | 97.9 | 96.9 |
+| `range` | **99.6** | 34.5 | 58.6 | **99.8** | 25.9 | 50.9 |
+| `temporal` | 97.0 | 46.6 | 67.2 | 97.3 | 25.9 | 50.2 |
+
+The separate [20-frame AV2 sequence](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_sequence_av2.html) is a **box-driven annotation crop**. Its 233,460 removed points include parked objects and are not reported as moving-object GT.
+
+Reproduce the benchmarks:
 
 ```bash
-python3 scripts/run_dynamicmap_benchmark.py --sequences 00 05   # ~385 MB per sequence
+python3 scripts/run_av2_benchmark.py --frames 12 --stride 3 --sr-min-votes 2
+python3 scripts/run_nuscenes_benchmark.py
+python3 scripts/run_dynamicmap_benchmark.py --sequences 00 05
 ```
-
-## Installation
-
-```bash
-pip install dynamic-object-removal
-```
-
-Pure-Python wheel, `numpy` the only dependency. Extras: `[ros2]` (ROS2 node), `[benchmarks]` (AV2/nuScenes scripts). From source: `git clone` + `pip install -e .`
 
 ## Quick Start On Public Data
 
-Real [Argoverse 2](https://www.argoverse.org/av2.html) data in three commands, no signup:
+Real [Argoverse 2](https://www.argoverse.org/av2.html) data in three commands, with no signup:
 
 ```bash
-# 1. Download an AV2 sample (1 sweep + annotations, ~1.3 MB)
 pip install awscli pyarrow
 python3 scripts/download_av2_sample.py
 
-# 2. Remove dynamic objects (18 vehicles, 3 pedestrians, 1 bicycle, 1 wheelchair)
 dynamic-object-removal \
   --input-cloud data/av2_sample/lidar/315969904359876000.feather \
   --input-objects data/av2_sample/annotations.feather \
   --timestamp-ns 315969904359876000 \
   --output-cloud output/av2_cleaned.pcd
 
-# 3. Inspect before/after in 3D
 python3 demo/run_scan_demo.py \
   --input-cloud data/av2_sample/lidar/315969904359876000.feather \
   --input-objects data/av2_sample/annotations.feather \
@@ -147,49 +180,53 @@ python3 demo/run_scan_demo.py \
   --output-html demo/index_3d_av2.html
 ```
 
-> Removes 3,406 of 95,381 points (3.6%); static road and buildings remain. KITTI is also supported: `scripts/download_kitti_sample.py`.
+> This sample removes 3,406 of 95,381 points (3.6%); static road and buildings remain. KITTI is also supported via `scripts/download_kitti_sample.py`.
 
-## CLI
+## ROS2 Realtime
 
 ```bash
-# Box-driven (needs detected boxes)
-dynamic-object-removal \
-  --input-cloud /path/to/scan.pcd \
-  --input-objects /path/to/objects.json \
-  --output-cloud /path/to/output.xyz
-
-# Detector-free map cleaning (swap range for scan_ratio as needed)
-dynamic-object-removal \
-  --algorithm range \
-  --input-map accumulated_map.npy \
-  --input-cloud query_sweep.npy \
-  --sensor-origin 0 0 0 \
-  --output-cloud cleaned_map.npy
+dynamic-object-removal-realtime \
+  --pointcloud-topic /velodyne_points --output-topic /cleaned_points \
+  --algorithm range --fixed-frame odom --range-window 3 \
+  --expected-rate-hz 10 --summary-json dor_summary.json
 ```
 
-## ROS2 Realtime Node
-
-Subscribes to `PointCloud2`, filters, publishes:
+The same node supports detector-driven boxes and detector-free temporal filtering:
 
 ```bash
 # Box-driven with an external detector
 dynamic-object-removal-realtime \
-  --pointcloud-topic /velodyne_points \
-  --objects-topic /detected_objects \
-  --output-topic /cleaned_points \
-  --algorithm box
+  --pointcloud-topic /velodyne_points --objects-topic /detected_objects \
+  --output-topic /cleaned_points --algorithm box
 
 # Detector-free temporal consistency
 dynamic-object-removal-realtime \
-  --pointcloud-topic /velodyne_points \
-  --output-topic /cleaned_points \
-  --algorithm temporal \
-  --voxel-size 0.10 --temporal-window 5 --temporal-min-hits 3
+  --pointcloud-topic /velodyne_points --output-topic /cleaned_points \
+  --algorithm temporal --voxel-size 0.10 \
+  --temporal-window 5 --temporal-min-hits 3
 ```
+
+On a moving platform, `temporal` and `range` require timestamped `fixed_frame <- cloud_frame` TF. Missing, invalid, or stale TF fails open: the scan is published unchanged and excluded from history. Input must already be deskewed; omit `--fixed-frame` only for a fixed sensor or clouds already expressed in one shared frame.
+
+For one-pass sequence accuracy, latency, confirmation delay, fail-open, and pose-noise evaluation, use [`scripts/run_online_benchmark.py`](scripts/run_online_benchmark.py).
+
+## Downstream SLAM Proof
+
+![AV2 downstream SLAM proof](demo/av2_downstream_gt_map_proof.png)
+
+The experimental [`lidarslam_ros2` integration](examples/lidarslam_ros2/README.md) feeds exact-stamp raw and cleaned clouds to the same map backend. On AV2, both branches use 11 identical cloud/odometry pairs and byte-identical trajectories and loop-edge artifacts. Realtime `range` reduces moving-GT map points by **14.1%**, keeps **96.2%** of static-GT points, and has **21.8%** removed-point precision. This is integration evidence; the offline `fusion` result above remains the accuracy headline. [Full contract and hashes](examples/lidarslam_ros2/av2_downstream_gt_map_proof.json).
+
+Keep these tasks separate:
+
+| Task | Evidence |
+|---|---|
+| Online moving-object segmentation | Per-scan F1/IoU, static keep, confirmation delay, latency |
+| Online static mapping | Same-pose raw/cleaned ghost and structure comparison |
+| Offline map cleaning | Final-map point metrics or SA/DA/AA |
 
 `temporal` keeps its legacy hit-count behavior by default. Pass `--temporal-visibility` to enable the opt-in spherical visibility gate; ROS2 also exposes `--temporal-visibility-h-res`, `--temporal-visibility-v-res`, `--temporal-visibility-margin`, `--temporal-visibility-fraction`, and `--temporal-visibility-min-hits` (`--no-visibility` makes the default explicit). On AV2, the 3-scene mean improves from F1 0.254 to 0.586 and static points kept from 0.703 to 0.968. The vectorized filter takes about 128 ms/100k points ungated or 162 ms gated (old Counter path: 516 ms).
 
-## Library API
+## Python API
 
 ```python
 from pathlib import Path
@@ -200,6 +237,12 @@ boxes = load_boxes(Path("/path/to/objects.json"), fmt="auto", skip_invalid=True)
 kept, keep_mask = remove_points_in_boxes(points, boxes, margin=(0.05, 0.05, 0.05))
 
 save_points(Path("/path/to/output.xyz"), kept, fmt="auto")
+
+# The same APIs also support the minimal form used by the CLI examples:
+points = load_points(Path("scan.pcd"), fmt="auto")
+boxes = load_boxes(Path("objects.json"), fmt="auto")
+cleaned, keep = remove_points_in_boxes(points, boxes)
+save_points(Path("cleaned.pcd"), cleaned, fmt="auto")
 ```
 
 Main public APIs:
@@ -243,33 +286,15 @@ ERASOR-style and independent of visibility: a polar column that is tall in the m
 kept, keep_mask = clean_map_by_fusion(map_points, scans, workers=6)
 ```
 
-Three independent dynamic-evidence channels, OR-fused:
+Fusion ORs three independent dynamic-evidence channels: ray-sampled free-space carving with per-scan hit precedence, DUFOMap-style eroded-void confirmation, and scan-ratio votes. Fractional free-space voting catches transient traffic while absolute void counts catch slower movers; the union reaches KITTI AA **98.6 / 98.0**. Carving is the cost: minutes per hundred 64-beam scans with `workers=6`, versus seconds for `range`/`scan_ratio`. For short windows (~12 scans), use `free_votes_fraction=0.7`, `free_votes_floor=3`, and `void_min_scans=4`; on sparse 32-beam sensors, prefer `range`.
 
-```mermaid
-flowchart LR
-    MAP["accumulated map<br/>+ per-scan (points, sensor origin)"]
-    FS["<b>free-space carving</b><br/>ray-sampled, per-scan hit precedence<br/>dynamic when ≥ 90% of observers freed it"]
-    EV["<b>eroded voids</b> (DUFOMap-style)<br/>hit inflation + 26-neighborhood erosion<br/>dynamic after ≥ 11 confirmed voids"]
-    SR["<b>scan-ratio votes</b><br/>polar-column occupancy, fraction 0.7"]
-    OR(("OR"))
-    OUT["dynamic mask removed →<br/>cleaned static map"]
-    MAP --> FS
-    MAP --> EV
-    MAP --> SR
-    FS --> OR
-    EV --> OR
-    SR --> OR
-    OR --> OUT
-```
+Main APIs: `TemporalConsistencyFilter`, `RangeImageGhostFilter`, `clean_map_by_visibility`, `clean_map_by_scan_ratio`, and `clean_map_by_fusion`. See their docstrings and [`dynamic_object_removal.py`](dynamic_object_removal.py).
 
-Fractional free-space voting nails transient traffic; absolute void counts catch slow movers and late leavers — the union scores high on both (KITTI AA **98.6 / 98.0**). Carving is the cost: minutes per hundred 64-beam scans with `workers=6`, vs seconds for `range`/`scan_ratio`.
-
-**Sizing to your data**: defaults assume a long (100+ scan) dense-sensor sequence. For short windows (~12 scans) relax to `free_votes_fraction=0.7, free_votes_floor=3, void_min_scans=4`. On sparse (32-beam) sensors use `range` instead (measured on nuScenes above).
+Supported point clouds: PCD (ASCII/binary), CSV, TXT, XYZ, NPY, KITTI BIN, and AV2 Feather. Boxes: JSON, CSV, KITTI `label_2`, and AV2 Feather. `PCD DATA binary_compressed` is not supported.
 
 ## Demo Regeneration
 
 ```bash
-# Single scan
 python3 demo/run_scan_demo.py \
   --input-cloud demo/actual_scan_20240820_cloud.pcd \
   --input-objects demo/actual_scan_20240820_objects.json \
@@ -277,7 +302,6 @@ python3 demo/run_scan_demo.py \
   --output-scene demo/demo_scene_single_scan.json \
   --output-html demo/index_3d_standalone.html
 
-# Sequence (temporal-cleaned; pass --input-objects / --input-poses for box-driven, pose-aligned)
 python3 demo/run_scan_sequence_demo.py \
   --input-glob "/path/to/graph/*/cloud.pcd" \
   --frame-count 12 --stride 1 --max-render-points 9000 --fps 4 \
@@ -285,23 +309,10 @@ python3 demo/run_scan_sequence_demo.py \
   --output-html demo/index_3d_sequence_standalone.html
 ```
 
-The checked-in HTML demos are self-contained (sampled point data embedded).
+The checked-in HTML demos are self-contained and embed sampled point data.
 
-## Supported Formats
-
-- Point clouds: `PCD` (ASCII / binary), `CSV`, `TXT`, `XYZ`, `NPY`, `BIN` (KITTI), `Feather` (Argoverse 2)
-- Bounding boxes: `JSON`, `CSV`, `KITTI label_2`, `Feather` (Argoverse 2)
-- `PCD DATA binary_compressed` is not supported
+More demos: [single scan](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_standalone.html) · [temporal sequence](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_sequence_standalone.html).
 
 ## Related Work
 
 - [UTS-RI/dynamic_object_detection](https://github.com/UTS-RI/dynamic_object_detection)
-
-## Releasing (maintainers)
-
-Releases publish to PyPI via [Trusted Publishing](https://docs.pypi.org/trusted-publishers/) on tag push. Bump `__version__` in `dynamic_object_removal.py`, commit, then:
-
-```bash
-git tag v0.6.0
-git push origin v0.6.0
-```

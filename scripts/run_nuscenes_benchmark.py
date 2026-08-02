@@ -34,6 +34,7 @@ import argparse
 import collections
 import json
 import math
+import os
 import sys
 import tarfile
 import time
@@ -62,6 +63,52 @@ _METHOD_LABELS = {
     "temporal_visibility": "temporal (visibility-gated)",
     "fusion": "free-space fusion",
 }
+
+
+def _export_online_manifest(
+    output_path: Path,
+    *,
+    scene: str,
+    stride: int,
+    local_scans: list[np.ndarray],
+    gt_masks: list[np.ndarray],
+    poses: list[tuple[np.ndarray, np.ndarray]],
+    timestamps_sec: list[float],
+) -> None:
+    output_path = output_path.resolve()
+    assets = output_path.parent / f"{output_path.stem}_assets"
+    assets.mkdir(parents=True, exist_ok=True)
+    frames = []
+    for index, (points, gt, (rotation, translation), timestamp) in enumerate(
+        zip(local_scans, gt_masks, poses, timestamps_sec)
+    ):
+        cloud_path = assets / f"{index:04d}_cloud.npy"
+        labels_path = assets / f"{index:04d}_labels.npy"
+        np.save(cloud_path, points)
+        np.save(labels_path, gt.astype(np.uint8))
+        frames.append({
+            "cloud": os.path.relpath(cloud_path, output_path.parent),
+            "point_labels": os.path.relpath(labels_path, output_path.parent),
+            "timestamp_sec": timestamp,
+            "pose": {
+                "rotation": rotation.tolist(),
+                "translation": translation.tolist(),
+            },
+        })
+    payload = {
+        "sensor_profile": {
+            "name": "nuScenes HDL-32E keyframes",
+            "beams": 32,
+            "rate_hz": 2.0 / max(1, stride),
+            "deskewed": False,
+            "note": "Single rigid keyframe pose; per-point intra-sweep deskew is unavailable.",
+        },
+        "dataset": "nuscenes-mini",
+        "scene": scene,
+        "frames": frames,
+    }
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
 def _quat_to_rot(qw: float, qx: float, qy: float, qz: float) -> np.ndarray:
@@ -204,6 +251,9 @@ def _run_scene(args: argparse.Namespace, root: Path, tables: dict, scene: str) -
 
     # Pose-aligned accumulated map (ground removed) + per-frame scans/origins/slices.
     chunks: list[np.ndarray] = []
+    local_chunks: list[np.ndarray] = []
+    selected_poses: list[tuple[np.ndarray, np.ndarray]] = []
+    selected_timestamps: list[float] = []
     scans: list[tuple[np.ndarray, np.ndarray]] = []
     slices: list[tuple[int, int]] = []
     cursor = 0
@@ -217,6 +267,9 @@ def _run_scene(args: argparse.Namespace, root: Path, tables: dict, scene: str) -
         r_ego = _quat_to_rot(*ep["rotation"]); t_ego = np.asarray(ep["translation"])
         pts_global = (pts @ r_cs.T + t_cs) @ r_ego.T + t_ego
         origin = r_ego @ t_cs + t_ego
+        local_chunks.append(pts)
+        selected_poses.append((r_ego @ r_cs, origin))
+        selected_timestamps.append(float(d["timestamp"]) * 1e-6)
         chunks.append(pts_global)
         scans.append((pts_global, origin))
         slices.append((cursor, cursor + len(pts_global)))
@@ -252,6 +305,20 @@ def _run_scene(args: argparse.Namespace, root: Path, tables: dict, scene: str) -
     gt_mask = np.concatenate(gt_chunks)
     print(f"  map: {len(acc_map):,} pts | moving tracks: {len(moving)} | "
           f"GT dynamic: {int(gt_mask.sum()):,} ({gt_mask.mean()*100:.2f}%)")
+
+    if args.online_manifest is not None:
+        _export_online_manifest(
+            args.online_manifest,
+            scene=scene,
+            stride=args.stride,
+            local_scans=local_chunks,
+            gt_masks=gt_chunks,
+            poses=selected_poses,
+            timestamps_sec=selected_timestamps,
+        )
+        print(f"  online manifest: {args.online_manifest}")
+        if args.online_only:
+            return 0
 
     # --- range: multi-scan visibility cleaner (coarse resolution for the sparse sensor) ---
     _, keep_range = core.clean_map_by_visibility(
@@ -293,6 +360,64 @@ def _run_scene(args: argparse.Namespace, root: Path, tables: dict, scene: str) -
         min_hits=args.temporal_min_hits,
     ))
     temporal_metrics = bench.compute_accuracy_metrics(~keep_temporal, gt_mask)
+    sensor_aware = None
+    if args.sensor_aware_ablation:
+        evidence = core._sensor_aware_visibility_evidence(
+            acc_map,
+            scans,
+            h_res_deg=args.h_res,
+            v_res_deg=args.v_res,
+            range_margin=args.range_margin,
+            sensor_h_spacing_deg=args.sensor_h_spacing,
+            sensor_v_spacing_deg=args.sensor_v_spacing,
+            support_size_m=args.sensor_support_size,
+        )
+        candidates = []
+        ground_mask = acc_map[:, 2] <= ground_z
+        for min_effective in (0.0, 1.0, 1.5, 2.0, 3.0):
+            for see_ratio in (0.0, 0.25, 0.5, 0.6):
+                for surface_ratio in (0.4, 0.6, 0.8, 1.0):
+                    normalized_range = core._sensor_aware_visibility_dynamic_mask(
+                        evidence,
+                        min_raw_observations=1,
+                        min_raw_see_through=args.min_see_through,
+                        max_raw_surface_hits=args.max_surface_hits,
+                        min_effective_observations=min_effective,
+                        min_see_through_ratio=see_ratio,
+                        max_surface_ratio=surface_ratio,
+                        ground_mask=ground_mask,
+                    )
+                    metrics = bench.compute_accuracy_metrics(normalized_range & ~keep_sr, gt_mask)
+                    candidates.append({
+                        "config": {
+                            "min_effective_observations": min_effective,
+                            "min_see_through_ratio": see_ratio,
+                            "max_surface_ratio": surface_ratio,
+                        },
+                        "metrics": metrics,
+                    })
+        candidates.sort(key=lambda item: item["metrics"]["f1"], reverse=True)
+        best_candidate = candidates[0]
+        normalized_metrics = best_candidate["metrics"]
+        sensor_aware = {
+            "status": "experimental_not_promoted",
+            "profile": {
+                "beams": 32,
+                "h_spacing_deg": args.sensor_h_spacing,
+                "v_spacing_deg": args.sensor_v_spacing,
+                "support_size_m": args.sensor_support_size,
+            },
+            "baseline_strategy": core._sensor_strategy(32, args.sensor_v_spacing),
+            "selected_metrics": combo_metrics,
+            "best_normalized_range_and_scan_ratio_candidate": best_candidate,
+            "ablation_candidates": candidates,
+            "candidate_passes_absolute_gate": bool(
+                round(normalized_metrics["f1"], 3) >= 0.642
+                and round(normalized_metrics["static_preservation"], 3) >= 0.842
+            ),
+            "evidence": core._sensor_aware_evidence_summary(evidence),
+        }
+
 
     keep_temporal_visibility = run_temporal(core.TemporalConsistencyFilter(
         voxel_size=args.voxel_size,
@@ -329,6 +454,22 @@ def _run_scene(args: argparse.Namespace, root: Path, tables: dict, scene: str) -
         metrics["fusion"] = bench.compute_accuracy_metrics(~keep_fusion, gt_mask)
         method_keys.append("fusion")
 
+    def row(name: str, m: dict) -> str:
+        return (f"| {name} | {m['precision']:.3f} | {m['recall']:.3f} | {m['f1']:.3f} | "
+                f"{m['static_preservation']:.3f} |")
+
+    table = (
+        "\n### Measured on nuScenes (this repo's detector-free methods)\n\n"
+        f"Scene `{scene}`, {len(selected)} pose-aligned keyframes, {len(acc_map):,} points "
+        f"({int(gt_mask.sum()):,} ground-truth points on moving objects). Range image at "
+        f"{args.h_res}deg, coarsened to match the 32-beam sensor.\n\n"
+        "| method | precision | recall | F1 | static kept |\n"
+        "|---|---|---|---|---|\n"
+        + "\n".join(row(_METHOD_LABELS[key], metrics[key]) for key in method_keys)
+        + "\n"
+    )
+    print(table)
+
     runtime_seconds = time.perf_counter() - started
     payload = {
         "dataset": "nuscenes-mini", "scene": scene, "frames": len(selected), "stride": args.stride,
@@ -351,6 +492,7 @@ def _run_scene(args: argparse.Namespace, root: Path, tables: dict, scene: str) -
             "include_fusion": args.include_fusion,
             "fusion_free_fraction": args.fusion_free_fraction, "fusion_free_floor": args.fusion_free_floor,
             "fusion_void_min_scans": args.fusion_void_min_scans,
+            "sensor_aware": sensor_aware,
         },
     }
     # Retain the single-scene JSON keys used by the original script.
@@ -411,7 +553,18 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--root", default=str(ROOT_DIR), help="Where the mini data lives / is downloaded.")
     parser.add_argument("--summary-json", default=None,
                         help="Output JSON path (per-scene in single-scene mode; aggregate in multi-scene mode).")
+    parser.add_argument("--sensor-aware-ablation", action="store_true",
+                        help="Report private O1 distance/beam-normalized visibility evidence.")
+    parser.add_argument("--sensor-h-spacing", type=float, default=0.2)
+    parser.add_argument("--sensor-v-spacing", type=float, default=1.25)
+    parser.add_argument("--sensor-support-size", type=float, default=0.5)
+    parser.add_argument("--online-manifest", type=Path, default=None,
+                        help="Export this exact pose/GT selection for scripts/run_online_benchmark.py.")
+    parser.add_argument("--online-only", action="store_true",
+                        help="Stop after exporting --online-manifest instead of running offline map cleaners.")
     args = parser.parse_args(argv)
+    if args.online_only and args.online_manifest is None:
+        parser.error("--online-only requires --online-manifest")
 
     root = Path(args.root)
     _ensure_data(root)
@@ -425,6 +578,8 @@ def main(argv: list[str] | None = None) -> int:
     payloads: list[dict] = []
     for scene in scene_names:
         payload = _run_scene(args, root, tables, scene)
+        if isinstance(payload, int):
+            return payload
         payloads.append(payload)
         per_scene_path = (Path(args.summary_json) if args.summary_json and len(scene_names) == 1
                           else root / f"benchmark_{scene}.json")
@@ -438,6 +593,9 @@ def main(argv: list[str] | None = None) -> int:
         "frames": args.frames, "stride": args.stride,
         "config": payloads[0]["config"], "scene_results": payloads,
         "aggregate": aggregate,
+        "sensor_aware": {
+            item["scene"]: item.get("sensor_aware") for item in payloads
+        },
     }
     if len(scene_names) == 1 and args.summary_json:
         # The path was already used for the backward-compatible per-scene payload.

@@ -14,6 +14,7 @@ from __future__ import annotations
 __version__ = "0.5.0"
 
 import argparse
+import atexit
 import csv
 import io
 import json
@@ -1739,7 +1740,6 @@ _NB26 = np.array(
     dtype=np.int64,
 )
 
-
 def _carve_free_scan(
     map_keys: np.ndarray,
     pts: np.ndarray,
@@ -1879,6 +1879,7 @@ def _carve_void_scan(
 
 
 _FUSION_STATE: dict[str, Any] | None = None
+_FUSION_SHM_HANDLES: list[Any] = []
 
 
 def _fusion_accumulate(
@@ -1936,6 +1937,99 @@ def _fusion_worker(indices: Sequence[int]) -> tuple[np.ndarray, ...]:
     )
 
 
+def _fusion_pool_context() -> Any:
+    """Select fork where available and stdlib spawn everywhere else."""
+    import multiprocessing
+
+    try:
+        return multiprocessing.get_context("fork")
+    except (AttributeError, ValueError):
+        return multiprocessing.get_context("spawn")
+
+
+def _fusion_shared_array_spec(array: np.ndarray, owners: list[Any]) -> dict[str, Any]:
+    """Put a contiguous read-only input array in a shared-memory block."""
+    from multiprocessing import shared_memory
+
+    array = np.ascontiguousarray(array)
+    if array.nbytes == 0:
+        raise ValueError("fusion shared arrays must be non-empty")
+    shm = shared_memory.SharedMemory(create=True, size=array.nbytes)
+    view = np.ndarray(array.shape, dtype=array.dtype, buffer=shm.buf)
+    view[...] = array
+    owners.append(shm)
+    return {"name": shm.name, "shape": tuple(array.shape), "dtype": array.dtype.str}
+
+
+def _fusion_attach_shared_array(spec: dict[str, Any], handles: list[Any]) -> np.ndarray:
+    """Attach a worker view to a parent-owned shared-memory array."""
+    from multiprocessing import shared_memory
+
+    shm = shared_memory.SharedMemory(name=spec["name"])
+    handles.append(shm)
+    # The parent owns unlinking; workers only close their attached handles.
+    # This avoids multiple POSIX spawn workers racing on one tracker entry.
+    view = np.ndarray(tuple(spec["shape"]), dtype=np.dtype(spec["dtype"]), buffer=shm.buf)
+    view.setflags(write=False)
+    return view
+
+
+def _fusion_close_worker_shared_memory() -> None:
+    global _FUSION_SHM_HANDLES
+    for shm in _FUSION_SHM_HANDLES:
+        try:
+            shm.close()
+        except Exception:
+            pass
+    _FUSION_SHM_HANDLES = []
+
+
+def _fusion_close_parent_shared_memory(owners: list[Any]) -> None:
+    for shm in reversed(owners):
+        try:
+            shm.close()
+        except Exception:
+            pass
+        try:
+            shm.unlink()
+        except (FileNotFoundError, PermissionError):
+            pass
+
+
+def _fusion_spawn_init(
+    shared_specs: dict[str, dict[str, Any]],
+    params: dict[str, Any],
+) -> None:
+    """Initialize spawn workers from parent-owned arrays, not per-worker copies."""
+    global _FUSION_STATE, _FUSION_SHM_HANDLES
+    _fusion_close_worker_shared_memory()
+    handles: list[Any] = []
+    map_points = _fusion_attach_shared_array(shared_specs["map_points"], handles)
+    free_keys = _fusion_attach_shared_array(shared_specs["free_keys"], handles)
+    void_keys = _fusion_attach_shared_array(shared_specs["void_keys"], handles)
+    ground_z = _fusion_attach_shared_array(shared_specs["ground_z"], handles)
+    _FUSION_SHM_HANDLES = handles
+    atexit.register(_fusion_close_worker_shared_memory)
+
+    worker_params = dict(params)
+    ground_mins, ground_dims, ground_cell, _ = worker_params["ground"]
+    worker_params["free_keys"] = free_keys
+    worker_params["void_keys"] = void_keys
+    worker_params["ground"] = (ground_mins, ground_dims, ground_cell, ground_z)
+    _FUSION_STATE = {
+        "map_points": map_points,
+        "scans": None,
+        "params": worker_params,
+    }
+
+
+def _fusion_spawn_worker(scan_subset: Sequence[tuple[np.ndarray, Sequence[float]]]) -> tuple[np.ndarray, ...]:
+    assert _FUSION_STATE is not None
+    return _fusion_accumulate(
+        _FUSION_STATE["map_points"], scan_subset, range(len(scan_subset)), _FUSION_STATE["params"],
+    )
+
+
 def clean_map_by_fusion(
     map_points: np.ndarray,
     scans: Sequence[tuple[np.ndarray, Sequence[float]]],
@@ -1989,10 +2083,14 @@ def clean_map_by_fusion(
     strongest method on the public leaderboard, AA 98.6 / 96.3) on seq 00 and
     surpassing it on seq 05.
 
-    ``workers > 1`` distributes scans over a fork-based process pool (Linux /
-    macOS); on platforms without ``fork`` it falls back to sequential.
-    Carving cost dominates: expect a few minutes per 100 scans of 64-beam
-    data at the defaults with ``workers=6``.
+    ``workers > 1`` distributes scans over a process pool. POSIX platforms use
+    ``fork`` and retain the copy-on-write path; Windows and other platforms use
+    ``spawn`` with shared-memory read-only views of the map, voxel keys, and
+    ground grid so the large map is not copied once per worker. Scan subsets
+    are pickled per worker. Shared blocks are closed and unlinked after the
+    pool exits. Carving cost dominates: expect a few minutes per 100 scans of
+    64-beam data at the defaults with ``workers=6``; each worker still needs
+    its own vote accumulators and ray-sampling temporaries.
 
     Returns ``(kept_points, keep_mask)`` over ``map_points``.
     """
@@ -2027,13 +2125,8 @@ def clean_map_by_fusion(
     workers = max(1, int(workers))
     partials: list[tuple[np.ndarray, ...]]
     if workers > 1:
-        import multiprocessing
-
-        try:
-            ctx = multiprocessing.get_context("fork")
-        except ValueError:
-            ctx = None
-        if ctx is not None:
+        ctx = _fusion_pool_context()
+        if ctx.get_start_method() == "fork":
             _FUSION_STATE = {"map_points": map_points, "scans": scans, "params": params}
             try:
                 splits = [list(c) for c in np.array_split(np.asarray(indices), workers) if len(c)]
@@ -2042,8 +2135,30 @@ def clean_map_by_fusion(
             finally:
                 _FUSION_STATE = None
         else:
-            _eprint("fusion: fork unavailable, running sequentially")
-            partials = [_fusion_accumulate(map_points, scans, indices, params)]
+            owners: list[Any] = []
+            try:
+                shared_specs = {
+                    "map_points": _fusion_shared_array_spec(map_points, owners),
+                    "free_keys": _fusion_shared_array_spec(free_keys, owners),
+                    "void_keys": _fusion_shared_array_spec(void_keys, owners),
+                    "ground_z": _fusion_shared_array_spec(params["ground"][3], owners),
+                }
+                spawn_params = dict(params)
+                ground_mins, ground_dims, ground_cell, _ = spawn_params["ground"]
+                spawn_params["free_keys"] = None
+                spawn_params["void_keys"] = None
+                spawn_params["ground"] = (ground_mins, ground_dims, ground_cell, None)
+                splits = [list(c) for c in np.array_split(np.asarray(indices), workers) if len(c)]
+                scan_subsets = [[scans[int(i)] for i in split] for split in splits]
+                with ctx.Pool(
+                    len(scan_subsets),
+                    initializer=_fusion_spawn_init,
+                    initargs=(shared_specs, spawn_params),
+                ) as pool:
+                    partials = pool.map(_fusion_spawn_worker, scan_subsets)
+            finally:
+                _fusion_close_parent_shared_memory(owners)
+                _FUSION_STATE = None
     else:
         partials = [_fusion_accumulate(map_points, scans, indices, params)]
 

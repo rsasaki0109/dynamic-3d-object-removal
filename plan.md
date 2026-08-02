@@ -690,8 +690,15 @@ R2 / O2                         … ablation を通った候補だけ public API
   ローカル clone `/tmp/DynamicMap_Benchmark_fork`）
 - teaser zip は各 ~385 MB。seq 00: 141 scans / 17.4 M 点 / 96 k 動的 GT 点、
   seq 05: 321 scans / 39.9 M 点 / 684 k 動的 GT 点
-- fusion 実行時間: seq 00 654 s / seq 05 1728 s（workers=6）。kept 点数は
-  experiments / library / fork アダプタ間で bit-exact を確認済み
+- Task E runtime (2026-08-03, this Windows machine, cached AV2 and nuScenes data):
+  AV2 scene `0b5142c1…` measured 292.206 s / 242.168 s on the preserved HEAD
+  implementation (`workers=1/6`, with the Windows sequential fallback) and
+  291.429 s / 72.854 s on the new implementation (`workers=1/6`, with spawn);
+  nuScenes scene-0757 measured 31.031 s / 31.702 s before and 48.158 s / 12.872 s
+  after. The new `workers=6` keep masks are bit-exact with both old worker-count
+  masks on both cached inputs. The historical KITTI seq 00/05 runtime numbers
+  are intentionally not repeated here because they were not measured on this
+  machine during Task E.
 
 ### fusion 転移評価（2026-06-10〜11 確定）
 

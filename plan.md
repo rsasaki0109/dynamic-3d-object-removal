@@ -1,6 +1,6 @@
 # dynamic-3d-object-removal plan
 
-Last updated: 2026-06-11 (Asia/Tokyo)
+Last updated: 2026-08-02 (Asia/Tokyo)
 Repo: `rsasaki0109/dynamic-3d-object-removal`
 Branch: `master`
 Latest release: **v0.5.0**（tag + GitHub release + PyPI、2026-06-11）
@@ -17,7 +17,7 @@ LiDAR 点群から動的物体（車両・歩行者・自転車など）を除�
 アルゴリズムは 5 つ、すべて numpy:
 
 1. **box** — 検出 3D box による per-scan crop（検出器 or annotation が必要）
-2. **temporal** — voxel hit-count の時系列一貫性（検出器不要、最も単純・高 recall）
+2. **temporal** — voxel hit-count の時系列一貫性（検出器不要、最も単純・高 recall。visibility gate は opt-in）
 3. **range** — range-image 可視性（Removert 系 remove + revert、検出器不要、multi-resolution consensus 対応）
 4. **scan_ratio** — 極座標カラムの擬似 occupancy（ERASOR 系 scan-ratio + ground revert、検出器不要。
    v0.4.0 から votes をカラム再訪数で正規化）
@@ -33,19 +33,21 @@ LiDAR 点群から動的物体（車両・歩行者・自転車など）を除�
 3. **ROS2 リアルタイムノード** (`realtime.py`, 859 行) — box / temporal / range 対応
 
 ベンチマーク 3 本（AV2 / nuScenes mini / Semantic-KITTI(DynamicMap_Benchmark)）と
-テスト（89 passed + 1 skipped）付き。
+テスト（95 passed + 1 skipped）付き。
 ブラウザ Playground（Pyodide、Box / Range / Temporal の 3 モード、**共有 URL +
 AV2/nuScenes プリセット切替対応**）が GitHub Pages にある。
 
 ---
 
-## Headline numbers (2026-06-11 時点、全て再現スクリプト付き)
+## Headline numbers (2026-08-02 時点、全て再現スクリプト付き)
 
 | ベンチ | センサー | ベスト手法 | 数字 | 次点 |
 |---|---|---|---|---|
 | Semantic-KITTI seq 00 / 05 (DynamicMap_Benchmark) | VLP-64, 141/321 scans | **fusion** | AA **98.6 / 98.0**（リーダーボード首位 DUFOMap は 98.6 / 96.3） | scan_ratio 95.4 / 96.9 |
-| Argoverse 2 (12 sweeps 短窓) | 64-beam | **fusion**（short-window 閾値 0.7/3/4） | F1 **0.657** / static 0.974 | range 0.600 |
-| nuScenes mini scene-0757 (12 keyframes) | 32-beam（疎） | **range ∧ scan_ratio**（マスク積） | F1 **0.642** / static 0.842 | range 単独 0.628 |
+| Argoverse 2 (3 logs, 12 sweeps mean) | 64-beam | **fusion**（short-window 閾値 0.7/3/4） | F1 **0.642** / static **0.964** | temporal (visibility-gated) F1 0.586 / static 0.968 |
+| nuScenes mini (6 eligible scenes, 12 keyframes) | 32-beam（疎） | **range ∧ scan_ratio**（マスク積） | F1 **0.240** / static **0.931**（scene-0757 best-case: F1 0.642 / static 0.842） | temporal (visibility-gated) F1 0.236 / static 0.880 |
+
+nuScenes は単一 scene の結果が transfer を過大評価していたため、5,000 GT dynamic points 以上の eligible 6 scenes の平均を headline にした（閾値未満の scene は一覧に残すが平均から除外）。
 
 転移の教訓（README に全部明記済みの誠実路線）:
 
@@ -95,7 +97,7 @@ examples/
 
 ---
 
-## Current state (2026-06-11)
+## Current state (2026-08-02)
 
 ### 完了済み（前回 plan 2026-06-10 以降の追加分に ★）
 
@@ -112,12 +114,14 @@ examples/
       nuScenes 32-beam は不適と実測で確定（チャネル単離まで）→ README に「sized to the sensor」
       の使い分け指針として明文化
 - [x] ★ **range ∧ scan_ratio 交差** — nuScenes のベスト数字を更新（F1 0.628 → 0.642、static 0.808 → 0.842）
+- [x] ★ **Task B (2026-08-02) 完了**: AV2 3-scene mean は fusion F1 0.642 / static 0.964、nuScenes 6-eligible-scene mean は range ∧ scan_ratio F1 0.240 / static 0.931。scene-0757 の F1 0.642 は best-case で、単一 scene の headline は transfer を過大評価していた。追加 AV2 logs は annotation-only screening で選定
+- [x] ★ **Task A (2026-08-02) 完了**: visibility-gated temporal を opt-in で追加。AV2 mean は ungated F1 0.254 / static 0.703 → gated F1 0.586 / static 0.968、nuScenes static 0.401 → 0.880。vectorized path は約 128–162 ms / 100k points
 - [x] ★ **Step C の実装部分完了**: Playground 共有 URL（`?mode=&preset=`、Share ボタン）+
       nuScenes 32-beam プリセット（`sample_nuscenes_range.npz`、生成スクリプト付き）
 - [x] ブラウザ Playground (Pyodide): Box / Range / Temporal、ユーザー自身の PCD ドロップ対応
 - [x] README: How It Compares + AV2 / nuScenes / KITTI 実測テーブル + fusion API sizing 指針
 - [x] GitHub Pages デモ群、hero image、social card、About / topics 設定
-- [x] テスト 89 件、CI (`test.yml`)、publish workflow (`publish.yml`)
+- [x] テスト 95 件、CI (`test.yml`)、publish workflow (`publish.yml`)
 
 ### 未完了（→ 下の Roadmap）
 
@@ -316,6 +320,13 @@ Step C 投稿 (Show HN)           … 半日（投稿 + 当日対応）
   fusion が既に 3 チャネル OR なので追加合成が効かない
 - 実験ハーネス: `/tmp/fusion_xfer.py`（閾値スイープ）、`/tmp/combo_test.py`（マスク合成総当たり）
 
+### Multi-scene benchmark + temporal visibility（2026-08-02 確定）
+
+- nuScenes は 10 scenes を走査し、GT dynamic points が 5,000 未満の scene は一覧に残して mean から除外。eligible 6-scene mean は range ∧ scan_ratio F1 0.240 / static 0.931、scene-0757 は busy-scene の best-case（F1 0.642 / static 0.842）で、単一 scene の数字は transfer を過大評価する
+- AV2 は annotation-only screening で moving content の多い 3 logs を選定。全 scene の fusion mean は F1 0.642 / static 0.964。追加 logs は `04994d08…` / `05fa5048…`（default は `0b5142c1…`）
+- visibility-gated temporal は opt-in。AV2 mean は F1 0.254 → 0.586、static 0.703 → 0.968、nuScenes static 0.401 → 0.880。vectorized timing は old Counter 515.873 ms → ungated 127.715 ms / gated 162.429 ms（100k points）
+- 詳細な per-scene 表・設定・再現ログは `data/benchmark_results/multiscene.md` が source of truth。ベンチマークのデータキャッシュは gitignored の `data/` 配下
+
 ### PyPI / packaging（2026-06-11 確認）
 
 - **PyPI に `dynamic-object-removal` v0.5.0 公開済み**（2026-06-11、wheel + sdist）。
@@ -383,8 +394,8 @@ scene: `04994d08-156c-3018-9717-ba0e29be8153` (val split)
 ### ベンチマーク再現（3 本）
 
 ```bash
-python3 scripts/run_av2_benchmark.py --frames 12          # AV2 (64-beam, fusion 含む)
-python3 scripts/run_nuscenes_benchmark.py                 # nuScenes mini (32-beam, 交差含む)
+python3 scripts/run_av2_benchmark.py --scenes 0b5142c1-420b-3fea-9e98-b87327ae22c6 04994d08-156c-3018-9717-ba0e29be8153 05fa5048-f355-3274-b565-c0ddc547b315   # AV2 (64-beam, 3-scene mean)
+python3 scripts/run_nuscenes_benchmark.py --scenes all    # nuScenes mini (32-beam, 6-scene eligible mean)
 python3 scripts/run_dynamicmap_benchmark.py --sequences 00 05   # Semantic-KITTI (SA/DA/AA)
 ```
 

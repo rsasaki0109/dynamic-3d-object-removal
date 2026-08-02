@@ -22,7 +22,7 @@
 
 ### Features
 
-- **Five algorithms, all numpy**: `box` (per-scan crop, needs 3D boxes), `temporal` (voxel consistency), `range` (range-image visibility, Removert-style remove + revert), `scan_ratio` (ERASOR-style per-column pseudo-occupancy + ground revert), `fusion` (highest-accuracy map cleaner) — the last four are detector-free
+- **Five algorithms, all numpy**: `box` (per-scan crop, needs 3D boxes), `temporal` (voxel consistency, optional visibility gate), `range` (range-image visibility, Removert-style remove + revert), `scan_ratio` (ERASOR-style per-column pseudo-occupancy + ground revert), `fusion` (highest-accuracy map cleaner) — the last four are detector-free
 - **Fast**: 1.5 ms for 24k points on CPU; **ROS2 realtime node** (`box` / `temporal` / `range`)
 - **Minimal dependencies**: `numpy` only (`pyarrow` just for Argoverse 2 Feather input)
 
@@ -59,40 +59,42 @@ flowchart TD
 | Online / realtime | **Yes** (ROS2 node) | No (batch) | No (batch) |
 | Core stack | `numpy` only | C++ / ROS / PCL | C++ / ROS / PCL |
 
-### Measured on Argoverse 2 (64-beam, 12 sweeps)
+### Measured on Argoverse 2 (64-beam, 12 sweeps; 3-scene mean)
 
-Detector-free methods only, reproducible with one command, no signup. Ground truth = points on objects whose track actually moved (parked cars don't count against a motion-based method).
+Detector-free methods only, reproducible with one command, no signup. Ground truth = points on objects whose track actually moved (parked cars don't count against a motion-based method). The three logs were selected by annotation-only screening for moving content; parameters were not tuned per scene.
 
-| method (detector-free) | precision | recall | F1 | static points kept |
+| method (detector-free, 3-scene mean) | precision | recall | F1 | static points kept |
 |---|---|---|---|---|
-| **free-space fusion** (`fusion`, short-window thresholds) | 0.65 | **0.66** | **0.66** | 0.97 |
-| **range-image visibility** (`range`) | **0.68** | 0.54 | 0.60 | 0.98 |
-| **scan-ratio** pseudo-occupancy (`scan_ratio`, `--sr-min-votes 2`) | 0.66 | 0.56 | 0.61 | 0.98 |
-| temporal consistency (`temporal`) | 0.19 | 0.72 | 0.30 | 0.78 |
+| **free-space fusion** (`fusion`, short-window thresholds) | 0.571 | **0.745** | **0.642** | 0.964 |
+| range-image visibility (`range`) | 0.594 | 0.636 | 0.606 | 0.972 |
+| scan-ratio pseudo-occupancy (`scan_ratio`) | **0.850** | 0.473 | 0.573 | **0.994** |
+| temporal consistency (`temporal`, ungated) | 0.152 | **0.817** | 0.254 | 0.703 |
+| temporal consistency (`temporal`, visibility-gated) | 0.556 | 0.629 | 0.586 | 0.968 |
 
-> Scene `0b5142c1…`, 1.24 M points, 84 k GT points. `fusion` needs relaxed short-window thresholds here (`0.7 / 3 / 4`, the script's defaults — the library defaults assume 100+ scans and drop F1 to 0.39). `range` is tunable toward precision (`--min-see-through 4` → ≈ 0.89). `scan_ratio` reaches a similar F1 through an independent signal (column occupancy vs line-of-sight); use a small fixed `--sr-min-votes` on short windows.
+> Logs `0b5142c1…`, `04994d08…`, and `05fa5048…` were selected by annotation-only screening for moving content. `fusion` needs relaxed short-window thresholds here (`0.7 / 3 / 4`, the script's defaults — the library defaults assume 100+ scans and drop F1 to 0.39). `range` is tunable toward precision (`--min-see-through 4` → ≈ 0.89). `scan_ratio` reaches a similar F1 through an independent signal (column occupancy vs line-of-sight); use a small fixed `--sr-min-votes` on short windows.
 
 ```bash
 pip install awscli pyarrow
-python3 scripts/run_av2_benchmark.py --frames 12
+python3 scripts/run_av2_benchmark.py --scenes 0b5142c1-420b-3fea-9e98-b87327ae22c6 04994d08-156c-3018-9717-ba0e29be8153 05fa5048-f355-3274-b565-c0ddc547b315
 ```
 
-### Also measured on nuScenes (32-beam, sparse)
+### Also measured on nuScenes (32-beam, sparse; 6-scene eligible mean)
 
 On a ~5× sparser sensor the one change that matters: **match the range-image resolution to beam density** (`2.5°` vs AV2's `1.0°`).
+Single-scene results overstate transfer; means over all eligible mini scenes are reported instead. The mean is unweighted over six scenes; scenes with fewer than 5,000 GT dynamic points are listed by the benchmark but excluded from the mean.
 
-| method (detector-free) | precision | recall | F1 | static points kept |
+| method (detector-free, 6-scene eligible mean) | precision | recall | F1 | static points kept |
 |---|---|---|---|---|
-| **range ∧ scan-ratio** (intersection) | **0.51** | 0.87 | **0.64** | **0.84** |
-| range-image visibility (`range`) | 0.48 | **0.92** | 0.63 | 0.81 |
-| scan-ratio pseudo-occupancy (`scan_ratio`) | 0.36 | **0.90** | 0.51 | 0.69 |
-| free-space fusion (`fusion`, short-window thresholds) | 0.16 | 0.32 | 0.22 | 0.68 |
-| temporal consistency (`temporal`) | 0.07 | 0.22 | 0.11 | 0.47 |
+| **range ∧ scan-ratio** (intersection) | **0.297** | 0.263 | **0.240** | **0.931** |
+| temporal consistency (`temporal`, visibility-gated) | 0.251 | 0.382 | 0.236 | 0.880 |
+| scan-ratio pseudo-occupancy (`scan_ratio`) | 0.247 | 0.331 | 0.231 | 0.825 |
+| range-image visibility (`range`) | 0.127 | **0.499** | 0.187 | 0.801 |
+| temporal consistency (`temporal`, ungated) | 0.107 | **0.797** | 0.158 | 0.401 |
 
-> `scene-0757`, 12 keyframes, 303 k points, 49 k GT points. AV2's fine `1.0°` resolution collapses F1 to ~0.30 here. `scan_ratio`'s column signal is more sparsity-sensitive (high recall, weak precision) — but its false positives are nearly disjoint from `range`'s, so **intersecting the two dynamic masks** gives the best precision-side numbers at no extra cost. `fusion` is not suited to sparse sensors: beyond ~13 m the beam spacing exceeds the carving voxel and static walls get carved between beams; coarser voxels don't recover it (measured F1 < 0.3).
+> Busy-scene best-case example (not typical): `scene-0757`, 12 keyframes, 303,120 map points, 48,529 GT points. Its `range ∧ scan_ratio` result is F1 0.642 / static 0.842. The fine AV2 `1.0°` resolution is a poor fit here. `scan_ratio`'s column signal is more sparsity-sensitive (high recall, weak precision) — but its false positives are nearly disjoint from `range`'s, so **intersecting the two dynamic masks** gives the best precision-side numbers at no extra cost. `fusion` is not suited to sparse sensors: beyond ~13 m the beam spacing exceeds the carving voxel and static walls get carved between beams; coarser voxels don't recover it (measured F1 < 0.3).
 
 ```bash
-python3 scripts/run_nuscenes_benchmark.py   # downloads nuScenes mini once, ~3.9 GB, no signup
+python3 scripts/run_nuscenes_benchmark.py --scenes all   # downloads nuScenes mini once, ~3.9 GB, no signup
 ```
 
 ### Measured on Semantic-KITTI (DynamicMap_Benchmark)
@@ -185,6 +187,8 @@ dynamic-object-removal-realtime \
   --voxel-size 0.10 --temporal-window 5 --temporal-min-hits 3
 ```
 
+`temporal` keeps its legacy hit-count behavior by default. Pass `--temporal-visibility` to enable the opt-in spherical visibility gate; ROS2 also exposes `--temporal-visibility-h-res`, `--temporal-visibility-v-res`, `--temporal-visibility-margin`, `--temporal-visibility-fraction`, and `--temporal-visibility-min-hits` (`--no-visibility` makes the default explicit). On AV2, the 3-scene mean improves from F1 0.254 to 0.586 and static points kept from 0.703 to 0.968. The vectorized filter takes about 128 ms/100k points ungated or 162 ms gated (old Counter path: 516 ms).
+
 ## Library API
 
 ```python
@@ -202,7 +206,7 @@ Main public APIs:
 
 - `load_points(path, fmt="auto")` / `load_boxes(path, fmt="auto", skip_invalid=False)` / `save_points(path, fmt="auto")`
 - `remove_points_in_boxes(points, boxes, margin=(0.05, 0.05, 0.05))`
-- `TemporalConsistencyFilter(voxel_size=0.10, window_size=5, min_hits=3)`
+- `TemporalConsistencyFilter(voxel_size=0.10, window_size=5, min_hits=3, visibility=False)`
 - `remove_ghost_by_range_image(map_points, query_points, sensor_origin, range_margin=0.5)` — single map-vs-scan visibility removal
 - `clean_map_by_visibility(map_points, scans, min_see_through=2, max_surface_hits=2, ground_z=None, resolutions=None)` — multi-scan map cleaner (remove + revert)
 - `remove_dynamic_by_scan_ratio(map_points, query_points, sensor_origin, scan_ratio_threshold=0.2, ground_margin=0.2)` — single map-vs-scan scan-ratio removal

@@ -33,6 +33,7 @@ import json
 import math
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 import numpy as np
@@ -46,6 +47,15 @@ DEFAULT_SCENE = "0b5142c1-420b-3fea-9e98-b87327ae22c6"
 S3_ROOT = "s3://argoverse/datasets/av2/sensor/val"
 OUTPUT_DIR = Path(__file__).resolve().parents[1] / "data" / "av2_benchmark"
 GROUND_Z = -1.4  # sensor-frame ground height (AV2 LiDAR ~1.73 m above ground)
+MIN_GT_DYNAMIC_POINTS_FOR_MEAN = 5_000
+
+_METRIC_KEYS = ("precision", "recall", "f1", "static_preservation")
+_METHOD_LABELS = {
+    "range": "range-image visibility",
+    "scan_ratio": "scan-ratio (pseudo-occupancy)",
+    "temporal": "temporal consistency",
+    "fusion": "free-space fusion",
+}
 
 
 def _run(cmd: list[str]) -> None:
@@ -106,51 +116,87 @@ def _load_poses(scene: str) -> dict[int, tuple[np.ndarray, np.ndarray]]:
     return out
 
 
-def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Accuracy benchmark on real AV2 data.")
-    parser.add_argument("--scene", default=DEFAULT_SCENE, help="AV2 val log id.")
-    parser.add_argument("--frames", type=int, default=12, help="Number of sweeps.")
-    parser.add_argument("--stride", type=int, default=3, help="Frame stride (3 = ~3 Hz, gives objects time to move).")
-    parser.add_argument("--range-margin", type=float, default=core.DEFAULT_RANGE_MARGIN)
-    parser.add_argument("--min-see-through", type=int, default=3, help="Scans that must see a point as free space.")
-    parser.add_argument("--max-surface-hits", type=int, default=3, help="Max scans confirming a point as surface (revert guard).")
-    parser.add_argument("--h-res", type=float, default=1.0)
-    parser.add_argument("--v-res", type=float, default=1.0)
-    parser.add_argument("--resolutions", type=float, nargs="+", default=None,
-                        help="Multi-resolution consensus (e.g. --resolutions 1.0 2.0): "
-                             "higher precision, slightly lower recall. Overrides --h/--v-res.")
-    parser.add_argument("--moving-thresh", type=float, default=2.0, help="Track center displacement (m) to count as moving GT.")
-    parser.add_argument("--voxel-size", type=float, default=core.DEFAULT_TEMPORAL_VOXEL_SIZE)
-    parser.add_argument("--temporal-min-hits", type=int, default=2)
-    parser.add_argument("--sr-rings", type=int, default=core.DEFAULT_SR_RINGS)
-    parser.add_argument("--sr-sectors", type=int, default=core.DEFAULT_SR_SECTORS)
-    parser.add_argument("--sr-max-range", type=float, default=core.DEFAULT_SR_MAX_RANGE)
-    parser.add_argument("--sr-ratio", type=float, default=core.DEFAULT_SR_RATIO,
-                        help="Column dynamic if query/map height ratio is below this.")
-    parser.add_argument("--sr-min-map-height", type=float, default=core.DEFAULT_SR_MIN_MAP_HEIGHT)
-    parser.add_argument("--sr-ground-margin", type=float, default=core.DEFAULT_SR_GROUND_MARGIN)
-    parser.add_argument("--sr-min-votes", type=int, default=None,
-                        help="Fixed absolute vote threshold (default: normalized, 35%% of each point's column revisits).")
-    parser.add_argument("--fusion-workers", type=int, default=6,
-                        help="Process pool size for the fusion carving channels.")
-    # Short-window fusion defaults: the library defaults (0.9 / 2 / 11) assume a long
-    # KITTI-style sequence. With only 12 sweeps, a single same-scan hit must not veto
-    # the fractional vote (0.9 would need 9 frees after 1 hit in 10 observations) and
-    # 11 absolute voids can never accumulate.
-    parser.add_argument("--fusion-free-fraction", type=float, default=0.7)
-    parser.add_argument("--fusion-free-floor", type=int, default=3)
-    parser.add_argument("--fusion-void-min-scans", type=int, default=4)
-    parser.add_argument("--summary-json", default=None)
-    args = parser.parse_args(argv)
+def _resolve_scenes(scene: str | None, scenes: list[str] | None) -> list[str]:
+    """Resolve the backward-compatible single-scene and explicit multi-scene forms."""
+    requested = [scene or DEFAULT_SCENE] if scenes is None else scenes
+    if len(requested) == 1 and requested[0].lower() == "all":
+        raise ValueError("AV2 has many val logs; pass explicit log ids to --scenes")
+    if any(item.lower() == "all" for item in requested):
+        raise ValueError("--scenes all cannot be combined with individual AV2 log ids")
+    return list(dict.fromkeys(requested))
 
+
+def _format_metric(value: float | None) -> str:
+    return "n/a" if value is None else f"{value:.3f}"
+
+
+def _aggregate_scene_results(
+    payloads: list[dict],
+    method_keys: list[str],
+    *,
+    min_gt_dynamic_points: int = MIN_GT_DYNAMIC_POINTS_FOR_MEAN,
+) -> dict:
+    """Compute an unweighted mean of eligible per-scene metric dictionaries."""
+    included = [p for p in payloads if p["gt_dynamic_points"] >= min_gt_dynamic_points]
+    excluded = [p for p in payloads if p["gt_dynamic_points"] < min_gt_dynamic_points]
+    means: dict[str, dict[str, float | None]] = {}
+    for key in method_keys:
+        means[key] = {
+            metric: (sum(float(p["metrics"][key][metric]) for p in included) / len(included)
+                     if included else None)
+            for metric in _METRIC_KEYS
+        }
+    return {
+        "min_gt_dynamic_points": min_gt_dynamic_points,
+        "included_scenes": [p["scene"] for p in included],
+        "excluded_scenes": [p["scene"] for p in excluded],
+        "methods": means,
+    }
+
+
+def _print_results(payloads: list[dict], aggregate: dict) -> None:
+    print("\n### Argoverse 2 per-scene summary\n")
+    print("| val log | map points | GT dynamic points | moving tracks | runtime (s) |")
+    print("|---|---:|---:|---:|---:|")
+    for payload in payloads:
+        print(f"| {payload['scene']} | {payload['map_points']:,} | {payload['gt_dynamic_points']:,} | "
+              f"{payload['moving_tracks']} | {payload['runtime_seconds']:.1f} |")
+
+    print("\n### Argoverse 2 per-scene metrics\n")
+    print("| val log | method | precision | recall | F1 | static kept |")
+    print("|---|---|---:|---:|---:|---:|")
+    for payload in payloads:
+        for key in payload["method_keys"]:
+            m = payload["metrics"][key]
+            print(f"| {payload['scene']} | {_METHOD_LABELS[key]} | {m['precision']:.3f} | "
+                  f"{m['recall']:.3f} | {m['f1']:.3f} | {m['static_preservation']:.3f} |")
+
+    threshold = aggregate["min_gt_dynamic_points"]
+    print("\n### Argoverse 2 aggregate mean across scenes\n")
+    print(f"Mean is unweighted across scenes with at least {threshold:,} GT dynamic points; "
+          "lower-content scenes remain listed above but are excluded from this mean.")
+    if aggregate["excluded_scenes"]:
+        print(f"Excluded: {', '.join(aggregate['excluded_scenes'])}.")
+    print("\n| method | scenes averaged | precision | recall | F1 | static kept |")
+    print("|---|---:|---:|---:|---:|---:|")
+    for key in payloads[0]["method_keys"]:
+        m = aggregate["methods"][key]
+        print(f"| {_METHOD_LABELS[key]} | {len(aggregate['included_scenes'])} | "
+              f"{_format_metric(m['precision'])} | {_format_metric(m['recall'])} | "
+              f"{_format_metric(m['f1'])} | {_format_metric(m['static_preservation'])} |")
+
+
+def _run_scene(args: argparse.Namespace, scene: str) -> dict:
     import pyarrow.feather as feather
 
-    print(f"Argoverse 2 scene {args.scene}: {args.frames} sweeps (stride {args.stride})...")
-    selected = _download(args.scene, args.frames, args.stride)
-    poses = _load_poses(args.scene)
-    ann_file = _scene_dir(args.scene) / "annotations.feather"
+    started = time.perf_counter()
+    print(f"Argoverse 2 scene {scene}: {args.frames} sweeps (stride {args.stride})...")
+    selected = _download(scene, args.frames, args.stride)
+    poses = _load_poses(scene)
+    ann_file = _scene_dir(scene) / "annotations.feather"
     ann = feather.read_table(ann_file)
     arr = {c: (ann[c].to_pylist() if c in ("track_uuid", "category") else ann[c].to_numpy()) for c in ann.column_names}
+    selected_set = set(selected)
 
     # Pose-aligned accumulated map (ground removed) + per-frame scans/origins/slices.
     chunks: list[np.ndarray] = []
@@ -159,7 +205,7 @@ def main(argv: list[str] | None = None) -> int:
     cursor = 0
     for ts in selected:
         R, tvec = poses[ts]
-        pts_ego = core.load_points(_scene_dir(args.scene) / "lidar" / f"{ts}.feather", fmt="feather")
+        pts_ego = core.load_points(_scene_dir(scene) / "lidar" / f"{ts}.feather", fmt="feather")
         pts_ego = pts_ego[pts_ego[:, 2] > GROUND_Z]
         pts_city = pts_ego @ R.T + tvec
         chunks.append(pts_city)
@@ -172,7 +218,7 @@ def main(argv: list[str] | None = None) -> int:
     track_centers: dict[str, list[np.ndarray]] = collections.defaultdict(list)
     for i in range(ann.num_rows):
         ts = int(arr["timestamp_ns"][i])
-        if ts not in poses or ts not in set(selected):
+        if ts not in poses or ts not in selected_set:
             continue
         R, tvec = poses[ts]
         c = R @ np.array([arr["tx_m"][i], arr["ty_m"][i], arr["tz_m"][i]]) + tvec
@@ -187,7 +233,6 @@ def main(argv: list[str] | None = None) -> int:
     for ts, (s, e) in zip(selected, slices):
         R, tvec = poses[ts]
         ego_yaw = math.atan2(R[1, 0], R[0, 0])
-        sub = ann.filter(arr["timestamp_ns"] == ts) if False else ann
         gb: list[core.DetectionBox] = []
         rows = np.where(np.asarray(arr["timestamp_ns"]) == ts)[0]
         for i in rows:
@@ -213,16 +258,6 @@ def main(argv: list[str] | None = None) -> int:
     )
     range_metrics = bench.compute_accuracy_metrics(~keep_range, gt_mask)
 
-    # --- temporal: per-frame voxel consistency assembled over the map ---
-    keep_temporal = np.ones(len(acc_map), dtype=bool)
-    tfilter = core.TemporalConsistencyFilter(voxel_size=args.voxel_size, window_size=len(selected), min_hits=args.temporal_min_hits)
-    for (s, e) in slices:
-        tfilter.filter(acc_map[s:e])
-    for (s, e) in slices:
-        _, keep_f = tfilter.filter(acc_map[s:e])
-        keep_temporal[s:e] = keep_f
-    temporal_metrics = bench.compute_accuracy_metrics(~keep_temporal, gt_mask)
-
     # --- scan-ratio: ERASOR-style per-column pseudo-occupancy (a different signal) ---
     _, keep_sr = core.clean_map_by_scan_ratio(
         acc_map, scans,
@@ -231,6 +266,17 @@ def main(argv: list[str] | None = None) -> int:
         ground_margin=args.sr_ground_margin, min_votes=args.sr_min_votes,
     )
     scanratio_metrics = bench.compute_accuracy_metrics(~keep_sr, gt_mask)
+
+    # --- temporal: per-frame voxel consistency assembled over the map ---
+    keep_temporal = np.ones(len(acc_map), dtype=bool)
+    tfilter = core.TemporalConsistencyFilter(
+        voxel_size=args.voxel_size, window_size=len(selected), min_hits=args.temporal_min_hits)
+    for (s, e) in slices:
+        tfilter.filter(acc_map[s:e])
+    for (s, e) in slices:
+        _, keep_f = tfilter.filter(acc_map[s:e])
+        keep_temporal[s:e] = keep_f
+    temporal_metrics = bench.compute_accuracy_metrics(~keep_temporal, gt_mask)
 
     # --- fusion: free-space carving + eroded voids + scan-ratio votes (OR) ---
     _, keep_fusion = core.clean_map_by_fusion(
@@ -242,36 +288,110 @@ def main(argv: list[str] | None = None) -> int:
     )
     fusion_metrics = bench.compute_accuracy_metrics(~keep_fusion, gt_mask)
 
-    def row(name: str, m: dict) -> str:
-        return (f"| {name} | {m['precision']:.3f} | {m['recall']:.3f} | {m['f1']:.3f} | "
-                f"{m['static_preservation']:.3f} |")
-
-    table = (
-        "\n### Measured on Argoverse 2 (this repo's detector-free methods)\n\n"
-        f"Scene `{args.scene}`, {len(selected)} pose-aligned sweeps, {len(acc_map):,} points "
-        f"({int(gt_mask.sum()):,} ground-truth points on moving objects).\n\n"
-        "| method | precision | recall | F1 | static kept |\n"
-        "|---|---|---|---|---|\n"
-        f"{row('free-space fusion', fusion_metrics)}\n"
-        f"{row('range-image visibility', range_metrics)}\n"
-        f"{row('scan-ratio (pseudo-occupancy)', scanratio_metrics)}\n"
-        f"{row('temporal consistency', temporal_metrics)}\n"
-    )
-    print(table)
-
-    payload = {
-        "scene": args.scene, "frames": len(selected), "stride": args.stride,
-        "map_points": int(len(acc_map)), "gt_dynamic_points": int(gt_mask.sum()),
-        "moving_tracks": len(moving),
-        "config": {"h_res": args.h_res, "v_res": args.v_res, "range_margin": args.range_margin,
-                   "min_see_through": args.min_see_through, "max_surface_hits": args.max_surface_hits,
-                   "ground_z": GROUND_Z, "moving_thresh": args.moving_thresh},
-        "range": range_metrics, "temporal": temporal_metrics, "scan_ratio": scanratio_metrics,
+    metrics = {
+        "range": range_metrics,
+        "scan_ratio": scanratio_metrics,
+        "temporal": temporal_metrics,
         "fusion": fusion_metrics,
     }
-    out_json = args.summary_json or str(_scene_dir(args.scene) / "benchmark_result.json")
-    Path(out_json).write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"Saved: {out_json}")
+    runtime_seconds = time.perf_counter() - started
+    payload = {
+        "dataset": "argoverse-2-sensor-val", "scene": scene,
+        "frames": len(selected), "stride": args.stride,
+        "map_points": int(len(acc_map)), "gt_dynamic_points": int(gt_mask.sum()),
+        "moving_tracks": len(moving), "runtime_seconds": runtime_seconds,
+        "method_keys": list(metrics), "metrics": metrics,
+        "config": {
+            "h_res": args.h_res, "v_res": args.v_res, "range_margin": args.range_margin,
+            "min_see_through": args.min_see_through, "max_surface_hits": args.max_surface_hits,
+            "ground_z": GROUND_Z, "moving_thresh": args.moving_thresh,
+            "voxel_size": args.voxel_size, "temporal_min_hits": args.temporal_min_hits,
+            "sr_rings": args.sr_rings, "sr_sectors": args.sr_sectors, "sr_max_range": args.sr_max_range,
+            "sr_ratio": args.sr_ratio, "sr_min_map_height": args.sr_min_map_height,
+            "sr_ground_margin": args.sr_ground_margin, "sr_min_votes": args.sr_min_votes,
+            "fusion_free_fraction": args.fusion_free_fraction, "fusion_free_floor": args.fusion_free_floor,
+            "fusion_void_min_scans": args.fusion_void_min_scans,
+        },
+    }
+    # Retain the single-scene JSON keys used by the original script.
+    payload.update(metrics)
+    return payload
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Accuracy benchmark on real AV2 data.")
+    scene_group = parser.add_mutually_exclusive_group()
+    scene_group.add_argument("--scene", default=None, help=f"AV2 val log id (default: {DEFAULT_SCENE}).")
+    scene_group.add_argument("--scenes", nargs="+", metavar="SCENE",
+                             help="Space-separated AV2 val log ids; pass explicit ids (no all expansion).")
+    parser.add_argument("--frames", type=int, default=12, help="Number of sweeps.")
+    parser.add_argument("--stride", type=int, default=3, help="Frame stride (3 = ~3 Hz, gives objects time to move).")
+    parser.add_argument("--range-margin", type=float, default=core.DEFAULT_RANGE_MARGIN)
+    parser.add_argument("--min-see-through", type=int, default=3, help="Scans that must see a point as free space.")
+    parser.add_argument("--max-surface-hits", type=int, default=3, help="Max scans confirming a point as surface (revert guard).")
+    parser.add_argument("--h-res", type=float, default=1.0)
+    parser.add_argument("--v-res", type=float, default=1.0)
+    parser.add_argument("--resolutions", type=float, nargs="+", default=None,
+                        help="Multi-resolution consensus (e.g. --resolutions 1.0 2.0): "
+                             "higher precision, slightly lower recall. Overrides --h/--v-res.")
+    parser.add_argument("--moving-thresh", type=float, default=2.0, help="Track displacement (m) to count as moving GT.")
+    parser.add_argument("--voxel-size", type=float, default=core.DEFAULT_TEMPORAL_VOXEL_SIZE)
+    parser.add_argument("--temporal-min-hits", type=int, default=2)
+    parser.add_argument("--sr-rings", type=int, default=core.DEFAULT_SR_RINGS)
+    parser.add_argument("--sr-sectors", type=int, default=core.DEFAULT_SR_SECTORS)
+    parser.add_argument("--sr-max-range", type=float, default=core.DEFAULT_SR_MAX_RANGE)
+    parser.add_argument("--sr-ratio", type=float, default=core.DEFAULT_SR_RATIO,
+                        help="Column dynamic if query/map height ratio is below this.")
+    parser.add_argument("--sr-min-map-height", type=float, default=core.DEFAULT_SR_MIN_MAP_HEIGHT)
+    parser.add_argument("--sr-ground-margin", type=float, default=core.DEFAULT_SR_GROUND_MARGIN)
+    parser.add_argument("--sr-min-votes", type=int, default=None,
+                        help="Fixed absolute vote threshold (default: normalized, 35%% of each point's column revisits).")
+    parser.add_argument("--fusion-workers", type=int, default=6,
+                        help="Process pool size for the fusion carving channels.")
+    # Short-window fusion defaults: the library defaults (0.9 / 2 / 11) assume a long
+    # KITTI-style sequence. With only 12 sweeps, a single same-scan hit must not veto
+    # the fractional vote (0.9 would need 9 frees after 1 hit in 10 observations) and
+    # 11 absolute voids can never accumulate.
+    parser.add_argument("--fusion-free-fraction", type=float, default=0.7)
+    parser.add_argument("--fusion-free-floor", type=int, default=3)
+    parser.add_argument("--fusion-void-min-scans", type=int, default=4)
+    parser.add_argument("--summary-json", default=None,
+                        help="Output JSON path (per-scene in single-scene mode; aggregate in multi-scene mode).")
+    args = parser.parse_args(argv)
+
+    try:
+        scene_names = _resolve_scenes(args.scene, args.scenes)
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+
+    payloads: list[dict] = []
+    for scene in scene_names:
+        payload = _run_scene(args, scene)
+        payloads.append(payload)
+        per_scene_path = (Path(args.summary_json) if args.summary_json and len(scene_names) == 1
+                          else _scene_dir(scene) / "benchmark_result.json")
+        per_scene_path.parent.mkdir(parents=True, exist_ok=True)
+        per_scene_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(f"  Saved: {per_scene_path}")
+
+    aggregate = _aggregate_scene_results(payloads, payloads[0]["method_keys"])
+    _print_results(payloads, aggregate)
+    aggregate_payload = {
+        "dataset": "argoverse-2-sensor-val", "scenes": scene_names,
+        "frames": args.frames, "stride": args.stride,
+        "config": payloads[0]["config"], "scene_results": payloads,
+        "aggregate": aggregate,
+    }
+    if len(scene_names) == 1 and args.summary_json:
+        # The path was already used for the backward-compatible per-scene payload.
+        aggregate_path = OUTPUT_DIR / "benchmark_multiscene.json"
+    else:
+        aggregate_path = Path(args.summary_json) if args.summary_json else OUTPUT_DIR / "benchmark_multiscene.json"
+    if len(scene_names) > 1 or args.scenes is not None:
+        aggregate_path.parent.mkdir(parents=True, exist_ok=True)
+        aggregate_path.write_text(json.dumps(aggregate_payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(f"Saved aggregate: {aggregate_path}")
     print("\nData source: Argoverse 2 Sensor Dataset (CC BY-NC-SA 4.0) https://www.argoverse.org/av2.html")
     return 0
 

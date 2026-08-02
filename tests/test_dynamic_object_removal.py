@@ -503,6 +503,140 @@ class TestTemporalConsistencyFilter:
         result, _ = tcf.filter(pt_b)
         assert result.shape[0] == 0  # pt_b only has 1 hit
 
+    def test_vectorized_path_matches_counter_reference(self):
+        """Packed-key/searchsorted decisions match the former Counter implementation."""
+        from collections import Counter, deque
+
+        rng = np.random.default_rng(20260802)
+        frames = [
+            (rng.integers(-8, 9, size=(37, 3)).astype(np.float64) + rng.random((37, 3)) * 0.9)
+            for _ in range(14)
+        ]
+        frames.insert(5, np.zeros((0, 3), dtype=np.float64))
+        voxel_size = 0.75
+        window_size = 5
+        min_hits = 3
+
+        reference_history: deque[set[tuple[int, int, int]]] = deque(maxlen=window_size)
+        reference_hits: Counter[tuple[int, int, int]] = Counter()
+        expected_masks: list[np.ndarray] = []
+        for points in frames:
+            if points.size == 0 or len(points) == 0:
+                expected_masks.append(np.ones(0, dtype=bool))
+                continue
+            voxels = np.floor(points / voxel_size).astype(np.int64)
+            frame_voxels = {tuple(v) for v in np.unique(voxels, axis=0)}
+            if len(reference_history) >= window_size:
+                old_frame = reference_history.popleft()
+                for voxel in old_frame:
+                    reference_hits[voxel] -= 1
+                    if reference_hits[voxel] <= 0:
+                        del reference_hits[voxel]
+            reference_history.append(frame_voxels)
+            for voxel in frame_voxels:
+                reference_hits[voxel] += 1
+            expected_masks.append(np.fromiter(
+                (reference_hits[tuple(v)] >= min_hits for v in voxels),
+                dtype=bool,
+                count=len(points),
+            ))
+
+        actual = TemporalConsistencyFilter(
+            voxel_size=voxel_size,
+            window_size=window_size,
+            min_hits=min_hits,
+        )
+        for points, expected in zip(frames, expected_masks):
+            _, actual_mask = actual.filter(points)
+            np.testing.assert_array_equal(actual_mask, expected)
+
+    def test_visibility_gate_off_matches_default(self):
+        rng = np.random.default_rng(17)
+        frames = [rng.normal(size=(25, 3)) for _ in range(8)]
+        default_filter = TemporalConsistencyFilter(voxel_size=0.5, window_size=4, min_hits=2)
+        off_filter = TemporalConsistencyFilter(
+            voxel_size=0.5, window_size=4, min_hits=2, visibility=False,
+        )
+        for points in frames:
+            _, default_mask = default_filter.filter(points)
+            _, off_mask = off_filter.filter(points, sensor_origin=(10.0, -2.0, 1.0))
+            np.testing.assert_array_equal(off_mask, default_mask)
+
+    def test_visibility_gate_keeps_voxel_hidden_behind_wall(self):
+        """An occluded miss is neutral, so the hidden static voxel is not removed."""
+        wall = np.array([[5.0, 0.0, 0.0]])
+        behind = np.array([[10.0, 0.0, 0.0]])
+        frames = [np.vstack([wall, behind]), wall, np.vstack([wall, behind])]
+
+        ungated = TemporalConsistencyFilter(voxel_size=1.0, window_size=3, min_hits=3)
+        gated = TemporalConsistencyFilter(
+            voxel_size=1.0,
+            window_size=3,
+            min_hits=3,
+            visibility=True,
+            visibility_h_res_deg=1.0,
+            visibility_v_res_deg=1.0,
+            visibility_margin=0.5,
+            visibility_fraction=1.0,
+            visibility_min_hits=2,
+        )
+        ungated_last = gated_last = None
+        for points in frames:
+            _, ungated_last = ungated.filter(points)
+            _, gated_mask = gated.filter(points)
+            gated_last = gated_mask
+
+        assert ungated_last is not None and gated_last is not None
+        assert not ungated_last[1]
+        assert gated_last[1]
+
+    def test_visibility_gate_keeps_voxel_after_fov_exit(self):
+        """A direction with no return is unobserved, not an observed-empty miss."""
+        target = np.array([[10.0, 0.0, 0.0]])
+        other_direction = np.array([[0.0, 10.0, 0.0]])
+        frames = [target, other_direction, target]
+        gated = TemporalConsistencyFilter(
+            voxel_size=1.0,
+            window_size=3,
+            min_hits=3,
+            visibility=True,
+            visibility_h_res_deg=1.0,
+            visibility_v_res_deg=1.0,
+            visibility_fraction=1.0,
+            visibility_min_hits=2,
+        )
+        ungated = TemporalConsistencyFilter(voxel_size=1.0, window_size=3, min_hits=3)
+        ungated_last = gated_last = None
+        for points in frames:
+            _, ungated_last = ungated.filter(points)
+            _, gated_last = gated.filter(points)
+        assert ungated_last is not None and gated_last is not None
+        assert not ungated_last[0]
+        assert gated_last[0]
+
+    def test_visibility_origin_defaults_to_sensor_frame_origin(self):
+        points = np.array([[2.0, 0.0, 0.0], [3.0, 0.0, 0.0]])
+        omitted = TemporalConsistencyFilter(
+            voxel_size=1.0, window_size=2, min_hits=2, visibility=True,
+            visibility_h_res_deg=1.0, visibility_v_res_deg=1.0,
+        )
+        explicit = TemporalConsistencyFilter(
+            voxel_size=1.0, window_size=2, min_hits=2, visibility=True,
+            visibility_h_res_deg=1.0, visibility_v_res_deg=1.0,
+        )
+        for _ in range(3):
+            _, omitted_mask = omitted.filter(points)
+            _, explicit_mask = explicit.filter(points, sensor_origin=(0.0, 0.0, 0.0))
+            np.testing.assert_array_equal(omitted_mask, explicit_mask)
+
+    def test_visibility_parameters_validate(self):
+        with pytest.raises(ValueError, match="visibility_h_res_deg must be positive"):
+            TemporalConsistencyFilter(visibility=True, visibility_h_res_deg=0.0)
+        with pytest.raises(ValueError, match="visibility_margin must be non-negative"):
+            TemporalConsistencyFilter(visibility=True, visibility_margin=-0.1)
+        with pytest.raises(ValueError, match="visibility_fraction"):
+            TemporalConsistencyFilter(visibility=True, visibility_fraction=1.1)
+
 
 # ---------------------------------------------------------------------------
 # save_points (round-trip)

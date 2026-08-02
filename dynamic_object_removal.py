@@ -22,7 +22,6 @@ import math
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from collections import Counter
 from typing import Any, Sequence
 
 import numpy as np
@@ -30,6 +29,11 @@ import numpy as np
 
 DEFAULT_BOX_MARGIN = (0.05, 0.05, 0.05)
 DEFAULT_TEMPORAL_VOXEL_SIZE = 0.10
+
+# A fixed-width byte key keeps voxel history in numpy arrays while preserving the
+# exact lexicographic ordering required by ``np.searchsorted``.  Voxel coordinates
+# are int64 so negative and large map coordinates remain supported.
+_VOXEL_KEY_DTYPE = np.dtype((np.void, 3 * np.dtype(np.int64).itemsize))
 
 # Range-image (visibility) ghost removal defaults.
 DEFAULT_RANGE_H_RES_DEG = 0.4
@@ -735,9 +739,47 @@ def load_points(path: Path, *, fmt: str) -> np.ndarray:
 
 @dataclass
 class TemporalConsistencyFilter:
+    """Keep points whose voxel is consistently supported by recent frames.
+
+    With ``visibility=False`` (the default), the rule is the historical one:
+    a voxel is kept when it was hit in at least ``min_hits`` of the last
+    ``window_size`` non-empty calls.  The history is stored as packed numpy keys;
+    this keeps the decisions bit-identical to the original Counter/tuple
+    implementation without a Python loop over points.
+
+    With ``visibility=True``, ``filter`` uses a spherical range image of the
+    current scan.  A previous voxel contributes one observation only when its
+    center projects to a pixel whose nearest measured range is farther than the
+    center by ``visibility_margin``.  A hit is always an observation and a hit
+    takes precedence over an empty-space vote.  Missing pixels (including an
+    occluded voxel or a direction outside the sensor's sampled FOV) are neutral.
+    The gated keep rule is::
+
+        hits >= max(visibility_min_hits,
+                    ceil(visibility_fraction * observations))
+
+    where ``visibility_min_hits`` defaults to ``min_hits``.  Thus the default
+    gate preserves the existing minimum-hit requirement while normalizing the
+    miss vote to the number of frames that actually observed the voxel.  Set a
+    lower ``visibility_min_hits`` explicitly when sparse sensors need a softer
+    early-window floor.
+
+    ``sensor_origin`` defaults to the sensor-frame origin ``(0, 0, 0)``.  For a
+    pose-aligned map, pass the per-frame origin in the same frame as ``points``.
+    ``visibility_h_res_deg``/``visibility_v_res_deg`` should be chosen to match
+    beam density (for example, about 1 degree for AV2 and 2.5 degrees for
+    32-beam nuScenes).
+    """
+
     voxel_size: float = DEFAULT_TEMPORAL_VOXEL_SIZE
     window_size: int = 5
     min_hits: int = 3
+    visibility: bool = False
+    visibility_h_res_deg: float = DEFAULT_RANGE_H_RES_DEG
+    visibility_v_res_deg: float = DEFAULT_RANGE_V_RES_DEG
+    visibility_margin: float = DEFAULT_RANGE_MARGIN
+    visibility_fraction: float = 0.5
+    visibility_min_hits: int | None = None
 
     def __post_init__(self) -> None:
         if self.voxel_size <= 0.0:
@@ -746,33 +788,187 @@ class TemporalConsistencyFilter:
             raise ValueError("window_size must be positive")
         if self.min_hits <= 0:
             raise ValueError("min_hits must be positive")
-        self._history: deque[set[tuple[int, int, int]]] = deque(maxlen=self.window_size)
-        self._voxel_hits: Counter[tuple[int, int, int]] = Counter()
+        if self.visibility_h_res_deg <= 0.0:
+            raise ValueError("visibility_h_res_deg must be positive")
+        if self.visibility_v_res_deg <= 0.0:
+            raise ValueError("visibility_v_res_deg must be positive")
+        if self.visibility_margin < 0.0:
+            raise ValueError("visibility_margin must be non-negative")
+        if not 0.0 < self.visibility_fraction <= 1.0:
+            raise ValueError("visibility_fraction must be in (0, 1]")
+        if self.visibility_min_hits is None:
+            self.visibility_min_hits = self.min_hits
+        if self.visibility_min_hits <= 0:
+            raise ValueError("visibility_min_hits must be positive")
 
-    def filter(self, points: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        empty_keys = np.empty(0, dtype=_VOXEL_KEY_DTYPE)
+        self._history: deque[tuple[np.ndarray, np.ndarray]] = deque(maxlen=self.window_size)
+        self._voxel_keys = empty_keys
+        self._voxel_hits = np.empty(0, dtype=np.int64)
+        self._voxel_observations = np.empty(0, dtype=np.int64)
+
+    @staticmethod
+    def _pack_voxels(voxels: np.ndarray) -> np.ndarray:
+        """Return one fixed-width numpy key per row of an int64 voxel array."""
+        return np.ascontiguousarray(voxels, dtype=np.int64).view(_VOXEL_KEY_DTYPE).reshape(-1)
+
+    @staticmethod
+    def _unpack_keys(keys: np.ndarray) -> np.ndarray:
+        """Recover ``(N, 3)`` int64 voxel coordinates from packed keys."""
+        return np.ascontiguousarray(keys).view(np.int64).reshape(-1, 3)
+
+    def _ensure_keys(self, keys: np.ndarray) -> None:
+        """Add sorted, unique keys to the active arrays, preserving counts."""
+        if keys.size == 0:
+            return
+        if self._voxel_keys.size == 0:
+            self._voxel_keys = keys.copy()
+            self._voxel_hits = np.zeros(keys.size, dtype=np.int64)
+            self._voxel_observations = np.zeros(keys.size, dtype=np.int64)
+            return
+
+        # Most streaming frames revisit the same active voxels.  Avoid sorting a
+        # second concatenated array in that common case; callers provide keys from
+        # ``np.unique`` or a unique boolean selection.
+        indices = np.searchsorted(self._voxel_keys, keys)
+        present = (indices < self._voxel_keys.size)
+        if np.all(present) and np.all(self._voxel_keys[indices] == keys):
+            return
+
+        merged = np.union1d(self._voxel_keys, keys)
+        old_indices = np.searchsorted(merged, self._voxel_keys)
+        hits = np.zeros(merged.size, dtype=np.int64)
+        observations = np.zeros(merged.size, dtype=np.int64)
+        hits[old_indices] = self._voxel_hits
+        observations[old_indices] = self._voxel_observations
+        self._voxel_keys = merged
+        self._voxel_hits = hits
+        self._voxel_observations = observations
+
+    def _remove_history_frame(self) -> None:
+        """Evict one frame and remove keys with no remaining evidence."""
+        hit_keys, observation_keys = self._history.popleft()
+        if hit_keys.size:
+            hit_indices = np.searchsorted(self._voxel_keys, hit_keys)
+            np.add.at(self._voxel_hits, hit_indices, -1)
+        if observation_keys.size:
+            observation_indices = np.searchsorted(self._voxel_keys, observation_keys)
+            np.add.at(self._voxel_observations, observation_indices, -1)
+
+        active = (self._voxel_hits > 0) | (self._voxel_observations > 0)
+        self._voxel_keys = self._voxel_keys[active]
+        self._voxel_hits = self._voxel_hits[active]
+        self._voxel_observations = self._voxel_observations[active]
+
+    def _observed_empty(
+        self,
+        voxel_keys: np.ndarray,
+        query_points: np.ndarray,
+        sensor_origin: np.ndarray,
+    ) -> np.ndarray:
+        """Return which candidate voxel centers are observed empty by one scan."""
+        if voxel_keys.size == 0 or query_points.size == 0:
+            return np.zeros(voxel_keys.size, dtype=bool)
+
+        n_cols = int(np.ceil(360.0 / self.visibility_h_res_deg))
+        n_rows = int(np.ceil(180.0 / self.visibility_v_res_deg))
+        q_ranges, q_col, q_row, q_valid = _spherical_pixels(
+            query_points,
+            sensor_origin,
+            self.visibility_h_res_deg,
+            self.visibility_v_res_deg,
+        )
+        flat_q = (
+            np.clip(q_row, 0, n_rows - 1) * n_cols
+            + np.clip(q_col, 0, n_cols - 1)
+        )[q_valid]
+        nearest = np.full(n_rows * n_cols, np.inf, dtype=np.float64)
+        np.minimum.at(nearest, flat_q, q_ranges[q_valid])
+
+        centers = (self._unpack_keys(voxel_keys).astype(np.float64) + 0.5) * self.voxel_size
+        center_ranges, center_col, center_row, center_valid = _spherical_pixels(
+            centers,
+            sensor_origin,
+            self.visibility_h_res_deg,
+            self.visibility_v_res_deg,
+        )
+        flat_centers = (
+            np.clip(center_row, 0, n_rows - 1) * n_cols
+            + np.clip(center_col, 0, n_cols - 1)
+        )
+        measured = nearest[flat_centers]
+        return center_valid & np.isfinite(measured) & (
+            measured > center_ranges + self.visibility_margin
+        )
+
+    def _keep_mask(self, point_keys: np.ndarray) -> np.ndarray:
+        """Look up the current points' vectorized hit/observation decisions."""
+        indices = np.searchsorted(self._voxel_keys, point_keys)
+        hits = self._voxel_hits[indices]
+        if not self.visibility:
+            return hits >= self.min_hits
+
+        observations = self._voxel_observations[indices]
+        required = np.maximum(
+            int(self.visibility_min_hits),
+            np.ceil(self.visibility_fraction * observations).astype(np.int64),
+        )
+        return hits >= required
+
+    def filter(
+        self,
+        points: np.ndarray,
+        sensor_origin: Sequence[float] = (0.0, 0.0, 0.0),
+    ) -> tuple[np.ndarray, np.ndarray]:
         if points.size == 0 or len(points) == 0:
+            if self.visibility:
+                # An empty sensor return is a neutral gated frame, but it still
+                # advances the rolling window so stale evidence ages out.
+                if self._history.maxlen and len(self._history) >= self._history.maxlen:
+                    self._remove_history_frame()
+                empty_keys = np.empty(0, dtype=_VOXEL_KEY_DTYPE)
+                self._history.append((empty_keys, empty_keys))
             return points, np.ones(0, dtype=bool)
 
         voxels = np.floor(points / self.voxel_size).astype(np.int64)
-        frame_voxels = {tuple(v) for v in np.unique(voxels, axis=0)}
+        point_keys = self._pack_voxels(voxels)
+        frame_keys = np.unique(point_keys)
 
         if self._history.maxlen and len(self._history) >= self._history.maxlen:
-            old_frame = self._history.popleft()
-            for voxel in old_frame:
-                self._voxel_hits[voxel] -= 1
-                if self._voxel_hits[voxel] <= 0:
-                    del self._voxel_hits[voxel]
+            self._remove_history_frame()
 
-        self._history.append(frame_voxels)
-        for voxel in frame_voxels:
-            self._voxel_hits[voxel] += 1
+        self._ensure_keys(frame_keys)
+        if not self.visibility:
+            # Every hit is also an observation in the legacy mode.  Keeping this
+            # path in the same packed-key state machine makes the compatibility
+            # guarantee explicit while avoiding a second implementation.
+            observation_keys = frame_keys
+        else:
+            # ``frame_keys`` has already been inserted above, so the active key
+            # array is exactly the candidate union for this frame.
+            candidate_keys = self._voxel_keys
+            origin = np.asarray(sensor_origin, dtype=np.float64)
+            if origin.shape != (3,):
+                raise ValueError("sensor_origin must have 3 elements")
+            empty = self._observed_empty(
+                candidate_keys,
+                np.asarray(points, dtype=np.float64),
+                origin,
+            )
+            hit_indices = np.searchsorted(candidate_keys, frame_keys)
+            empty[hit_indices] = False  # current hits always win over empty votes
+            observation_mask = empty
+            observation_mask[hit_indices] = True
+            observation_keys = candidate_keys[observation_mask]
 
-        point_voxels = [tuple(v) for v in voxels]
-        keep_mask = np.fromiter(
-            (self._voxel_hits[voxel] >= self.min_hits for voxel in point_voxels),
-            dtype=bool,
-            count=points.shape[0],
-        )
+        hit_indices = np.searchsorted(self._voxel_keys, frame_keys)
+        np.add.at(self._voxel_hits, hit_indices, 1)
+        if observation_keys.size:
+            observation_indices = np.searchsorted(self._voxel_keys, observation_keys)
+            np.add.at(self._voxel_observations, observation_indices, 1)
+        self._history.append((frame_keys, observation_keys))
+
+        keep_mask = self._keep_mask(point_keys)
         return points[keep_mask], keep_mask
 
 

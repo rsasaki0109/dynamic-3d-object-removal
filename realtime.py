@@ -509,6 +509,50 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--voxel-size", type=float, default=core.DEFAULT_TEMPORAL_VOXEL_SIZE, help="Temporal filter voxel size.")
     parser.add_argument("--temporal-window", type=int, default=5, help="Temporal filter window size.")
     parser.add_argument("--temporal-min-hits", type=int, default=3, help="Temporal filter minimum hits.")
+    temporal_visibility = parser.add_mutually_exclusive_group()
+    temporal_visibility.add_argument(
+        "--temporal-visibility",
+        dest="temporal_visibility",
+        action="store_true",
+        help="Gate temporal misses by spherical range-image visibility.",
+    )
+    temporal_visibility.add_argument(
+        "--no-visibility",
+        dest="temporal_visibility",
+        action="store_false",
+        help="Disable the temporal visibility gate (the default legacy behavior).",
+    )
+    parser.set_defaults(temporal_visibility=False)
+    parser.add_argument(
+        "--temporal-visibility-h-res",
+        type=float,
+        default=core.DEFAULT_RANGE_H_RES_DEG,
+        help="Temporal visibility azimuth resolution in degrees.",
+    )
+    parser.add_argument(
+        "--temporal-visibility-v-res",
+        type=float,
+        default=core.DEFAULT_RANGE_V_RES_DEG,
+        help="Temporal visibility elevation resolution in degrees.",
+    )
+    parser.add_argument(
+        "--temporal-visibility-margin",
+        type=float,
+        default=core.DEFAULT_RANGE_MARGIN,
+        help="Extra range beyond a voxel center required for an observed-empty vote (meters).",
+    )
+    parser.add_argument(
+        "--temporal-visibility-fraction",
+        type=float,
+        default=0.5,
+        help="Minimum fraction of observed frames that must be hits when visibility is enabled.",
+    )
+    parser.add_argument(
+        "--temporal-visibility-min-hits",
+        type=int,
+        default=None,
+        help="Minimum gated hits; defaults to --temporal-min-hits.",
+    )
     parser.add_argument("--range-window", type=int, default=5, help="Range filter rolling-map window (number of recent scans).")
     parser.add_argument("--range-margin", type=float, default=core.DEFAULT_RANGE_MARGIN, help="Range filter free-space margin (meters).")
     parser.add_argument("--range-h-res", type=float, default=core.DEFAULT_RANGE_H_RES_DEG, help="Range filter azimuth resolution (degrees).")
@@ -614,6 +658,12 @@ class DynamicObjectRemovalNode:
                 voxel_size=float(kwargs["voxel_size"]),
                 window_size=int(kwargs["temporal_window"]),
                 min_hits=int(kwargs["temporal_min_hits"]),
+                visibility=bool(kwargs.get("temporal_visibility", False)),
+                visibility_h_res_deg=float(kwargs.get("temporal_visibility_h_res", core.DEFAULT_RANGE_H_RES_DEG)),
+                visibility_v_res_deg=float(kwargs.get("temporal_visibility_v_res", core.DEFAULT_RANGE_V_RES_DEG)),
+                visibility_margin=float(kwargs.get("temporal_visibility_margin", core.DEFAULT_RANGE_MARGIN)),
+                visibility_fraction=float(kwargs.get("temporal_visibility_fraction", 0.5)),
+                visibility_min_hits=kwargs.get("temporal_visibility_min_hits"),
             )
 
         self._range_filter = None
@@ -767,7 +817,9 @@ class DynamicObjectRemovalNode:
 
             else:
                 assert self._temporal_filter is not None
-                filtered = self._temporal_filter.filter(points)[0]
+                # PointCloud2 points are in the live sensor frame, whose origin is
+                # the visibility gate's default origin.
+                filtered = self._temporal_filter.filter(points, sensor_origin=(0.0, 0.0, 0.0))[0]
                 used_boxes = False
                 stale = False
 
@@ -836,6 +888,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             voxel_size=args.voxel_size,
             temporal_window=args.temporal_window,
             temporal_min_hits=args.temporal_min_hits,
+            temporal_visibility=args.temporal_visibility,
+            temporal_visibility_h_res=args.temporal_visibility_h_res,
+            temporal_visibility_v_res=args.temporal_visibility_v_res,
+            temporal_visibility_margin=args.temporal_visibility_margin,
+            temporal_visibility_fraction=args.temporal_visibility_fraction,
+            temporal_visibility_min_hits=args.temporal_visibility_min_hits,
             range_window=args.range_window,
             range_margin=args.range_margin,
             range_h_res=args.range_h_res,

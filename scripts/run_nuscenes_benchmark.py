@@ -59,6 +59,7 @@ _METHOD_LABELS = {
     "scan_ratio": "scan-ratio (pseudo-occupancy)",
     "range_and_scan_ratio": "range ∧ scan-ratio (intersection)",
     "temporal": "temporal consistency",
+    "temporal_visibility": "temporal (visibility-gated)",
     "fusion": "free-space fusion",
 }
 
@@ -277,21 +278,41 @@ def _run_scene(args: argparse.Namespace, root: Path, tables: dict, scene: str) -
     combo_metrics = bench.compute_accuracy_metrics(~keep_range & ~keep_sr, gt_mask)
 
     # --- temporal: per-frame voxel consistency assembled over the map ---
-    keep_temporal = np.ones(len(acc_map), dtype=bool)
-    tfilter = core.TemporalConsistencyFilter(
-        voxel_size=args.voxel_size, window_size=len(selected), min_hits=args.temporal_min_hits)
-    for (s, e) in slices:
-        tfilter.filter(acc_map[s:e])
-    for (s, e) in slices:
-        _, keep_f = tfilter.filter(acc_map[s:e])
-        keep_temporal[s:e] = keep_f
+    def run_temporal(tfilter: core.TemporalConsistencyFilter) -> np.ndarray:
+        keep = np.ones(len(acc_map), dtype=bool)
+        for (s, e), (_, origin) in zip(slices, scans):
+            tfilter.filter(acc_map[s:e], sensor_origin=origin)
+        for (s, e), (_, origin) in zip(slices, scans):
+            _, keep_f = tfilter.filter(acc_map[s:e], sensor_origin=origin)
+            keep[s:e] = keep_f
+        return keep
+
+    keep_temporal = run_temporal(core.TemporalConsistencyFilter(
+        voxel_size=args.voxel_size,
+        window_size=len(selected),
+        min_hits=args.temporal_min_hits,
+    ))
     temporal_metrics = bench.compute_accuracy_metrics(~keep_temporal, gt_mask)
+
+    keep_temporal_visibility = run_temporal(core.TemporalConsistencyFilter(
+        voxel_size=args.voxel_size,
+        window_size=len(selected),
+        min_hits=args.temporal_min_hits,
+        visibility=True,
+        visibility_h_res_deg=args.temporal_visibility_h_res,
+        visibility_v_res_deg=args.temporal_visibility_v_res,
+        visibility_margin=args.temporal_visibility_margin,
+        visibility_fraction=args.temporal_visibility_fraction,
+        visibility_min_hits=args.temporal_visibility_min_hits,
+    ))
+    temporal_visibility_metrics = bench.compute_accuracy_metrics(~keep_temporal_visibility, gt_mask)
 
     metrics = {
         "range": range_metrics,
         "scan_ratio": scanratio_metrics,
         "range_and_scan_ratio": combo_metrics,
         "temporal": temporal_metrics,
+        "temporal_visibility": temporal_visibility_metrics,
     }
     method_keys = list(metrics)
 
@@ -319,6 +340,11 @@ def _run_scene(args: argparse.Namespace, root: Path, tables: dict, scene: str) -
             "min_see_through": args.min_see_through, "max_surface_hits": args.max_surface_hits,
             "ground_z_sensor": GROUND_Z_SENSOR, "moving_thresh": args.moving_thresh,
             "voxel_size": args.voxel_size, "temporal_min_hits": args.temporal_min_hits,
+            "temporal_visibility_h_res": args.temporal_visibility_h_res,
+            "temporal_visibility_v_res": args.temporal_visibility_v_res,
+            "temporal_visibility_margin": args.temporal_visibility_margin,
+            "temporal_visibility_fraction": args.temporal_visibility_fraction,
+            "temporal_visibility_min_hits": args.temporal_visibility_min_hits,
             "sr_rings": args.sr_rings, "sr_sectors": args.sr_sectors, "sr_max_range": args.sr_max_range,
             "sr_ratio": args.sr_ratio, "sr_min_map_height": args.sr_min_map_height,
             "sr_ground_margin": args.sr_ground_margin, "sr_min_votes": args.sr_min_votes,
@@ -352,6 +378,16 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--moving-thresh", type=float, default=2.0, help="Track displacement (m) to count as moving GT.")
     parser.add_argument("--voxel-size", type=float, default=core.DEFAULT_TEMPORAL_VOXEL_SIZE)
     parser.add_argument("--temporal-min-hits", type=int, default=2)
+    parser.add_argument("--temporal-visibility-h-res", type=float, default=2.5,
+                        help="Visibility-gated temporal azimuth resolution in degrees (nuScenes default: 2.5).")
+    parser.add_argument("--temporal-visibility-v-res", type=float, default=2.5,
+                        help="Visibility-gated temporal elevation resolution in degrees (nuScenes default: 2.5).")
+    parser.add_argument("--temporal-visibility-margin", type=float, default=core.DEFAULT_RANGE_MARGIN,
+                        help="Visibility-gated temporal empty-space margin in meters.")
+    parser.add_argument("--temporal-visibility-fraction", type=float, default=0.30,
+                        help="Visibility-gated temporal fraction of observed frames that must be hits (default: 0.30).")
+    parser.add_argument("--temporal-visibility-min-hits", type=int, default=1,
+                        help="Visibility-gated temporal hit floor (nuScenes default: 1).")
     parser.add_argument("--sr-rings", type=int, default=core.DEFAULT_SR_RINGS)
     parser.add_argument("--sr-sectors", type=int, default=core.DEFAULT_SR_SECTORS)
     parser.add_argument("--sr-max-range", type=float, default=core.DEFAULT_SR_MAX_RANGE)

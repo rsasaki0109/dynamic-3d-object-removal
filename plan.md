@@ -447,6 +447,49 @@ O3のacceptance gate:
    callback/front-end latencyとback-end amortized costを同時に報告する。
 4. AV2だけでなくsparse/heterogeneous sensorのheld-outを通るまで公開default/APIにしない。
 
+#### F — bounded back-end（2026-08-03）
+
+FreeDOM-styleの「現在scanのfront-end」と「履歴free-spaceで既受理map点を
+非同期再判定するback-end」を、オンライン静的mapping（Task class 2）として
+privateに実装・評価した。README / public APIには昇格させない。
+
+実装:
+
+- [x] `scripts/online_mapping_backend.py` と `run_online_benchmark.py --backend bounded`を追加。
+      R1 `range` window 3の出力をmapへ追加した後、raw scanをpose位置からcarveし、
+      hit precedenceとfusionと同じground protectionを使ってfree / observed / surface
+      evidenceを更新する。evidenceはsaturating LRU voxel store、再判定はbounded queueから
+      1 frame最大1 slice、20,000 points/sliceで実行する
+- [x] evidence storeのcapacity / counter saturation、retroactive removal、slice budgetと、
+      deterministic replayのunit testを追加。既存suiteは後述の通りgreen
+- [x] AV2で固定したconfigは `voxel=0.30 m`, `free step=0.30 m`, `free fraction=0.70`,
+      `free floor=3`, `rejudge=3 frames`, `max slice=20,000 points`,
+      `max voxels=250,000`, `max recent/queued points=500,000`。nuScenesではback-endを
+      変更せず、sensor metadataから一度だけrange resolutionを`2.5°/2.5°`へ切り替えた
+
+実測（同一poseのオンライン静的mapping）:
+
+| replay | front-end only F1 / static / ghost | + back-end F1 / static / ghost | backend removed | amortized / slice p95 | memory bound |
+|---|---:|---:|---:|---:|---:|
+| AV2 scene `0b5142c1…` | 0.417501 / 0.985734 / 0.048513 | **0.423185 / 0.984664 / 0.047932** | 2,021 | 3,825.139 ms/frame / 27.231 ms | 82,004,096 B |
+| nuScenes `scene-0757` (held-out) | 0.152133 / 0.746967 / 0.171011 | 0.150597 / 0.740234 / 0.172160 | 1,752 | 586.276 ms/frame / 40.117 ms | 82,004,096 B |
+| nuScenes `scene-0796` (held-out) | 0.086103 / 0.735642 / 0.032115 | 0.086099 / 0.735626 / 0.032116 | 4 | 573.177 ms/frame / 36.048 ms | 82,004,096 B |
+
+Pose-noise（AV2, translation σ=0.10 m / yaw σ=1.0°）では、front-end自身の
+degradationを基準にしてback-endの追加F1/static degradationはそれぞれ
+`0.004503 / 0.002036`、`0.011121 / 0.005378`で、noise gateはpassした。
+visibility-gated temporal front-end-onlyも追加rowとして測定したが、AV2 map F1
+`0.003129` / static `0.999093`、scene-0757 F1 `0.000206` / static `0.999973`、
+scene-0796 F1 `0.000000` / static `1.000000`であり、このmapping replayでの
+dynamic removalにはほぼ寄与しなかった。
+
+Held-out static keep gate（front-end-onlyとの差分 `<=0.005`）はscene-0796では
+`-0.000016`でpassしたが、scene-0757では`0.746967 → 0.740234`
+（`-0.006732`）でfailした。AV2のF1 / ghost改善とpose-noise passだけを理由に
+再tuningは行わず、**F判定: 不採用**。実装はprivate/experimentalのまま残す。
+詳細なprecision / recall / latency / memory / pose-noise表は
+`data/benchmark_results/multiscene.md`の`## Task F`をsource of truthとする。
+
 ### 評価タスクを混ぜない
 
 1. **Online MOS**: 現在（または明示した1-frame delay）の scan に対する moving/static 分類。

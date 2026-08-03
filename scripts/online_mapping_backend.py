@@ -397,6 +397,14 @@ class _BoundedFreeSpaceBackend:
             voxel_key = _key(_unpack_voxel_keys(unique[group_index : group_index + 1])[0])
             groups.append((voxel_key, group_indices.copy()))
 
+        # Evict before insertion so the persistent reference index never
+        # exceeds either capacity, even transiently at a frame boundary.
+        while self._recent_frames and (
+            len(self._recent_frames) >= self.config.max_recent_frames
+            or self._recent_points + len(map_indices) > self.config.max_recent_points
+        ):
+            self._remove_recent_frame(self._recent_frames.popleft())
+
         self._recent_frames.append((int(frame_index), groups, len(map_indices)))
         self._recent_points += len(map_indices)
         for voxel_key, group_indices in groups:
@@ -405,11 +413,6 @@ class _BoundedFreeSpaceBackend:
             )
         self.peak_recent_points = max(self.peak_recent_points, self._recent_points)
         self.peak_recent_voxels = max(self.peak_recent_voxels, len(self._recent_by_voxel))
-        while (
-            len(self._recent_frames) > self.config.max_recent_frames
-            or self._recent_points > self.config.max_recent_points
-        ):
-            self._remove_recent_frame(self._recent_frames.popleft())
 
     def observe_scan(self, points: np.ndarray, origin: Sequence[float], *, frame_index: int) -> dict[str, int]:
         """Carve one scan and update bounded evidence; return scan counts."""

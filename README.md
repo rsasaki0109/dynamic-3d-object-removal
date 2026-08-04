@@ -4,19 +4,35 @@
 [![Live demo](https://img.shields.io/badge/demo-live-brightgreen)](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/playground.html)
 [![Release](https://img.shields.io/github/v/release/rsasaki0109/dynamic-3d-object-removal)](https://github.com/rsasaki0109/dynamic-3d-object-removal/releases)
 
-Geometry-based LiDAR dynamic-object removal: **no GPU, no deep learning, `numpy` only**.
+> **Keep moving objects from becoming LiDAR map ghosts.**
 
-[Try the browser playground](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/playground.html) — Box / Range / Temporal modes, AV2 and nuScenes presets, or drop your own PCD.
+Detector-free, CPU-only LiDAR map cleaning and pose-aware ROS2 filtering. The real `numpy` implementation also runs in your browser — no GPU, no upload, no signup.
+
+Accumulating scans from a moving scene can turn cars, pedestrians, and other transient returns into ghost geometry. This project uses geometric evidence across scans to reduce that contamination while preserving persistent structure, without requiring a learned detector.
+
+[Try it in the browser](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/playground.html) · [Install and clean a map](#install) · [ROS2 quick start](#ros2-realtime) · [See the audited proof](#av2-detector-free-proof)
 
 [![Browser playground](demo/playground_demo.gif)](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/playground.html)
 
+## Choose your path
+
+| If you need to… | Start here | Key requirement |
+|---|---|---|
+| Clean a dense, pose-aligned accumulated map | [`fusion`](#algorithms) | Offline map cleaning; best fit for 64-beam-class data |
+| Clean a sparse 32-beam map | [`range` ∩ `scan_ratio`](#algorithms) | Pose-aligned scans and range resolution matched to beam density |
+| Filter a moving-platform ROS2 stream | [`range` or `temporal`](#ros2-realtime) | Timestamped TF into a fixed frame; input must be deskewed |
+| Remove points using existing 3D boxes | [`box`](#algorithms) | Per-scan detections or annotations |
+| Try the idea before installing anything | [Browser playground](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/playground.html) | Visual preview; no data leaves your browser |
+
+### The problem this solves
+
+A scan can look correct on its own while a sequence of scans quietly turns moving objects into map ghosts. Those trails make maps harder to inspect, maintain, and use downstream. The project separates three jobs — online scan filtering, online static mapping, and offline map cleaning — so the method and evidence match the task.
+
+![Audited AV2 detector-free map proof](demo/av2_gt_map_proof.png)
+
+> Audited same-pose AV2 proof: 12 pose-aligned sweeps, 1,235,563 points, and 84,471 moving-track GT points. Detector-free `fusion` removes 66.3% of moving GT while keeping 97.4% of static GT. This is the main accuracy proof; the visual box-driven demos below are separate previews.
+
 More demos: [AV2 sequence](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_sequence_av2.html) · [single scan](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_standalone.html) · [local sequence](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_sequence_standalone.html)
-
-![Before/After](demo/av2_before_after.png)
-
-![Ghost Trail Close-up](demo/av2_zoom.png)
-
-> 20-frame accumulated Argoverse 2 map (not a single scan): 233k ghost points (11.9% of 2M) removed, static structure preserved.
 
 ## Install
 
@@ -33,7 +49,7 @@ dynamic-object-removal \
   --output-cloud cleaned.pcd
 ```
 
-- **Five algorithms, all numpy**: `box` (per-scan crop, needs 3D boxes), `temporal` (voxel consistency, optional visibility gate), `range` (range-image visibility, Removert-style remove + revert), `scan_ratio` (ERASOR-style per-column pseudo-occupancy + ground revert), `fusion` (highest-accuracy map cleaner) — the last four are detector-free
+- **Five algorithms, all numpy**: `box` (per-scan crop, needs 3D boxes), `temporal` (voxel consistency, optional visibility gate), `range` (range-image visibility, Removert-style remove + revert), `scan_ratio` (ERASOR-style per-column pseudo-occupancy + ground revert), `fusion` (dense-sensor offline map cleaner) — the last four are detector-free
 - **Fast**: 1.5 ms for 24k points on CPU; **ROS2 realtime node** (`box` / `temporal` / `range`)
 - **Minimal dependencies**: `numpy` only (`pyarrow` just for Argoverse 2 Feather input)
 
@@ -114,7 +130,9 @@ python3 scripts/run_nuscenes_benchmark.py --scenes all   # downloads nuScenes mi
 
 The upstream proof artifacts are retained here as single-scene reference points. They are useful for reproducing the checked-in images, but the multi-scene means above are the transfer-oriented headline numbers.
 
-#### Argoverse 2 — 64-beam, 12 sweeps
+#### AV2 detector-free proof
+
+Argoverse 2 — 64-beam, 12 sweeps.
 
 | Detector-free method | Precision | Recall | F1 | Static kept |
 |---|---:|---:|---:|---:|

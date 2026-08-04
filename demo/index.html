@@ -1,20 +1,20 @@
 <!doctype html>
-<html lang="ja">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dynamic Object Removal Demos</title>
-    <meta name="description" content="AV2 same-pose detector-free map cleaning, audited against moving-track ground truth, plus public interactive demos." />
-    <meta property="og:title" content="Dynamic Object Removal Demos" />
-    <meta property="og:description" content="AV2 same-pose detector-free map cleaning, audited against moving-track ground truth, plus public interactive demos." />
+    <title>LiDAR Map Cleaning Proofs and Demos</title>
+    <meta name="description" content="See an audited detector-free LiDAR map-cleaning proof, try the real NumPy library in your browser, and explore visual sequence demos." />
+    <meta property="og:title" content="LiDAR Map Cleaning Proofs and Demos" />
+    <meta property="og:description" content="Audited detector-free LiDAR map cleaning, a no-upload browser playground, and visual sequence demos." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/" />
     <meta property="og:image" content="https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/social_card.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Dynamic Object Removal Demos" />
-    <meta name="twitter:description" content="AV2 same-pose detector-free map cleaning, audited against moving-track ground truth, plus public interactive demos." />
+    <meta name="twitter:title" content="LiDAR Map Cleaning Proofs and Demos" />
+    <meta name="twitter:description" content="Audited detector-free LiDAR map cleaning, a no-upload browser playground, and visual sequence demos." />
     <meta name="twitter:image" content="https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/social_card.png" />
     <style>
       :root {
@@ -158,60 +158,61 @@
   <body>
     <div class="wrap">
       <section class="hero">
-        <div class="eyebrow">Demo Entry</div>
-        <h1>まずは AV2 moving-GT proof を見る</h1>
-        <p class="lead">同一pose・同一12 sweepsのraw/cleaned accumulationを、実際に2 m超移動したtrack内の84,471点で監査しました。detector-free fusionはmoving GTを66.3%除去し、static GTを97.4%保持します。</p>
+        <div class="eyebrow">Proof first · then try it</div>
+        <h1>See how LiDAR map ghosts are reduced.</h1>
+        <p class="lead">A moving scene can look clean scan-by-scan and still accumulate ghost geometry. This gallery separates the audited detector-free proof from visual demos, so you can check the evidence before choosing a path.</p>
       </section>
 
       <a class="card primary" href="playground.html" style="margin-top: 18px; display: block; border: 1.5px solid var(--accent);">
         <span class="tag" style="background: rgba(15, 118, 110, 0.12); color: var(--accent-strong);">⚡ Interactive · No install</span>
-        <h2 style="font-size: 28px;">Run it live in your browser</h2>
-        <p>The real <code>numpy</code> library runs client-side via Pyodide — drop your own LiDAR scan (.pcd / .bin / .xyz / .npy) and watch dynamic objects get removed in 3D. No GPU, no upload, no signup. Ships with a 95k-point Argoverse 2 sample (23 dynamic objects).</p>
+        <h2 style="font-size: 28px;">Try the real NumPy library in your browser</h2>
+        <p>Choose Box, Range, or Temporal, run an Argoverse 2 or nuScenes preset, or drop your own LiDAR scan (.pcd / .bin / .xyz / .npy). No GPU, no upload, no signup. This is a visual preview; the audited metrics are below.</p>
       </a>
 
       <section class="grid">
-        <a class="card primary" href="av2_gt_map_proof.png">
+        <a class="card primary" id="strict-gt-proof" href="av2_gt_map_proof.png">
           <span class="tag">Strict GT Proof</span>
-          <h2>Detector-free AV2 Map Audit</h2>
-          <p>1,235,563点を全点評価。raw、fusion-cleaned、TP/FPを同一city-frame cropで比較し、設定と全confusion countもJSONに保存しています。</p>
+          <h2>Detector-free AV2 map audit</h2>
+          <p>1,235,563 points are evaluated against 84,471 moving-track GT points. Raw, cleaned, and TP/FP views use the same pose-aligned frame; configuration and confusion counts are saved as JSON.</p>
           <div class="facts">
             <div class="fact"><strong>66.3% moving GT removed</strong><span>precision 65.1% / F1 65.7%</span></div>
-            <div class="fact"><strong>97.4% static GT kept</strong><span>boxesは評価GTだけに使用</span></div>
+            <div class="fact"><strong>97.4% static GT kept</strong><span>boxes are used only to create the evaluation labels</span></div>
           </div>
         </a>
 
         <a class="card primary" href="index_3d_sequence_av2.html">
-          <span class="tag">Interactive Box Preview</span>
-          <h2>AV2 Box-driven Sequence</h2>
-          <p>`annotations.feather`とposeを使う20-frame previewです。全注釈物体をcropするため、233,460 removedはmoving-GT値やdetector-free精度ではありません。</p>
+          <span class="tag">Visual demo · Box-driven</span>
+          <h2>AV2 accumulated sequence</h2>
+          <p>A 20-frame public-data preview using per-frame annotation boxes and pose alignment. It shows how transient objects contaminate an accumulation; its removed-point count is not a detector-free moving-GT score.</p>
           <div class="facts">
             <div class="fact">
               <strong>20-frame accumulated map</strong>
-              <span>moving-object contamination が map 側にどう残るかを見せます。</span>
+              <span>See how moving-object contamination builds up in the map.</span>
             </div>
             <div class="fact">
               <strong>Per-frame boxes + pose alignment</strong>
-              <span>public AV2 だけで box-driven sequence を再生成できます。</span>
+              <span>Reproducible from public AV2 data and annotations.</span>
             </div>
           </div>
         </a>
 
         <a class="card" href="index_3d_sequence_standalone.html">
-          <span class="tag">Secondary</span>
-          <h2>Local Sequence Proof Demo</h2>
-          <p>checked-in の local multi-frame proof。repo 内に per-frame boxes がないため、cleaned 側は temporal consistency ベースです。</p>
+          <span class="tag">Visual demo · Local</span>
+          <h2>Local sequence comparison</h2>
+          <p>A checked-in multi-frame visual comparison using temporal consistency. Useful for understanding the interaction, not a replacement for the audited benchmark.</p>
         </a>
 
         <a class="card" href="index_3d_standalone.html">
-          <span class="tag">Fast Check</span>
-          <h2>Single-Scan Demo</h2>
-          <p>1 フレームの point cloud から動的物体だけを除去する、最短の visual sanity check です。</p>
+          <span class="tag">Fast check</span>
+          <h2>Single-scan preview</h2>
+          <p>The shortest visual check: remove points from one point cloud and inspect the result in 3D.</p>
         </a>
       </section>
 
       <div class="footer">
-        GitHub root: <a href="../index.html">../index.html</a><br />
-        詳細な使い方は <a href="https://github.com/rsasaki0109/dynamic-3d-object-removal/blob/master/README.md">README</a> を参照してください。
+        <a href="../index.html">Project overview</a> ·
+        <a href="https://github.com/rsasaki0109/dynamic-3d-object-removal/blob/master/README.md">README and benchmarks</a> ·
+        <a href="https://github.com/rsasaki0109/dynamic-3d-object-removal/blob/master/examples/lidarslam_ros2/README.md">ROS2 integration guide</a>
       </div>
     </div>
   </body>

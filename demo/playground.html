@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Dynamic Object Removal — Browser Playground</title>
+    <title>Try Detector-Free LiDAR Cleaning | Browser Playground</title>
     <meta
       name="description"
-      content="Run the real numpy-only dynamic object removal library in your browser. No install, no GPU. Drop a LiDAR scan and watch dynamic objects get removed."
+      content="Try the real NumPy-only LiDAR map-cleaning library in your browser. No install, no GPU, no upload. Use a public preset or drop your own point cloud."
     />
     <script src="https://cdn.jsdelivr.net/npm/three@0.145.0/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.145.0/examples/js/controls/OrbitControls.js"></script>
@@ -139,11 +139,12 @@
   <body>
     <div class="layout">
       <aside class="side">
-        <span class="badge">● Runs the real numpy library in your browser</span>
-        <h1>Dynamic Object Removal Playground</h1>
+        <span class="badge">● Runs the real NumPy library in your browser</span>
+        <h1>Try detector-free LiDAR cleaning in your browser</h1>
         <p class="sub">
           Powered by <b>Pyodide</b>: the exact <code>dynamic_object_removal.py</code> from this repo
           runs client-side. No install, no GPU, no upload — your point cloud never leaves your browser.
+          Use this as a visual preview; audited accuracy numbers come from the reproducible benchmarks in the README.
         </p>
 
         <div id="status"><span class="spinner"></span> Booting Python runtime…</div>

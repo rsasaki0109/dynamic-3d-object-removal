@@ -1,20 +1,20 @@
 <!doctype html>
-<html lang="ja">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dynamic 3D Object Removal</title>
-    <meta name="description" content="Numpy-only dynamic object removal for LiDAR point clouds. Public AV2 sequence demo, ROS2 realtime node, and proof that cleaned accumulation reduces ghost contamination." />
-    <meta property="og:title" content="Dynamic 3D Object Removal" />
-    <meta property="og:description" content="Numpy-only dynamic object removal for LiDAR point clouds with public AV2 demos and ROS2 realtime support." />
+    <title>Detector-Free LiDAR Map Cleaning | Dynamic 3D Object Removal</title>
+    <meta name="description" content="Keep moving objects from becoming LiDAR map ghosts. Detector-free, CPU-only map cleaning and pose-aware ROS2 filtering with a no-upload browser demo." />
+    <meta property="og:title" content="Detector-Free LiDAR Map Cleaning" />
+    <meta property="og:description" content="Keep moving objects from becoming LiDAR map ghosts with detector-free, CPU-only geometry and pose-aware ROS2 filtering." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://rsasaki0109.github.io/dynamic-3d-object-removal/" />
     <meta property="og:image" content="https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/social_card.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Dynamic 3D Object Removal" />
-    <meta name="twitter:description" content="Numpy-only dynamic object removal for LiDAR point clouds with public AV2 demos and ROS2 realtime support." />
+    <meta name="twitter:title" content="Detector-Free LiDAR Map Cleaning" />
+    <meta name="twitter:description" content="Keep moving objects from becoming LiDAR map ghosts with detector-free, CPU-only geometry and pose-aware ROS2 filtering." />
     <meta name="twitter:image" content="https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/social_card.png" />
     <style>
       :root {
@@ -233,69 +233,70 @@
     <div class="wrap">
       <section class="hero">
         <div class="panel hero-copy">
-          <div class="eyebrow">Public AV2 Demo</div>
-          <h1>動的物体で汚れた LiDAR map を、DL なしで掃除する</h1>
-          <p class="lead">単発スキャンは 3D bounding box crop、offline map は detector-free cleaner で掃除します。まずは同一 pose・同一 12 sweeps を moving-track GT で監査した AV2 proof で、ghost 低減と静的保持を確認できます。</p>
+          <div class="eyebrow">Detector-free LiDAR mapping</div>
+          <h1>Keep moving objects from becoming LiDAR map ghosts.</h1>
+          <p class="lead">Accumulated scans can turn cars, pedestrians, and other transient returns into ghost geometry. Clean the map with geometry-only methods, or filter a pose-aligned ROS2 stream — no GPU and no learned detector required.</p>
           <div class="stats">
             <div class="stat">
-              <strong>12 sweeps</strong>
-              <span>同一 pose-aligned AV2 input</span>
+              <strong>66.3%</strong>
+              <span>moving GT removed in the AV2 audit</span>
             </div>
             <div class="stat">
-              <strong>1.24M points</strong>
-              <span>84,471 moving-track GT points</span>
+              <strong>97.4%</strong>
+              <span>static GT kept in the same proof</span>
             </div>
             <div class="stat">
-              <strong>66.3% GT removed</strong>
-              <span>static GT は 97.4% 保持</span>
+              <strong>0 GPU</strong>
+              <span>NumPy-only core; browser demo never uploads data</span>
             </div>
           </div>
           <div class="actions">
-            <a class="btn primary" href="demo/av2_gt_map_proof.png">GT proof を見る</a>
-            <a class="btn secondary" href="demo/index_3d_sequence_av2.html">Box-driven 3D demo</a>
-            <a class="btn secondary" href="https://github.com/rsasaki0109/dynamic-3d-object-removal/blob/master/README.md">README を読む</a>
+            <a class="btn primary" href="demo/playground.html">Try it in your browser</a>
+            <a class="btn secondary" href="demo/index.html#strict-gt-proof">See the audited proof</a>
+            <a class="btn secondary" href="https://github.com/rsasaki0109/dynamic-3d-object-removal/blob/master/README.md#install">Install from GitHub</a>
           </div>
         </div>
         <aside class="panel hero-note">
-          <h2>What It Proves</h2>
+          <h2>Why this matters</h2>
           <div class="proof-list">
             <div class="proof-item">
-              <strong>raw accumulation は残像を作る</strong>
-              <span>moving objects を積み上げると、map 側に ghost contamination が残ります。</span>
+              <strong>Moving scenes leave ghosts</strong>
+              <span>A scan can look fine on its own while repeated observations smear transient objects into the map.</span>
             </div>
             <div class="proof-item">
-              <strong>cleaned accumulation はそれを減らす</strong>
-              <span>box-driven removal や temporal consistency で、raw-only clutter を抑えます。</span>
+              <strong>Detectors are not always available</strong>
+              <span>Geometry-only modes work without labels, a learned model, or a GPU.</span>
             </div>
             <div class="proof-item">
-              <strong>静的構造は残す</strong>
-              <span>道路、建物、縁石など、persistent structure を map に残すのが主眼です。</span>
+              <strong>Sensor density changes the answer</strong>
+              <span>Use dense-sensor fusion, sparse-sensor range ∩ scan-ratio, or pose-aware realtime filtering.</span>
             </div>
           </div>
         </aside>
       </section>
 
       <section class="grid">
-        <a class="card-link primary" href="demo/index_3d_sequence_av2.html">
-          <strong>AV2 Public Sequence Demo</strong>
-          <p>公開データだけで再現できる20-frameの注釈box crop previewです。全注釈物体を対象とするため、除去点数はmoving-object GT精度としては扱いません。</p>
-          <span class="meta">Start here</span>
+        <a class="card-link primary" href="demo/playground.html">
+          <strong>Try it before installing</strong>
+          <p>Run the real NumPy implementation in the browser. Choose Box, Range, or Temporal, load a public preset, or drop your own point cloud. No upload.</p>
+          <span class="meta">Open the playground →</span>
         </a>
-        <a class="card-link" href="demo/index_3d_sequence_standalone.html">
-          <strong>Local Sequence Proof Demo</strong>
-          <p>checked-in の local sequence proof。temporal consistency ベースで raw accumulation と cleaned accumulation を比較します。</p>
-          <span class="meta">Secondary proof</span>
+        <a class="card-link primary" href="demo/index.html#strict-gt-proof">
+          <strong>See the audited proof</strong>
+          <p>Same-pose Argoverse 2 accumulation, moving-track ground truth, full point counts, and a separate JSON artifact. The evidence is detector-free and reproducible.</p>
+          <span class="meta">Inspect the AV2 audit →</span>
         </a>
-        <a class="card-link" href="demo/index_3d_standalone.html">
-          <strong>Single-Scan Demo</strong>
-          <p>1 フレームの point cloud から動的物体だけを消す最短の visual sanity check です。</p>
-          <span class="meta">Fastest visual check</span>
+        <a class="card-link" href="https://github.com/rsasaki0109/dynamic-3d-object-removal/blob/master/examples/lidarslam_ros2/README.md">
+          <strong>Add it to ROS2</strong>
+          <p>Insert the pose-aware realtime node between your LiDAR frontend and map backend. Timestamped TF, deskewed input, and fail-open behavior are documented.</p>
+          <span class="meta">Open the integration guide →</span>
         </a>
       </section>
 
       <div class="footer">
-        GitHub: <a href="https://github.com/rsasaki0109/dynamic-3d-object-removal">rsasaki0109/dynamic-3d-object-removal</a><br />
-        すべての demo 一覧は <a href="demo/">demo/</a> を参照してください。
+        <a href="https://github.com/rsasaki0109/dynamic-3d-object-removal">GitHub repository</a> ·
+        <a href="https://github.com/rsasaki0109/dynamic-3d-object-removal/blob/master/README.md">README and benchmarks</a> ·
+        <a href="demo/">All visual demos</a>
       </div>
     </div>
   </body>

@@ -181,7 +181,43 @@ python scripts/diagnose_common_misses.py \
   --ablate-evidence --report-json output/evidence_ablations.json
 ```
 
-### Official close-point preprocessing
+### Sensor-axis range-image experiment
+
+[range_frame_comparison.json](range_frame_comparison.json) compares the current
+map-axis spherical pixels with per-scan sensor-axis pixels. Each map point is
+transformed by `(map_point - translation) @ sensor_to_map_rotation`; query
+points use their native sensor coordinates. Both use the same angular
+resolution, range margin and voting thresholds. Scan-ratio remains unchanged,
+and the ground guard still uses map-frame Z. No deskew is added.
+
+All ten nuScenes inputs and the AV2 scene retain identical fingerprints, and
+map-axis baseline metrics replay exactly. The synthetic tests check posed
+visibility, map-row ordering, map-frame ground protection and quaternion/matrix
+rotation agreement.
+
+| Frame / method | nuScenes recall | nuScenes F1 | nuScenes static kept | AV2 recall | AV2 F1 | AV2 static kept |
+|---|---:|---:|---:|---:|---:|---:|
+| Map axes, range only | 50.349% | 0.4726 | 96.120% | 53.702% | 0.5998 | 98.139% |
+| Sensor axes, range only | 48.290% | 0.4475 | 95.637% | 53.111% | 0.5854 | 97.920% |
+| Map axes, intersection | 20.440% | 0.2925 | 99.476% | 16.139% | 0.2776 | 99.991% |
+| Sensor axes, intersection | 21.053% | 0.2995 | 99.467% | 16.233% | 0.2790 | 99.992% |
+
+The intersection gains a little recall, but range alone loses F1 and static
+preservation in both datasets. This does not support replacing the production
+projection. These are API research measurements on already examined data;
+the sensor-axis helper is not a new public API or CLI option. nuScenes means
+use the same six eligible scenes; AV2 is one scene. Neither is held-out
+validation of the selected experiment.
+
+```bash
+python scripts/compare_range_frames.py \
+  --validation-root output/cli_nuscenes_devkit_selection \
+  --av2-manifest output/cli_av2/manifest.json \
+  --av2-baseline examples/cli_validation/av2_12_sweeps.json \
+  --report-json output/range_frame_comparison.json
+```
+
+### Close-point preprocessing record
 
 The follow-up [nuscenes_devkit_selection.json](nuscenes_devkit_selection.json)
 uses the official nuScenes devkit multisweep close-point rule before pose

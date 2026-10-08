@@ -96,3 +96,48 @@ frames, and values are fractions of the target GT in each acquisition frame.
 White columns have no target GT and are undefined, not zero or perfect votes.
 Frame numbers start at zero; relative timestamp seconds are recorded in JSON.
 No filter behavior changes.
+
+## Fixed-map follow-up scan experiment
+
+[scene_0796_followup_scans.json](scene_0796_followup_scans.json) tests the
+sequence-end hypothesis without changing the evaluated map, GT, track or
+filter settings. Add the next same-cadence keyframes, scene sample indices
+36 and 39, about 1.50 and 3.00 seconds after the final baseline scan.
+Hashes prove evaluation arrays remain fixed before and after all API calls;
+later points and annotations are not added to the evaluated population.
+
+| Added queries | Scene moving GT removed | Scene static falsely removed | Target car removed | Target car missed |
+|---|---:|---:|---:|---:|
+| 0 (12 queries) | 331 | 796 | 292 | 5,064 |
+| 1 (13 queries) | 331 | 803 | 292 | 5,064 |
+| 2 (14 queries) | 331 | 803 | 292 | 5,064 |
+
+The target receives 156 range see-through votes from the first extra scan
+and none from the second. Neither extra scan revisits any target point's
+scan-ratio column. Most target points are still within the 80 m polar range
+(5,164 and 5,129 of 5,356 respectively), so the lack of revisits is not simply
+that every target point is out of range. Preprocessed query columns are empty
+at the target bins. This does not prove physical occlusion or sensor blindness;
+the observation definition includes the fixed discretization and preprocessing.
+
+The target's range dynamic count increases only 3,160 → 3,161, while its
+scan-ratio dynamic count stays at 399, so the intersection cannot recover
+additional target GT. This limited 3-second experiment fails to support a
+simple wait-for-two-more-scans solution. Across the scene, the second variant
+adds 9 static false removals and recovers 2 baseline false removals, a net +7;
+additional evidence is not guaranteed to make removal monotonic.
+
+```bash
+python scripts/evaluate_followup_scans.py \
+  --manifest output/cli_nuscenes_devkit_selection/scene-0796/manifest.json \
+  --validation-root output/cli_nuscenes_devkit_selection/scene-0796/validation \
+  --data-root data/nuscenes_mini --stride 3 \
+  --track 69385845cb9747b7afe095177cc405b5 \
+  --report-json output/scene_0796_followup_scans.json
+```
+
+No production changes are made. This is one previously examined track and
+scene, not held-out validation or proof about longer delays. Later queries
+still affect normalized vote thresholds and surface evidence, while the
+parameter values remain fixed. The record includes query file and transformed
+point hashes, poses, relative times and individual target evidence counts.

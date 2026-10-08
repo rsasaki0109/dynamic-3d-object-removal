@@ -1,0 +1,509 @@
+{
+  "scene": "scene-0796",
+  "frames": 12,
+  "input_hashes": {
+    "manifest_sha256": "7f6d7b89f180d94596ff6ffd48d1fdec529b32885d898283b4f4e0bd18f5b8f2",
+    "map_sha256": "8654ed2309ac4e2eec80d8811c32e2b55ef3572651b0a82e85e6f34d3cc04a7b",
+    "gt_sha256": "a76a7c37e244f5302ed878dc0846d2390b212bd2513f8b6ad93720e3e476fe23"
+  },
+  "parameters": {
+    "range": {
+      "h_res_deg": 2.5,
+      "v_res_deg": 2.5,
+      "range_margin": 0.5,
+      "min_see_through": 3,
+      "max_surface_hits": 5,
+      "ground_z": null,
+      "resolutions": null
+    },
+    "scan_ratio": {
+      "n_rings": 20,
+      "n_sectors": 108,
+      "max_range": 80.0,
+      "scan_ratio_threshold": 0.2,
+      "min_map_height": 0.5,
+      "ground_margin": 0.2,
+      "min_votes": null,
+      "votes_fraction": 0.5,
+      "votes_floor": 3
+    }
+  },
+  "preprocessing": {
+    "ground_z_sensor": -1.6,
+    "min_distance": 1.0,
+    "close_point_rule": "abs(sensor_x)<min_distance AND abs(sensor_y)<min_distance"
+  },
+  "metrics": {
+    "precision": 0.2937000887311446,
+    "recall": 0.035560807907176625,
+    "f1": 0.06344034499281266,
+    "iou": 0.032759303246239116,
+    "static_preservation": 0.994951641033772,
+    "true_positive": 331,
+    "false_positive": 796,
+    "false_negative": 8977,
+    "true_negative": 156879
+  },
+  "tracks": [
+    {
+      "instance_token": "69385845cb9747b7afe095177cc405b5",
+      "category": "vehicle.car",
+      "gt_points": 5356,
+      "removed": 292,
+      "missed": 5064,
+      "recall": 0.05451829723674384,
+      "median_acquisition_range_m": 3.2253448965166145,
+      "center_xy": [
+        1751.7351720360198,
+        2631.4835011929235
+      ]
+    },
+    {
+      "instance_token": "bbee785861d143e1861ab1facf72794a",
+      "category": "vehicle.car",
+      "gt_points": 703,
+      "removed": 2,
+      "missed": 701,
+      "recall": 0.002844950213371266,
+      "median_acquisition_range_m": 8.167395205822633,
+      "center_xy": [
+        1775.2573229599393,
+        2607.8026423876872
+      ]
+    },
+    {
+      "instance_token": "9cba9cd8af85487fb010652c90d845b5",
+      "category": "vehicle.bus.rigid",
+      "gt_points": 710,
+      "removed": 13,
+      "missed": 697,
+      "recall": 0.018309859154929577,
+      "median_acquisition_range_m": 21.427446508680642,
+      "center_xy": [
+        1876.343820869778,
+        2503.2762309652217
+      ]
+    },
+    {
+      "instance_token": "2dd2b297279e47c29167b37d83cc7deb",
+      "category": "vehicle.car",
+      "gt_points": 596,
+      "removed": 21,
+      "missed": 575,
+      "recall": 0.03523489932885906,
+      "median_acquisition_range_m": 8.332692644275692,
+      "center_xy": [
+        1812.6711498369984,
+        2563.9912330076063
+      ]
+    },
+    {
+      "instance_token": "056d745eca7b42f493d84cc2b7d3b5dc",
+      "category": "vehicle.car",
+      "gt_points": 219,
+      "removed": 0,
+      "missed": 219,
+      "recall": 0.0,
+      "median_acquisition_range_m": 9.48345016253348,
+      "center_xy": [
+        1794.0651514330077,
+        2590.332007966712
+      ]
+    },
+    {
+      "instance_token": "1e425c3c4d3c42848f29a7b5c46565e2",
+      "category": "vehicle.car",
+      "gt_points": 187,
+      "removed": 0,
+      "missed": 187,
+      "recall": 0.0,
+      "median_acquisition_range_m": 12.205655543335418,
+      "center_xy": [
+        1832.6555369139353,
+        2544.680553676158
+      ]
+    },
+    {
+      "instance_token": "3684709dcf7246be881769a6fd33d80b",
+      "category": "human.pedestrian.adult",
+      "gt_points": 181,
+      "removed": 0,
+      "missed": 181,
+      "recall": 0.0,
+      "median_acquisition_range_m": 5.710126146890254,
+      "center_xy": [
+        1866.3785415668035,
+        2481.028408692651
+      ]
+    },
+    {
+      "instance_token": "4045908096574b24a57f32261d6a76a2",
+      "category": "vehicle.car",
+      "gt_points": 153,
+      "removed": 0,
+      "missed": 153,
+      "recall": 0.0,
+      "median_acquisition_range_m": 12.959886609892163,
+      "center_xy": [
+        1822.4376026223538,
+        2557.7753934799007
+      ]
+    },
+    {
+      "instance_token": "4bb69c834e4f47e2a915cb1abaac7ac1",
+      "category": "vehicle.truck",
+      "gt_points": 133,
+      "removed": 0,
+      "missed": 133,
+      "recall": 0.0,
+      "median_acquisition_range_m": 11.27537892453997,
+      "center_xy": [
+        1751.3428611241434,
+        2644.98749389904
+      ]
+    },
+    {
+      "instance_token": "b224990245da4159b42a55dc0537ddf4",
+      "category": "vehicle.car",
+      "gt_points": 124,
+      "removed": 0,
+      "missed": 124,
+      "recall": 0.0,
+      "median_acquisition_range_m": 13.656010651578319,
+      "center_xy": [
+        1869.5233759838466,
+        2503.62341804771
+      ]
+    },
+    {
+      "instance_token": "d0d878e38f744577ad7c91edd001da08",
+      "category": "vehicle.motorcycle",
+      "gt_points": 114,
+      "removed": 0,
+      "missed": 114,
+      "recall": 0.0,
+      "median_acquisition_range_m": 11.273652771669902,
+      "center_xy": [
+        1810.5137738378642,
+        2544.6919846422643
+      ]
+    },
+    {
+      "instance_token": "b53f6f12d9b149938350665b4bdfde22",
+      "category": "vehicle.truck",
+      "gt_points": 107,
+      "removed": 0,
+      "missed": 107,
+      "recall": 0.0,
+      "median_acquisition_range_m": 22.019777785602034,
+      "center_xy": [
+        1858.579566312467,
+        2520.123337823156
+      ]
+    },
+    {
+      "instance_token": "afa497ac5b994d0c9aa0ddda6cb9ac81",
+      "category": "human.pedestrian.adult",
+      "gt_points": 93,
+      "removed": 0,
+      "missed": 93,
+      "recall": 0.0,
+      "median_acquisition_range_m": 6.681932066220417,
+      "center_xy": [
+        1794.6033170072553,
+        2564.982877389579
+      ]
+    },
+    {
+      "instance_token": "a9ba2ffc5a95458c9bd1052be9bc24ad",
+      "category": "human.pedestrian.adult",
+      "gt_points": 80,
+      "removed": 0,
+      "missed": 80,
+      "recall": 0.0,
+      "median_acquisition_range_m": 6.500892122183634,
+      "center_xy": [
+        1854.3406285695357,
+        2494.7779849620756
+      ]
+    },
+    {
+      "instance_token": "123975e127674a218dec62579ce3ef49",
+      "category": "human.pedestrian.adult",
+      "gt_points": 68,
+      "removed": 0,
+      "missed": 68,
+      "recall": 0.0,
+      "median_acquisition_range_m": 7.847768406618144,
+      "center_xy": [
+        1793.8614758276597,
+        2564.397084908389
+      ]
+    },
+    {
+      "instance_token": "f0a32ff104d7412c958b06dd3551a480",
+      "category": "vehicle.car",
+      "gt_points": 65,
+      "removed": 0,
+      "missed": 65,
+      "recall": 0.0,
+      "median_acquisition_range_m": 15.551795602665667,
+      "center_xy": [
+        1772.8306054837226,
+        2614.680877021703
+      ]
+    },
+    {
+      "instance_token": "d820e2bc424246a0b7e9b12a2225a33b",
+      "category": "vehicle.car",
+      "gt_points": 61,
+      "removed": 0,
+      "missed": 61,
+      "recall": 0.0,
+      "median_acquisition_range_m": 20.641917909789477,
+      "center_xy": [
+        1870.5496558341422,
+        2502.697030032096
+      ]
+    },
+    {
+      "instance_token": "88e4abb15ade4097a1689225c13399ec",
+      "category": "vehicle.car",
+      "gt_points": 60,
+      "removed": 1,
+      "missed": 59,
+      "recall": 0.016666666666666666,
+      "median_acquisition_range_m": 13.19220125284312,
+      "center_xy": [
+        1758.5483533467502,
+        2623.606049309788
+      ]
+    },
+    {
+      "instance_token": "5693745996aa45ceb9bcd5a238aea978",
+      "category": "human.pedestrian.adult",
+      "gt_points": 41,
+      "removed": 0,
+      "missed": 41,
+      "recall": 0.0,
+      "median_acquisition_range_m": 10.31702229278618,
+      "center_xy": [
+        1859.32625724011,
+        2489.770970145613
+      ]
+    },
+    {
+      "instance_token": "d0c7ec4b0ad749acae439f2d6bee330f",
+      "category": "vehicle.car",
+      "gt_points": 40,
+      "removed": 0,
+      "missed": 40,
+      "recall": 0.0,
+      "median_acquisition_range_m": 27.793128277605753,
+      "center_xy": [
+        1782.640803218633,
+        2622.2676401611843
+      ]
+    },
+    {
+      "instance_token": "2fa52c38542e482aa25fa5ff489ce85b",
+      "category": "human.pedestrian.adult",
+      "gt_points": 37,
+      "removed": 0,
+      "missed": 37,
+      "recall": 0.0,
+      "median_acquisition_range_m": 9.136338984129928,
+      "center_xy": [
+        1869.7222793505305,
+        2475.9275455385864
+      ]
+    },
+    {
+      "instance_token": "3c988d7c752a49b385f2eea8322652d1",
+      "category": "vehicle.car",
+      "gt_points": 29,
+      "removed": 0,
+      "missed": 29,
+      "recall": 0.0,
+      "median_acquisition_range_m": 17.555339738365728,
+      "center_xy": [
+        1820.3486844042252,
+        2560.782626458843
+      ]
+    },
+    {
+      "instance_token": "7fd4411922dc48bfb610fa548c9313a6",
+      "category": "vehicle.car",
+      "gt_points": 27,
+      "removed": 0,
+      "missed": 27,
+      "recall": 0.0,
+      "median_acquisition_range_m": 67.09766399233393,
+      "center_xy": [
+        1740.7407447704584,
+        2641.448376775453
+      ]
+    },
+    {
+      "instance_token": "af8f1a158d3741ab9d5856b91531d758",
+      "category": "human.pedestrian.adult",
+      "gt_points": 24,
+      "removed": 0,
+      "missed": 24,
+      "recall": 0.0,
+      "median_acquisition_range_m": 10.935373240577619,
+      "center_xy": [
+        1858.210769355727,
+        2489.575753839094
+      ]
+    },
+    {
+      "instance_token": "c2f164499b954e72939fa09382c17436",
+      "category": "vehicle.car",
+      "gt_points": 24,
+      "removed": 0,
+      "missed": 24,
+      "recall": 0.0,
+      "median_acquisition_range_m": 20.057605322189566,
+      "center_xy": [
+        1876.1383441673972,
+        2506.824685329606
+      ]
+    },
+    {
+      "instance_token": "4f204cd1e74a4e9c9e90ca91389dbeb8",
+      "category": "vehicle.car",
+      "gt_points": 22,
+      "removed": 1,
+      "missed": 21,
+      "recall": 0.045454545454545456,
+      "median_acquisition_range_m": 26.67032343925073,
+      "center_xy": [
+        1828.2433800492565,
+        2554.454799552963
+      ]
+    },
+    {
+      "instance_token": "326e58cb5f8145b2b0146dd383f886b8",
+      "category": "vehicle.car",
+      "gt_points": 17,
+      "removed": 0,
+      "missed": 17,
+      "recall": 0.0,
+      "median_acquisition_range_m": 32.8046241129033,
+      "center_xy": [
+        1779.9307868574401,
+        2630.985779087466
+      ]
+    },
+    {
+      "instance_token": "f0ba63c4ef524c4b8bce6eae49dc9aad",
+      "category": "human.pedestrian.adult",
+      "gt_points": 13,
+      "removed": 0,
+      "missed": 13,
+      "recall": 0.0,
+      "median_acquisition_range_m": 20.260158138503332,
+      "center_xy": [
+        1826.5978706526819,
+        2568.1678438319695
+      ]
+    },
+    {
+      "instance_token": "ae873f154c6a43b2b10a097e8e03fd92",
+      "category": "human.pedestrian.adult",
+      "gt_points": 9,
+      "removed": 0,
+      "missed": 9,
+      "recall": 0.0,
+      "median_acquisition_range_m": 21.804417211323784,
+      "center_xy": [
+        1870.591793058847,
+        2517.681169988366
+      ]
+    },
+    {
+      "instance_token": "5dc4683340cb4a7d91731c2116845055",
+      "category": "vehicle.car",
+      "gt_points": 6,
+      "removed": 1,
+      "missed": 5,
+      "recall": 0.16666666666666666,
+      "median_acquisition_range_m": 46.6486795351306,
+      "center_xy": [
+        1803.296471579656,
+        2569.144249701563
+      ]
+    },
+    {
+      "instance_token": "343a0d85fb3849d68c70401101cc53da",
+      "category": "human.pedestrian.adult",
+      "gt_points": 3,
+      "removed": 0,
+      "missed": 3,
+      "recall": 0.0,
+      "median_acquisition_range_m": 30.729495458303862,
+      "center_xy": [
+        1858.4929080609727,
+        2533.74894208659
+      ]
+    },
+    {
+      "instance_token": "39a7bd2c92de40bf96ba0f866585b43b",
+      "category": "vehicle.car",
+      "gt_points": 3,
+      "removed": 0,
+      "missed": 3,
+      "recall": 0.0,
+      "median_acquisition_range_m": 30.650306117199616,
+      "center_xy": [
+        1761.0296536188896,
+        2615.398952126982
+      ]
+    },
+    {
+      "instance_token": "ce2f7b7a62bd44d59b5d1cb532333044",
+      "category": "vehicle.car",
+      "gt_points": 3,
+      "removed": 0,
+      "missed": 3,
+      "recall": 0.0,
+      "median_acquisition_range_m": 73.40802796420193,
+      "center_xy": [
+        1807.535281075052,
+        2564.104176447434
+      ]
+    }
+  ],
+  "categories": {
+    "vehicle.car": {
+      "gt_points": 7695,
+      "removed": 318,
+      "missed": 7377
+    },
+    "human.pedestrian.adult": {
+      "gt_points": 549,
+      "removed": 0,
+      "missed": 549
+    },
+    "vehicle.truck": {
+      "gt_points": 240,
+      "removed": 0,
+      "missed": 240
+    },
+    "vehicle.bus.rigid": {
+      "gt_points": 710,
+      "removed": 13,
+      "missed": 697
+    },
+    "vehicle.motorcycle": {
+      "gt_points": 114,
+      "removed": 0,
+      "missed": 114
+    }
+  },
+  "overlapping_gt_points": 6,
+  "limitations": "Moving-instance annotation boxes define GT, not per-point motion or detector outputs. Motion cutoff 2 m and box margin 0.25 m match the baseline. Overlapping boxes are assigned to the first lexicographic instance token. Background only is deterministically sampled for display; counts use all points. Rigid poses without deskew. nuScenes mini CC BY-NC-SA 4.0, https://www.nuscenes.org",
+  "validation_date": "2026-10-08",
+  "source_base_commit": "087c5606bd161a59caa52e0b4e3403b108604f7d"
+}

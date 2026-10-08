@@ -60,6 +60,120 @@ dynamic-object-removal \
   --sensor-origin 0 0 0 --output-cloud cleaned.npy
 ```
 
+### Clean a map using multiple scans
+
+Use `fusion` for dense, pose-aligned offline maps. Supply the accumulated map
+and a JSON manifest of the scans that built it:
+
+```bash
+dynamic-object-removal \
+  --algorithm fusion --input-map map.npy --input-manifest scans.json \
+  --output-cloud output/cleaned.npy --summary-json output/summary.json
+```
+
+`scans.json` uses the same pose fields as the online benchmark manifest.
+Each `pose` transforms a deskewed sensor-frame cloud into the coordinate frame
+of `map.npy` (`p_map = R @ p_sensor + translation`). The translation is also
+the sensor origin in that map frame:
+
+```json
+{
+  "sensor_profile": {"name": "64-beam LiDAR", "beams": 64, "deskewed": true},
+  "frames": [
+    {
+      "cloud": "scans/000.npy",
+      "pose": {
+        "translation": [0, 0, 0],
+        "quaternion_xyzw": [0, 0, 0, 1]
+      }
+    },
+    {
+      "cloud": "scans/001.npy",
+      "pose": {
+        "translation": [1, 0, 0],
+        "quaternion_xyzw": [0, 0, 0, 1]
+      }
+    }
+  ]
+}
+```
+
+Cloud paths are relative to the manifest's directory, or absolute. Each cloud's
+format is inferred from its extension. A pose can instead provide a proper 3×3
+`rotation` matrix. For clouds already expressed in the map frame, replace
+`pose` with `"sensor_origin": [x, y, z]`; do not provide both. All scans must
+be nonempty and finite, and `sensor_profile.deskewed` must explicitly be `true`.
+The CLI applies rigid poses; it does not deskew scans or estimate poses.
+
+Without `--preset`, defaults match `clean_map_by_fusion` and target long
+sequences. Choose a preset explicitly; it is not inferred from sensor metadata
+or scan count:
+
+| Preset | Intended use | Free vote fraction / floor / minimum void scans |
+|---|---|---|
+| `long-map` | Dense offline maps with long sequences (100+ scans) | `0.9 / 2 / 11` (API defaults) |
+| `short-window` | Dense offline maps with about 12 scans | `0.7 / 3 / 4` |
+
+```bash
+dynamic-object-removal \
+  --algorithm fusion --preset short-window \
+  --input-map map.npy --input-manifest scans.json \
+  --output-cloud output/cleaned.npy --summary-json output/summary.json
+```
+
+Explicit `--fusion-*` options override the preset regardless of argument order.
+For example, `--preset short-window --fusion-free-votes-floor 4` uses
+`0.7 / 4 / 4`. Presets do not make fusion suitable for sparse 32-beam sensors.
+
+Use `--fusion-workers 4` to process scans in parallel when memory permits; the
+default is one worker. All fusion API parameters are available with a
+`--fusion-` prefix and hyphens, for example `--fusion-free-voxel 0.3`.
+The summary records point counts, scan count, sensor metadata, the selected
+preset (`null` when omitted), all effective
+parameters, library version, and filter/overall processing time. These counts
+describe removal, not accuracy against ground truth. Sparse 32-beam data should
+use the intersection workflow below.
+
+### Clean a sparse map with range ∩ scan-ratio
+
+`range_scan_ratio` runs both multi-scan cleaners on the same map and scans,
+then removes only points that **both** mark dynamic. A point marked by just one
+method is kept. Use the same `scans.json` manifest and deskew/pose contract as
+the fusion example:
+
+```bash
+dynamic-object-removal \
+  --algorithm range_scan_ratio \
+  --input-map map.npy --input-manifest scans.json \
+  --output-cloud output/cleaned.npy --summary-json output/summary.json
+```
+
+This mode defaults to a coarse `2.5° × 2.5°` range image, at least three
+see-through votes, and at most five surface confirmations, following the sparse
+nuScenes benchmark settings. Scan-ratio voting uses the API's revisit-normalized
+defaults. The existing single-query `--algorithm range` keeps its `0.4°`
+resolution defaults.
+
+Tune the range channel with `--range-h-res`, `--range-v-res`,
+`--range-margin`, `--range-min-see-through`, and `--range-max-surface-hits`.
+`--range-resolutions 2.5 4` requires consensus at both square resolutions and
+overrides the horizontal/vertical resolution settings. To protect ground,
+provide `--range-ground-z` in map-frame coordinates; no global ground height
+is inferred by default.
+
+Scan-ratio exposes `--scan-ratio-rings`, `--scan-ratio-sectors`,
+`--scan-ratio-max-range`, `--scan-ratio-threshold`,
+`--scan-ratio-min-map-height`, and `--scan-ratio-ground-margin`.
+Use `--scan-ratio-votes-fraction` and `--scan-ratio-votes-floor` for normalized
+voting, or `--scan-ratio-min-votes` to select a fixed absolute threshold instead.
+
+The summary records both channels' parameters and candidate counts in
+`channel_removed_points`, plus the final intersection count. It does not
+report accuracy without ground truth. This CLI uses the benchmark's mask
+combination; reproducing its published numbers also requires its dataset
+selection, preprocessing, and ground settings. Fusion presets and
+`--fusion-*` options apply only to `--algorithm fusion`.
+
 ## Algorithms
 
 | Method | Use | Detector | Poses |
@@ -69,6 +183,7 @@ dynamic-object-removal \
 | `range` | Range-image visibility + revert | no | yes |
 | `scan_ratio` | Polar pseudo-occupancy + ground revert | no | yes |
 | `fusion` | Offline free-space + void + scan-ratio fusion | no | yes |
+| `range_scan_ratio` (CLI combination) | Offline intersection of range and scan-ratio dynamic masks | no | yes |
 
 Use `fusion` for dense offline maps, `range` (optionally intersected with `scan_ratio`) for sparse sensors, and `temporal` or `range` for realtime filtering.
 
@@ -175,6 +290,88 @@ python3 scripts/run_av2_benchmark.py --frames 12 --stride 3 --sr-min-votes 2
 python3 scripts/run_nuscenes_benchmark.py
 python3 scripts/run_dynamicmap_benchmark.py --sequences 00 05
 ```
+
+### Compare benchmark results across changes
+
+Save a baseline JSON before a change, rerun the same benchmark with the same
+dataset selection and settings, then compare the results:
+
+```bash
+python3 scripts/compare_benchmark_results.py \
+  --baseline output/before.json --candidate output/after.json \
+  --report-json output/regression-report.json \
+  --max-metric-drop 0.005 --max-slowdown 0.2
+```
+
+The comparator reads AV2/nuScenes single-scene or aggregate JSON, DynamicMap
+results, and `run_online_benchmark.py` segmentation results. It checks every
+recorded method and scene/scenario, including per-scene results behind an
+aggregate mean. CLI removal summaries contain no accuracy ground truth and
+are not accepted as benchmark results.
+
+By default, any precision, recall, F1, IoU (when recorded), or static-preservation
+drop fails; timing may increase by at most 20%. `--max-metric-drop 0.005`
+allows a 0.5 percentage-point drop. DynamicMap's SA/DA/AA/HA percentages are
+normalized to the same 0–1 scale. Online dropped/fail-open/deadline-miss counts
+must not increase. Thresholds are inclusive.
+
+Exit codes are **0** for passing, **1** for regression, and **2** for incompatible
+conditions or invalid input. JSON reports contain the values, deltas, thresholds,
+and individual regression flags; input errors write `comparison_error` instead
+of leaving an old passing report. Missing/non-finite metrics, empty runs, changed
+method sets, and mismatched evaluation metadata are errors.
+
+AV2/nuScenes timing is the runner's whole-scene `runtime_seconds`, not per-method
+latency. Online timing covers filter latency, not ROS2 serialization/publishing.
+DynamicMap JSON has no timing measurements, which the report marks explicitly.
+Use comparable hardware and repeat noisy timing measurements when investigating
+a failure. The tool validates recorded settings, scene membership, counts, and
+online manifest paths; existing result files do not prove that raw data contents
+or hardware are identical. Run dataset acquisition and benchmarks separately;
+the comparator does not download data or launch benchmarks.
+
+### Validate the multi-scan CLI on an AV2 sequence
+
+Export the exact scan poses and per-point moving GT from the existing AV2
+benchmark, then validate both new CLI modes:
+
+```bash
+pip install -e ".[benchmarks]"
+python scripts/run_av2_benchmark.py --frames 12 --stride 3 --fusion-workers 2 \
+  --online-manifest output/cli_av2/manifest.json \
+  --summary-json output/cli_av2/reference.json
+python scripts/validate_multiscan_cli.py \
+  --manifest output/cli_av2/manifest.json --stride 3 --workers 2 \
+  --reference-summary output/cli_av2/reference.json \
+  --output-dir output/cli_av2/validation
+```
+
+The validation directory must be new or empty. It contains the accumulated map,
+moving-GT labels, CLI point clouds, boolean keep masks, command logs,
+`baseline_api.json`, `candidate_cli.json`, and `validation.json`.
+The validator requires point-for-point and mask-for-mask API/CLI equality and
+checks fusion/range/scan-ratio metrics against the reference benchmark. Boxes
+are used for GT only, not inference. Missing moving GT makes validation fail.
+
+For this AV2 check, `range_scan_ratio` uses the reference benchmark's dense-sensor
+range and ground settings, rather than its sparse-sensor CLI defaults. This
+checks the CLI execution path; it does not establish sparse-sensor accuracy.
+The existing benchmark exporter declares its clouds deskewed.
+
+`equivalence_report.json` checks accuracy equality only. Both API and CLI JSON
+also record the sum of filter-call timings, excluding CLI process startup.
+Use repeated CLI validation runs in separate directories to investigate timing
+regressions. A later candidate can be compared against a retained
+`candidate_cli.json` using `compare_benchmark_results.py`.
+
+To obtain row-aligned masks separately, add `--output-mask kept.npy` to either
+multi-scan CLI mode. The boolean mask has one entry per input-map point;
+`True` means kept.
+Output cloud, mask, and summary paths must be distinct and cannot overwrite
+the input map, manifest, or its scan/GT files.
+
+A compact [real AV2 validation record](examples/cli_validation/README.md)
+is checked in separately from the downloaded data and generated point clouds.
 
 ## Quick Start On Public Data
 

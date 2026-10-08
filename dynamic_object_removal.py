@@ -21,6 +21,7 @@ import json
 from collections import deque
 import math
 import sys
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Sequence
@@ -2273,17 +2274,291 @@ def save_points(path: Path, points: np.ndarray, *, fmt: str) -> None:
             writer.writerow([f"{x:.10f}", f"{y:.10f}", f"{z:.10f}"])
 
 
+_FUSION_CLI_DEFAULTS = {
+    "min_range": DEFAULT_FUSION_MIN_RANGE, "max_range": DEFAULT_FUSION_MAX_RANGE,
+    "free_voxel": DEFAULT_FREE_VOXEL, "free_step": DEFAULT_FREE_STEP,
+    "free_carve_margin": DEFAULT_FREE_CARVE_MARGIN,
+    "free_ground_margin": DEFAULT_FREE_GROUND_MARGIN,
+    "free_votes_fraction": DEFAULT_FREE_VOTES_FRACTION,
+    "free_votes_floor": DEFAULT_FREE_VOTES_FLOOR,
+    "void_voxel": DEFAULT_VOID_VOXEL, "void_step": DEFAULT_VOID_STEP,
+    "void_hit_inflation": DEFAULT_VOID_HIT_INFLATION,
+    "void_min_scans": DEFAULT_VOID_MIN_SCANS,
+    "sr_votes_fraction": DEFAULT_FUSION_SR_FRACTION,
+    "sr_votes_floor": DEFAULT_SR_VOTES_FLOOR,
+    "n_rings": DEFAULT_SR_RINGS, "n_sectors": DEFAULT_SR_SECTORS,
+    "sr_max_range": DEFAULT_SR_MAX_RANGE, "scan_ratio_threshold": DEFAULT_SR_RATIO,
+    "min_map_height": DEFAULT_SR_MIN_MAP_HEIGHT,
+    "sr_ground_margin": DEFAULT_SR_GROUND_MARGIN, "workers": 1,
+}
+
+_FUSION_CLI_PRESETS = {
+    "long-map": {},
+    "short-window": {
+        "free_votes_fraction": 0.7,
+        "free_votes_floor": 3,
+        "void_min_scans": 4,
+    },
+}
+
+
+def _load_scan_manifest(path: Path) -> tuple[list[tuple[np.ndarray, np.ndarray]], dict[str, Any]]:
+    """Load deskewed scans with explicit sensor-to-map poses or map-frame origins."""
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError("manifest must be an object")
+    profile = payload.get("sensor_profile")
+    if not isinstance(profile, dict) or profile.get("deskewed") is not True:
+        raise ValueError("manifest requires sensor_profile.deskewed=true")
+    frames = payload.get("frames")
+    if not isinstance(frames, list) or not frames:
+        raise ValueError("manifest.frames must be a nonempty list")
+    scans = []
+    for index, frame in enumerate(frames):
+        try:
+            if not isinstance(frame, dict):
+                raise ValueError("frame must be an object")
+            cloud = frame.get("cloud")
+            if not isinstance(cloud, str) or not cloud:
+                raise ValueError("cloud must be a nonempty path")
+            if ("pose" in frame) == ("sensor_origin" in frame):
+                raise ValueError("provide exactly one of pose or sensor_origin")
+            cloud_path = Path(cloud)
+            if not cloud_path.is_absolute():
+                cloud_path = path.parent / cloud_path
+            points = load_points(cloud_path, fmt="auto")
+            if not len(points) or not np.isfinite(points).all():
+                raise ValueError("scan must contain finite, nonempty points")
+            if "pose" in frame:
+                pose = frame["pose"]
+                if not isinstance(pose, dict):
+                    raise ValueError("pose must be an object")
+                origin = np.asarray(pose.get("translation"), dtype=np.float64)
+                if ("rotation" in pose) == ("quaternion_xyzw" in pose):
+                    raise ValueError("pose requires exactly one rotation or quaternion_xyzw")
+                if "quaternion_xyzw" in pose:
+                    q = np.asarray(pose["quaternion_xyzw"], dtype=np.float64)
+                    if q.shape != (4,) or not np.isfinite(q).all() or np.max(np.abs(q)) == 0:
+                        raise ValueError("quaternion_xyzw must be finite and nonzero with four values")
+                    q = q / np.max(np.abs(q))
+                    x, y, z, w = q / np.linalg.norm(q)
+                    rotation = np.array([
+                        [1 - 2*(y*y + z*z), 2*(x*y - z*w), 2*(x*z + y*w)],
+                        [2*(x*y + z*w), 1 - 2*(x*x + z*z), 2*(y*z - x*w)],
+                        [2*(x*z - y*w), 2*(y*z + x*w), 1 - 2*(x*x + y*y)],
+                    ])
+                else:
+                    rotation = np.asarray(pose["rotation"], dtype=np.float64)
+                if (rotation.shape != (3, 3) or not np.isfinite(rotation).all()
+                        or not np.allclose(rotation.T @ rotation, np.eye(3), atol=1e-6)
+                        or not np.isclose(np.linalg.det(rotation), 1.0, atol=1e-6)):
+                    raise ValueError("pose rotation must be a proper orthonormal 3x3 matrix")
+                if origin.shape != (3,) or not np.isfinite(origin).all():
+                    raise ValueError("pose.translation must contain three finite values")
+                points = points @ rotation.T + origin
+            else:
+                origin = np.asarray(frame["sensor_origin"], dtype=np.float64)
+                if origin.shape != (3,) or not np.isfinite(origin).all():
+                    raise ValueError("sensor_origin must contain three finite map-frame values")
+            if not np.isfinite(points).all():
+                raise ValueError("transformed scan contains non-finite points")
+            scans.append((points, origin))
+        except (ValueError, TypeError, OSError, KeyError) as exc:
+            raise ValueError(f"manifest frame {index}: {exc}") from exc
+    return scans, profile
+
+
+def _range_scan_ratio_cli_parameters(args: argparse.Namespace) -> dict[str, Any]:
+    visibility = {
+        "h_res_deg": args.range_h_res, "v_res_deg": args.range_v_res,
+        "range_margin": args.range_margin,
+        "min_see_through": args.range_min_see_through,
+        "max_surface_hits": args.range_max_surface_hits,
+        "ground_z": args.range_ground_z, "resolutions": args.range_resolutions,
+    }
+    scan_ratio = {
+        "n_rings": args.scan_ratio_rings, "n_sectors": args.scan_ratio_sectors,
+        "max_range": args.scan_ratio_max_range,
+        "scan_ratio_threshold": args.scan_ratio_threshold,
+        "min_map_height": args.scan_ratio_min_map_height,
+        "ground_margin": args.scan_ratio_ground_margin,
+        "min_votes": args.scan_ratio_min_votes,
+        "votes_fraction": args.scan_ratio_votes_fraction,
+        "votes_floor": args.scan_ratio_votes_floor,
+    }
+    for channel, params in (("range", visibility), ("scan_ratio", scan_ratio)):
+        for name, value in params.items():
+            if value is None:
+                continue
+            values = value if isinstance(value, list) else [value]
+            for entry in values:
+                if not math.isfinite(entry):
+                    raise ValueError(f"{channel} {name} must be finite")
+                if name in {"scan_ratio_threshold", "votes_fraction"}:
+                    if not 0 <= entry <= 1:
+                        raise ValueError(f"{channel} {name} must be between 0 and 1")
+                elif name == "ground_z":
+                    continue
+                elif name in {"range_margin", "max_surface_hits", "min_map_height", "ground_margin"}:
+                    if entry < 0:
+                        raise ValueError(f"{channel} {name} must be nonnegative")
+                elif entry <= 0:
+                    raise ValueError(f"{channel} {name} must be positive")
+    return {"range": visibility, "scan_ratio": scan_ratio}
+
+
+def _fusion_cli_parameters(args: argparse.Namespace) -> dict[str, Any]:
+    params = dict(_FUSION_CLI_DEFAULTS)
+    if args.preset:
+        params.update(_FUSION_CLI_PRESETS[args.preset])
+    # Only explicitly supplied options override the preset, even when their
+    # value equals the API default. Argument order does not affect precedence.
+    params.update({
+        name: getattr(args, "fusion_" + name)
+        for name in _FUSION_CLI_DEFAULTS if hasattr(args, "fusion_" + name)
+    })
+    for name, value in params.items():
+        if not math.isfinite(value):
+            raise ValueError(f"fusion {name} must be finite")
+        if name.endswith("fraction") or name == "scan_ratio_threshold":
+            if not 0 <= value <= 1:
+                raise ValueError(f"fusion {name} must be between 0 and 1")
+        elif "margin" in name or name in {"min_range", "min_map_height", "void_hit_inflation"}:
+            if value < 0:
+                raise ValueError(f"fusion {name} must be nonnegative")
+        elif value <= 0:
+            raise ValueError(f"fusion {name} must be positive")
+    if params["max_range"] <= params["min_range"]:
+        raise ValueError("fusion max_range must exceed min_range")
+    return params
+
+
+def _check_multiscan_output_paths(args: argparse.Namespace) -> None:
+    manifest_path = Path(args.input_manifest)
+    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    inputs = {Path(args.input_map).resolve(), manifest_path.resolve()}
+    for frame in payload["frames"]:
+        for name in ("cloud", "point_labels"):
+            value = frame.get(name)
+            if isinstance(value, str):
+                path = Path(value)
+                inputs.add((path if path.is_absolute() else manifest_path.parent / path).resolve())
+    outputs = [Path(value).resolve() for value in
+               (args.output_cloud, args.output_mask, args.summary_json) if value]
+    # np.save appends .npy when the explicitly selected numpy format has a
+    # different suffix; check the actual destination as well.
+    fmt = (Path(args.output_cloud).suffix.lstrip(".").lower()
+           if args.cloud_format == "auto" else args.cloud_format)
+    if fmt in {"npy", "npz"} and not str(outputs[0]).endswith(".npy"):
+        outputs[0] = Path(str(outputs[0]) + ".npy")
+    if len(outputs) != len(set(outputs)):
+        raise ValueError("output cloud, mask, and summary paths must differ")
+    if set(outputs) & inputs:
+        raise ValueError("output paths must not overwrite the map, manifest, scans, or labels")
+
+
+def _run_multiscan_cli(args: argparse.Namespace) -> int:
+    if not args.input_map or not args.input_manifest:
+        _eprint(f"algorithm={args.algorithm} requires --input-map and --input-manifest")
+        return 1
+    if args.input_cloud:
+        _eprint(f"algorithm={args.algorithm} uses --input-manifest instead of --input-cloud")
+        return 1
+    try:
+        params = (_fusion_cli_parameters(args) if args.algorithm == "fusion"
+                  else _range_scan_ratio_cli_parameters(args))
+        if args.output_mask:
+            mask_path = Path(args.output_mask)
+            if mask_path.suffix != ".npy":
+                raise ValueError("--output-mask requires a .npy path")
+            other_paths = [args.input_map, args.input_manifest, args.output_cloud, args.summary_json]
+            if mask_path.resolve() in {Path(p).resolve() for p in other_paths if p}:
+                raise ValueError("--output-mask must differ from input/output paths")
+        started = time.perf_counter()
+        map_points = load_points(Path(args.input_map), fmt=args.cloud_format)
+        if not len(map_points) or not np.isfinite(map_points).all():
+            raise ValueError("input map must contain finite, nonempty points")
+        scans, profile = _load_scan_manifest(Path(args.input_manifest))
+        _check_multiscan_output_paths(args)
+        filter_started = time.perf_counter()
+        channel_counts = {}
+        if args.algorithm == "fusion":
+            filtered, keep = clean_map_by_fusion(map_points, scans, **params)
+        else:
+            _, keep_range = clean_map_by_visibility(map_points, scans, **params["range"])
+            _, keep_sr = clean_map_by_scan_ratio(map_points, scans, **params["scan_ratio"])
+            # Intersect dynamic masks; either method's keep decision protects a point.
+            keep = keep_range | keep_sr
+            filtered = map_points[keep]
+            channel_counts = {
+                "range": int((~keep_range).sum()),
+                "scan_ratio": int((~keep_sr).sum()),
+                "intersection": int((~keep).sum()),
+            }
+        filter_seconds = time.perf_counter() - filter_started
+        out_path = Path(args.output_cloud)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        save_points(out_path, filtered, fmt=args.cloud_format)
+        if args.output_mask:
+            mask_path.parent.mkdir(parents=True, exist_ok=True)
+            np.save(mask_path, keep)
+        total = len(map_points)
+        removed = total - len(filtered)
+        if args.summary_json:
+            summary_path = Path(args.summary_json)
+            summary_path.parent.mkdir(parents=True, exist_ok=True)
+            summary_path.write_text(json.dumps({
+                "algorithm": args.algorithm, "total_points": total,
+                "kept_points": len(filtered), "removed_points": removed,
+                "removed_ratio": removed / total, "scan_count": len(scans),
+                "scan_points": sum(len(points) for points, _ in scans),
+                "sensor_profile": profile, "preset": args.preset, "parameters": params,
+                **({"channel_removed_points": channel_counts} if channel_counts else {}),
+                "input_map": str(Path(args.input_map).resolve()),
+                "input_manifest": str(Path(args.input_manifest).resolve()),
+                "output_cloud": str(out_path.resolve()), "version": __version__,
+                "filter_seconds": filter_seconds,
+                "elapsed_seconds": time.perf_counter() - started,
+            }, ensure_ascii=False, indent=2), encoding="utf-8")
+        if not args.quiet:
+            _eprint(f"algorithm: {args.algorithm}, scans: {len(scans)}")
+            _eprint(f"removed: {removed} points ({removed / total:.2%})")
+            _eprint(f"output: {len(filtered)} points -> {out_path}")
+        return 0
+    except (ValueError, TypeError, OSError) as exc:
+        _eprint(f"{args.algorithm}: {exc}")
+        return 1
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Remove dynamic points from point clouds (box or range-image visibility).")
-    parser.add_argument("--input-cloud", required=True, help="Input point cloud path (csv/txt/xyz/pcd/npy). For --algorithm range this is the query scan.")
+    parser.add_argument("--input-cloud", help="Input point cloud path (csv/txt/xyz/pcd/npy). For --algorithm range/scan_ratio this is the query scan.")
     parser.add_argument("--input-objects", help="Detected object boxes JSON or CSV path (required for --algorithm box).")
     parser.add_argument("--output-cloud", required=True, help="Output point cloud path.")
-    parser.add_argument("--algorithm", choices=["box", "range", "scan_ratio"], default="box", help="box: crop by detection boxes. range: range-image visibility removal of an accumulated map. scan_ratio: ERASOR-style per-column pseudo-occupancy removal of an accumulated map.")
-    parser.add_argument("--input-map", help="Accumulated map point cloud to clean (required for --algorithm range/scan_ratio).")
+    parser.add_argument("--output-mask", help="fusion/range_scan_ratio: optional boolean .npy keep mask in input-map row order.")
+    parser.add_argument("--algorithm", choices=["box", "range", "scan_ratio", "fusion", "range_scan_ratio"], default="box", help="box: detection crop. range/scan_ratio: single-query map cleaning. fusion/range_scan_ratio: multi-scan offline map cleaning; range_scan_ratio intersects dynamic masks.")
+    parser.add_argument("--input-manifest", help="fusion/range_scan_ratio: JSON manifest of deskewed scans with sensor-to-map poses or map-frame sensor origins.")
+    fusion_group = parser.add_argument_group("fusion parameters (same defaults as the Python API)")
+    fusion_group.add_argument("--preset", choices=list(_FUSION_CLI_PRESETS),
+                             help="fusion: long-map uses API defaults; short-window uses 0.7/3/4 voting thresholds for about 12 scans. Explicit --fusion-* options take precedence.")
+    for name, default in _FUSION_CLI_DEFAULTS.items():
+        fusion_group.add_argument("--fusion-" + name.replace("_", "-"), type=type(default), default=argparse.SUPPRESS, help=f"{name} (API default: {default}; overrides preset)")
+    parser.add_argument("--input-map", help="Accumulated map point cloud to clean (required for --algorithm range/scan_ratio/fusion/range_scan_ratio).")
     parser.add_argument("--sensor-origin", nargs=3, type=float, default=[0.0, 0.0, 0.0], metavar=("X", "Y", "Z"), help="Sensor origin of the query scan (meters), for --algorithm range/scan_ratio.")
     parser.add_argument("--range-margin", type=float, default=DEFAULT_RANGE_MARGIN, help="Free-space margin for range-image removal (meters).")
-    parser.add_argument("--range-h-res", type=float, default=DEFAULT_RANGE_H_RES_DEG, help="Range-image azimuth resolution (degrees).")
-    parser.add_argument("--range-v-res", type=float, default=DEFAULT_RANGE_V_RES_DEG, help="Range-image elevation resolution (degrees).")
+    parser.add_argument("--range-h-res", type=float, default=None, help="Range-image azimuth resolution (degrees; range_scan_ratio: 2.5, range: 0.4).")
+    parser.add_argument("--range-v-res", type=float, default=None, help="Range-image elevation resolution (degrees; range_scan_ratio: 2.5, range: 0.4).")
+    intersection_group = parser.add_argument_group("multi-scan range_scan_ratio parameters")
+    intersection_group.add_argument("--range-min-see-through", type=int, default=3, help="Minimum see-through scans (default: 3).")
+    intersection_group.add_argument("--range-max-surface-hits", type=int, default=5, help="Maximum surface confirmations before removal (default: 5).")
+    intersection_group.add_argument("--range-ground-z", type=float, default=None, help="Protect map points at or below this map-frame Z (no protection by default).")
+    intersection_group.add_argument("--range-resolutions", nargs="+", type=float, default=None, help="Square range-image resolutions in degrees for consensus; overrides --range-h-res/--range-v-res.")
+    intersection_group.add_argument("--scan-ratio-rings", type=int, default=DEFAULT_SR_RINGS)
+    intersection_group.add_argument("--scan-ratio-sectors", type=int, default=DEFAULT_SR_SECTORS)
+    intersection_group.add_argument("--scan-ratio-max-range", type=float, default=DEFAULT_SR_MAX_RANGE)
+    intersection_group.add_argument("--scan-ratio-min-votes", type=int, default=None, help="Fixed absolute votes; omitted uses revisit-normalized voting.")
+    intersection_group.add_argument("--scan-ratio-votes-fraction", type=float, default=DEFAULT_SR_VOTES_FRACTION)
+    intersection_group.add_argument("--scan-ratio-votes-floor", type=int, default=DEFAULT_SR_VOTES_FLOOR)
     parser.add_argument("--scan-ratio-threshold", type=float, default=DEFAULT_SR_RATIO, help="scan_ratio: a column is dynamic when query/map height ratio is below this.")
     parser.add_argument("--scan-ratio-min-map-height", type=float, default=DEFAULT_SR_MIN_MAP_HEIGHT, help="scan_ratio: ignore columns whose map height spread is below this (meters).")
     parser.add_argument("--scan-ratio-ground-margin", type=float, default=DEFAULT_SR_GROUND_MARGIN, help="scan_ratio: keep points within this height of the per-column ground (meters).")
@@ -2328,6 +2603,26 @@ def _write_summary_json(path: Path, *, total: int, kept: int, boxes: Sequence[De
 def main(argv: Sequence[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
+
+    for name, default in (("range_h_res", DEFAULT_RANGE_H_RES_DEG),
+                          ("range_v_res", DEFAULT_RANGE_V_RES_DEG)):
+        if getattr(args, name) is None:
+            setattr(args, name, 2.5 if args.algorithm == "range_scan_ratio" else default)
+    if args.algorithm != "fusion" and args.preset:
+        parser.error("--preset requires --algorithm fusion")
+    if args.algorithm != "fusion" and any(
+            hasattr(args, "fusion_" + name) for name in _FUSION_CLI_DEFAULTS):
+        parser.error("--fusion-* options require --algorithm fusion")
+    if args.algorithm in {"fusion", "range_scan_ratio"}:
+        return _run_multiscan_cli(args)
+    if args.output_mask:
+        parser.error("--output-mask requires --algorithm fusion or range_scan_ratio")
+    if args.preset:
+        parser.error("--preset requires --algorithm fusion")
+    if args.input_manifest:
+        parser.error("--input-manifest requires --algorithm fusion or range_scan_ratio")
+    if not args.input_cloud:
+        parser.error("--input-cloud is required for box/range/scan_ratio")
 
     cloud_path = Path(args.input_cloud)
     out_path = Path(args.output_cloud)

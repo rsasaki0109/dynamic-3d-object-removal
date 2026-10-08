@@ -58,3 +58,55 @@ def test_lower_z_gate_preserves_native_votes_and_only_reduces_inference():
     np.testing.assert_array_equal(go[obs], obs[obs])
     assert not (gi & ~ei).any() and not (go & ~eo).any()
     assert not (gated & ~either).any()
+
+
+def test_visibility_support_keeps_native_and_treats_surfaces_as_negative_evidence():
+    from scripts.experiment_neighbor_columns import visibility_supported_votes
+    dynamic = np.ones(5, bool)
+    observed = np.ones(5, bool)
+    inferred = np.array([False, True, True, True, True])
+    st = np.array([False, True, False, False, False])
+    surface = np.array([False, False, True, False, False])
+    d, o, i = visibility_supported_votes(dynamic, observed, inferred, st, surface)
+    assert d.tolist() == [True, True, False, False, False]
+    assert o.tolist() == [True, True, True, False, False]
+    assert i.tolist() == [False, True, True, False, False]
+
+
+def test_range_evidence_does_not_treat_missing_or_occluded_pixels_as_free():
+    from scripts.experiment_neighbor_columns import visibility_supported_votes
+    points = np.array([[5., 0, 0], [0, 5., 0], [-5., 0, 0], [0, -5., 0]])
+    scan = np.array([[8., 0, 0], [0, 5., 0], [-3., 0, 0]])
+    st, surface = core._visibility_votes(points, scan, np.zeros(3), 1., 1., .5)
+    d, o, inferred = visibility_supported_votes(np.ones(4, bool), np.ones(4, bool),
+                                               np.ones(4, bool), st, surface)
+    assert d.tolist() == [True, False, False, False]
+    assert o.tolist() == [True, True, False, False]
+    np.testing.assert_array_equal(o, inferred)
+
+
+def test_visibility_supported_requires_explicit_single_resolution():
+    import pytest
+    params = {"n_rings": 2, "n_sectors": 4, "max_range": 30.,
+              "scan_ratio_threshold": .8, "min_map_height": .5, "ground_margin": .2}
+    points = np.array([[2., 0, 0], [2., 0, 1]])
+    with pytest.raises(ValueError, match='single-resolution'):
+        scan_votes(points, points, np.zeros(3), params, 'visibility_supported')
+
+
+def test_visibility_gate_is_applied_to_same_query_point_masks():
+    from scripts.experiment_neighbor_columns import visibility_supported_votes
+    rng = np.random.default_rng(64)
+    points = rng.uniform([-15, -15, -1], [15, 15, 3], (3000, 3))
+    query = points[::20].copy()
+    origin = np.array([1., -2., .5])
+    params = {"n_rings": 10, "n_sectors": 80, "max_range": 30.,
+              "scan_ratio_threshold": .8, "min_map_height": .5, "ground_margin": .2}
+    range_params = dict(h_res_deg=2.5, v_res_deg=2.5, range_margin=.5, resolutions=None)
+    raw = scan_votes(points, query, origin, params, 'either')
+    st, surface = core._visibility_votes(points, query, origin, 2.5, 2.5, .5)
+    expected = visibility_supported_votes(*raw, st, surface)
+    actual = scan_votes(points, query, origin, params, 'visibility_supported', range_params)
+    assert raw[2].any() and (raw[2] & ~actual[2]).any()
+    for a, b in zip(actual, expected):
+        np.testing.assert_array_equal(a, b)

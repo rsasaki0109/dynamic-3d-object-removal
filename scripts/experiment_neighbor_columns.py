@@ -41,7 +41,14 @@ def ground_aligned_support(borrowed, query_low, map_low, map_counts, margin):
     return borrowed & (map_counts > 0) & aligned
 
 
-def scan_votes(points, scan, origin, params, support):
+def visibility_supported_votes(dynamic, observed, inferred, seen_through, surface):
+    """Gate only inferred evidence; preserve native occupied-column votes."""
+    accepted = inferred & (seen_through | surface)
+    return (dynamic & (~inferred | seen_through),
+            observed & (~inferred | accepted), accepted)
+
+
+def scan_votes(points, scan, origin, params, support, range_params=None):
     rings, sectors = params["n_rings"], params["n_sectors"]
     mf, mv = core._polar_bins(points, origin, rings, sectors, params["max_range"])
     qf, qv = core._polar_bins(scan, origin, rings, sectors, params["max_range"])
@@ -54,7 +61,7 @@ def scan_votes(points, scan, origin, params, support):
     mh, ml, mc = spread(mf, mv, points[:, 2])
     qh, ql, qc = spread(qf, qv, scan[:, 2])
     qh, ql, qc, borrowed_bins = fill_neighbors(
-        qh, ql, qc, rings, sectors, "either" if support == "ground_aligned" else support)
+        qh, ql, qc, rings, sectors, "either" if support in {"ground_aligned", "visibility_supported"} else support)
     if support == "ground_aligned":
         accepted = ground_aligned_support(borrowed_bins, ql, ml, mc, params["ground_margin"])
         rejected = borrowed_bins & ~accepted
@@ -77,16 +84,23 @@ def scan_votes(points, scan, origin, params, support):
         group = indices[start:end]
         residual = core._ground_residual(points[group], max(params["ground_margin"] * 2, .3))
         dynamic[group[residual > params["ground_margin"]]] = True
+    if support == "visibility_supported":
+        if range_params is None or range_params.get("resolutions") is not None:
+            raise ValueError("visibility support requires single-resolution range parameters")
+        st, surface = core._visibility_votes(
+            points, scan, origin, range_params["h_res_deg"],
+            range_params["v_res_deg"], range_params["range_margin"])
+        dynamic, observed, inferred = visibility_supported_votes(dynamic, observed, inferred, st, surface)
     return dynamic, observed, inferred
 
 
-def clean(points, scans, params, support):
+def clean(points, scans, params, support, range_params=None):
     if params["min_votes"] is not None:
         raise ValueError("experiment requires normalized voting")
     votes, observed = np.zeros(len(points), int), np.zeros(len(points), int)
     inferred = 0
     for scan, origin in scans:
-        dyn, obs, borrowed = scan_votes(points, scan, origin, params, support)
+        dyn, obs, borrowed = scan_votes(points, scan, origin, params, support, range_params)
         votes += dyn; observed += obs
         inferred += int(borrowed.sum())
     floor = max(1, min(params["votes_floor"], len(scans)))
@@ -121,7 +135,7 @@ def compare_scene(path, reference, modes=("none", "both", "either")):
     baseline = ~kr & ~ks
     results = {}
     for support in modes:
-        sr_dynamic, inferred = clean(points, scans, params["scan_ratio"], support)
+        sr_dynamic, inferred = clean(points, scans, params["scan_ratio"], support, params["range"])
         if support == "none":
             np.testing.assert_array_equal(sr_dynamic, ~ks)
         dynamic = ~kr & sr_dynamic
@@ -144,8 +158,11 @@ def main(argv=None):
     parser.add_argument("--av2-baseline", type=Path, required=True)
     parser.add_argument("--report-json", type=Path, required=True)
     parser.add_argument("--ground-aligned", action="store_true", help="also test lower-Z continuity using existing ground margin")
+    parser.add_argument("--visibility-supported", action="store_true", help="gate inferred votes with same-scan range-image evidence")
     args = parser.parse_args(argv)
     modes = ("none", "both", "either", "ground_aligned") if args.ground_aligned else ("none", "both", "either")
+    if args.visibility_supported:
+        modes += ("visibility_supported",)
     if args.report_json.exists():
         parser.error("report exists; choose a new path")
     records = []
@@ -168,6 +185,8 @@ def main(argv=None):
               "limitations": "Research-only empty-column height pooling from adjacent angular sectors within the same radial ring. Both/either support uses union height extrema, never overwrites an occupied center column. Inferred observations are not direct measurements and affect normalized vote thresholds. Fixed inputs, range and other thresholds. Same previously examined datasets; no held-out validation or production changes."}
     if not args.ground_aligned:
         report.pop("ground_aligned_rule")
+    if args.visibility_supported:
+        report["visibility_supported_rule"] = "Only inferred point-scan observations are gated by same-scan range-image evidence at the baseline resolution/margin. Seen-through permits inferred dynamic votes; confirmed surfaces count as inferred observations without dynamic votes. Occluded/unobserved/ambiguous points receive no inferred observation. Native column votes unchanged. Angular-bin approximation, not exact laser ray traversal. Normalized votes unchanged."
     args.report_json.parent.mkdir(parents=True, exist_ok=True)
     args.report_json.write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps({"nuscenes": summary, "av2": av2["results"]}, indent=2))

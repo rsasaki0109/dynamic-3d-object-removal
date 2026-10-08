@@ -288,3 +288,57 @@ python scripts/experiment_neighbor_columns.py \
 
 Use a new report path. Tests cover rejection at height steps/missing extrema,
 the inclusive margin, native-column preservation and reduction of inference.
+
+## Same-scan visibility support for inferred columns
+
+[neighbor_visibility_supported.json](neighbor_visibility_supported.json) gates
+only inferred point-scan evidence with the same query's range image, using the
+baseline angular resolution and range margin. Inferred dynamic votes require a
+seen-through observation (nearest return in the pixel farther than the map
+point by more than the margin). Confirmed surface observations count toward
+normalized revisits but never as inferred dynamic votes. Unobserved, occluded
+and margin-ambiguous points receive no inferred observation. Native occupied
+column votes remain unchanged. Multi-resolution range settings are rejected.
+
+This is an angular-bin approximation, **not exact laser-ray traversal** or a
+proof of free space: different directions can share a pixel, and undeskewed
+scans and the existing map-axis projection remain limitations. It also reuses
+the range channel's evidence, so it is not an independent sensor confirmation.
+Global range and scan-ratio intersection rules and normalized thresholds remain
+unchanged; seen-through votes from different scans no longer suffice to justify
+an inferred dynamic vote from a scan lacking its own evidence.
+
+| Support | nuScenes mean recall | Mean static kept | AV2 moving removed | AV2 static falsely removed |
+|---|---:|---:|---:|---:|
+| Native | 20.440% | 99.476% | 13,633 | 104 |
+| Either neighbor | 30.492% | 99.384% | 13,594 | 99 |
+| Same-scan visibility | 27.691% | 99.421% | 13,606 | 101 |
+
+Means use the same six eligible scenes; all ten scenes are recorded. In
+scene-0796, additional moving removals are 1,281 and additional static removals
+276, compared with 1,420 and 478 for ungated support. On AV2, it adds 45 moving
+removals but loses 72 (net -27); no new static removals and three recovered static
+points do not compensate for that detection loss. Per-scene static preservation
+can improve or worsen: native observations plus inferred surface evidence still
+change normalized thresholds. This is not a general default improvement.
+
+All previous native/both/either/lower-Z results exactly reproduce the preceding
+experiment on ten mini scenes and AV2; native masks match production. Tests
+cover native-vote preservation, negative surface evidence, rejection of missing
+or occluded pixels and required single-resolution parameters. The candidate is
+research only, on previously examined data with no held-out validation. An exact
+ray or narrow cone model with sensor-frame rotation and deskew would require
+additional geometry and measurement assumptions; this experiment does not
+claim to implement that model. Core and public demos are unchanged.
+
+```bash
+python scripts/experiment_neighbor_columns.py \
+  --validation-root output/cli_nuscenes_devkit_selection \
+  --av2-manifest output/cli_av2/manifest.json \
+  --av2-baseline examples/cli_validation/av2_12_sweeps.json \
+  --ground-aligned --visibility-supported \
+  --report-json output/neighbor_visibility_supported.json
+```
+
+Choose a new report path. The lower-Z and visibility candidates are separate
+comparisons; the flags do not combine them into one gate.

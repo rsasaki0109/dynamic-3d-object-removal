@@ -76,6 +76,7 @@ def validate(manifest_path: Path, output: Path) -> dict:
     payload = {"dataset": "nuscenes-mini", "scene": manifest["scene"],
                "frames": len(scans), "map_points": len(points),
                "gt_dynamic_points": int(gt.sum()), "sensor_profile": profile,
+               "preprocessing": manifest.get("preprocessing"),
                "manifest_sha256": hashlib.sha256(manifest_path.read_bytes()).hexdigest(),
                "map_sha256": hashlib.sha256(points.tobytes()).hexdigest(),
                "gt_sha256": hashlib.sha256(gt.tobytes()).hexdigest(), "results": results}
@@ -90,9 +91,12 @@ def main(argv=None):
     parser.add_argument("--scenes", nargs="+", default=[nuscenes.DEFAULT_SCENE])
     parser.add_argument("--frames", type=int, default=12)
     parser.add_argument("--stride", type=int, default=3)
+    parser.add_argument("--min-distance", type=float, default=0.0)
     args = parser.parse_args(argv)
     if args.frames < 1 or args.stride < 1:
         parser.error("frames and stride must be positive")
+    if not np.isfinite(args.min_distance) or args.min_distance < 0:
+        parser.error("min-distance must be finite and nonnegative")
     if args.output.exists() and any(args.output.iterdir()):
         parser.error("output must be new or empty")
     nuscenes._ensure_data(args.root)
@@ -103,6 +107,7 @@ def main(argv=None):
         manifest = args.output / scene / "manifest.json"
         status = nuscenes.main(["--root", str(args.root), "--scene", scene,
                     "--frames", str(args.frames), "--stride", str(args.stride),
+                    "--min-distance", str(args.min_distance),
                     "--online-only", "--online-manifest", str(manifest)])
         if status:
             raise ValueError(f"manifest export failed: {scene}")
@@ -114,6 +119,7 @@ def main(argv=None):
                    if eligible else None for metric in nuscenes._METRIC_KEYS}
              for name in ("defaults", "ground_protected")}
     report = {"dataset": "nuscenes-mini", "frames_requested": args.frames,
+              "min_distance": args.min_distance,
               "stride": args.stride, "scene_results": records,
               "aggregate": {"min_gt_dynamic_points": nuscenes.MIN_GT_DYNAMIC_POINTS_FOR_MEAN,
                             "included_scenes": [r["scene"] for r in eligible],

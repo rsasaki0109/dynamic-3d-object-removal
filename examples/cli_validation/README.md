@@ -29,6 +29,37 @@ input hashes only. Use a new output directory when repeating it.
 
 ## Sparse-sensor error diagnosis
 
+The follow-up [nuscenes_devkit_selection.json](nuscenes_devkit_selection.json)
+uses the official nuScenes devkit multisweep close-point rule before pose
+alignment: discard points where **both** `abs(sensor_x) < 1 m` and
+`abs(sensor_y) < 1 m`. This is an XY square, independent of Z, not a 2 m
+spherical guard. The source is
+[PointCloud.from_file_multisweep/remove_close](https://github.com/nutonomy/nuscenes-devkit/blob/master/python-sdk/nuscenes/utils/data_classes.py).
+The benchmark had omitted this preprocessing. Close points are consistent
+with self returns or invalid near-sensor returns; their semantic identity is
+not proven by the geometry alone.
+
+This removes 1,054,321 points, leaving 1,666,156 across all ten scenes. Moving
+GT point counts are unchanged in every scene, and both CLI configurations
+match their APIs exactly. The six eligible scenes remain the same.
+
+| Selection | Precision | Recall | F1 | Static kept |
+|---|---:|---:|---:|---:|
+| Legacy, close points included | 0.2971 | 0.2632 | 0.2401 | 93.084% |
+| Devkit close-point exclusion | 0.5866 | 0.2044 | 0.2925 | 99.476% |
+
+These are different input populations, not a same-input regression comparison.
+Close-point exclusion changes the range and scan-ratio evidence as well as
+the static evaluation denominator; it is not equivalent to preserving those
+points after filtering. All accuracy and timing limitations above still apply.
+`--min-distance 0` preserves legacy benchmark selection. Core filter defaults
+are unchanged; `--min-distance 1` is explicit in the new record.
+
+```bash
+python scripts/validate_nuscenes_cli.py --scenes all --frames 12 --stride 3 \
+  --min-distance 1 --output output/cli_nuscenes_devkit_selection
+```
+
 [nuscenes_error_analysis.json](nuscenes_error_analysis.json) replays the baseline
 exactly in all 10 scenes and measures distance/height bins and four exploratory
 alternatives. Of 244,581 baseline false positives across all scenes, 236,778

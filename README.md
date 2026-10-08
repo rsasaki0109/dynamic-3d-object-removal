@@ -127,6 +127,14 @@ exact API/CLI masks and points for both configurations. Its aggregate reports
 unweighted means only for scenes with at least 5,000 moving-GT points, listing
 excluded scenes explicitly. Use a new output directory for each run.
 
+For the official nuScenes devkit multisweep near-sensor exclusion, add
+`--min-distance 1` to the validator or nuScenes benchmark. Before pose alignment,
+this discards points with both `abs(sensor_x) < 1` and `abs(sensor_y) < 1` meters.
+The default `0` preserves historical input selection. The
+[recorded comparison](examples/cli_validation/README.md#sparse-sensor-error-diagnosis)
+shows that this preprocessing materially changes static preservation and
+filter evidence; compare runs only when their input selection matches.
+
 Without `--preset`, defaults match `clean_map_by_fusion` and target long
 sequences. Choose a preset explicitly; it is not inferred from sensor metadata
 or scan count:

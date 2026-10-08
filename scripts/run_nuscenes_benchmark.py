@@ -74,6 +74,7 @@ def _export_online_manifest(
     gt_masks: list[np.ndarray],
     poses: list[tuple[np.ndarray, np.ndarray]],
     timestamps_sec: list[float],
+    min_distance: float = 0.0,
 ) -> None:
     output_path = output_path.resolve()
     assets = output_path.parent / f"{output_path.stem}_assets"
@@ -104,6 +105,9 @@ def _export_online_manifest(
             "note": "Single rigid keyframe pose; per-point intra-sweep deskew is unavailable.",
         },
         "dataset": "nuscenes-mini",
+        "preprocessing": {"ground_z_sensor": GROUND_Z_SENSOR,
+                          "min_distance": min_distance,
+                          "close_point_rule": "abs(sensor_x)<min_distance AND abs(sensor_y)<min_distance"},
         "scene": scene,
         "frames": frames,
     }
@@ -235,6 +239,14 @@ def _print_results(payloads: list[dict], aggregate: dict) -> None:
               f"{_format_metric(m['f1'])} | {_format_metric(m['static_preservation'])} |")
 
 
+def _remove_close_points(points: np.ndarray, min_distance: float) -> np.ndarray:
+    """Match nuScenes devkit PointCloud.remove_close in sensor-frame XY."""
+    if not np.isfinite(min_distance) or min_distance < 0:
+        raise ValueError("min_distance must be finite and nonnegative")
+    return points[~((np.abs(points[:, 0]) < min_distance) &
+                   (np.abs(points[:, 1]) < min_distance))]
+
+
 def _run_scene(args: argparse.Namespace, root: Path, tables: dict, scene: str) -> dict:
     started = time.perf_counter()
     toks: list[str] = []
@@ -263,6 +275,7 @@ def _run_scene(args: argparse.Namespace, root: Path, tables: dict, scene: str) -
         csd = tables["cs"][d["calibrated_sensor_token"]]
         pts = np.fromfile(root / d["filename"], dtype=np.float32).reshape(-1, 5)[:, :3].astype(np.float64)
         pts = pts[pts[:, 2] > GROUND_Z_SENSOR]
+        pts = _remove_close_points(pts, args.min_distance)
         r_cs = _quat_to_rot(*csd["rotation"]); t_cs = np.asarray(csd["translation"])
         r_ego = _quat_to_rot(*ep["rotation"]); t_ego = np.asarray(ep["translation"])
         pts_global = (pts @ r_cs.T + t_cs) @ r_ego.T + t_ego
@@ -315,6 +328,7 @@ def _run_scene(args: argparse.Namespace, root: Path, tables: dict, scene: str) -
             gt_masks=gt_chunks,
             poses=selected_poses,
             timestamps_sec=selected_timestamps,
+            min_distance=args.min_distance,
         )
         print(f"  online manifest: {args.online_manifest}")
         if args.online_only:
@@ -480,6 +494,7 @@ def _run_scene(args: argparse.Namespace, root: Path, tables: dict, scene: str) -
             "h_res": args.h_res, "v_res": args.v_res, "range_margin": args.range_margin,
             "min_see_through": args.min_see_through, "max_surface_hits": args.max_surface_hits,
             "ground_z_sensor": GROUND_Z_SENSOR, "moving_thresh": args.moving_thresh,
+            "min_distance": args.min_distance,
             "voxel_size": args.voxel_size, "temporal_min_hits": args.temporal_min_hits,
             "temporal_visibility_h_res": args.temporal_visibility_h_res,
             "temporal_visibility_v_res": args.temporal_visibility_v_res,
@@ -510,6 +525,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--stride", type=int, default=3, help="Keyframe stride (2 Hz keyframes; 3 = ~1.5 s apart).")
     # Coarser than AV2 on purpose -- match the range image to the sparse 32-beam sensor.
     parser.add_argument("--h-res", type=float, default=2.5)
+    parser.add_argument("--min-distance", type=float, default=0.0,
+                        help="Remove sensor-frame points with abs(x) AND abs(y) below this value before pose alignment (meters; nuScenes devkit multisweep uses 1.0; default 0 preserves legacy selection).")
     parser.add_argument("--v-res", type=float, default=2.5)
     parser.add_argument("--range-margin", type=float, default=core.DEFAULT_RANGE_MARGIN)
     parser.add_argument("--min-see-through", type=int, default=3)
@@ -563,6 +580,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--online-only", action="store_true",
                         help="Stop after exporting --online-manifest instead of running offline map cleaners.")
     args = parser.parse_args(argv)
+    if not np.isfinite(args.min_distance) or args.min_distance < 0:
+        parser.error("--min-distance must be finite and nonnegative")
     if args.online_only and args.online_manifest is None:
         parser.error("--online-only requires --online-manifest")
 

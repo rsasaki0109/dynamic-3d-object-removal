@@ -4,8 +4,22 @@ import json
 import numpy as np
 import pytest
 
-from scripts.run_nuscenes_benchmark import _export_online_manifest
+from scripts.run_nuscenes_benchmark import _export_online_manifest, _remove_close_points
 from scripts.validate_nuscenes_cli import validate
+
+
+def test_devkit_close_point_rule_uses_sensor_xy_and_strict_boundary():
+    points = np.array([[0, 0, 100], [.9, .9, 0], [1, 0, 0],
+                       [0, -1, 0], [2, 0, 0]], dtype=float)
+    # A .9/.9 point is outside a 1 m sphere but inside the devkit XY square.
+    np.testing.assert_array_equal(_remove_close_points(points, 1), points[2:])
+    np.testing.assert_array_equal(_remove_close_points(points, 0), points)
+
+
+@pytest.mark.parametrize("distance", [-1, float("nan"), float("inf")])
+def test_devkit_close_point_rule_rejects_invalid_distance(distance):
+    with pytest.raises(ValueError, match="finite and nonnegative"):
+        _remove_close_points(np.zeros((1, 3)), distance)
 
 
 def test_sparse_validator_preserves_profile_and_matches_cli(tmp_path):

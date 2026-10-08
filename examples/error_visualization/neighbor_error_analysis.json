@@ -1,0 +1,1833 @@
+{
+  "selection": "Previously examined target, largest moving gain, largest additional static removal, and AV2 comparison; selected examples, not aggregate.",
+  "scenes": [
+    {
+      "scene": "scene-0757",
+      "input_hashes": {
+        "manifest_sha256": "c8710ebbc75718e96a9b9d3013c006d2adbe6cfcae2ab68cbd62cafddb0644c2",
+        "map_sha256": "326d1fe2e64915713416e6d13dd3e5150fdcb69cb64f70596718bb18a0530455",
+        "gt_sha256": "98f709118402b707494f6b55ec989a27a1f5c59e2f50c606b97e8aa6f7b1a91e"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "groups": {
+        "additional_moving_removed": {
+          "count": 17567,
+          "acquisition_range_m": {
+            "min": 2.1619973811149045,
+            "p25": 2.356000958159887,
+            "median": 2.5940176526857575,
+            "p75": 2.981964556811345,
+            "max": 37.3603517559174
+          },
+          "acquisition_frame_counts": [
+            0,
+            8,
+            24,
+            7,
+            7,
+            14,
+            67,
+            119,
+            4547,
+            4419,
+            4172,
+            4183
+          ],
+          "native": {
+            "votes": {
+              "min": 1.0,
+              "p25": 3.0,
+              "median": 3.0,
+              "p75": 3.0,
+              "max": 5.0
+            },
+            "observed": {
+              "min": 2.0,
+              "p25": 7.0,
+              "median": 7.0,
+              "p75": 7.0,
+              "max": 11.0
+            },
+            "inferred": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "inferred_votes": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "threshold": {
+              "min": 3.0,
+              "p25": 4.0,
+              "median": 4.0,
+              "p75": 4.0,
+              "max": 6.0
+            }
+          },
+          "either": {
+            "votes": {
+              "min": 3.0,
+              "p25": 4.0,
+              "median": 4.0,
+              "p75": 4.0,
+              "max": 7.0
+            },
+            "observed": {
+              "min": 4.0,
+              "p25": 8.0,
+              "median": 8.0,
+              "p75": 8.0,
+              "max": 12.0
+            },
+            "inferred": {
+              "min": 1.0,
+              "p25": 1.0,
+              "median": 1.0,
+              "p75": 1.0,
+              "max": 8.0
+            },
+            "inferred_votes": {
+              "min": 1.0,
+              "p25": 1.0,
+              "median": 1.0,
+              "p75": 1.0,
+              "max": 5.0
+            },
+            "threshold": {
+              "min": 3.0,
+              "p25": 4.0,
+              "median": 4.0,
+              "p75": 4.0,
+              "max": 6.0
+            }
+          },
+          "threshold_increased": 1007,
+          "dynamic_votes_decreased": 0,
+          "no_inferred_dynamic_votes": 0
+        },
+        "additional_static_removed": {
+          "count": 41,
+          "acquisition_range_m": {
+            "min": 1.0819674219382682,
+            "p25": 1.130027191790576,
+            "median": 1.133879314719224,
+            "p75": 1.1379284220519121,
+            "max": 40.25180915425664
+          },
+          "acquisition_frame_counts": [
+            0,
+            1,
+            6,
+            0,
+            0,
+            1,
+            0,
+            7,
+            7,
+            7,
+            6,
+            6
+          ],
+          "native": {
+            "votes": {
+              "min": 1.0,
+              "p25": 3.0,
+              "median": 3.0,
+              "p75": 4.0,
+              "max": 4.0
+            },
+            "observed": {
+              "min": 2.0,
+              "p25": 8.0,
+              "median": 8.0,
+              "p75": 9.0,
+              "max": 9.0
+            },
+            "inferred": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "inferred_votes": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "threshold": {
+              "min": 3.0,
+              "p25": 4.0,
+              "median": 4.0,
+              "p75": 5.0,
+              "max": 5.0
+            }
+          },
+          "either": {
+            "votes": {
+              "min": 3.0,
+              "p25": 5.0,
+              "median": 5.0,
+              "p75": 5.0,
+              "max": 6.0
+            },
+            "observed": {
+              "min": 4.0,
+              "p25": 10.0,
+              "median": 10.0,
+              "p75": 10.0,
+              "max": 10.0
+            },
+            "inferred": {
+              "min": 1.0,
+              "p25": 1.0,
+              "median": 2.0,
+              "p75": 2.0,
+              "max": 6.0
+            },
+            "inferred_votes": {
+              "min": 1.0,
+              "p25": 1.0,
+              "median": 1.0,
+              "p75": 2.0,
+              "max": 5.0
+            },
+            "threshold": {
+              "min": 3.0,
+              "p25": 5.0,
+              "median": 5.0,
+              "p75": 5.0,
+              "max": 5.0
+            }
+          },
+          "threshold_increased": 18,
+          "dynamic_votes_decreased": 0,
+          "no_inferred_dynamic_votes": 0
+        },
+        "lost_moving_removed": {
+          "count": 64,
+          "acquisition_range_m": {
+            "min": 4.512083027870195,
+            "p25": 19.367479175778,
+            "median": 19.51703147981327,
+            "p75": 19.888101087134746,
+            "max": 27.9198957281077
+          },
+          "acquisition_frame_counts": [
+            0,
+            0,
+            0,
+            5,
+            7,
+            0,
+            0,
+            11,
+            3,
+            3,
+            18,
+            17
+          ],
+          "native": {
+            "votes": {
+              "min": 3.0,
+              "p25": 4.0,
+              "median": 4.0,
+              "p75": 4.0,
+              "max": 4.0
+            },
+            "observed": {
+              "min": 3.0,
+              "p25": 8.0,
+              "median": 8.0,
+              "p75": 8.0,
+              "max": 8.0
+            },
+            "inferred": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "inferred_votes": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "threshold": {
+              "min": 3.0,
+              "p25": 4.0,
+              "median": 4.0,
+              "p75": 4.0,
+              "max": 4.0
+            }
+          },
+          "either": {
+            "votes": {
+              "min": 3.0,
+              "p25": 4.0,
+              "median": 4.0,
+              "p75": 4.0,
+              "max": 5.0
+            },
+            "observed": {
+              "min": 9.0,
+              "p25": 10.0,
+              "median": 10.0,
+              "p75": 10.0,
+              "max": 12.0
+            },
+            "inferred": {
+              "min": 2.0,
+              "p25": 2.0,
+              "median": 2.0,
+              "p75": 3.0,
+              "max": 6.0
+            },
+            "inferred_votes": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 1.0
+            },
+            "threshold": {
+              "min": 5.0,
+              "p25": 5.0,
+              "median": 5.0,
+              "p75": 5.0,
+              "max": 6.0
+            }
+          },
+          "threshold_increased": 64,
+          "dynamic_votes_decreased": 0,
+          "no_inferred_dynamic_votes": 50
+        },
+        "recovered_static_points": {
+          "count": 1,
+          "acquisition_range_m": {
+            "min": 27.80798150635851,
+            "p25": 27.80798150635851,
+            "median": 27.80798150635851,
+            "p75": 27.80798150635851,
+            "max": 27.80798150635851
+          },
+          "acquisition_frame_counts": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          "native": {
+            "votes": {
+              "min": 5.0,
+              "p25": 5.0,
+              "median": 5.0,
+              "p75": 5.0,
+              "max": 5.0
+            },
+            "observed": {
+              "min": 10.0,
+              "p25": 10.0,
+              "median": 10.0,
+              "p75": 10.0,
+              "max": 10.0
+            },
+            "inferred": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "inferred_votes": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "threshold": {
+              "min": 5.0,
+              "p25": 5.0,
+              "median": 5.0,
+              "p75": 5.0,
+              "max": 5.0
+            }
+          },
+          "either": {
+            "votes": {
+              "min": 5.0,
+              "p25": 5.0,
+              "median": 5.0,
+              "p75": 5.0,
+              "max": 5.0
+            },
+            "observed": {
+              "min": 12.0,
+              "p25": 12.0,
+              "median": 12.0,
+              "p75": 12.0,
+              "max": 12.0
+            },
+            "inferred": {
+              "min": 2.0,
+              "p25": 2.0,
+              "median": 2.0,
+              "p75": 2.0,
+              "max": 2.0
+            },
+            "inferred_votes": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "threshold": {
+              "min": 6.0,
+              "p25": 6.0,
+              "median": 6.0,
+              "p75": 6.0,
+              "max": 6.0
+            }
+          },
+          "threshold_increased": 1,
+          "dynamic_votes_decreased": 0,
+          "no_inferred_dynamic_votes": 1
+        }
+      },
+      "native_threshold_counterfactual": {
+        "metrics": {
+          "precision": 0.9807683470428749,
+          "recall": 0.8795771600486307,
+          "f1": 0.9274206689769802,
+          "iou": 0.8646639387432646,
+          "static_preservation": 0.9943769650390992,
+          "true_positive": 42685,
+          "false_positive": 837,
+          "false_negative": 5844,
+          "true_negative": 148015
+        },
+        "changes": {
+          "additional_moving_removed": 18006,
+          "additional_static_removed": 46,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "description": "Either-neighbor dynamic votes with native-only observation threshold; research counterfactual, not production behavior."
+      },
+      "limitations": "Annotation-box GT, not point motion labels or static object categories. Acquisition range is 3D distance to the point source sensor. Quantiles describe changed points, not predictive gates. Same examined data; no held-out validation. Neighbor support adds inferred observations and affects normalized thresholds. Full offline accumulated map includes future points."
+    },
+    {
+      "scene": "scene-0796",
+      "input_hashes": {
+        "manifest_sha256": "7f6d7b89f180d94596ff6ffd48d1fdec529b32885d898283b4f4e0bd18f5b8f2",
+        "map_sha256": "8654ed2309ac4e2eec80d8811c32e2b55ef3572651b0a82e85e6f34d3cc04a7b",
+        "gt_sha256": "a76a7c37e244f5302ed878dc0846d2390b212bd2513f8b6ad93720e3e476fe23"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "groups": {
+        "additional_moving_removed": {
+          "count": 1420,
+          "acquisition_range_m": {
+            "min": 2.710119244316571,
+            "p25": 2.833484673113683,
+            "median": 2.9442442082182545,
+            "p75": 3.3019603422304313,
+            "max": 31.169071127132902
+          },
+          "acquisition_frame_counts": [
+            44,
+            18,
+            2,
+            0,
+            1,
+            10,
+            0,
+            0,
+            1,
+            127,
+            0,
+            1217
+          ],
+          "native": {
+            "votes": {
+              "min": 0.0,
+              "p25": 2.0,
+              "median": 2.0,
+              "p75": 2.0,
+              "max": 2.0
+            },
+            "observed": {
+              "min": 1.0,
+              "p25": 3.0,
+              "median": 3.0,
+              "p75": 3.0,
+              "max": 5.0
+            },
+            "inferred": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "inferred_votes": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "threshold": {
+              "min": 3.0,
+              "p25": 3.0,
+              "median": 3.0,
+              "p75": 3.0,
+              "max": 3.0
+            }
+          },
+          "either": {
+            "votes": {
+              "min": 3.0,
+              "p25": 3.0,
+              "median": 3.0,
+              "p75": 3.0,
+              "max": 6.0
+            },
+            "observed": {
+              "min": 3.0,
+              "p25": 4.0,
+              "median": 4.0,
+              "p75": 5.0,
+              "max": 7.0
+            },
+            "inferred": {
+              "min": 1.0,
+              "p25": 1.0,
+              "median": 1.0,
+              "p75": 2.0,
+              "max": 4.0
+            },
+            "inferred_votes": {
+              "min": 1.0,
+              "p25": 1.0,
+              "median": 1.0,
+              "p75": 1.0,
+              "max": 4.0
+            },
+            "threshold": {
+              "min": 3.0,
+              "p25": 3.0,
+              "median": 3.0,
+              "p75": 3.0,
+              "max": 4.0
+            }
+          },
+          "threshold_increased": 1,
+          "dynamic_votes_decreased": 0,
+          "no_inferred_dynamic_votes": 0
+        },
+        "additional_static_removed": {
+          "count": 478,
+          "acquisition_range_m": {
+            "min": 1.0448941328443766,
+            "p25": 1.148770430740063,
+            "median": 1.1684215326212009,
+            "p75": 1.5387181141655506,
+            "max": 39.98247948101577
+          },
+          "acquisition_frame_counts": [
+            0,
+            9,
+            17,
+            4,
+            92,
+            84,
+            0,
+            43,
+            0,
+            55,
+            25,
+            149
+          ],
+          "native": {
+            "votes": {
+              "min": 1.0,
+              "p25": 1.0,
+              "median": 2.0,
+              "p75": 2.0,
+              "max": 2.0
+            },
+            "observed": {
+              "min": 2.0,
+              "p25": 2.0,
+              "median": 3.0,
+              "p75": 3.0,
+              "max": 5.0
+            },
+            "inferred": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "inferred_votes": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "threshold": {
+              "min": 3.0,
+              "p25": 3.0,
+              "median": 3.0,
+              "p75": 3.0,
+              "max": 3.0
+            }
+          },
+          "either": {
+            "votes": {
+              "min": 3.0,
+              "p25": 3.0,
+              "median": 3.0,
+              "p75": 3.0,
+              "max": 5.0
+            },
+            "observed": {
+              "min": 3.0,
+              "p25": 4.0,
+              "median": 5.0,
+              "p75": 6.0,
+              "max": 6.0
+            },
+            "inferred": {
+              "min": 1.0,
+              "p25": 1.0,
+              "median": 3.0,
+              "p75": 3.0,
+              "max": 4.0
+            },
+            "inferred_votes": {
+              "min": 1.0,
+              "p25": 1.0,
+              "median": 1.0,
+              "p75": 2.0,
+              "max": 3.0
+            },
+            "threshold": {
+              "min": 3.0,
+              "p25": 3.0,
+              "median": 3.0,
+              "p75": 3.0,
+              "max": 3.0
+            }
+          },
+          "threshold_increased": 0,
+          "dynamic_votes_decreased": 0,
+          "no_inferred_dynamic_votes": 0
+        },
+        "lost_moving_removed": {
+          "count": 18,
+          "acquisition_range_m": {
+            "min": 7.055531208073933,
+            "p25": 14.418493219886587,
+            "median": 14.567596859358225,
+            "p75": 14.730069781224312,
+            "max": 31.342159529333248
+          },
+          "acquisition_frame_counts": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            4,
+            12,
+            2,
+            0,
+            0,
+            0,
+            0
+          ],
+          "native": {
+            "votes": {
+              "min": 3.0,
+              "p25": 3.0,
+              "median": 3.0,
+              "p75": 3.0,
+              "max": 3.0
+            },
+            "observed": {
+              "min": 5.0,
+              "p25": 5.0,
+              "median": 5.0,
+              "p75": 5.0,
+              "max": 6.0
+            },
+            "inferred": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "inferred_votes": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "threshold": {
+              "min": 3.0,
+              "p25": 3.0,
+              "median": 3.0,
+              "p75": 3.0,
+              "max": 3.0
+            }
+          },
+          "either": {
+            "votes": {
+              "min": 3.0,
+              "p25": 3.0,
+              "median": 3.0,
+              "p75": 3.0,
+              "max": 3.0
+            },
+            "observed": {
+              "min": 7.0,
+              "p25": 7.25,
+              "median": 8.0,
+              "p75": 8.0,
+              "max": 8.0
+            },
+            "inferred": {
+              "min": 2.0,
+              "p25": 2.0,
+              "median": 3.0,
+              "p75": 3.0,
+              "max": 3.0
+            },
+            "inferred_votes": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "threshold": {
+              "min": 4.0,
+              "p25": 4.0,
+              "median": 4.0,
+              "p75": 4.0,
+              "max": 4.0
+            }
+          },
+          "threshold_increased": 18,
+          "dynamic_votes_decreased": 0,
+          "no_inferred_dynamic_votes": 18
+        },
+        "recovered_static_points": {
+          "count": 58,
+          "acquisition_range_m": {
+            "min": 1.3075443613561422,
+            "p25": 1.5526506673737919,
+            "median": 1.5631537576295584,
+            "p75": 10.409794116341262,
+            "max": 79.9220581411248
+          },
+          "acquisition_frame_counts": [
+            2,
+            0,
+            0,
+            0,
+            0,
+            7,
+            8,
+            40,
+            1,
+            0,
+            0,
+            0
+          ],
+          "native": {
+            "votes": {
+              "min": 3.0,
+              "p25": 3.0,
+              "median": 3.0,
+              "p75": 3.0,
+              "max": 4.0
+            },
+            "observed": {
+              "min": 4.0,
+              "p25": 5.0,
+              "median": 6.0,
+              "p75": 6.0,
+              "max": 8.0
+            },
+            "inferred": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "inferred_votes": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "threshold": {
+              "min": 3.0,
+              "p25": 3.0,
+              "median": 3.0,
+              "p75": 3.0,
+              "max": 4.0
+            }
+          },
+          "either": {
+            "votes": {
+              "min": 3.0,
+              "p25": 3.0,
+              "median": 3.0,
+              "p75": 3.0,
+              "max": 4.0
+            },
+            "observed": {
+              "min": 7.0,
+              "p25": 8.0,
+              "median": 8.0,
+              "p75": 8.0,
+              "max": 9.0
+            },
+            "inferred": {
+              "min": 1.0,
+              "p25": 2.0,
+              "median": 2.0,
+              "p75": 3.0,
+              "max": 3.0
+            },
+            "inferred_votes": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 1.0
+            },
+            "threshold": {
+              "min": 4.0,
+              "p25": 4.0,
+              "median": 4.0,
+              "p75": 4.0,
+              "max": 5.0
+            }
+          },
+          "threshold_increased": 58,
+          "dynamic_votes_decreased": 0,
+          "no_inferred_dynamic_votes": 56
+        }
+      },
+      "native_threshold_counterfactual": {
+        "metrics": {
+          "precision": 0.579118028534371,
+          "recall": 0.19187795444778685,
+          "f1": 0.2882504841833441,
+          "iou": 0.16839524797284555,
+          "static_preservation": 0.9917678769621056,
+          "true_positive": 1786,
+          "false_positive": 1298,
+          "false_negative": 7522,
+          "true_negative": 156377
+        },
+        "changes": {
+          "additional_moving_removed": 1455,
+          "additional_static_removed": 502,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "description": "Either-neighbor dynamic votes with native-only observation threshold; research counterfactual, not production behavior."
+      },
+      "limitations": "Annotation-box GT, not point motion labels or static object categories. Acquisition range is 3D distance to the point source sensor. Quantiles describe changed points, not predictive gates. Same examined data; no held-out validation. Neighbor support adds inferred observations and affects normalized thresholds. Full offline accumulated map includes future points."
+    },
+    {
+      "scene": "scene-0916",
+      "input_hashes": {
+        "manifest_sha256": "18577fbdbd1e0051b7705fbd6774e8f93a3e74dbf26be11595035c1c7121b457",
+        "map_sha256": "f5a00a3b57ddcb85d1f03c096580f513660a8484e81bb3279d3bc05c318a286e",
+        "gt_sha256": "596cfd4655590d085e779fffcfb216914d2ac09b11e56faa8b0e39faafbb13d6"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "groups": {
+        "additional_moving_removed": {
+          "count": 278,
+          "acquisition_range_m": {
+            "min": 6.407500991650567,
+            "p25": 14.572092448924783,
+            "median": 16.089369590765262,
+            "p75": 19.31848836532299,
+            "max": 34.83875735000832
+          },
+          "acquisition_frame_counts": [
+            0,
+            8,
+            38,
+            59,
+            23,
+            39,
+            41,
+            38,
+            21,
+            11,
+            0,
+            0
+          ],
+          "native": {
+            "votes": {
+              "min": 0.0,
+              "p25": 2.0,
+              "median": 2.0,
+              "p75": 3.0,
+              "max": 5.0
+            },
+            "observed": {
+              "min": 2.0,
+              "p25": 4.0,
+              "median": 5.0,
+              "p75": 7.0,
+              "max": 11.0
+            },
+            "inferred": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "inferred_votes": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "threshold": {
+              "min": 3.0,
+              "p25": 3.0,
+              "median": 3.0,
+              "p75": 4.0,
+              "max": 6.0
+            }
+          },
+          "either": {
+            "votes": {
+              "min": 3.0,
+              "p25": 4.0,
+              "median": 4.0,
+              "p75": 4.0,
+              "max": 7.0
+            },
+            "observed": {
+              "min": 4.0,
+              "p25": 7.0,
+              "median": 8.0,
+              "p75": 8.0,
+              "max": 12.0
+            },
+            "inferred": {
+              "min": 1.0,
+              "p25": 1.0,
+              "median": 2.0,
+              "p75": 2.75,
+              "max": 7.0
+            },
+            "inferred_votes": {
+              "min": 1.0,
+              "p25": 1.0,
+              "median": 2.0,
+              "p75": 2.0,
+              "max": 5.0
+            },
+            "threshold": {
+              "min": 3.0,
+              "p25": 4.0,
+              "median": 4.0,
+              "p75": 4.0,
+              "max": 6.0
+            }
+          },
+          "threshold_increased": 106,
+          "dynamic_votes_decreased": 0,
+          "no_inferred_dynamic_votes": 0
+        },
+        "additional_static_removed": {
+          "count": 594,
+          "acquisition_range_m": {
+            "min": 1.0864045351547564,
+            "p25": 4.502685251045515,
+            "median": 6.909875676188704,
+            "p75": 11.637144588608564,
+            "max": 74.61065463291246
+          },
+          "acquisition_frame_counts": [
+            25,
+            2,
+            4,
+            12,
+            11,
+            58,
+            65,
+            256,
+            106,
+            34,
+            18,
+            3
+          ],
+          "native": {
+            "votes": {
+              "min": 1.0,
+              "p25": 2.0,
+              "median": 3.0,
+              "p75": 3.0,
+              "max": 5.0
+            },
+            "observed": {
+              "min": 2.0,
+              "p25": 6.0,
+              "median": 7.0,
+              "p75": 8.0,
+              "max": 11.0
+            },
+            "inferred": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "inferred_votes": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "threshold": {
+              "min": 3.0,
+              "p25": 3.0,
+              "median": 4.0,
+              "p75": 4.0,
+              "max": 6.0
+            }
+          },
+          "either": {
+            "votes": {
+              "min": 3.0,
+              "p25": 5.0,
+              "median": 5.0,
+              "p75": 5.0,
+              "max": 7.0
+            },
+            "observed": {
+              "min": 3.0,
+              "p25": 9.0,
+              "median": 10.0,
+              "p75": 10.0,
+              "max": 12.0
+            },
+            "inferred": {
+              "min": 1.0,
+              "p25": 2.0,
+              "median": 3.0,
+              "p75": 3.0,
+              "max": 7.0
+            },
+            "inferred_votes": {
+              "min": 1.0,
+              "p25": 2.0,
+              "median": 2.0,
+              "p75": 3.0,
+              "max": 4.0
+            },
+            "threshold": {
+              "min": 3.0,
+              "p25": 5.0,
+              "median": 5.0,
+              "p75": 5.0,
+              "max": 6.0
+            }
+          },
+          "threshold_increased": 467,
+          "dynamic_votes_decreased": 0,
+          "no_inferred_dynamic_votes": 0
+        },
+        "lost_moving_removed": {
+          "count": 60,
+          "acquisition_range_m": {
+            "min": 7.818369469318902,
+            "p25": 17.284228346081406,
+            "median": 18.76888629940609,
+            "p75": 21.51173292999475,
+            "max": 35.32877255749395
+          },
+          "acquisition_frame_counts": [
+            8,
+            8,
+            7,
+            0,
+            2,
+            8,
+            15,
+            9,
+            1,
+            2,
+            0,
+            0
+          ],
+          "native": {
+            "votes": {
+              "min": 3.0,
+              "p25": 3.0,
+              "median": 4.0,
+              "p75": 5.0,
+              "max": 5.0
+            },
+            "observed": {
+              "min": 4.0,
+              "p25": 6.0,
+              "median": 8.0,
+              "p75": 9.0,
+              "max": 10.0
+            },
+            "inferred": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "inferred_votes": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "threshold": {
+              "min": 3.0,
+              "p25": 3.0,
+              "median": 4.0,
+              "p75": 5.0,
+              "max": 5.0
+            }
+          },
+          "either": {
+            "votes": {
+              "min": 3.0,
+              "p25": 4.0,
+              "median": 4.0,
+              "p75": 5.0,
+              "max": 5.0
+            },
+            "observed": {
+              "min": 7.0,
+              "p25": 9.0,
+              "median": 10.5,
+              "p75": 11.0,
+              "max": 12.0
+            },
+            "inferred": {
+              "min": 1.0,
+              "p25": 1.0,
+              "median": 2.0,
+              "p75": 4.0,
+              "max": 5.0
+            },
+            "inferred_votes": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 1.0
+            },
+            "threshold": {
+              "min": 4.0,
+              "p25": 5.0,
+              "median": 5.5,
+              "p75": 6.0,
+              "max": 6.0
+            }
+          },
+          "threshold_increased": 60,
+          "dynamic_votes_decreased": 0,
+          "no_inferred_dynamic_votes": 53
+        },
+        "recovered_static_points": {
+          "count": 534,
+          "acquisition_range_m": {
+            "min": 1.784599007587814,
+            "p25": 4.87072424251042,
+            "median": 7.417273731368531,
+            "p75": 10.117038132731171,
+            "max": 71.46578885470177
+          },
+          "acquisition_frame_counts": [
+            4,
+            1,
+            63,
+            7,
+            8,
+            54,
+            63,
+            128,
+            160,
+            38,
+            6,
+            2
+          ],
+          "native": {
+            "votes": {
+              "min": 3.0,
+              "p25": 3.25,
+              "median": 4.0,
+              "p75": 5.0,
+              "max": 5.0
+            },
+            "observed": {
+              "min": 5.0,
+              "p25": 6.0,
+              "median": 8.0,
+              "p75": 10.0,
+              "max": 10.0
+            },
+            "inferred": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "inferred_votes": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "threshold": {
+              "min": 3.0,
+              "p25": 3.0,
+              "median": 4.0,
+              "p75": 5.0,
+              "max": 5.0
+            }
+          },
+          "either": {
+            "votes": {
+              "min": 3.0,
+              "p25": 4.0,
+              "median": 4.0,
+              "p75": 5.0,
+              "max": 5.0
+            },
+            "observed": {
+              "min": 7.0,
+              "p25": 10.0,
+              "median": 11.0,
+              "p75": 12.0,
+              "max": 12.0
+            },
+            "inferred": {
+              "min": 1.0,
+              "p25": 2.0,
+              "median": 2.0,
+              "p75": 3.0,
+              "max": 6.0
+            },
+            "inferred_votes": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 2.0
+            },
+            "threshold": {
+              "min": 4.0,
+              "p25": 5.0,
+              "median": 6.0,
+              "p75": 6.0,
+              "max": 6.0
+            }
+          },
+          "threshold_increased": 534,
+          "dynamic_votes_decreased": 0,
+          "no_inferred_dynamic_votes": 431
+        }
+      },
+      "native_threshold_counterfactual": {
+        "metrics": {
+          "precision": 0.12673822883630154,
+          "recall": 0.3214727722772277,
+          "f1": 0.18180227471566054,
+          "iou": 0.09999037628717158,
+          "static_preservation": 0.9539759175565256,
+          "true_positive": 1039,
+          "false_positive": 7159,
+          "false_negative": 2193,
+          "true_negative": 148390
+        },
+        "changes": {
+          "additional_moving_removed": 455,
+          "additional_static_removed": 2211,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "description": "Either-neighbor dynamic votes with native-only observation threshold; research counterfactual, not production behavior."
+      },
+      "limitations": "Annotation-box GT, not point motion labels or static object categories. Acquisition range is 3D distance to the point source sensor. Quantiles describe changed points, not predictive gates. Same examined data; no held-out validation. Neighbor support adds inferred observations and affects normalized thresholds. Full offline accumulated map includes future points."
+    },
+    {
+      "scene": "0b5142c1-420b-3fea-9e98-b87327ae22c6",
+      "input_hashes": {
+        "manifest_sha256": "36a8b5c4e86afcb9fd8735c64fa3063e46bce29eb6ec8d64b193ff915d6af81b",
+        "map_sha256": "5da31155fa7b54b564900e80084614a2144702ec05f61d10b306fbda9ecf5df0",
+        "gt_sha256": "549ec2c75f73d7aee951b935f689604a9ebb9d42f401a200bf4422f270942c1c"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 1.0,
+          "v_res_deg": 1.0,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 3,
+          "ground_z": -1.4,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "groups": {
+        "additional_moving_removed": {
+          "count": 90,
+          "acquisition_range_m": {
+            "min": 2.8489689149726485,
+            "p25": 6.757240949542457,
+            "median": 8.128248702714705,
+            "p75": 44.0780787097475,
+            "max": 50.76832205669419
+          },
+          "acquisition_frame_counts": [
+            16,
+            10,
+            12,
+            1,
+            0,
+            14,
+            9,
+            1,
+            0,
+            5,
+            8,
+            14
+          ],
+          "native": {
+            "votes": {
+              "min": 0.0,
+              "p25": 3.0,
+              "median": 4.0,
+              "p75": 5.0,
+              "max": 5.0
+            },
+            "observed": {
+              "min": 6.0,
+              "p25": 7.25,
+              "median": 9.0,
+              "p75": 11.0,
+              "max": 11.0
+            },
+            "inferred": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "inferred_votes": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "threshold": {
+              "min": 3.0,
+              "p25": 4.0,
+              "median": 5.0,
+              "p75": 6.0,
+              "max": 6.0
+            }
+          },
+          "either": {
+            "votes": {
+              "min": 4.0,
+              "p25": 6.0,
+              "median": 6.0,
+              "p75": 6.0,
+              "max": 7.0
+            },
+            "observed": {
+              "min": 8.0,
+              "p25": 11.25,
+              "median": 12.0,
+              "p75": 12.0,
+              "max": 12.0
+            },
+            "inferred": {
+              "min": 1.0,
+              "p25": 1.0,
+              "median": 1.0,
+              "p75": 3.0,
+              "max": 6.0
+            },
+            "inferred_votes": {
+              "min": 1.0,
+              "p25": 1.0,
+              "median": 1.0,
+              "p75": 3.0,
+              "max": 6.0
+            },
+            "threshold": {
+              "min": 4.0,
+              "p25": 6.0,
+              "median": 6.0,
+              "p75": 6.0,
+              "max": 6.0
+            }
+          },
+          "threshold_increased": 31,
+          "dynamic_votes_decreased": 0,
+          "no_inferred_dynamic_votes": 0
+        },
+        "additional_static_removed": {
+          "count": 1,
+          "acquisition_range_m": {
+            "min": 51.19327077835737,
+            "p25": 51.19327077835737,
+            "median": 51.19327077835737,
+            "p75": 51.19327077835737,
+            "max": 51.19327077835737
+          },
+          "acquisition_frame_counts": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "native": {
+            "votes": {
+              "min": 4.0,
+              "p25": 4.0,
+              "median": 4.0,
+              "p75": 4.0,
+              "max": 4.0
+            },
+            "observed": {
+              "min": 9.0,
+              "p25": 9.0,
+              "median": 9.0,
+              "p75": 9.0,
+              "max": 9.0
+            },
+            "inferred": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "inferred_votes": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "threshold": {
+              "min": 5.0,
+              "p25": 5.0,
+              "median": 5.0,
+              "p75": 5.0,
+              "max": 5.0
+            }
+          },
+          "either": {
+            "votes": {
+              "min": 6.0,
+              "p25": 6.0,
+              "median": 6.0,
+              "p75": 6.0,
+              "max": 6.0
+            },
+            "observed": {
+              "min": 11.0,
+              "p25": 11.0,
+              "median": 11.0,
+              "p75": 11.0,
+              "max": 11.0
+            },
+            "inferred": {
+              "min": 2.0,
+              "p25": 2.0,
+              "median": 2.0,
+              "p75": 2.0,
+              "max": 2.0
+            },
+            "inferred_votes": {
+              "min": 2.0,
+              "p25": 2.0,
+              "median": 2.0,
+              "p75": 2.0,
+              "max": 2.0
+            },
+            "threshold": {
+              "min": 6.0,
+              "p25": 6.0,
+              "median": 6.0,
+              "p75": 6.0,
+              "max": 6.0
+            }
+          },
+          "threshold_increased": 1,
+          "dynamic_votes_decreased": 0,
+          "no_inferred_dynamic_votes": 0
+        },
+        "lost_moving_removed": {
+          "count": 129,
+          "acquisition_range_m": {
+            "min": 5.561308829677318,
+            "p25": 7.060470019248079,
+            "median": 38.37534193265596,
+            "p75": 41.637812478305285,
+            "max": 57.25457815330526
+          },
+          "acquisition_frame_counts": [
+            13,
+            17,
+            17,
+            15,
+            6,
+            4,
+            29,
+            2,
+            1,
+            1,
+            1,
+            23
+          ],
+          "native": {
+            "votes": {
+              "min": 3.0,
+              "p25": 5.0,
+              "median": 5.0,
+              "p75": 5.0,
+              "max": 5.0
+            },
+            "observed": {
+              "min": 6.0,
+              "p25": 10.0,
+              "median": 10.0,
+              "p75": 10.0,
+              "max": 10.0
+            },
+            "inferred": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "inferred_votes": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "threshold": {
+              "min": 3.0,
+              "p25": 5.0,
+              "median": 5.0,
+              "p75": 5.0,
+              "max": 5.0
+            }
+          },
+          "either": {
+            "votes": {
+              "min": 3.0,
+              "p25": 5.0,
+              "median": 5.0,
+              "p75": 5.0,
+              "max": 5.0
+            },
+            "observed": {
+              "min": 11.0,
+              "p25": 11.0,
+              "median": 12.0,
+              "p75": 12.0,
+              "max": 12.0
+            },
+            "inferred": {
+              "min": 1.0,
+              "p25": 1.0,
+              "median": 2.0,
+              "p75": 2.0,
+              "max": 6.0
+            },
+            "inferred_votes": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 1.0
+            },
+            "threshold": {
+              "min": 6.0,
+              "p25": 6.0,
+              "median": 6.0,
+              "p75": 6.0,
+              "max": 6.0
+            }
+          },
+          "threshold_increased": 129,
+          "dynamic_votes_decreased": 0,
+          "no_inferred_dynamic_votes": 128
+        },
+        "recovered_static_points": {
+          "count": 6,
+          "acquisition_range_m": {
+            "min": 8.819448572359935,
+            "p25": 8.885488383603667,
+            "median": 8.998756366741313,
+            "p75": 9.053837567503344,
+            "max": 17.821038592178333
+          },
+          "acquisition_frame_counts": [
+            5,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "native": {
+            "votes": {
+              "min": 5.0,
+              "p25": 5.0,
+              "median": 5.0,
+              "p75": 5.0,
+              "max": 5.0
+            },
+            "observed": {
+              "min": 6.0,
+              "p25": 6.25,
+              "median": 8.0,
+              "p75": 9.75,
+              "max": 10.0
+            },
+            "inferred": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "inferred_votes": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "threshold": {
+              "min": 3.0,
+              "p25": 3.25,
+              "median": 4.5,
+              "p75": 5.0,
+              "max": 5.0
+            }
+          },
+          "either": {
+            "votes": {
+              "min": 5.0,
+              "p25": 5.0,
+              "median": 5.0,
+              "p75": 5.0,
+              "max": 5.0
+            },
+            "observed": {
+              "min": 11.0,
+              "p25": 11.25,
+              "median": 12.0,
+              "p75": 12.0,
+              "max": 12.0
+            },
+            "inferred": {
+              "min": 2.0,
+              "p25": 2.25,
+              "median": 4.0,
+              "p75": 5.0,
+              "max": 5.0
+            },
+            "inferred_votes": {
+              "min": 0.0,
+              "p25": 0.0,
+              "median": 0.0,
+              "p75": 0.0,
+              "max": 0.0
+            },
+            "threshold": {
+              "min": 6.0,
+              "p25": 6.0,
+              "median": 6.0,
+              "p75": 6.0,
+              "max": 6.0
+            }
+          },
+          "threshold_increased": 6,
+          "dynamic_votes_decreased": 0,
+          "no_inferred_dynamic_votes": 6
+        }
+      },
+      "native_threshold_counterfactual": {
+        "metrics": {
+          "precision": 0.9924220554272517,
+          "recall": 0.16278959642954385,
+          "f1": 0.2796993704679284,
+          "iou": 0.1625874952705259,
+          "static_preservation": 0.9999087822693581,
+          "true_positive": 13751,
+          "false_positive": 105,
+          "false_negative": 70720,
+          "true_negative": 1150987
+        },
+        "changes": {
+          "additional_moving_removed": 118,
+          "additional_static_removed": 1,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "description": "Either-neighbor dynamic votes with native-only observation threshold; research counterfactual, not production behavior."
+      },
+      "limitations": "Annotation-box GT, not point motion labels or static object categories. Acquisition range is 3D distance to the point source sensor. Quantiles describe changed points, not predictive gates. Same examined data; no held-out validation. Neighbor support adds inferred observations and affects normalized thresholds. Full offline accumulated map includes future points."
+    }
+  ]
+}

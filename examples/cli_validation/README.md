@@ -101,6 +101,55 @@ and retains CLI commands, masks and summaries in a new output directory.
 
 ### Close-point selection follow-up
 
+### Moving GT missed by both baseline filters
+
+[common_miss_diagnosis.json](common_miss_diagnosis.json) reconstructs range
+and scan-ratio votes, requiring exact agreement with public API masks and
+recorded baseline metrics on all ten devkit-selected nuScenes scenes and the
+AV2 scene. Inputs are fingerprint-verified and defaults are unchanged.
+
+| Common-miss diagnosis | nuScenes, all 10 scenes | AV2, one scene |
+|---|---:|---:|
+| Moving GT missed by both | 28,530 | 37,274 |
+| Fewer than 3 range see-through votes | 27,933 (97.9%) | 25,021 (67.1%) |
+| Range surface guard active | 1,935 | 14,477 |
+| Fewer revisits than scan-ratio vote floor | 10,839 | 1,092 |
+| No scan-ratio dynamic votes | 18,783 | 15,871 |
+
+Range reason masks overlap; do not add those rows. These are counts across
+all ten scenes, including the four excluded from accuracy means.
+
+For these common misses, each observed point-scan opportunity is assigned
+to exactly one scan-ratio stage. This denominator counts repeated observations
+of points, not unique points:
+
+| Scan-ratio stage | nuScenes opportunities | AV2 opportunities |
+|---|---:|---:|
+| Map height too small | 3,812 | 691 |
+| Query/map height ratio too large | 67,977 (53.4%) | 319,532 (79.0%) |
+| Ground reversion | 37,819 (29.7%) | 33,494 (8.3%) |
+| Dynamic vote produced | 17,603 | 50,554 |
+| Total observed opportunities | 127,211 | 404,271 |
+
+nuScenes is often blocked by too few range see-through votes; AV2 also has
+substantial surface protection. In both datasets the scan-ratio height-ratio
+test often prevents votes from being produced. Lowering the final vote floor
+cannot rescue a point with zero votes. These measurements identify gates,
+not proof that a gate is wrong: occlusion and ground protection can be
+appropriate, and GT uses moving-instance boxes rather than per-point motion.
+Further experiments should target evidence formation while tracking static
+false removals, rather than assuming one threshold fits both datasets.
+
+```bash
+python scripts/diagnose_common_misses.py \
+  --validation-root output/cli_nuscenes_devkit_selection \
+  --av2-manifest output/cli_av2/manifest.json \
+  --av2-baseline examples/cli_validation/av2_12_sweeps.json \
+  --report-json output/common_misses.json
+```
+
+### Official close-point preprocessing
+
 The follow-up [nuscenes_devkit_selection.json](nuscenes_devkit_selection.json)
 uses the official nuScenes devkit multisweep close-point rule before pose
 alignment: discard points where **both** `abs(sensor_x) < 1 m` and

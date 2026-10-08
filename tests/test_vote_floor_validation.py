@@ -7,6 +7,7 @@ import pytest
 import bench
 import dynamic_object_removal as core
 from scripts.validate_vote_floor import validate
+from scripts.diagnose_common_misses import diagnose
 
 
 def fixture(root):
@@ -52,3 +53,15 @@ def test_frozen_vote_floor_validator_rejects_changed_input_before_output(tmp_pat
     with pytest.raises(ValueError, match="fingerprints"):
         validate(manifest, baseline, tmp_path / "out")
     assert not (tmp_path / "out").exists()
+
+
+def test_common_misses_replay_evidence_and_partition_observed_opportunities(tmp_path):
+    manifest, baseline = fixture(tmp_path)
+    result = diagnose(manifest, json.loads(baseline.read_text()))
+    assert result["evidence_api_masks_equal"]
+    assert result["common_misses"] == 3
+    assert result["range"]["insufficient_see_through"] == 3
+    gates = result["scan_ratio"]["observed_point_scan_opportunities"]
+    assert gates["total"] == 9
+    assert gates["query_map_height_ratio_too_large"] == 9
+    assert sum(value for key, value in gates.items() if key != "total") == gates["total"]

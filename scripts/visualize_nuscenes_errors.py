@@ -96,6 +96,7 @@ def analyze(manifest_path, data_root, validation_root):
         removed = int((selected_points & ~keep).sum())
         missed = count - removed
         row = {"instance_token": token, "category": category, "gt_points": count,
+               "owner_index": index,
                "removed": removed, "missed": missed, "recall": removed / count,
                "median_acquisition_range_m": float(np.median(acquisition_distance[selected_points])),
                "center_xy": np.mean(points[selected_points, :2], axis=0).tolist()}

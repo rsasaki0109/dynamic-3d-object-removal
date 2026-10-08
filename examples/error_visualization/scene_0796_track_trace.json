@@ -1,0 +1,282 @@
+{
+  "scene": "scene-0796",
+  "track": {
+    "instance_token": "69385845cb9747b7afe095177cc405b5",
+    "category": "vehicle.car",
+    "gt_points": 5356,
+    "owner_index": 15,
+    "removed": 292,
+    "missed": 5064,
+    "recall": 0.05451829723674384,
+    "median_acquisition_range_m": 3.2253448965166145,
+    "center_xy": [
+      1751.7351720360198,
+      2631.4835011929235
+    ]
+  },
+  "input_hashes": {
+    "manifest_sha256": "7f6d7b89f180d94596ff6ffd48d1fdec529b32885d898283b4f4e0bd18f5b8f2",
+    "map_sha256": "8654ed2309ac4e2eec80d8811c32e2b55ef3572651b0a82e85e6f34d3cc04a7b",
+    "gt_sha256": "a76a7c37e244f5302ed878dc0846d2390b212bd2513f8b6ad93720e3e476fe23"
+  },
+  "parameters": {
+    "range": {
+      "h_res_deg": 2.5,
+      "v_res_deg": 2.5,
+      "range_margin": 0.5,
+      "min_see_through": 3,
+      "max_surface_hits": 5,
+      "ground_z": null,
+      "resolutions": null
+    },
+    "scan_ratio": {
+      "n_rings": 20,
+      "n_sectors": 108,
+      "max_range": 80.0,
+      "scan_ratio_threshold": 0.2,
+      "min_map_height": 0.5,
+      "ground_margin": 0.2,
+      "min_votes": null,
+      "votes_fraction": 0.5,
+      "votes_floor": 3
+    }
+  },
+  "query_frames": [
+    {
+      "frame": 0,
+      "time_seconds": 0.0,
+      "range_see_through_points": 1,
+      "range_surface_points": 0,
+      "scan_ratio_observed_points": 2,
+      "scan_ratio_dynamic_points": 0,
+      "map_height_too_small": 0,
+      "height_ratio_too_large": 2,
+      "ground_reverted": 0
+    },
+    {
+      "frame": 1,
+      "time_seconds": 1.6002588272094727,
+      "range_see_through_points": 30,
+      "range_surface_points": 0,
+      "scan_ratio_observed_points": 5,
+      "scan_ratio_dynamic_points": 5,
+      "map_height_too_small": 0,
+      "height_ratio_too_large": 0,
+      "ground_reverted": 0
+    },
+    {
+      "frame": 2,
+      "time_seconds": 3.0998899936676025,
+      "range_see_through_points": 52,
+      "range_surface_points": 16,
+      "scan_ratio_observed_points": 62,
+      "scan_ratio_dynamic_points": 62,
+      "map_height_too_small": 0,
+      "height_ratio_too_large": 0,
+      "ground_reverted": 0
+    },
+    {
+      "frame": 3,
+      "time_seconds": 4.600091934204102,
+      "range_see_through_points": 34,
+      "range_surface_points": 1,
+      "scan_ratio_observed_points": 17,
+      "scan_ratio_dynamic_points": 16,
+      "map_height_too_small": 1,
+      "height_ratio_too_large": 0,
+      "ground_reverted": 0
+    },
+    {
+      "frame": 4,
+      "time_seconds": 6.100237846374512,
+      "range_see_through_points": 53,
+      "range_surface_points": 1,
+      "scan_ratio_observed_points": 81,
+      "scan_ratio_dynamic_points": 70,
+      "map_height_too_small": 0,
+      "height_ratio_too_large": 10,
+      "ground_reverted": 1
+    },
+    {
+      "frame": 5,
+      "time_seconds": 7.600988864898682,
+      "range_see_through_points": 185,
+      "range_surface_points": 13,
+      "scan_ratio_observed_points": 66,
+      "scan_ratio_dynamic_points": 64,
+      "map_height_too_small": 0,
+      "height_ratio_too_large": 2,
+      "ground_reverted": 0
+    },
+    {
+      "frame": 6,
+      "time_seconds": 9.100044965744019,
+      "range_see_through_points": 254,
+      "range_surface_points": 96,
+      "scan_ratio_observed_points": 240,
+      "scan_ratio_dynamic_points": 234,
+      "map_height_too_small": 0,
+      "height_ratio_too_large": 4,
+      "ground_reverted": 2
+    },
+    {
+      "frame": 7,
+      "time_seconds": 10.600225925445557,
+      "range_see_through_points": 328,
+      "range_surface_points": 32,
+      "scan_ratio_observed_points": 2724,
+      "scan_ratio_dynamic_points": 1771,
+      "map_height_too_small": 0,
+      "height_ratio_too_large": 24,
+      "ground_reverted": 929
+    },
+    {
+      "frame": 8,
+      "time_seconds": 12.099889039993286,
+      "range_see_through_points": 5078,
+      "range_surface_points": 73,
+      "scan_ratio_observed_points": 2118,
+      "scan_ratio_dynamic_points": 996,
+      "map_height_too_small": 48,
+      "height_ratio_too_large": 431,
+      "ground_reverted": 643
+    },
+    {
+      "frame": 9,
+      "time_seconds": 13.600590944290161,
+      "range_see_through_points": 4410,
+      "range_surface_points": 503,
+      "scan_ratio_observed_points": 3304,
+      "scan_ratio_dynamic_points": 1404,
+      "map_height_too_small": 0,
+      "height_ratio_too_large": 404,
+      "ground_reverted": 1496
+    },
+    {
+      "frame": 10,
+      "time_seconds": 15.099118947982788,
+      "range_see_through_points": 3009,
+      "range_surface_points": 1754,
+      "scan_ratio_observed_points": 4843,
+      "scan_ratio_dynamic_points": 1825,
+      "map_height_too_small": 81,
+      "height_ratio_too_large": 1617,
+      "ground_reverted": 1320
+    },
+    {
+      "frame": 11,
+      "time_seconds": 16.6004478931427,
+      "range_see_through_points": 0,
+      "range_surface_points": 3092,
+      "scan_ratio_observed_points": 3147,
+      "scan_ratio_dynamic_points": 0,
+      "map_height_too_small": 7,
+      "height_ratio_too_large": 3140,
+      "ground_reverted": 0
+    }
+  ],
+  "acquisition_frames": [
+    {
+      "frame": 0,
+      "time_seconds": 0.0,
+      "gt_points": 0,
+      "removed": 0,
+      "missed": 0
+    },
+    {
+      "frame": 1,
+      "time_seconds": 1.6002588272094727,
+      "gt_points": 0,
+      "removed": 0,
+      "missed": 0
+    },
+    {
+      "frame": 2,
+      "time_seconds": 3.0998899936676025,
+      "gt_points": 0,
+      "removed": 0,
+      "missed": 0
+    },
+    {
+      "frame": 3,
+      "time_seconds": 4.600091934204102,
+      "gt_points": 1,
+      "removed": 0,
+      "missed": 1
+    },
+    {
+      "frame": 4,
+      "time_seconds": 6.100237846374512,
+      "gt_points": 2,
+      "removed": 0,
+      "missed": 2
+    },
+    {
+      "frame": 5,
+      "time_seconds": 7.600988864898682,
+      "gt_points": 16,
+      "removed": 1,
+      "missed": 15
+    },
+    {
+      "frame": 6,
+      "time_seconds": 9.100044965744019,
+      "gt_points": 28,
+      "removed": 4,
+      "missed": 24
+    },
+    {
+      "frame": 7,
+      "time_seconds": 10.600225925445557,
+      "gt_points": 47,
+      "removed": 1,
+      "missed": 46
+    },
+    {
+      "frame": 8,
+      "time_seconds": 12.099889039993286,
+      "gt_points": 98,
+      "removed": 0,
+      "missed": 98
+    },
+    {
+      "frame": 9,
+      "time_seconds": 13.600590944290161,
+      "gt_points": 351,
+      "removed": 83,
+      "missed": 268
+    },
+    {
+      "frame": 10,
+      "time_seconds": 15.099118947982788,
+      "gt_points": 1666,
+      "removed": 0,
+      "missed": 1666
+    },
+    {
+      "frame": 11,
+      "time_seconds": 16.6004478931427,
+      "gt_points": 3147,
+      "removed": 203,
+      "missed": 2944
+    }
+  ],
+  "range_blockers": {
+    "insufficient_see_through": 2196,
+    "surface_guard": 0
+  },
+  "scan_ratio_blockers": {
+    "no_dynamic_votes": 1985,
+    "insufficient_revisits": 142,
+    "below_vote_threshold": 4957
+  },
+  "channel_decisions": {
+    "both_dynamic": 292,
+    "range_only": 2868,
+    "scan_ratio_only": 107,
+    "neither": 2089
+  },
+  "limitations": "Votes are against the full accumulated map, including future scans: offline analysis, not an online replay. Rows are query scans; columns are acquisition frames. Fractions normalize by target GT points in each acquisition frame. Range blocker masks overlap. Moving-box GT does not assert per-point motion. No deskew or filter changes.",
+  "validation_date": "2026-10-08",
+  "source_base_commit": "d14da3f"
+}

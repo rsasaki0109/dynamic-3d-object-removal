@@ -1,0 +1,106 @@
+{
+  "dataset": "argoverse-2-sensor-val",
+  "scene": "0b5142c1-420b-3fea-9e98-b87327ae22c6",
+  "frames": 12,
+  "stride": 3,
+  "map_points": 1235563,
+  "gt_dynamic_points": 84471,
+  "method_keys": [
+    "fusion",
+    "range_scan_ratio"
+  ],
+  "config": {
+    "manifest_sha256": "36a8b5c4e86afcb9fd8735c64fa3063e46bce29eb6ec8d64b193ff915d6af81b",
+    "map_sha256": "5da31155fa7b54b564900e80084614a2144702ec05f61d10b306fbda9ecf5df0",
+    "gt_sha256": "549ec2c75f73d7aee951b935f689604a9ebb9d42f401a200bf4422f270942c1c",
+    "parameters": {
+      "fusion": {
+        "min_range": 1.0,
+        "max_range": 60.0,
+        "free_voxel": 0.3,
+        "free_step": 0.3,
+        "free_carve_margin": 0.6,
+        "free_ground_margin": 0.25,
+        "free_votes_fraction": 0.7,
+        "free_votes_floor": 3,
+        "void_voxel": 0.2,
+        "void_step": 0.1,
+        "void_hit_inflation": 0.2,
+        "void_min_scans": 4,
+        "sr_votes_fraction": 0.7,
+        "sr_votes_floor": 3,
+        "n_rings": 20,
+        "n_sectors": 108,
+        "sr_max_range": 80.0,
+        "scan_ratio_threshold": 0.2,
+        "min_map_height": 0.5,
+        "sr_ground_margin": 0.2,
+        "workers": 2
+      },
+      "range_scan_ratio": {
+        "range": {
+          "h_res_deg": 1.0,
+          "v_res_deg": 1.0,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 3,
+          "ground_z": -1.4,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      }
+    }
+  },
+  "metrics": {
+    "fusion": {
+      "precision": 0.6508454499001254,
+      "recall": 0.6634584650353376,
+      "f1": 0.6570914356397914,
+      "iou": 0.4893046727666411,
+      "static_preservation": 0.9738813231262141,
+      "true_positive": 56043,
+      "false_positive": 30065,
+      "false_negative": 28428,
+      "true_negative": 1121027
+    },
+    "range_scan_ratio": {
+      "precision": 0.9924292057945694,
+      "recall": 0.16139266730593932,
+      "f1": 0.2776352231997393,
+      "iou": 0.16119420632574638,
+      "static_preservation": 0.99990965100965,
+      "true_positive": 13633,
+      "false_positive": 104,
+      "false_negative": 70838,
+      "true_negative": 1150988
+    }
+  },
+  "runtime_seconds": 131.820361134,
+  "validation_date": "2026-10-08",
+  "source_base_commit": "0a640ba198a00d554a8538a0c7a1d955d6d85356",
+  "validation": {
+    "point_masks_identical": true,
+    "reference_metrics_matched": true,
+    "regression_count": 0
+  },
+  "timing_scope": "sum of filter calls; not end-to-end startup or ROS2 latency",
+  "method_filter_seconds": {
+    "fusion": 126.82054744200013,
+    "range_scan_ratio": 4.9998136919998615
+  },
+  "limits": [
+    "One 64-beam AV2 scene, not a cross-scene or sparse-sensor accuracy claim.",
+    "Single timing sample with two fusion workers; not a stable performance guarantee.",
+    "Source base plus the CLI feature changes; the base commit alone lacks these CLIs."
+  ]
+}

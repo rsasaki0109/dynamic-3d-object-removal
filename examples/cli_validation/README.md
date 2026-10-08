@@ -365,3 +365,69 @@ and 532 static false removals. All API/CLI point masks match. This reproduces
 the earlier diagnostic result; it is a corrected replay, not fresh held-out
 validation. The full benchmark method metrics and coordinate-specific settings
 are included so historical configurations remain distinguishable.
+## New AV2 log: frozen neighbor candidates
+
+[av2_unseen_02a_neighbors.json](av2_unseen_02a_neighbors.json) evaluates
+`02a00399-3857-444e-8db3-a8f58489c394`, the first lexicographic val log absent
+from repository scene references and local prior evaluations. The log was chosen
+before candidate metrics were inspected, without moving-content screening or
+reselection. This is one newly examined val log, not an official test split or
+representative held-out dataset. Parameters were frozen from the earlier AV2
+comparison at commit `19f3ef099f5a8505c7824b12a0ab7f2acad3c2d9`.
+
+The first 12 usable annotation/pose timestamps at stride 3 yield 1,185,246 map
+points and 11,124 moving-box GT points (8 moving tracks). Manifest timestamps
+are checked against source annotation/pose tables; source and input hashes are
+recorded. Native masks match production, and all candidates share map/GT/range
+settings and normalized voting. AV2 source preprocessing excludes ego Z <=
+-1.4 m before pose transformation; that is distinct from the later map-Z guard.
+
+**Frozen result:** all three methods remove zero points, yielding zero recall
+and 100% static preservation. The inherited absolute map-coordinate guard
+`ground_z=-1.4` is not portable: map Z median is -20.95 m, 1,184,859 map points
+and all 11,124 moving GT points lie at or below it. Native range removes zero
+points, while native scan-ratio flags 17,310 points. Thus the guard blocks all
+moving GT removals in the final intersection. Zero precision here follows the
+metric convention when nothing is removed; it is not evidence of false positives.
+
+A separately labelled **post-result diagnostic**, not the frozen evaluation,
+disables only that absolute map-Z guard. It keeps the existing ego-frame source
+preprocessing and all other parameters:
+
+| Method | Recall | F1 | Static kept | Moving removed | Static falsely removed |
+|---|---:|---:|---:|---:|---:|
+| Native | 67.440% | 0.7832 | 99.955% | 7,502 | 532 |
+| Either neighbor | 69.004% | 0.7939 | 99.954% | 7,676 | 538 |
+| Same-scan visibility support | 67.161% | 0.7812 | 99.955% | 7,471 | 532 |
+
+Ungated support adds 188 moving removals and loses 14; visibility-supported
+inference adds 54 and loses 85. The latter does not improve this log, consistent
+with its loss on the previously examined AV2 log. This single diagnostic does
+not justify dropping all ground protection or adopting neighbor inference.
+Before broader comparisons, distinguish absolute map elevation from ground
+relative to sensor/local surface. No production behavior is changed here.
+Annotations are boxes, not per-point motion labels; motion threshold is >2 m
+and box margin is 0.2 m. Offline maps include future points. Visibility support
+is an angular-pixel approximation and reuses range evidence, not exact rays.
+
+Reproduce with benchmark extras installed and public unsigned S3 access:
+
+```bash
+python scripts/run_av2_benchmark.py \
+  --scene 02a00399-3857-444e-8db3-a8f58489c394 --frames 12 --stride 3 \
+  --online-manifest output/av2_unseen_02a/manifest.json --online-only
+python scripts/validate_unseen_av2_neighbors.py \
+  --manifest output/av2_unseen_02a/manifest.json --data-root data/av2_benchmark \
+  --prior-experiment examples/error_visualization/neighbor_visibility_supported.json \
+  --previously-examined \
+    02678d04-cc9f-3148-9f95-1ba66347dff9 \
+    04994d08-156c-3018-9717-ba0e29be8153 \
+    05fa5048-f355-3274-b565-c0ddc547b315 \
+    0b5142c1-420b-3fea-9e98-b87327ae22c6 \
+  --report-json output/av2_unseen_02a/comparison.json
+```
+
+Choose a new report path. If an inherited AWS profile is unavailable, run the
+public unsigned downloader without that profile (`env -u AWS_PROFILE ...`);
+no cloud credentials are required. Generated datasets/manifests remain ignored.
+Source: Argoverse 2 Sensor Dataset val split, https://www.argoverse.org/.

@@ -10,7 +10,7 @@ Detector-free, CPU-only LiDAR map cleaning and pose-aware ROS2 filtering. The re
 
 Accumulating scans from a moving scene can turn cars, pedestrians, and other transient returns into ghost geometry. This project uses geometric evidence across scans to reduce that contamination while preserving persistent structure, without requiring a learned detector.
 
-[Try it in the browser](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/playground.html) · [Install and clean a map](#install) · [ROS2 quick start](#ros2-realtime) · [See the audited proof](#av2-detector-free-proof)
+[Try it in the browser](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/playground.html) · [Clean your first map](examples/quickstart/README.md) · [ROS2 quick start](#ros2-realtime) · [See the audited proof](#av2-detector-free-proof)
 
 [![Browser playground](demo/playground_demo.gif)](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/playground.html)
 
@@ -35,6 +35,10 @@ A scan can look correct on its own while a sequence of scans quietly turns movin
 More demos: [AV2 sequence](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_sequence_av2.html) · [single scan](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_standalone.html) · [local sequence](https://rsasaki0109.github.io/dynamic-3d-object-removal/demo/index_3d_sequence_standalone.html)
 
 ## Install
+
+New here? Follow [Clean your first map](examples/quickstart/README.md) for a
+download-free example, then replace it with your own scans and poses. The guide
+covers input coordinates, deskew requirements, keep masks and result inspection.
 
 ```bash
 pip install dynamic-object-removal

@@ -13,6 +13,42 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import bench
 import dynamic_object_removal as core
+from scripts.run_nuscenes_benchmark import MIN_GT_DYNAMIC_POINTS_FOR_MEAN
+
+EVIDENCE_VARIANTS = {
+    "see_through_2": ("range", {"min_see_through": 2}),
+    "range_margin_0_25": ("range", {"range_margin": .25}),
+    "resolution_half": ("range", "half"),
+    "resolution_double": ("range", "double"),
+    "map_height_0_25": ("scan_ratio", {"min_map_height": .25}),
+    "ground_margin_0_1": ("scan_ratio", {"ground_margin": .1}),
+}
+
+
+def ablate_evidence(points, scans, gt, params, range_keep, sr_keep):
+    """One-factor ablations; preserve baseline voting and the other channel."""
+    baseline_dynamic = ~range_keep & ~sr_keep
+    variants = {"baseline": {"parameters": params,
+                            "metrics": bench.compute_accuracy_metrics(baseline_dynamic, gt)}}
+    for name, (channel, change) in EVIDENCE_VARIANTS.items():
+        candidate = {k: dict(v) for k, v in params.items()}
+        if isinstance(change, str):
+            factor = .5 if change == "half" else 2
+            change = {key: params["range"][key] * factor for key in ("h_res_deg", "v_res_deg")}
+        candidate[channel].update(change)
+        kr, ks = range_keep, sr_keep
+        if channel == "range":
+            _, kr = core.clean_map_by_visibility(points, scans, **candidate["range"])
+        else:
+            _, ks = core.clean_map_by_scan_ratio(points, scans, **candidate["scan_ratio"])
+        dynamic = ~kr & ~ks
+        variants[name] = {"parameters": candidate,
+                          "metrics": bench.compute_accuracy_metrics(dynamic, gt),
+                          "additional_moving_removed": int((dynamic & ~baseline_dynamic & gt).sum()),
+                          "additional_static_removed": int((dynamic & ~baseline_dynamic & ~gt).sum()),
+                          "lost_moving_removed": int((~dynamic & baseline_dynamic & gt).sum()),
+                          "recovered_static_points": int((~dynamic & baseline_dynamic & ~gt).sum())}
+    return variants
 
 
 def quantiles(values):
@@ -43,7 +79,7 @@ def height_gates(points, scan, origin, params, observed, dynamic):
     return low_height, ratio_failure, ground_reverted
 
 
-def diagnose(path: Path, reference: dict):
+def diagnose(path: Path, reference: dict, *, ablate=False):
     manifest = json.loads(path.read_text())
     scans, _ = core._load_scan_manifest(path, allow_undeskewed=True)
     points = np.concatenate([p for p, _ in scans])
@@ -108,6 +144,7 @@ def diagnose(path: Path, reference: dict):
     count = lambda mask: int((missed & mask).sum())
     distances = np.concatenate([np.linalg.norm(p - origin, axis=1) for p, origin in scans])
     return {"scene": manifest["scene"], "input_hashes": hashes, "parameters": params,
+            **({"evidence_ablations": ablate_evidence(points, scans, gt, params, kr, ks)} if ablate else {}),
             "gt_dynamic_points": int(gt.sum()), "common_misses": int(missed.sum()),
             "evidence_api_masks_equal": True,
             "range": {"insufficient_see_through": count(see < rp["min_see_through"]),
@@ -136,6 +173,8 @@ def main(argv=None):
     parser.add_argument("--av2-manifest", type=Path, required=True)
     parser.add_argument("--av2-baseline", type=Path, required=True)
     parser.add_argument("--report-json", type=Path, required=True)
+    parser.add_argument("--ablate-evidence", action="store_true",
+                        help="Also compare one-factor visibility and height-gate changes on fixed inputs.")
     args = parser.parse_args(argv)
     if args.report_json.exists():
         parser.error("report exists; choose a new path")
@@ -144,14 +183,26 @@ def main(argv=None):
         if json.loads(path.read_text()).get("preprocessing", {}).get("min_distance") != 1:
             raise ValueError("requires min-distance 1 selection")
         reference = json.loads((path.parent / "validation/validation.json").read_text())
-        records.append(diagnose(path, reference))
+        records.append(diagnose(path, reference, ablate=args.ablate_evidence))
         print(f"{records[-1]['scene']}: evidence agrees with public APIs", flush=True)
     if not records:
         raise ValueError("no scene manifests")
-    av2 = diagnose(args.av2_manifest, json.loads(args.av2_baseline.read_text()))
+    av2 = diagnose(args.av2_manifest, json.loads(args.av2_baseline.read_text()), ablate=args.ablate_evidence)
     report = {"nuscenes_scene_results": records, "av2_scene_result": av2,
               "quantile_order": [0, .25, .5, .75, 1],
               "limitations": "Counts concern moving GT missed by both baseline channels. Range reason masks overlap and must not be summed. No see-through/surface evidence also includes occlusion, not just missing pixels. Scan-ratio height gate counts classify observed point-scan opportunities, not unique points. GT is moving-instance boxes, not per-point motion. No defaults changed."}
+    if args.ablate_evidence:
+        eligible = [r for r in records if r["gt_dynamic_points"] >= MIN_GT_DYNAMIC_POINTS_FOR_MEAN]
+        names = ["baseline", *EVIDENCE_VARIANTS]
+        keys = ["precision", "recall", "f1", "static_preservation"]
+        report["evidence_ablation_summary"] = {
+            "included_scenes": [r["scene"] for r in eligible],
+            "min_gt_dynamic_points": MIN_GT_DYNAMIC_POINTS_FOR_MEAN,
+            "nuscenes_mean": {name: {key: float(np.mean([r["evidence_ablations"][name]["metrics"][key]
+                                    for r in eligible])) if eligible else None for key in keys} for name in names},
+            "av2": {name: av2["evidence_ablations"][name]["metrics"] for name in names},
+            "limitations": "Exploratory one-factor comparisons, not held-out validation. Baseline voting remains unchanged. One AV2 scene. Half/double resolution changes both angular dimensions together. Static preservation is a scene mean, not a per-scene guarantee."}
+        print(json.dumps(report["evidence_ablation_summary"], indent=2), flush=True)
     args.report_json.parent.mkdir(parents=True, exist_ok=True)
     args.report_json.write_text(json.dumps(report, indent=2) + "\n")
     print(f"Saved {args.report_json}")

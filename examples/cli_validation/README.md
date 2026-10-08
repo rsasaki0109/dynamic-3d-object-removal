@@ -99,8 +99,6 @@ python scripts/validate_vote_floor.py \
 The validator rejects changed input fingerprints, replays baseline metrics,
 and retains CLI commands, masks and summaries in a new output directory.
 
-### Close-point selection follow-up
-
 ### Moving GT missed by both baseline filters
 
 [common_miss_diagnosis.json](common_miss_diagnosis.json) reconstructs range
@@ -146,6 +144,41 @@ python scripts/diagnose_common_misses.py \
   --av2-manifest output/cli_av2/manifest.json \
   --av2-baseline examples/cli_validation/av2_12_sweeps.json \
   --report-json output/common_misses.json
+```
+
+### One-factor evidence experiments
+
+[evidence_ablations.json](evidence_ablations.json) compares six observation
+conditions on the same fingerprint-verified inputs, keeping voting and the
+other channel fixed. nuScenes values are the usual six-scene unweighted mean;
+AV2 is the single reference scene. Baseline replay and vote reconstruction
+still agree exactly with the public APIs.
+
+| Evidence change | nuScenes recall | nuScenes static kept | AV2 recall | AV2 static kept |
+|---|---:|---:|---:|---:|
+| Baseline | 20.440% | 99.476% | 16.139% | 99.991% |
+| See-through scans 3 → 2 | 22.265% | 99.115% | 16.506% | 99.989% |
+| Range margin 0.5 → 0.25 m | 20.691% | 99.427% | 16.381% | 99.990% |
+| Both angular resolutions halved | 16.861% | 99.521% | 16.573% | 99.987% |
+| Both angular resolutions doubled | 17.528% | 99.658% | 15.636% | 99.996% |
+| Minimum map height 0.5 → 0.25 m | 20.440% | 99.475% | 16.139% | 99.991% |
+| Ground margin 0.2 → 0.1 m | 21.237% | 99.380% | 16.594% | 99.990% |
+
+Reducing the see-through requirement improves mean recall in both datasets,
+but also removes more static points. Finer resolution moves recall in opposite
+directions between datasets. Lowering the minimum map height has essentially
+no benefit. These changes do not provide a large shared recall gain, so no
+production defaults or presets change. All variants are exploratory comparisons
+on already examined data, without held-out validation. Mean static retention
+is not a per-scene guarantee. Only baseline CLI equivalence is claimed here;
+the experimental variants are API measurements.
+
+```bash
+python scripts/diagnose_common_misses.py \
+  --validation-root output/cli_nuscenes_devkit_selection \
+  --av2-manifest output/cli_av2/manifest.json \
+  --av2-baseline examples/cli_validation/av2_12_sweeps.json \
+  --ablate-evidence --report-json output/evidence_ablations.json
 ```
 
 ### Official close-point preprocessing

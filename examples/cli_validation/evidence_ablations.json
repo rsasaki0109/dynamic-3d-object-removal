@@ -1,0 +1,4076 @@
+{
+  "nuscenes_scene_results": [
+    {
+      "scene": "scene-0061",
+      "input_hashes": {
+        "manifest_sha256": "1998e84d0bd8e4f45997c8605b1d2be98db2bc0d5cf51d58b3ff1b317cdde779",
+        "map_sha256": "e4df94113846adb08ca7eddb51498f8278459e5548f0f446fe4066ed44587994",
+        "gt_sha256": "01c0bd54a9fddfe8d204e6584e5c404ef8f538e83cf91bb0c6763ad9761afb65"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "evidence_ablations": {
+        "baseline": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.2289156626506024,
+            "recall": 0.10662177328843996,
+            "f1": 0.14548238897396631,
+            "iou": 0.07844756399669695,
+            "static_preservation": 0.9926534313641086,
+            "true_positive": 380,
+            "false_positive": 1280,
+            "false_negative": 3184,
+            "true_negative": 172951
+          }
+        },
+        "see_through_2": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 2,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.23603082851637766,
+            "recall": 0.20622895622895623,
+            "f1": 0.22012578616352202,
+            "iou": 0.12367491166077739,
+            "static_preservation": 0.9863457134493862,
+            "true_positive": 735,
+            "false_positive": 2379,
+            "false_negative": 2829,
+            "true_negative": 171852
+          },
+          "additional_moving_removed": 355,
+          "additional_static_removed": 1099,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "range_margin_0_25": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.25,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.21883974727168293,
+            "recall": 0.1069023569023569,
+            "f1": 0.14363807728557965,
+            "iou": 0.07737611697806661,
+            "static_preservation": 0.9921942708243654,
+            "true_positive": 381,
+            "false_positive": 1360,
+            "false_negative": 3183,
+            "true_negative": 172871
+          },
+          "additional_moving_removed": 1,
+          "additional_static_removed": 80,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "resolution_half": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 1.25,
+              "v_res_deg": 1.25,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.2648018648018648,
+            "recall": 0.15937149270482603,
+            "f1": 0.19898406025573653,
+            "iou": 0.11048434156778837,
+            "static_preservation": 0.9909487978603119,
+            "true_positive": 568,
+            "false_positive": 1577,
+            "false_negative": 2996,
+            "true_negative": 172654
+          },
+          "additional_moving_removed": 263,
+          "additional_static_removed": 629,
+          "lost_moving_removed": 75,
+          "recovered_static_points": 332
+        },
+        "resolution_double": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 5.0,
+              "v_res_deg": 5.0,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.3020257826887661,
+            "recall": 0.0920314253647587,
+            "f1": 0.14107526881720428,
+            "iou": 0.07589079130032392,
+            "static_preservation": 0.9956494538859331,
+            "true_positive": 328,
+            "false_positive": 758,
+            "false_negative": 3236,
+            "true_negative": 173473
+          },
+          "additional_moving_removed": 129,
+          "additional_static_removed": 232,
+          "lost_moving_removed": 181,
+          "recovered_static_points": 754
+        },
+        "map_height_0_25": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.25,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.2278708133971292,
+            "recall": 0.1069023569023569,
+            "f1": 0.1455309396485867,
+            "iou": 0.07847579814624099,
+            "static_preservation": 0.9925902967898939,
+            "true_positive": 381,
+            "false_positive": 1291,
+            "false_negative": 3183,
+            "true_negative": 172940
+          },
+          "additional_moving_removed": 1,
+          "additional_static_removed": 11,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "ground_margin_0_1": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.1,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.2224157955865273,
+            "recall": 0.1074635241301908,
+            "f1": 0.14491108588724935,
+            "iou": 0.07811543952682032,
+            "static_preservation": 0.9923148004660479,
+            "true_positive": 383,
+            "false_positive": 1339,
+            "false_negative": 3181,
+            "true_negative": 172892
+          },
+          "additional_moving_removed": 5,
+          "additional_static_removed": 59,
+          "lost_moving_removed": 2,
+          "recovered_static_points": 0
+        }
+      },
+      "gt_dynamic_points": 3564,
+      "common_misses": 2060,
+      "evidence_api_masks_equal": true,
+      "range": {
+        "insufficient_see_through": 2053,
+        "surface_guard": 21,
+        "no_see_through_or_surface_evidence": 401,
+        "ground_guard": 0,
+        "see_through_quantiles": [
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          3.0
+        ],
+        "surface_quantiles": [
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          8.0
+        ]
+      },
+      "scan_ratio": {
+        "insufficient_revisits_for_floor": 202,
+        "adequate_revisits_below_threshold": 1858,
+        "zero_dynamic_votes": 1179,
+        "observed_point_scan_opportunities": {
+          "total": 11100,
+          "map_height_too_small": 189,
+          "query_map_height_ratio_too_large": 6611,
+          "ground_reverted": 2554,
+          "dynamic_votes": 1746
+        },
+        "revisit_quantiles": [
+          1.0,
+          4.0,
+          5.0,
+          7.0,
+          12.0
+        ],
+        "dynamic_vote_quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          2.0,
+          4.0
+        ]
+      },
+      "acquisition_distance_quantiles_m": [
+        6.846010778074221,
+        7.603973017735571,
+        9.546694378277664,
+        18.393174540571778,
+        77.35107782002335
+      ]
+    },
+    {
+      "scene": "scene-0103",
+      "input_hashes": {
+        "manifest_sha256": "b7e15863d6cda5586959952b62270072dbd76ac3c942bf20682dc166eaced916",
+        "map_sha256": "d9eaf67c4fad6b71c7f215562fc075c987b02136ffcf4a713d2e1d33d024908a",
+        "gt_sha256": "69d20b7b9ff7c8901ea73c20b5ed6e31649f0a2191237d38aaf760e03f3c691e"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "evidence_ablations": {
+        "baseline": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.30717255717255715,
+            "recall": 0.11261432926829268,
+            "f1": 0.16480758505298382,
+            "iou": 0.08980398115787874,
+            "static_preservation": 0.9904614019520852,
+            "true_positive": 591,
+            "false_positive": 1333,
+            "false_negative": 4657,
+            "true_negative": 138415
+          }
+        },
+        "see_through_2": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 2,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.2545196738745126,
+            "recall": 0.1368140243902439,
+            "f1": 0.1779650514314041,
+            "iou": 0.09767378587947217,
+            "static_preservation": 0.9849514840999514,
+            "true_positive": 718,
+            "false_positive": 2103,
+            "false_negative": 4530,
+            "true_negative": 137645
+          },
+          "additional_moving_removed": 127,
+          "additional_static_removed": 770,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "range_margin_0_25": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.25,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.30673316708229426,
+            "recall": 0.1171875,
+            "f1": 0.1695849993106301,
+            "iou": 0.0926483880686954,
+            "static_preservation": 0.9900535249162778,
+            "true_positive": 615,
+            "false_positive": 1390,
+            "false_negative": 4633,
+            "true_negative": 138358
+          },
+          "additional_moving_removed": 24,
+          "additional_static_removed": 57,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "resolution_half": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 1.25,
+              "v_res_deg": 1.25,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.35686876438986953,
+            "recall": 0.08860518292682927,
+            "f1": 0.14196305907495038,
+            "iou": 0.07640486362142622,
+            "static_preservation": 0.9940034919998855,
+            "true_positive": 465,
+            "false_positive": 838,
+            "false_negative": 4783,
+            "true_negative": 138910
+          },
+          "additional_moving_removed": 79,
+          "additional_static_removed": 256,
+          "lost_moving_removed": 205,
+          "recovered_static_points": 751
+        },
+        "resolution_double": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 5.0,
+              "v_res_deg": 5.0,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.28695652173913044,
+            "recall": 0.07545731707317073,
+            "f1": 0.11949305974652988,
+            "iou": 0.06354300385109114,
+            "static_preservation": 0.9929587543292212,
+            "true_positive": 396,
+            "false_positive": 984,
+            "false_negative": 4852,
+            "true_negative": 138764
+          },
+          "additional_moving_removed": 21,
+          "additional_static_removed": 245,
+          "lost_moving_removed": 216,
+          "recovered_static_points": 594
+        },
+        "map_height_0_25": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.25,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.307012987012987,
+            "recall": 0.11261432926829268,
+            "f1": 0.16478460895023,
+            "iou": 0.08979033728350046,
+            "static_preservation": 0.9904542462146149,
+            "true_positive": 591,
+            "false_positive": 1334,
+            "false_negative": 4657,
+            "true_negative": 138414
+          },
+          "additional_moving_removed": 0,
+          "additional_static_removed": 1,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "ground_margin_0_1": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.1,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.3062372188139059,
+            "recall": 0.11413871951219512,
+            "f1": 0.1662965019433648,
+            "iou": 0.0906888720666162,
+            "static_preservation": 0.9902896642527979,
+            "true_positive": 599,
+            "false_positive": 1357,
+            "false_negative": 4649,
+            "true_negative": 138391
+          },
+          "additional_moving_removed": 8,
+          "additional_static_removed": 24,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        }
+      },
+      "gt_dynamic_points": 5248,
+      "common_misses": 1599,
+      "evidence_api_masks_equal": true,
+      "range": {
+        "insufficient_see_through": 1593,
+        "surface_guard": 49,
+        "no_see_through_or_surface_evidence": 128,
+        "ground_guard": 0,
+        "see_through_quantiles": [
+          0.0,
+          0.0,
+          1.0,
+          2.0,
+          5.0
+        ],
+        "surface_quantiles": [
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          8.0
+        ]
+      },
+      "scan_ratio": {
+        "insufficient_revisits_for_floor": 428,
+        "adequate_revisits_below_threshold": 1171,
+        "zero_dynamic_votes": 670,
+        "observed_point_scan_opportunities": {
+          "total": 8326,
+          "map_height_too_small": 132,
+          "query_map_height_ratio_too_large": 5867,
+          "ground_reverted": 990,
+          "dynamic_votes": 1337
+        },
+        "revisit_quantiles": [
+          1.0,
+          2.0,
+          5.0,
+          7.0,
+          12.0
+        ],
+        "dynamic_vote_quantiles": [
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          5.0
+        ]
+      },
+      "acquisition_distance_quantiles_m": [
+        4.1162187528762955,
+        6.476050874571957,
+        12.398807717530964,
+        17.905247278419765,
+        74.05034458726041
+      ]
+    },
+    {
+      "scene": "scene-0553",
+      "input_hashes": {
+        "manifest_sha256": "6d297da7a9b4b40e95192f65e1d5031b10e193d275cfb298474ca79ff60170ce",
+        "map_sha256": "6366998699c68e0b35b27e92909de3098ef7c7a3653edf5adb6c4ba9ab438b81",
+        "gt_sha256": "8f9f17f1b9950738e64754c75e8051090705ec2f6eb76d7cb62ca6a49d01b072"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "evidence_ablations": {
+        "baseline": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.9964586100044267,
+            "recall": 0.3898510564599931,
+            "f1": 0.5604381924561185,
+            "iou": 0.3893116568661363,
+            "static_preservation": 0.9999519051569695,
+            "true_positive": 2251,
+            "false_positive": 8,
+            "false_negative": 3523,
+            "true_negative": 166330
+          }
+        },
+        "see_through_2": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 2,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.9960869565217392,
+            "recall": 0.3967786629719432,
+            "f1": 0.5675006192717365,
+            "iou": 0.39616116202662977,
+            "static_preservation": 0.9999458933015908,
+            "true_positive": 2291,
+            "false_positive": 9,
+            "false_negative": 3483,
+            "true_negative": 166329
+          },
+          "additional_moving_removed": 40,
+          "additional_static_removed": 1,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "range_margin_0_25": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.25,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.9956427015250545,
+            "recall": 0.39573952199515067,
+            "f1": 0.566365101003842,
+            "iou": 0.39505532503457813,
+            "static_preservation": 0.9999398814462119,
+            "true_positive": 2285,
+            "false_positive": 10,
+            "false_negative": 3489,
+            "true_negative": 166328
+          },
+          "additional_moving_removed": 34,
+          "additional_static_removed": 2,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "resolution_half": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 1.25,
+              "v_res_deg": 1.25,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.9971333014811276,
+            "recall": 0.3614478697609976,
+            "f1": 0.5305707385280284,
+            "iou": 0.3610726643598616,
+            "static_preservation": 0.9999639288677271,
+            "true_positive": 2087,
+            "false_positive": 6,
+            "false_negative": 3687,
+            "true_negative": 166332
+          },
+          "additional_moving_removed": 171,
+          "additional_static_removed": 3,
+          "lost_moving_removed": 335,
+          "recovered_static_points": 5
+        },
+        "resolution_double": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 5.0,
+              "v_res_deg": 5.0,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.9977753058954394,
+            "recall": 0.31070315206096294,
+            "f1": 0.473851030110935,
+            "iou": 0.31048805815160957,
+            "static_preservation": 0.9999759525784848,
+            "true_positive": 1794,
+            "false_positive": 4,
+            "false_negative": 3980,
+            "true_negative": 166334
+          },
+          "additional_moving_removed": 118,
+          "additional_static_removed": 0,
+          "lost_moving_removed": 575,
+          "recovered_static_points": 4
+        },
+        "map_height_0_25": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.25,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.9964586100044267,
+            "recall": 0.3898510564599931,
+            "f1": 0.5604381924561185,
+            "iou": 0.3893116568661363,
+            "static_preservation": 0.9999519051569695,
+            "true_positive": 2251,
+            "false_positive": 8,
+            "false_negative": 3523,
+            "true_negative": 166330
+          },
+          "additional_moving_removed": 0,
+          "additional_static_removed": 0,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "ground_margin_0_1": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.1,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.9966101694915255,
+            "recall": 0.40734326290266715,
+            "f1": 0.5783132530120482,
+            "iou": 0.4067796610169492,
+            "static_preservation": 0.9999519051569695,
+            "true_positive": 2352,
+            "false_positive": 8,
+            "false_negative": 3422,
+            "true_negative": 166330
+          },
+          "additional_moving_removed": 109,
+          "additional_static_removed": 0,
+          "lost_moving_removed": 8,
+          "recovered_static_points": 0
+        }
+      },
+      "gt_dynamic_points": 5774,
+      "common_misses": 2323,
+      "evidence_api_masks_equal": true,
+      "range": {
+        "insufficient_see_through": 2318,
+        "surface_guard": 1036,
+        "no_see_through_or_surface_evidence": 1004,
+        "ground_guard": 0,
+        "see_through_quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          4.0
+        ],
+        "surface_quantiles": [
+          0.0,
+          0.0,
+          1.0,
+          11.0,
+          12.0
+        ]
+      },
+      "scan_ratio": {
+        "insufficient_revisits_for_floor": 293,
+        "adequate_revisits_below_threshold": 2030,
+        "zero_dynamic_votes": 2292,
+        "observed_point_scan_opportunities": {
+          "total": 23335,
+          "map_height_too_small": 1936,
+          "query_map_height_ratio_too_large": 6216,
+          "ground_reverted": 15143,
+          "dynamic_votes": 40
+        },
+        "revisit_quantiles": [
+          0.0,
+          11.0,
+          12.0,
+          12.0,
+          12.0
+        ],
+        "dynamic_vote_quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          5.0
+        ]
+      },
+      "acquisition_distance_quantiles_m": [
+        6.617920523148437,
+        8.743007002218317,
+        10.582000855135204,
+        21.4088977008522,
+        100.18603342592976
+      ]
+    },
+    {
+      "scene": "scene-0655",
+      "input_hashes": {
+        "manifest_sha256": "691189899335bbc5e06da2811fe980689b9abb3162fdad21b5d66908cd213324",
+        "map_sha256": "1ebf32cb787af21232dc4645ca8b5c11c69775e762f85c36b5475fd004452ac3",
+        "gt_sha256": "5039a158cf5de9c539794649be7be54dd1ff58cd773f7dffa4a589703b1a8e45"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "evidence_ablations": {
+        "baseline": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.05241379310344828,
+            "recall": 0.014274981217129978,
+            "f1": 0.02243873634484795,
+            "iou": 0.011346670647954613,
+            "static_preservation": 0.9957091999250516,
+            "true_positive": 38,
+            "false_positive": 687,
+            "false_negative": 2624,
+            "true_negative": 159423
+          }
+        },
+        "see_through_2": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 2,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.02520478890989288,
+            "recall": 0.015026296018031555,
+            "f1": 0.01882795951988703,
+            "iou": 0.00950344499881207,
+            "static_preservation": 0.9903378926987696,
+            "true_positive": 40,
+            "false_positive": 1547,
+            "false_negative": 2622,
+            "true_negative": 158563
+          },
+          "additional_moving_removed": 2,
+          "additional_static_removed": 860,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "range_margin_0_25": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.25,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.04859335038363171,
+            "recall": 0.014274981217129978,
+            "f1": 0.022067363530778164,
+            "iou": 0.011156782149148562,
+            "static_preservation": 0.9953531946786585,
+            "true_positive": 38,
+            "false_positive": 744,
+            "false_negative": 2624,
+            "true_negative": 159366
+          },
+          "additional_moving_removed": 0,
+          "additional_static_removed": 57,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "resolution_half": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 1.25,
+              "v_res_deg": 1.25,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.02691065662002153,
+            "recall": 0.009391435011269721,
+            "f1": 0.01392369813422445,
+            "iou": 0.007010656197420078,
+            "static_preservation": 0.9943538817063269,
+            "true_positive": 25,
+            "false_positive": 904,
+            "false_negative": 2637,
+            "true_negative": 159206
+          },
+          "additional_moving_removed": 3,
+          "additional_static_removed": 505,
+          "lost_moving_removed": 16,
+          "recovered_static_points": 288
+        },
+        "resolution_double": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 5.0,
+              "v_res_deg": 5.0,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.09042553191489362,
+            "recall": 0.006386175807663411,
+            "f1": 0.011929824561403509,
+            "iou": 0.006000705965407695,
+            "static_preservation": 0.9989319842608206,
+            "true_positive": 17,
+            "false_positive": 171,
+            "false_negative": 2645,
+            "true_negative": 159939
+          },
+          "additional_moving_removed": 0,
+          "additional_static_removed": 1,
+          "lost_moving_removed": 21,
+          "recovered_static_points": 517
+        },
+        "map_height_0_25": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.25,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.05371900826446281,
+            "recall": 0.014650638617580767,
+            "f1": 0.023022432113341203,
+            "iou": 0.011645267243953419,
+            "static_preservation": 0.9957091999250516,
+            "true_positive": 39,
+            "false_positive": 687,
+            "false_negative": 2623,
+            "true_negative": 159423
+          },
+          "additional_moving_removed": 1,
+          "additional_static_removed": 0,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "ground_margin_0_1": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.1,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.04954367666232073,
+            "recall": 0.014274981217129978,
+            "f1": 0.02216389617964421,
+            "iou": 0.011206133883810086,
+            "static_preservation": 0.9954468802698145,
+            "true_positive": 38,
+            "false_positive": 729,
+            "false_negative": 2624,
+            "true_negative": 159381
+          },
+          "additional_moving_removed": 0,
+          "additional_static_removed": 45,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 3
+        }
+      },
+      "gt_dynamic_points": 2662,
+      "common_misses": 256,
+      "evidence_api_masks_equal": true,
+      "range": {
+        "insufficient_see_through": 256,
+        "surface_guard": 0,
+        "no_see_through_or_surface_evidence": 16,
+        "ground_guard": 0,
+        "see_through_quantiles": [
+          0.0,
+          1.0,
+          1.0,
+          2.0,
+          2.0
+        ],
+        "surface_quantiles": [
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          5.0
+        ]
+      },
+      "scan_ratio": {
+        "insufficient_revisits_for_floor": 140,
+        "adequate_revisits_below_threshold": 116,
+        "zero_dynamic_votes": 121,
+        "observed_point_scan_opportunities": {
+          "total": 948,
+          "map_height_too_small": 39,
+          "query_map_height_ratio_too_large": 589,
+          "ground_reverted": 114,
+          "dynamic_votes": 206
+        },
+        "revisit_quantiles": [
+          1.0,
+          2.0,
+          2.0,
+          3.0,
+          12.0
+        ],
+        "dynamic_vote_quantiles": [
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          5.0
+        ]
+      },
+      "acquisition_distance_quantiles_m": [
+        3.113603167165558,
+        3.6109844498533725,
+        14.451823463868624,
+        17.385831257290054,
+        34.13378510601622
+      ]
+    },
+    {
+      "scene": "scene-0757",
+      "input_hashes": {
+        "manifest_sha256": "c8710ebbc75718e96a9b9d3013c006d2adbe6cfcae2ab68cbd62cafddb0644c2",
+        "map_sha256": "326d1fe2e64915713416e6d13dd3e5150fdcb69cb64f70596718bb18a0530455",
+        "gt_sha256": "98f709118402b707494f6b55ec989a27a1f5c59e2f50c606b97e8aa6f7b1a91e"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "evidence_ablations": {
+        "baseline": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.9689438555162937,
+            "recall": 0.5085412845927177,
+            "f1": 0.6670090136353194,
+            "iou": 0.5003852392538524,
+            "static_preservation": 0.9946859968290651,
+            "true_positive": 24679,
+            "false_positive": 791,
+            "false_negative": 23850,
+            "true_negative": 148061
+          }
+        },
+        "see_through_2": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 2,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.9542178728569262,
+            "recall": 0.5183910651363103,
+            "f1": 0.6718117848129999,
+            "iou": 0.5058106803924722,
+            "static_preservation": 0.9918912745545911,
+            "true_positive": 25157,
+            "false_positive": 1207,
+            "false_negative": 23372,
+            "true_negative": 147645
+          },
+          "additional_moving_removed": 478,
+          "additional_static_removed": 416,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "range_margin_0_25": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.25,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.967265625,
+            "recall": 0.510251602134806,
+            "f1": 0.6680786197034899,
+            "iou": 0.5015901310592096,
+            "static_preservation": 0.9943702469567087,
+            "true_positive": 24762,
+            "false_positive": 838,
+            "false_negative": 23767,
+            "true_negative": 148014
+          },
+          "additional_moving_removed": 83,
+          "additional_static_removed": 47,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "resolution_half": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 1.25,
+              "v_res_deg": 1.25,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.9437821284042437,
+            "recall": 0.355622411341672,
+            "f1": 0.5165905859462695,
+            "iou": 0.34824545472889806,
+            "static_preservation": 0.9930938113025018,
+            "true_positive": 17258,
+            "false_positive": 1028,
+            "false_negative": 31271,
+            "true_negative": 147824
+          },
+          "additional_moving_removed": 132,
+          "additional_static_removed": 572,
+          "lost_moving_removed": 7553,
+          "recovered_static_points": 335
+        },
+        "resolution_double": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 5.0,
+              "v_res_deg": 5.0,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.9701498533606524,
+            "recall": 0.4975993735704424,
+            "f1": 0.6578044129664942,
+            "iou": 0.49009579477187853,
+            "static_preservation": 0.9950084647838121,
+            "true_positive": 24148,
+            "false_positive": 743,
+            "false_negative": 24381,
+            "true_negative": 148109
+          },
+          "additional_moving_removed": 401,
+          "additional_static_removed": 229,
+          "lost_moving_removed": 932,
+          "recovered_static_points": 277
+        },
+        "map_height_0_25": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.25,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.9689438555162937,
+            "recall": 0.5085412845927177,
+            "f1": 0.6670090136353194,
+            "iou": 0.5003852392538524,
+            "static_preservation": 0.9946859968290651,
+            "true_positive": 24679,
+            "false_positive": 791,
+            "false_negative": 23850,
+            "true_negative": 148061
+          },
+          "additional_moving_removed": 0,
+          "additional_static_removed": 0,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "ground_margin_0_1": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.1,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.9635918557662418,
+            "recall": 0.5110140328463393,
+            "f1": 0.6678516124688615,
+            "iou": 0.501334249787733,
+            "static_preservation": 0.993705156800043,
+            "true_positive": 24799,
+            "false_positive": 937,
+            "false_negative": 23730,
+            "true_negative": 147915
+          },
+          "additional_moving_removed": 120,
+          "additional_static_removed": 147,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 1
+        }
+      },
+      "gt_dynamic_points": 48529,
+      "common_misses": 2904,
+      "evidence_api_masks_equal": true,
+      "range": {
+        "insufficient_see_through": 2373,
+        "surface_guard": 689,
+        "no_see_through_or_surface_evidence": 338,
+        "ground_guard": 0,
+        "see_through_quantiles": [
+          0.0,
+          0.0,
+          2.0,
+          2.0,
+          5.0
+        ],
+        "surface_quantiles": [
+          0.0,
+          1.0,
+          1.0,
+          5.0,
+          9.0
+        ]
+      },
+      "scan_ratio": {
+        "insufficient_revisits_for_floor": 402,
+        "adequate_revisits_below_threshold": 2502,
+        "zero_dynamic_votes": 1190,
+        "observed_point_scan_opportunities": {
+          "total": 21498,
+          "map_height_too_small": 213,
+          "query_map_height_ratio_too_large": 11822,
+          "ground_reverted": 4122,
+          "dynamic_votes": 5341
+        },
+        "revisit_quantiles": [
+          0.0,
+          4.0,
+          9.0,
+          10.0,
+          12.0
+        ],
+        "dynamic_vote_quantiles": [
+          0.0,
+          0.0,
+          2.0,
+          3.0,
+          5.0
+        ]
+      },
+      "acquisition_distance_quantiles_m": [
+        2.1820154064023165,
+        4.718912029136618,
+        10.312809698384811,
+        20.44511523765675,
+        97.83415247277868
+      ]
+    },
+    {
+      "scene": "scene-0796",
+      "input_hashes": {
+        "manifest_sha256": "7f6d7b89f180d94596ff6ffd48d1fdec529b32885d898283b4f4e0bd18f5b8f2",
+        "map_sha256": "8654ed2309ac4e2eec80d8811c32e2b55ef3572651b0a82e85e6f34d3cc04a7b",
+        "gt_sha256": "a76a7c37e244f5302ed878dc0846d2390b212bd2513f8b6ad93720e3e476fe23"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "evidence_ablations": {
+        "baseline": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.2937000887311446,
+            "recall": 0.035560807907176625,
+            "f1": 0.06344034499281266,
+            "iou": 0.032759303246239116,
+            "static_preservation": 0.994951641033772,
+            "true_positive": 331,
+            "false_positive": 796,
+            "false_negative": 8977,
+            "true_negative": 156879
+          }
+        },
+        "see_through_2": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 2,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.24387902064330294,
+            "recall": 0.054576708207993124,
+            "f1": 0.08919322271969099,
+            "iou": 0.04667830561426077,
+            "static_preservation": 0.9900110987791343,
+            "true_positive": 508,
+            "false_positive": 1575,
+            "false_negative": 8800,
+            "true_negative": 156100
+          },
+          "additional_moving_removed": 177,
+          "additional_static_removed": 779,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "range_margin_0_25": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.25,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.2914485165794066,
+            "recall": 0.03588311130210572,
+            "f1": 0.06389898603405396,
+            "iou": 0.03300395256916996,
+            "static_preservation": 0.994850166481687,
+            "true_positive": 334,
+            "false_positive": 812,
+            "false_negative": 8974,
+            "true_negative": 156863
+          },
+          "additional_moving_removed": 3,
+          "additional_static_removed": 16,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "resolution_half": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 1.25,
+              "v_res_deg": 1.25,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.11788617886178862,
+            "recall": 0.006231198968629136,
+            "f1": 0.01183673469387755,
+            "iou": 0.005953602956271813,
+            "static_preservation": 0.9972475027746948,
+            "true_positive": 58,
+            "false_positive": 434,
+            "false_negative": 9250,
+            "true_negative": 157241
+          },
+          "additional_moving_removed": 17,
+          "additional_static_removed": 222,
+          "lost_moving_removed": 290,
+          "recovered_static_points": 584
+        },
+        "resolution_double": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 5.0,
+              "v_res_deg": 5.0,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.06547619047619048,
+            "recall": 0.002363558229480017,
+            "f1": 0.004562422231439237,
+            "iou": 0.0022864269382664726,
+            "static_preservation": 0.9980085619153322,
+            "true_positive": 22,
+            "false_positive": 314,
+            "false_negative": 9286,
+            "true_negative": 157361
+          },
+          "additional_moving_removed": 1,
+          "additional_static_removed": 4,
+          "lost_moving_removed": 310,
+          "recovered_static_points": 486
+        },
+        "map_height_0_25": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.25,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.29343971631205673,
+            "recall": 0.035560807907176625,
+            "f1": 0.06343426600229973,
+            "iou": 0.032756061355764476,
+            "static_preservation": 0.9949452988742666,
+            "true_positive": 331,
+            "false_positive": 797,
+            "false_negative": 8977,
+            "true_negative": 156878
+          },
+          "additional_moving_removed": 0,
+          "additional_static_removed": 1,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "ground_margin_0_1": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.1,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.34422492401215804,
+            "recall": 0.04866781263429308,
+            "f1": 0.08527861445783133,
+            "iou": 0.04453839347163504,
+            "static_preservation": 0.9945267163469161,
+            "true_positive": 453,
+            "false_positive": 863,
+            "false_negative": 8855,
+            "true_negative": 156812
+          },
+          "additional_moving_removed": 122,
+          "additional_static_removed": 67,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        }
+      },
+      "gt_dynamic_points": 9308,
+      "common_misses": 5278,
+      "evidence_api_masks_equal": true,
+      "range": {
+        "insufficient_see_through": 5278,
+        "surface_guard": 0,
+        "no_see_through_or_surface_evidence": 321,
+        "ground_guard": 0,
+        "see_through_quantiles": [
+          0.0,
+          0.0,
+          1.0,
+          2.0,
+          2.0
+        ],
+        "surface_quantiles": [
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          3.0
+        ]
+      },
+      "scan_ratio": {
+        "insufficient_revisits_for_floor": 1916,
+        "adequate_revisits_below_threshold": 3362,
+        "zero_dynamic_votes": 2543,
+        "observed_point_scan_opportunities": {
+          "total": 14932,
+          "map_height_too_small": 317,
+          "query_map_height_ratio_too_large": 8042,
+          "ground_reverted": 2580,
+          "dynamic_votes": 3993
+        },
+        "revisit_quantiles": [
+          1.0,
+          2.0,
+          3.0,
+          3.0,
+          9.0
+        ],
+        "dynamic_vote_quantiles": [
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          4.0
+        ]
+      },
+      "acquisition_distance_quantiles_m": [
+        3.1370686116144575,
+        4.206719482888742,
+        7.560998380860148,
+        13.086684370396659,
+        103.67691992598617
+      ]
+    },
+    {
+      "scene": "scene-0916",
+      "input_hashes": {
+        "manifest_sha256": "18577fbdbd1e0051b7705fbd6774e8f93a3e74dbf26be11595035c1c7121b457",
+        "map_sha256": "f5a00a3b57ddcb85d1f03c096580f513660a8484e81bb3279d3bc05c318a286e",
+        "gt_sha256": "596cfd4655590d085e779fffcfb216914d2ac09b11e56faa8b0e39faafbb13d6"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "evidence_ablations": {
+        "baseline": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.10556760665220535,
+            "recall": 0.1806930693069307,
+            "f1": 0.13327247832040162,
+            "iou": 0.07139364303178485,
+            "static_preservation": 0.9681900880108519,
+            "true_positive": 584,
+            "false_positive": 4948,
+            "false_negative": 2648,
+            "true_negative": 150601
+          }
+        },
+        "see_through_2": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 2,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.0929091928251121,
+            "recall": 0.20513613861386137,
+            "f1": 0.1278935185185185,
+            "iou": 0.06831530139103555,
+            "static_preservation": 0.9583861034143581,
+            "true_positive": 663,
+            "false_positive": 6473,
+            "false_negative": 2569,
+            "true_negative": 149076
+          },
+          "additional_moving_removed": 79,
+          "additional_static_removed": 1525,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "range_margin_0_25": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.25,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.099863434619324,
+            "recall": 0.18100247524752475,
+            "f1": 0.12871287128712872,
+            "iou": 0.06878306878306878,
+            "static_preservation": 0.966100714244386,
+            "true_positive": 585,
+            "false_positive": 5273,
+            "false_negative": 2647,
+            "true_negative": 150276
+          },
+          "additional_moving_removed": 1,
+          "additional_static_removed": 325,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "resolution_half": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 1.25,
+              "v_res_deg": 1.25,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.10184164961435542,
+            "recall": 0.20018564356435645,
+            "f1": 0.13500260824204488,
+            "iou": 0.0723875587379727,
+            "static_preservation": 0.9633170255032176,
+            "true_positive": 647,
+            "false_positive": 5706,
+            "false_negative": 2585,
+            "true_negative": 149843
+          },
+          "additional_moving_removed": 100,
+          "additional_static_removed": 1297,
+          "lost_moving_removed": 37,
+          "recovered_static_points": 539
+        },
+        "resolution_double": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 5.0,
+              "v_res_deg": 5.0,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.15895953757225434,
+            "recall": 0.13613861386138615,
+            "f1": 0.14666666666666667,
+            "iou": 0.07913669064748201,
+            "static_preservation": 0.985033654989746,
+            "true_positive": 440,
+            "false_positive": 2328,
+            "false_negative": 2792,
+            "true_negative": 153221
+          },
+          "additional_moving_removed": 10,
+          "additional_static_removed": 233,
+          "lost_moving_removed": 154,
+          "recovered_static_points": 2853
+        },
+        "map_height_0_25": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.25,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.10522522522522522,
+            "recall": 0.1806930693069307,
+            "f1": 0.13299931678433158,
+            "iou": 0.07123688704562088,
+            "static_preservation": 0.9680743688484015,
+            "true_positive": 584,
+            "false_positive": 4966,
+            "false_negative": 2648,
+            "true_negative": 150583
+          },
+          "additional_moving_removed": 0,
+          "additional_static_removed": 18,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "ground_margin_0_1": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.1,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.1039272030651341,
+            "recall": 0.20142326732673269,
+            "f1": 0.13711036225779274,
+            "iou": 0.0736009044657999,
+            "static_preservation": 0.9639149078425447,
+            "true_positive": 651,
+            "false_positive": 5613,
+            "false_negative": 2581,
+            "true_negative": 149936
+          },
+          "additional_moving_removed": 78,
+          "additional_static_removed": 787,
+          "lost_moving_removed": 11,
+          "recovered_static_points": 122
+        }
+      },
+      "gt_dynamic_points": 3232,
+      "common_misses": 696,
+      "evidence_api_masks_equal": true,
+      "range": {
+        "insufficient_see_through": 681,
+        "surface_guard": 25,
+        "no_see_through_or_surface_evidence": 43,
+        "ground_guard": 0,
+        "see_through_quantiles": [
+          0.0,
+          1.0,
+          2.0,
+          2.0,
+          6.0
+        ],
+        "surface_quantiles": [
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          8.0
+        ]
+      },
+      "scan_ratio": {
+        "insufficient_revisits_for_floor": 114,
+        "adequate_revisits_below_threshold": 582,
+        "zero_dynamic_votes": 384,
+        "observed_point_scan_opportunities": {
+          "total": 4664,
+          "map_height_too_small": 11,
+          "query_map_height_ratio_too_large": 2734,
+          "ground_reverted": 1316,
+          "dynamic_votes": 603
+        },
+        "revisit_quantiles": [
+          1.0,
+          3.0,
+          7.0,
+          9.0,
+          12.0
+        ],
+        "dynamic_vote_quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          5.0
+        ]
+      },
+      "acquisition_distance_quantiles_m": [
+        6.73791103228616,
+        12.591485441088505,
+        14.162098254495405,
+        19.25860067678782,
+        52.81235012451213
+      ]
+    },
+    {
+      "scene": "scene-1077",
+      "input_hashes": {
+        "manifest_sha256": "5a2b461848554666b8ab2a83fe93cd617bf28814403f45b55c75184304d41b97",
+        "map_sha256": "67d16eb95cd305e32665780bb048b3f1405c1e41e0a7c17089b79efe0eeae5b4",
+        "gt_sha256": "0275a8a871ca522ad290a28b3c19133381c8a6b24068035fe2f88c4aeea9e091"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "evidence_ablations": {
+        "baseline": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.054187192118226604,
+            "recall": 0.0024352446313925173,
+            "f1": 0.004661016949152542,
+            "iou": 0.002335952431514122,
+            "static_preservation": 0.9987798445572805,
+            "true_positive": 11,
+            "false_positive": 192,
+            "false_negative": 4506,
+            "true_negative": 157165
+          }
+        },
+        "see_through_2": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 2,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.2198952879581152,
+            "recall": 0.027894620323223377,
+            "f1": 0.049508840864440073,
+            "iou": 0.025382755842062853,
+            "static_preservation": 0.9971593256099188,
+            "true_positive": 126,
+            "false_positive": 447,
+            "false_negative": 4391,
+            "true_negative": 156910
+          },
+          "additional_moving_removed": 115,
+          "additional_static_removed": 255,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "range_margin_0_25": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.25,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.06132075471698113,
+            "recall": 0.002878016382554793,
+            "f1": 0.005497991118629732,
+            "iou": 0.00275657336726039,
+            "static_preservation": 0.9987353597234314,
+            "true_positive": 13,
+            "false_positive": 199,
+            "false_negative": 4504,
+            "true_negative": 157158
+          },
+          "additional_moving_removed": 2,
+          "additional_static_removed": 7,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "resolution_half": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 1.25,
+              "v_res_deg": 1.25,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.07971014492753623,
+            "recall": 0.004870489262785035,
+            "f1": 0.00918005424577509,
+            "iou": 0.004611192622091804,
+            "static_preservation": 0.9983858360289024,
+            "true_positive": 22,
+            "false_positive": 254,
+            "false_negative": 4495,
+            "true_negative": 157103
+          },
+          "additional_moving_removed": 18,
+          "additional_static_removed": 221,
+          "lost_moving_removed": 7,
+          "recovered_static_points": 159
+        },
+        "resolution_double": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 5.0,
+              "v_res_deg": 5.0,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.25925925925925924,
+            "recall": 0.0015497011290679654,
+            "f1": 0.003080985915492957,
+            "iou": 0.0015428697377121445,
+            "static_preservation": 0.9998729004747168,
+            "true_positive": 7,
+            "false_positive": 20,
+            "false_negative": 4510,
+            "true_negative": 157337
+          },
+          "additional_moving_removed": 3,
+          "additional_static_removed": 12,
+          "lost_moving_removed": 7,
+          "recovered_static_points": 184
+        },
+        "map_height_0_25": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.25,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.054187192118226604,
+            "recall": 0.0024352446313925173,
+            "f1": 0.004661016949152542,
+            "iou": 0.002335952431514122,
+            "static_preservation": 0.9987798445572805,
+            "true_positive": 11,
+            "false_positive": 192,
+            "false_negative": 4506,
+            "true_negative": 157165
+          },
+          "additional_moving_removed": 0,
+          "additional_static_removed": 0,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "ground_margin_0_1": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.1,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.05392156862745098,
+            "recall": 0.0024352446313925173,
+            "f1": 0.004660029654734167,
+            "iou": 0.002335456475583864,
+            "static_preservation": 0.9987734895810164,
+            "true_positive": 11,
+            "false_positive": 193,
+            "false_negative": 4506,
+            "true_negative": 157164
+          },
+          "additional_moving_removed": 0,
+          "additional_static_removed": 1,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        }
+      },
+      "gt_dynamic_points": 4517,
+      "common_misses": 4181,
+      "evidence_api_masks_equal": true,
+      "range": {
+        "insufficient_see_through": 4181,
+        "surface_guard": 0,
+        "no_see_through_or_surface_evidence": 378,
+        "ground_guard": 0,
+        "see_through_quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          2.0
+        ],
+        "surface_quantiles": [
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          4.0
+        ]
+      },
+      "scan_ratio": {
+        "insufficient_revisits_for_floor": 2349,
+        "adequate_revisits_below_threshold": 1832,
+        "zero_dynamic_votes": 2860,
+        "observed_point_scan_opportunities": {
+          "total": 11111,
+          "map_height_too_small": 451,
+          "query_map_height_ratio_too_large": 7046,
+          "ground_reverted": 1970,
+          "dynamic_votes": 1644
+        },
+        "revisit_quantiles": [
+          1.0,
+          1.0,
+          2.0,
+          4.0,
+          8.0
+        ],
+        "dynamic_vote_quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          3.0
+        ]
+      },
+      "acquisition_distance_quantiles_m": [
+        8.894570289433416,
+        13.092015203773615,
+        15.749760442886146,
+        22.532953984664985,
+        76.56916582366874
+      ]
+    },
+    {
+      "scene": "scene-1094",
+      "input_hashes": {
+        "manifest_sha256": "36238296b59211fc46833d545f035f94d8c77f718ea984c50006c9b4691ca7ae",
+        "map_sha256": "c0641984f32a6f096473eafba59ffca3903a547aa668eff1d8f00e6f93bd66ac",
+        "gt_sha256": "d8c174ef6284b2b23fb25116fd81f0dd8f2084a73adf0d52d9542fdc7bd19062"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "evidence_ablations": {
+        "baseline": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.3008608971454463,
+            "recall": 0.08200568111646289,
+            "f1": 0.12888198757763977,
+            "iou": 0.06887966804979254,
+            "static_preservation": 0.990699833043017,
+            "true_positive": 664,
+            "false_positive": 1543,
+            "false_negative": 7433,
+            "true_negative": 164368
+          }
+        },
+        "see_through_2": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 2,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.2704562834565384,
+            "recall": 0.13103618624181795,
+            "f1": 0.17653910149750415,
+            "iou": 0.09681540286522493,
+            "static_preservation": 0.9827497875366914,
+            "true_positive": 1061,
+            "false_positive": 2862,
+            "false_negative": 7036,
+            "true_negative": 163049
+          },
+          "additional_moving_removed": 397,
+          "additional_static_removed": 1319,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "range_margin_0_25": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.25,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.27093397745571657,
+            "recall": 0.08311720390268,
+            "f1": 0.12720914847367923,
+            "iou": 0.06792490916431167,
+            "static_preservation": 0.989084509164552,
+            "true_positive": 673,
+            "false_positive": 1811,
+            "false_negative": 7424,
+            "true_negative": 164100
+          },
+          "additional_moving_removed": 9,
+          "additional_static_removed": 268,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "resolution_half": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 1.25,
+              "v_res_deg": 1.25,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.3382004735595896,
+            "recall": 0.10584166975422996,
+            "f1": 0.16122660144859374,
+            "iou": 0.08768160425618989,
+            "static_preservation": 0.9898921711037846,
+            "true_positive": 857,
+            "false_positive": 1677,
+            "false_negative": 7240,
+            "true_negative": 164234
+          },
+          "additional_moving_removed": 395,
+          "additional_static_removed": 695,
+          "lost_moving_removed": 202,
+          "recovered_static_points": 561
+        },
+        "resolution_double": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 5.0,
+              "v_res_deg": 5.0,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.4700493305144468,
+            "recall": 0.0823761887118686,
+            "f1": 0.1401849516603615,
+            "iou": 0.07537574867216634,
+            "static_preservation": 0.9954674494156506,
+            "true_positive": 667,
+            "false_positive": 752,
+            "false_negative": 7430,
+            "true_negative": 165159
+          },
+          "additional_moving_removed": 203,
+          "additional_static_removed": 206,
+          "lost_moving_removed": 200,
+          "recovered_static_points": 997
+        },
+        "map_height_0_25": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.25,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.3004524886877828,
+            "recall": 0.08200568111646289,
+            "f1": 0.128844474628893,
+            "iou": 0.06885823913719796,
+            "static_preservation": 0.9906817510593029,
+            "true_positive": 664,
+            "false_positive": 1546,
+            "false_negative": 7433,
+            "true_negative": 164365
+          },
+          "additional_moving_removed": 0,
+          "additional_static_removed": 3,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "ground_margin_0_1": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.1,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.2594171997157072,
+            "recall": 0.09015684821538841,
+            "f1": 0.1338099165979287,
+            "iou": 0.07170219035458207,
+            "static_preservation": 0.9874390486465635,
+            "true_positive": 730,
+            "false_positive": 2084,
+            "false_negative": 7367,
+            "true_negative": 163827
+          },
+          "additional_moving_removed": 79,
+          "additional_static_removed": 562,
+          "lost_moving_removed": 13,
+          "recovered_static_points": 21
+        }
+      },
+      "gt_dynamic_points": 8097,
+      "common_misses": 4968,
+      "evidence_api_masks_equal": true,
+      "range": {
+        "insufficient_see_through": 4968,
+        "surface_guard": 4,
+        "no_see_through_or_surface_evidence": 309,
+        "ground_guard": 0,
+        "see_through_quantiles": [
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          2.0
+        ],
+        "surface_quantiles": [
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          7.0
+        ]
+      },
+      "scan_ratio": {
+        "insufficient_revisits_for_floor": 2388,
+        "adequate_revisits_below_threshold": 2580,
+        "zero_dynamic_votes": 3742,
+        "observed_point_scan_opportunities": {
+          "total": 17781,
+          "map_height_too_small": 297,
+          "query_map_height_ratio_too_large": 10242,
+          "ground_reverted": 5084,
+          "dynamic_votes": 2158
+        },
+        "revisit_quantiles": [
+          1.0,
+          1.0,
+          3.0,
+          5.0,
+          12.0
+        ],
+        "dynamic_vote_quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          5.0
+        ]
+      },
+      "acquisition_distance_quantiles_m": [
+        2.1405245299911724,
+        3.1776969316788497,
+        9.262883859940604,
+        13.768009188530353,
+        91.3994176071424
+      ]
+    },
+    {
+      "scene": "scene-1100",
+      "input_hashes": {
+        "manifest_sha256": "81fc4151bbbd46a83c074f6af6322f5c44d8e0c26cb644014c3acba637e581d7",
+        "map_sha256": "737cca2b922905e681cddb5737ad2a55ebd388dc3f1cc6407e80c4e6f59fa87a",
+        "gt_sha256": "fda0b7429d577bf2c08c974a286a9abf3d436149d175217dc17923d6d496ce34"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "evidence_ablations": {
+        "baseline": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.6524122807017544,
+            "recall": 0.09782966129562644,
+            "f1": 0.1701458392908207,
+            "iou": 0.09298327863728707,
+            "static_preservation": 0.9977889685573195,
+            "true_positive": 595,
+            "false_positive": 317,
+            "false_negative": 5487,
+            "true_negative": 143055
+          }
+        },
+        "see_through_2": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 2,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.6095820591233435,
+            "recall": 0.09832292009207498,
+            "f1": 0.16933314455613763,
+            "iou": 0.09249806651198762,
+            "static_preservation": 0.9973286276260358,
+            "true_positive": 598,
+            "false_positive": 383,
+            "false_negative": 5484,
+            "true_negative": 142989
+          },
+          "additional_moving_removed": 3,
+          "additional_static_removed": 66,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "range_margin_0_25": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.25,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.6138211382113821,
+            "recall": 0.09930943768497205,
+            "f1": 0.17095952448344184,
+            "iou": 0.09346951408232745,
+            "static_preservation": 0.9973495522138214,
+            "true_positive": 604,
+            "false_positive": 380,
+            "false_negative": 5478,
+            "true_negative": 142992
+          },
+          "additional_moving_removed": 9,
+          "additional_static_removed": 63,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "resolution_half": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 1.25,
+              "v_res_deg": 1.25,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.5767676767676768,
+            "recall": 0.09388359092403814,
+            "f1": 0.1614819004524887,
+            "iou": 0.08783264113213352,
+            "static_preservation": 0.9970775325726083,
+            "true_positive": 571,
+            "false_positive": 419,
+            "false_negative": 5511,
+            "true_negative": 142953
+          },
+          "additional_moving_removed": 20,
+          "additional_static_removed": 154,
+          "lost_moving_removed": 44,
+          "recovered_static_points": 52
+        },
+        "resolution_double": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 5.0,
+              "v_res_deg": 5.0,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.6445859872611465,
+            "recall": 0.08319631700098652,
+            "f1": 0.14737148682102813,
+            "iou": 0.0795472409998428,
+            "static_preservation": 0.9980540133359372,
+            "true_positive": 506,
+            "false_positive": 279,
+            "false_negative": 5576,
+            "true_negative": 143093
+          },
+          "additional_moving_removed": 64,
+          "additional_static_removed": 50,
+          "lost_moving_removed": 153,
+          "recovered_static_points": 88
+        },
+        "map_height_0_25": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.25,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.6524122807017544,
+            "recall": 0.09782966129562644,
+            "f1": 0.1701458392908207,
+            "iou": 0.09298327863728707,
+            "static_preservation": 0.9977889685573195,
+            "true_positive": 595,
+            "false_positive": 317,
+            "false_negative": 5487,
+            "true_negative": 143055
+          },
+          "additional_moving_removed": 0,
+          "additional_static_removed": 0,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "ground_margin_0_1": {
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.1,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "metrics": {
+            "precision": 0.5839552238805971,
+            "recall": 0.10292666885892798,
+            "f1": 0.17500698909700865,
+            "iou": 0.09589460784313726,
+            "static_preservation": 0.9968892112825377,
+            "true_positive": 626,
+            "false_positive": 446,
+            "false_negative": 5456,
+            "true_negative": 142926
+          },
+          "additional_moving_removed": 31,
+          "additional_static_removed": 129,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        }
+      },
+      "gt_dynamic_points": 6082,
+      "common_misses": 4265,
+      "evidence_api_masks_equal": true,
+      "range": {
+        "insufficient_see_through": 4232,
+        "surface_guard": 111,
+        "no_see_through_or_surface_evidence": 272,
+        "ground_guard": 0,
+        "see_through_quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          5.0
+        ],
+        "surface_quantiles": [
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          12.0
+        ]
+      },
+      "scan_ratio": {
+        "insufficient_revisits_for_floor": 2607,
+        "adequate_revisits_below_threshold": 1658,
+        "zero_dynamic_votes": 3802,
+        "observed_point_scan_opportunities": {
+          "total": 13516,
+          "map_height_too_small": 227,
+          "query_map_height_ratio_too_large": 8808,
+          "ground_reverted": 3946,
+          "dynamic_votes": 535
+        },
+        "revisit_quantiles": [
+          0.0,
+          1.0,
+          2.0,
+          3.0,
+          12.0
+        ],
+        "dynamic_vote_quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          5.0
+        ]
+      },
+      "acquisition_distance_quantiles_m": [
+        3.406143362141486,
+        3.9440960332311166,
+        6.097997287154431,
+        7.045962410592369,
+        104.04594253617087
+      ]
+    }
+  ],
+  "av2_scene_result": {
+    "scene": "0b5142c1-420b-3fea-9e98-b87327ae22c6",
+    "input_hashes": {
+      "manifest_sha256": "36a8b5c4e86afcb9fd8735c64fa3063e46bce29eb6ec8d64b193ff915d6af81b",
+      "map_sha256": "5da31155fa7b54b564900e80084614a2144702ec05f61d10b306fbda9ecf5df0",
+      "gt_sha256": "549ec2c75f73d7aee951b935f689604a9ebb9d42f401a200bf4422f270942c1c"
+    },
+    "parameters": {
+      "range": {
+        "h_res_deg": 1.0,
+        "v_res_deg": 1.0,
+        "range_margin": 0.5,
+        "min_see_through": 3,
+        "max_surface_hits": 3,
+        "ground_z": -1.4,
+        "resolutions": null
+      },
+      "scan_ratio": {
+        "n_rings": 20,
+        "n_sectors": 108,
+        "max_range": 80.0,
+        "scan_ratio_threshold": 0.2,
+        "min_map_height": 0.5,
+        "ground_margin": 0.2,
+        "min_votes": null,
+        "votes_fraction": 0.5,
+        "votes_floor": 3
+      }
+    },
+    "evidence_ablations": {
+      "baseline": {
+        "parameters": {
+          "range": {
+            "h_res_deg": 1.0,
+            "v_res_deg": 1.0,
+            "range_margin": 0.5,
+            "min_see_through": 3,
+            "max_surface_hits": 3,
+            "ground_z": -1.4,
+            "resolutions": null
+          },
+          "scan_ratio": {
+            "n_rings": 20,
+            "n_sectors": 108,
+            "max_range": 80.0,
+            "scan_ratio_threshold": 0.2,
+            "min_map_height": 0.5,
+            "ground_margin": 0.2,
+            "min_votes": null,
+            "votes_fraction": 0.5,
+            "votes_floor": 3
+          }
+        },
+        "metrics": {
+          "precision": 0.9924292057945694,
+          "recall": 0.16139266730593932,
+          "f1": 0.2776352231997393,
+          "iou": 0.16119420632574638,
+          "static_preservation": 0.99990965100965,
+          "true_positive": 13633,
+          "false_positive": 104,
+          "false_negative": 70838,
+          "true_negative": 1150988
+        }
+      },
+      "see_through_2": {
+        "parameters": {
+          "range": {
+            "h_res_deg": 1.0,
+            "v_res_deg": 1.0,
+            "range_margin": 0.5,
+            "min_see_through": 2,
+            "max_surface_hits": 3,
+            "ground_z": -1.4,
+            "resolutions": null
+          },
+          "scan_ratio": {
+            "n_rings": 20,
+            "n_sectors": 108,
+            "max_range": 80.0,
+            "scan_ratio_threshold": 0.2,
+            "min_map_height": 0.5,
+            "ground_margin": 0.2,
+            "min_votes": null,
+            "votes_fraction": 0.5,
+            "votes_floor": 3
+          }
+        },
+        "metrics": {
+          "precision": 0.9908328595793064,
+          "recall": 0.16506256585100212,
+          "f1": 0.2829830632312797,
+          "iou": 0.16481087470449174,
+          "static_preservation": 0.9998879325023543,
+          "true_positive": 13943,
+          "false_positive": 129,
+          "false_negative": 70528,
+          "true_negative": 1150963
+        },
+        "additional_moving_removed": 310,
+        "additional_static_removed": 25,
+        "lost_moving_removed": 0,
+        "recovered_static_points": 0
+      },
+      "range_margin_0_25": {
+        "parameters": {
+          "range": {
+            "h_res_deg": 1.0,
+            "v_res_deg": 1.0,
+            "range_margin": 0.25,
+            "min_see_through": 3,
+            "max_surface_hits": 3,
+            "ground_z": -1.4,
+            "resolutions": null
+          },
+          "scan_ratio": {
+            "n_rings": 20,
+            "n_sectors": 108,
+            "max_range": 80.0,
+            "scan_ratio_threshold": 0.2,
+            "min_map_height": 0.5,
+            "ground_margin": 0.2,
+            "min_votes": null,
+            "votes_fraction": 0.5,
+            "votes_floor": 3
+          }
+        },
+        "metrics": {
+          "precision": 0.9919707505914402,
+          "recall": 0.1638076973162387,
+          "f1": 0.2811826864458443,
+          "iou": 0.16359079247602945,
+          "static_preservation": 0.9999027010873154,
+          "true_positive": 13837,
+          "false_positive": 112,
+          "false_negative": 70634,
+          "true_negative": 1150980
+        },
+        "additional_moving_removed": 204,
+        "additional_static_removed": 8,
+        "lost_moving_removed": 0,
+        "recovered_static_points": 0
+      },
+      "resolution_half": {
+        "parameters": {
+          "range": {
+            "h_res_deg": 0.5,
+            "v_res_deg": 0.5,
+            "range_margin": 0.5,
+            "min_see_through": 3,
+            "max_surface_hits": 3,
+            "ground_z": -1.4,
+            "resolutions": null
+          },
+          "scan_ratio": {
+            "n_rings": 20,
+            "n_sectors": 108,
+            "max_range": 80.0,
+            "scan_ratio_threshold": 0.2,
+            "min_map_height": 0.5,
+            "ground_margin": 0.2,
+            "min_votes": null,
+            "votes_fraction": 0.5,
+            "votes_floor": 3
+          }
+        },
+        "metrics": {
+          "precision": 0.9890490320757384,
+          "recall": 0.16572551526559412,
+          "f1": 0.28388339670468954,
+          "iou": 0.165421974334129,
+          "static_preservation": 0.9998653452547668,
+          "true_positive": 13999,
+          "false_positive": 155,
+          "false_negative": 70472,
+          "true_negative": 1150937
+        },
+        "additional_moving_removed": 660,
+        "additional_static_removed": 70,
+        "lost_moving_removed": 294,
+        "recovered_static_points": 19
+      },
+      "resolution_double": {
+        "parameters": {
+          "range": {
+            "h_res_deg": 2.0,
+            "v_res_deg": 2.0,
+            "range_margin": 0.5,
+            "min_see_through": 3,
+            "max_surface_hits": 3,
+            "ground_z": -1.4,
+            "resolutions": null
+          },
+          "scan_ratio": {
+            "n_rings": 20,
+            "n_sectors": 108,
+            "max_range": 80.0,
+            "scan_ratio_threshold": 0.2,
+            "min_map_height": 0.5,
+            "ground_margin": 0.2,
+            "min_votes": null,
+            "votes_fraction": 0.5,
+            "votes_floor": 3
+          }
+        },
+        "metrics": {
+          "precision": 0.9963038394810289,
+          "recall": 0.15636135478448224,
+          "f1": 0.27030124426981006,
+          "iou": 0.15627070515854236,
+          "static_preservation": 0.9999574317257005,
+          "true_positive": 13208,
+          "false_positive": 49,
+          "false_negative": 71263,
+          "true_negative": 1151043
+        },
+        "additional_moving_removed": 185,
+        "additional_static_removed": 6,
+        "lost_moving_removed": 610,
+        "recovered_static_points": 61
+      },
+      "map_height_0_25": {
+        "parameters": {
+          "range": {
+            "h_res_deg": 1.0,
+            "v_res_deg": 1.0,
+            "range_margin": 0.5,
+            "min_see_through": 3,
+            "max_surface_hits": 3,
+            "ground_z": -1.4,
+            "resolutions": null
+          },
+          "scan_ratio": {
+            "n_rings": 20,
+            "n_sectors": 108,
+            "max_range": 80.0,
+            "scan_ratio_threshold": 0.2,
+            "min_map_height": 0.25,
+            "ground_margin": 0.2,
+            "min_votes": null,
+            "votes_fraction": 0.5,
+            "votes_floor": 3
+          }
+        },
+        "metrics": {
+          "precision": 0.9924292057945694,
+          "recall": 0.16139266730593932,
+          "f1": 0.2776352231997393,
+          "iou": 0.16119420632574638,
+          "static_preservation": 0.99990965100965,
+          "true_positive": 13633,
+          "false_positive": 104,
+          "false_negative": 70838,
+          "true_negative": 1150988
+        },
+        "additional_moving_removed": 0,
+        "additional_static_removed": 0,
+        "lost_moving_removed": 0,
+        "recovered_static_points": 0
+      },
+      "ground_margin_0_1": {
+        "parameters": {
+          "range": {
+            "h_res_deg": 1.0,
+            "v_res_deg": 1.0,
+            "range_margin": 0.5,
+            "min_see_through": 3,
+            "max_surface_hits": 3,
+            "ground_z": -1.4,
+            "resolutions": null
+          },
+          "scan_ratio": {
+            "n_rings": 20,
+            "n_sectors": 108,
+            "max_range": 80.0,
+            "scan_ratio_threshold": 0.2,
+            "min_map_height": 0.5,
+            "ground_margin": 0.1,
+            "min_votes": null,
+            "votes_fraction": 0.5,
+            "votes_floor": 3
+          }
+        },
+        "metrics": {
+          "precision": 0.992143261608154,
+          "recall": 0.16593860614885583,
+          "f1": 0.2843233704195783,
+          "iou": 0.1657208389491854,
+          "static_preservation": 0.9999035698276072,
+          "true_positive": 14017,
+          "false_positive": 111,
+          "false_negative": 70454,
+          "true_negative": 1150981
+        },
+        "additional_moving_removed": 386,
+        "additional_static_removed": 7,
+        "lost_moving_removed": 2,
+        "recovered_static_points": 0
+      }
+    },
+    "gt_dynamic_points": 84471,
+    "common_misses": 37274,
+    "evidence_api_masks_equal": true,
+    "range": {
+      "insufficient_see_through": 25021,
+      "surface_guard": 14477,
+      "no_see_through_or_surface_evidence": 9291,
+      "ground_guard": 0,
+      "see_through_quantiles": [
+        0.0,
+        0.0,
+        1.0,
+        4.0,
+        8.0
+      ],
+      "surface_quantiles": [
+        0.0,
+        0.0,
+        2.0,
+        5.0,
+        11.0
+      ]
+    },
+    "scan_ratio": {
+      "insufficient_revisits_for_floor": 1092,
+      "adequate_revisits_below_threshold": 36182,
+      "zero_dynamic_votes": 15871,
+      "observed_point_scan_opportunities": {
+        "total": 404271,
+        "map_height_too_small": 691,
+        "query_map_height_ratio_too_large": 319532,
+        "ground_reverted": 33494,
+        "dynamic_votes": 50554
+      },
+      "revisit_quantiles": [
+        0.0,
+        11.0,
+        12.0,
+        12.0,
+        12.0
+      ],
+      "dynamic_vote_quantiles": [
+        0.0,
+        0.0,
+        1.0,
+        2.0,
+        5.0
+      ]
+    },
+    "acquisition_distance_quantiles_m": [
+      2.5600340429303787,
+      4.3691130539805325,
+      8.508783739001466,
+      19.059412402328075,
+      108.95253770244067
+    ]
+  },
+  "quantile_order": [
+    0,
+    0.25,
+    0.5,
+    0.75,
+    1
+  ],
+  "limitations": "Counts concern moving GT missed by both baseline channels. Range reason masks overlap and must not be summed. No see-through/surface evidence also includes occlusion, not just missing pixels. Scan-ratio height gate counts classify observed point-scan opportunities, not unique points. GT is moving-instance boxes, not per-point motion. No defaults changed.",
+  "evidence_ablation_summary": {
+    "included_scenes": [
+      "scene-0103",
+      "scene-0553",
+      "scene-0757",
+      "scene-0796",
+      "scene-1094",
+      "scene-1100"
+    ],
+    "min_gt_dynamic_points": 5000,
+    "nuscenes_mean": {
+      "baseline": {
+        "precision": 0.5865913815452704,
+        "recall": 0.20440047010671156,
+        "f1": 0.2924538271676158,
+        "static_preservation": 0.9947566244287048
+      },
+      "see_through_2": {
+        "precision": 0.5547903110793938,
+        "recall": 0.22265326117339723,
+        "f1": 0.30872382071491217,
+        "static_preservation": 0.9911463609829991
+      },
+      "range_margin_0_25": {
+        "precision": 0.5743075209756424,
+        "recall": 0.20691472950328574,
+        "f1": 0.29434939650152286,
+        "static_preservation": 0.9942746468632099
+      },
+      "resolution_half": {
+        "precision": 0.5551064205773826,
+        "recall": 0.16860532061273267,
+        "f1": 0.2539449366907014,
+        "static_preservation": 0.9952130731035337
+      },
+      "resolution_double": {
+        "precision": 0.572498864874501,
+        "recall": 0.17528265110781852,
+        "f1": 0.2572112272561313,
+        "static_preservation": 0.9965788660597398
+      },
+      "map_height_0_25": {
+        "precision": 0.5864533230392168,
+        "recall": 0.20440047010671156,
+        "f1": 0.29244273249394687,
+        "static_preservation": 0.9947513611152564
+      },
+      "ground_margin_0_1": {
+        "precision": 0.5756727652800225,
+        "recall": 0.21237455749496847,
+        "f1": 0.3010928145961739,
+        "static_preservation": 0.993800283747638
+      }
+    },
+    "av2": {
+      "baseline": {
+        "precision": 0.9924292057945694,
+        "recall": 0.16139266730593932,
+        "f1": 0.2776352231997393,
+        "iou": 0.16119420632574638,
+        "static_preservation": 0.99990965100965,
+        "true_positive": 13633,
+        "false_positive": 104,
+        "false_negative": 70838,
+        "true_negative": 1150988
+      },
+      "see_through_2": {
+        "precision": 0.9908328595793064,
+        "recall": 0.16506256585100212,
+        "f1": 0.2829830632312797,
+        "iou": 0.16481087470449174,
+        "static_preservation": 0.9998879325023543,
+        "true_positive": 13943,
+        "false_positive": 129,
+        "false_negative": 70528,
+        "true_negative": 1150963
+      },
+      "range_margin_0_25": {
+        "precision": 0.9919707505914402,
+        "recall": 0.1638076973162387,
+        "f1": 0.2811826864458443,
+        "iou": 0.16359079247602945,
+        "static_preservation": 0.9999027010873154,
+        "true_positive": 13837,
+        "false_positive": 112,
+        "false_negative": 70634,
+        "true_negative": 1150980
+      },
+      "resolution_half": {
+        "precision": 0.9890490320757384,
+        "recall": 0.16572551526559412,
+        "f1": 0.28388339670468954,
+        "iou": 0.165421974334129,
+        "static_preservation": 0.9998653452547668,
+        "true_positive": 13999,
+        "false_positive": 155,
+        "false_negative": 70472,
+        "true_negative": 1150937
+      },
+      "resolution_double": {
+        "precision": 0.9963038394810289,
+        "recall": 0.15636135478448224,
+        "f1": 0.27030124426981006,
+        "iou": 0.15627070515854236,
+        "static_preservation": 0.9999574317257005,
+        "true_positive": 13208,
+        "false_positive": 49,
+        "false_negative": 71263,
+        "true_negative": 1151043
+      },
+      "map_height_0_25": {
+        "precision": 0.9924292057945694,
+        "recall": 0.16139266730593932,
+        "f1": 0.2776352231997393,
+        "iou": 0.16119420632574638,
+        "static_preservation": 0.99990965100965,
+        "true_positive": 13633,
+        "false_positive": 104,
+        "false_negative": 70838,
+        "true_negative": 1150988
+      },
+      "ground_margin_0_1": {
+        "precision": 0.992143261608154,
+        "recall": 0.16593860614885583,
+        "f1": 0.2843233704195783,
+        "iou": 0.1657208389491854,
+        "static_preservation": 0.9999035698276072,
+        "true_positive": 14017,
+        "false_positive": 111,
+        "false_negative": 70454,
+        "true_negative": 1150981
+      }
+    },
+    "limitations": "Exploratory one-factor comparisons, not held-out validation. Baseline voting remains unchanged. One AV2 scene. Half/double resolution changes both angular dimensions together. Static preservation is a scene mean, not a per-scene guarantee."
+  },
+  "validation_date": "2026-10-08",
+  "source_base_commit": "3752bec"
+}

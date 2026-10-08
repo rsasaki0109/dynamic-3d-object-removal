@@ -69,6 +69,36 @@ For direct CLI use, `--scan-ratio-votes-floor 2` is already available; the
 validator now accepts the same explicit override and labels the resulting
 unprotected run `votes_floor_2` rather than `defaults`.
 
+### Cross-dataset check of the frozen vote-floor candidate
+
+[av2_votes_floor_2.json](av2_votes_floor_2.json) tests the nuScenes-selected
+vote floor 2 on the previously recorded real AV2 scene without retuning.
+The 12-sweep map, GT and manifest hashes exactly match the earlier AV2 record.
+Range settings stay at the AV2 reference's 1° resolution, 3 see-through scans,
+3 maximum surface confirmations and ground Z -1.4 m. Only the scan-ratio vote
+floor changes. Both runs have exact API/CLI masks, points and parameters.
+
+| AV2 configuration | Precision | Recall | F1 | Static kept | Moving GT removed |
+|---|---:|---:|---:|---:|---:|
+| Vote floor 3 | 0.992429 | 0.161393 | 0.277635 | 99.990965% | 13,633 |
+| Vote floor 2 | 0.992432 | 0.161452 | 0.277723 | 99.990965% | 13,638 |
+
+The candidate adds only five true positives and no false positives in this
+scene. The larger nuScenes recall gain therefore does not recur here. One
+previously benchmarked AV2 scene is not broad held-out validation; keep the
+candidate explicit and avoid a universal default change. API timings cover
+scan-ratio only; CLI timings cover both filters.
+
+```bash
+python scripts/validate_vote_floor.py \
+  --manifest output/cli_av2/manifest.json \
+  --baseline-summary examples/cli_validation/av2_12_sweeps.json \
+  --candidate-floor 2 --output output/cli_av2_votes_floor_2
+```
+
+The validator rejects changed input fingerprints, replays baseline metrics,
+and retains CLI commands, masks and summaries in a new output directory.
+
 ### Close-point selection follow-up
 
 The follow-up [nuscenes_devkit_selection.json](nuscenes_devkit_selection.json)

@@ -19,7 +19,9 @@ import dynamic_object_removal as core
 from scripts import run_nuscenes_benchmark as nuscenes
 
 
-def validate(manifest_path: Path, output: Path) -> dict:
+def validate(manifest_path: Path, output: Path, *, scan_ratio_votes_floor=core.DEFAULT_SR_VOTES_FLOOR) -> dict:
+    if not isinstance(scan_ratio_votes_floor, int) or scan_ratio_votes_floor < 1:
+        raise ValueError("scan_ratio_votes_floor must be a positive integer")
     manifest_path = manifest_path.resolve()
     manifest = json.loads(manifest_path.read_text())
     if manifest.get("dataset") != "nuscenes-mini":
@@ -39,12 +41,14 @@ def validate(manifest_path: Path, output: Path) -> dict:
     np.save(output / "map.npy", points)
     np.save(output / "gt.npy", gt)
     results = {}
-    for name, ground_z in (("defaults", None),
+    unprotected_name = ("defaults" if scan_ratio_votes_floor == core.DEFAULT_SR_VOTES_FLOOR
+                        else f"votes_floor_{scan_ratio_votes_floor}")
+    for name, ground_z in ((unprotected_name, None),
                            ("ground_protected", float(np.percentile(points[:, 2], 2)))):
         started = time.perf_counter()
         _, kr = core.clean_map_by_visibility(points, scans, h_res_deg=2.5,
                     v_res_deg=2.5, min_see_through=3, max_surface_hits=5, ground_z=ground_z)
-        _, ks = core.clean_map_by_scan_ratio(points, scans)
+        _, ks = core.clean_map_by_scan_ratio(points, scans, votes_floor=scan_ratio_votes_floor)
         keep = kr | ks
         api_seconds = time.perf_counter() - started
         target = output / name
@@ -56,6 +60,7 @@ def validate(manifest_path: Path, output: Path) -> dict:
                    "--output-cloud", str((target / "cleaned.npy").resolve()),
                    "--output-mask", str((target / "keep.npy").resolve()),
                    "--summary-json", str((target / "summary.json").resolve()), "--quiet"]
+        command += ["--scan-ratio-votes-floor", str(scan_ratio_votes_floor)]
         if ground_z is not None:
             command += ["--range-ground-z", repr(ground_z)]
         run = subprocess.run(command, cwd=ROOT, capture_output=True, text=True)
@@ -92,11 +97,14 @@ def main(argv=None):
     parser.add_argument("--frames", type=int, default=12)
     parser.add_argument("--stride", type=int, default=3)
     parser.add_argument("--min-distance", type=float, default=0.0)
+    parser.add_argument("--scan-ratio-votes-floor", type=int, default=core.DEFAULT_SR_VOTES_FLOOR)
     args = parser.parse_args(argv)
     if args.frames < 1 or args.stride < 1:
         parser.error("frames and stride must be positive")
     if not np.isfinite(args.min_distance) or args.min_distance < 0:
         parser.error("min-distance must be finite and nonnegative")
+    if args.scan_ratio_votes_floor < 1:
+        parser.error("scan-ratio-votes-floor must be positive")
     if args.output.exists() and any(args.output.iterdir()):
         parser.error("output must be new or empty")
     nuscenes._ensure_data(args.root)
@@ -111,15 +119,18 @@ def main(argv=None):
                     "--online-only", "--online-manifest", str(manifest)])
         if status:
             raise ValueError(f"manifest export failed: {scene}")
-        record = validate(manifest, args.output / scene / "validation")
+        record = validate(manifest, args.output / scene / "validation",
+                          scan_ratio_votes_floor=args.scan_ratio_votes_floor)
         records.append(record)
         print(f"{scene}: API/CLI masks and points match for both configurations", flush=True)
     eligible = [r for r in records if r["gt_dynamic_points"] >= nuscenes.MIN_GT_DYNAMIC_POINTS_FOR_MEAN]
+    methods = list(records[0]["results"])
     means = {name: {metric: float(np.mean([r["results"][name]["metrics"][metric] for r in eligible]))
                    if eligible else None for metric in nuscenes._METRIC_KEYS}
-             for name in ("defaults", "ground_protected")}
+             for name in methods}
     report = {"dataset": "nuscenes-mini", "frames_requested": args.frames,
               "min_distance": args.min_distance,
+              "scan_ratio_votes_floor": args.scan_ratio_votes_floor,
               "stride": args.stride, "scene_results": records,
               "aggregate": {"min_gt_dynamic_points": nuscenes.MIN_GT_DYNAMIC_POINTS_FOR_MEAN,
                             "included_scenes": [r["scene"] for r in eligible],

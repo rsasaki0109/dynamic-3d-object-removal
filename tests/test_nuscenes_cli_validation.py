@@ -22,7 +22,8 @@ def test_devkit_close_point_rule_rejects_invalid_distance(distance):
         _remove_close_points(np.zeros((1, 3)), distance)
 
 
-def test_sparse_validator_preserves_profile_and_matches_cli(tmp_path):
+@pytest.mark.parametrize("votes_floor", [2, 3])
+def test_sparse_validator_preserves_profile_and_matches_cli(tmp_path, votes_floor):
     cloud = np.array([[5., 0., 0.], [5., 0., 1.], [10., 0., 2.]])
     manifest = tmp_path / "manifest.json"
     _export_online_manifest(manifest, scene="scene-test", stride=3,
@@ -30,7 +31,7 @@ def test_sparse_validator_preserves_profile_and_matches_cli(tmp_path):
         gt_masks=[np.array([False, True, False])] * 3,
         poses=[(np.eye(3), np.zeros(3))] * 3, timestamps_sec=[0., 1.5, 3.])
     output = tmp_path / "results"
-    report = validate(manifest, output)
+    report = validate(manifest, output, scan_ratio_votes_floor=votes_floor)
     assert report["sensor_profile"]["deskewed"] is False
     assert report["gt_dynamic_points"] == 3
     assert report["map_points"] == 9
@@ -38,7 +39,9 @@ def test_sparse_validator_preserves_profile_and_matches_cli(tmp_path):
         assert result["api_cli_masks_equal"]
         assert result["api_cli_points_equal"]
         assert result["parameters"]["range"]["h_res_deg"] == 2.5
-    assert report["results"]["defaults"]["parameters"]["range"]["ground_z"] is None
+        assert result["parameters"]["scan_ratio"]["votes_floor"] == votes_floor
+    unprotected = "defaults" if votes_floor == 3 else "votes_floor_2"
+    assert report["results"][unprotected]["parameters"]["range"]["ground_z"] is None
     assert report["results"]["ground_protected"]["parameters"]["range"]["ground_z"] == 0
     assert json.loads((output / "validation.json").read_text()) == report
     with pytest.raises(ValueError, match="new or empty"):

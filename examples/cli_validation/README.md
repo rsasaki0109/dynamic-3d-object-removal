@@ -29,6 +29,48 @@ input hashes only. Use a new output directory when repeating it.
 
 ## Sparse-sensor error diagnosis
 
+### Recall diagnosis with devkit selection fixed
+
+[nuscenes_recall_analysis.json](nuscenes_recall_analysis.json) keeps the same
+devkit-selected input hashes and replays baseline metrics in all ten scenes.
+On the six eligible scenes, range alone recalls 50.35% of moving GT, while
+scan-ratio alone recalls 25.95%; their intersection recalls 20.44%.
+Across all scenes, 34,109 moving-GT points are marked dynamic by range but
+kept by scan-ratio, versus 4,250 with the opposite disagreement. Both methods
+miss another 28,530 moving-GT points.
+
+| Scan-ratio change (range fixed) | Precision | Recall | F1 | Static kept |
+|---|---:|---:|---:|---:|
+| Baseline | 0.5866 | 0.2044 | 0.2925 | 99.476% |
+| Height ratio threshold 0.3 | 0.5736 | 0.2260 | 0.3148 | 99.361% |
+| Height ratio threshold 0.4 | 0.5517 | 0.2478 | 0.3296 | 99.092% |
+| Revisit vote fraction 0.35 | 0.5607 | 0.2752 | 0.3420 | 99.283% |
+| Vote floor 2 | 0.6616 | 0.2492 | 0.3539 | 99.411% |
+| 216 sectors | 0.5337 | 0.1791 | 0.2619 | 99.436% |
+
+Vote floor 2 has the largest mean F1 among these one-factor experiments.
+[nuscenes_votes_floor_2.json](nuscenes_votes_floor_2.json) verifies its API/CLI
+point clouds and masks exactly in all ten scenes. It retains the same input
+hashes and moving GT. Static preservation is an average, not a per-scene
+guarantee: `scene-0916` falls from 96.82% to 96.71%, and two eligible scenes
+fall slightly below 99%. This is exploratory mini-scene tuning without a
+held-out dataset; production defaults remain at vote floor 3.
+
+```bash
+python scripts/analyze_nuscenes_recall.py \
+  --validation-root output/cli_nuscenes_devkit_selection \
+  --report-json output/cli_nuscenes_recall.json
+python scripts/validate_nuscenes_cli.py --scenes all --frames 12 --stride 3 \
+  --min-distance 1 --scan-ratio-votes-floor 2 \
+  --output output/cli_nuscenes_votes_floor_2
+```
+
+For direct CLI use, `--scan-ratio-votes-floor 2` is already available; the
+validator now accepts the same explicit override and labels the resulting
+unprotected run `votes_floor_2` rather than `defaults`.
+
+### Close-point selection follow-up
+
 The follow-up [nuscenes_devkit_selection.json](nuscenes_devkit_selection.json)
 uses the official nuScenes devkit multisweep close-point rule before pose
 alignment: discard points where **both** `abs(sensor_x) < 1 m` and

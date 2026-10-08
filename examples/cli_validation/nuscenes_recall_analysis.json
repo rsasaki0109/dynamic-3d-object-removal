@@ -1,0 +1,1468 @@
+{
+  "dataset": "nuscenes-mini",
+  "min_distance": 1.0,
+  "scene_results": [
+    {
+      "scene": "scene-0061",
+      "map_points": 177795,
+      "gt_dynamic_points": 3564,
+      "preprocessing": {
+        "ground_z_sensor": -1.6,
+        "min_distance": 1.0,
+        "close_point_rule": "abs(sensor_x)<min_distance AND abs(sensor_y)<min_distance"
+      },
+      "manifest_sha256": "1998e84d0bd8e4f45997c8605b1d2be98db2bc0d5cf51d58b3ff1b317cdde779",
+      "map_sha256": "e4df94113846adb08ca7eddb51498f8278459e5548f0f446fe4066ed44587994",
+      "gt_sha256": "01c0bd54a9fddfe8d204e6584e5c404ef8f538e83cf91bb0c6763ad9761afb65",
+      "gt_decisions": {
+        "both_dynamic": 380,
+        "range_dynamic_only": 348,
+        "scan_ratio_dynamic_only": 776,
+        "neither_dynamic": 2060
+      },
+      "channels": {
+        "range_only": {
+          "precision": 0.18782249742002063,
+          "recall": 0.20426487093153758,
+          "f1": 0.19569892473118278,
+          "iou": 0.10846245530393325,
+          "static_preservation": 0.9819320327611045,
+          "true_positive": 728,
+          "false_positive": 3148,
+          "false_negative": 2836,
+          "true_negative": 171083
+        },
+        "scan_ratio_only": {
+          "precision": 0.09317320867252357,
+          "recall": 0.32435465768799104,
+          "f1": 0.14476238181704337,
+          "iou": 0.07802902463719204,
+          "static_preservation": 0.9354248095918637,
+          "true_positive": 1156,
+          "false_positive": 11251,
+          "false_negative": 2408,
+          "true_negative": 162980
+        }
+      },
+      "variants": {
+        "baseline": {
+          "scan_ratio_parameters": {},
+          "metrics": {
+            "precision": 0.2289156626506024,
+            "recall": 0.10662177328843996,
+            "f1": 0.14548238897396631,
+            "iou": 0.07844756399669695,
+            "static_preservation": 0.9926534313641086,
+            "true_positive": 380,
+            "false_positive": 1280,
+            "false_negative": 3184,
+            "true_negative": 172951
+          }
+        },
+        "ratio_0_3": {
+          "scan_ratio_parameters": {
+            "scan_ratio_threshold": 0.3
+          },
+          "metrics": {
+            "precision": 0.22134831460674156,
+            "recall": 0.11054994388327721,
+            "f1": 0.1474550898203593,
+            "iou": 0.0795959595959596,
+            "static_preservation": 0.9920450436489489,
+            "true_positive": 394,
+            "false_positive": 1386,
+            "false_negative": 3170,
+            "true_negative": 172845
+          }
+        },
+        "ratio_0_4": {
+          "scan_ratio_parameters": {
+            "scan_ratio_threshold": 0.4
+          },
+          "metrics": {
+            "precision": 0.21515768056968465,
+            "recall": 0.11868686868686869,
+            "f1": 0.15298372513562386,
+            "iou": 0.0828274916780889,
+            "static_preservation": 0.9911439410897027,
+            "true_positive": 423,
+            "false_positive": 1543,
+            "false_negative": 3141,
+            "true_negative": 172688
+          }
+        },
+        "votes_fraction_0_35": {
+          "scan_ratio_parameters": {
+            "votes_fraction": 0.35
+          },
+          "metrics": {
+            "precision": 0.21508828250401285,
+            "recall": 0.1127946127946128,
+            "f1": 0.14798453892876864,
+            "iou": 0.07990459153249851,
+            "static_preservation": 0.9915801436024588,
+            "true_positive": 402,
+            "false_positive": 1467,
+            "false_negative": 3162,
+            "true_negative": 172764
+          }
+        },
+        "votes_floor_2": {
+          "scan_ratio_parameters": {
+            "votes_floor": 2
+          },
+          "metrics": {
+            "precision": 0.23806970509383377,
+            "recall": 0.12457912457912458,
+            "f1": 0.1635660342604531,
+            "iou": 0.08906720160481445,
+            "static_preservation": 0.9918441609128111,
+            "true_positive": 444,
+            "false_positive": 1421,
+            "false_negative": 3120,
+            "true_negative": 172810
+          }
+        },
+        "sectors_216": {
+          "scan_ratio_parameters": {
+            "n_sectors": 216
+          },
+          "metrics": {
+            "precision": 0.24609375,
+            "recall": 0.10606060606060606,
+            "f1": 0.14823529411764705,
+            "iou": 0.08005082592121983,
+            "static_preservation": 0.993353651187217,
+            "true_positive": 378,
+            "false_positive": 1158,
+            "false_negative": 3186,
+            "true_negative": 173073
+          }
+        }
+      }
+    },
+    {
+      "scene": "scene-0103",
+      "map_points": 144996,
+      "gt_dynamic_points": 5248,
+      "preprocessing": {
+        "ground_z_sensor": -1.6,
+        "min_distance": 1.0,
+        "close_point_rule": "abs(sensor_x)<min_distance AND abs(sensor_y)<min_distance"
+      },
+      "manifest_sha256": "b7e15863d6cda5586959952b62270072dbd76ac3c942bf20682dc166eaced916",
+      "map_sha256": "d9eaf67c4fad6b71c7f215562fc075c987b02136ffcf4a713d2e1d33d024908a",
+      "gt_sha256": "69d20b7b9ff7c8901ea73c20b5ed6e31649f0a2191237d38aaf760e03f3c691e",
+      "gt_decisions": {
+        "both_dynamic": 591,
+        "range_dynamic_only": 2711,
+        "scan_ratio_dynamic_only": 347,
+        "neither_dynamic": 1599
+      },
+      "channels": {
+        "range_only": {
+          "precision": 0.2538828233123174,
+          "recall": 0.6291920731707317,
+          "f1": 0.36178371863701103,
+          "iou": 0.22084002140181916,
+          "static_preservation": 0.930560723588173,
+          "true_positive": 3302,
+          "false_positive": 9704,
+          "false_negative": 1946,
+          "true_negative": 130044
+        },
+        "scan_ratio_only": {
+          "precision": 0.11981095925405544,
+          "recall": 0.17873475609756098,
+          "f1": 0.14345797965894316,
+          "iou": 0.07727160392124557,
+          "static_preservation": 0.9506898130921373,
+          "true_positive": 938,
+          "false_positive": 6891,
+          "false_negative": 4310,
+          "true_negative": 132857
+        }
+      },
+      "variants": {
+        "baseline": {
+          "scan_ratio_parameters": {},
+          "metrics": {
+            "precision": 0.30717255717255715,
+            "recall": 0.11261432926829268,
+            "f1": 0.16480758505298382,
+            "iou": 0.08980398115787874,
+            "static_preservation": 0.9904614019520852,
+            "true_positive": 591,
+            "false_positive": 1333,
+            "false_negative": 4657,
+            "true_negative": 138415
+          }
+        },
+        "ratio_0_3": {
+          "scan_ratio_parameters": {
+            "scan_ratio_threshold": 0.3
+          },
+          "metrics": {
+            "precision": 0.3598130841121495,
+            "recall": 0.1760670731707317,
+            "f1": 0.23643807574206757,
+            "iou": 0.13406848520023215,
+            "static_preservation": 0.9882359675988207,
+            "true_positive": 924,
+            "false_positive": 1644,
+            "false_negative": 4324,
+            "true_negative": 138104
+          }
+        },
+        "ratio_0_4": {
+          "scan_ratio_parameters": {
+            "scan_ratio_threshold": 0.4
+          },
+          "metrics": {
+            "precision": 0.34538558786346396,
+            "recall": 0.2602896341463415,
+            "f1": 0.2968597196566337,
+            "iou": 0.174301390838331,
+            "static_preservation": 0.9814737956893838,
+            "true_positive": 1366,
+            "false_positive": 2589,
+            "false_negative": 3882,
+            "true_negative": 137159
+          }
+        },
+        "votes_fraction_0_35": {
+          "scan_ratio_parameters": {
+            "votes_fraction": 0.35
+          },
+          "metrics": {
+            "precision": 0.25718608169440244,
+            "recall": 0.12957317073170732,
+            "f1": 0.17232640648758238,
+            "iou": 0.09428729894620078,
+            "static_preservation": 0.9859461316083236,
+            "true_positive": 680,
+            "false_positive": 1964,
+            "false_negative": 4568,
+            "true_negative": 137784
+          }
+        },
+        "votes_floor_2": {
+          "scan_ratio_parameters": {
+            "votes_floor": 2
+          },
+          "metrics": {
+            "precision": 0.37333333333333335,
+            "recall": 0.1600609756097561,
+            "f1": 0.22405974926647104,
+            "iou": 0.12616401321718235,
+            "static_preservation": 0.9899104101668718,
+            "true_positive": 840,
+            "false_positive": 1410,
+            "false_negative": 4408,
+            "true_negative": 138338
+          }
+        },
+        "sectors_216": {
+          "scan_ratio_parameters": {
+            "n_sectors": 216
+          },
+          "metrics": {
+            "precision": 0.27473631341034654,
+            "recall": 0.10423018292682927,
+            "f1": 0.15112584611134133,
+            "iou": 0.08173939031679617,
+            "static_preservation": 0.9896671150928815,
+            "true_positive": 547,
+            "false_positive": 1444,
+            "false_negative": 4701,
+            "true_negative": 138304
+          }
+        }
+      }
+    },
+    {
+      "scene": "scene-0553",
+      "map_points": 172112,
+      "gt_dynamic_points": 5774,
+      "preprocessing": {
+        "ground_z_sensor": -1.6,
+        "min_distance": 1.0,
+        "close_point_rule": "abs(sensor_x)<min_distance AND abs(sensor_y)<min_distance"
+      },
+      "manifest_sha256": "6d297da7a9b4b40e95192f65e1d5031b10e193d275cfb298474ca79ff60170ce",
+      "map_sha256": "6366998699c68e0b35b27e92909de3098ef7c7a3653edf5adb6c4ba9ab438b81",
+      "gt_sha256": "8f9f17f1b9950738e64754c75e8051090705ec2f6eb76d7cb62ca6a49d01b072",
+      "gt_decisions": {
+        "both_dynamic": 2251,
+        "range_dynamic_only": 781,
+        "scan_ratio_dynamic_only": 419,
+        "neither_dynamic": 2323
+      },
+      "channels": {
+        "range_only": {
+          "precision": 0.901307966706302,
+          "recall": 0.5251125736058192,
+          "f1": 0.6636025388487634,
+          "iou": 0.4965607599082869,
+          "static_preservation": 0.998004064014236,
+          "true_positive": 3032,
+          "false_positive": 332,
+          "false_negative": 2742,
+          "true_negative": 166006
+        },
+        "scan_ratio_only": {
+          "precision": 0.9245152354570637,
+          "recall": 0.4624177346726706,
+          "f1": 0.6164858000461787,
+          "iou": 0.44559412550066757,
+          "static_preservation": 0.9986894155274201,
+          "true_positive": 2670,
+          "false_positive": 218,
+          "false_negative": 3104,
+          "true_negative": 166120
+        }
+      },
+      "variants": {
+        "baseline": {
+          "scan_ratio_parameters": {},
+          "metrics": {
+            "precision": 0.9964586100044267,
+            "recall": 0.3898510564599931,
+            "f1": 0.5604381924561185,
+            "iou": 0.3893116568661363,
+            "static_preservation": 0.9999519051569695,
+            "true_positive": 2251,
+            "false_positive": 8,
+            "false_negative": 3523,
+            "true_negative": 166330
+          }
+        },
+        "ratio_0_3": {
+          "scan_ratio_parameters": {
+            "scan_ratio_threshold": 0.3
+          },
+          "metrics": {
+            "precision": 0.9965397923875432,
+            "recall": 0.39903013508832696,
+            "f1": 0.5698738560474894,
+            "iou": 0.3984780352819094,
+            "static_preservation": 0.9999519051569695,
+            "true_positive": 2304,
+            "false_positive": 8,
+            "false_negative": 3470,
+            "true_negative": 166330
+          }
+        },
+        "ratio_0_4": {
+          "scan_ratio_parameters": {
+            "scan_ratio_threshold": 0.4
+          },
+          "metrics": {
+            "precision": 0.9892933618843683,
+            "recall": 0.4000692760651195,
+            "f1": 0.5697373288938217,
+            "iou": 0.3983445421624418,
+            "static_preservation": 0.9998497036155298,
+            "true_positive": 2310,
+            "false_positive": 25,
+            "false_negative": 3464,
+            "true_negative": 166313
+          }
+        },
+        "votes_fraction_0_35": {
+          "scan_ratio_parameters": {
+            "votes_fraction": 0.35
+          },
+          "metrics": {
+            "precision": 0.9965457685664939,
+            "recall": 0.399722895739522,
+            "f1": 0.5705809641532756,
+            "iou": 0.39916983742649603,
+            "static_preservation": 0.9999519051569695,
+            "true_positive": 2308,
+            "false_positive": 8,
+            "false_negative": 3466,
+            "true_negative": 166330
+          }
+        },
+        "votes_floor_2": {
+          "scan_ratio_parameters": {
+            "votes_floor": 2
+          },
+          "metrics": {
+            "precision": 0.996474217717056,
+            "recall": 0.3915829580879806,
+            "f1": 0.5622280243690165,
+            "iou": 0.3910411622276029,
+            "static_preservation": 0.9999519051569695,
+            "true_positive": 2261,
+            "false_positive": 8,
+            "false_negative": 3513,
+            "true_negative": 166330
+          }
+        },
+        "sectors_216": {
+          "scan_ratio_parameters": {
+            "n_sectors": 216
+          },
+          "metrics": {
+            "precision": 0.9942016057091883,
+            "recall": 0.3860408728784205,
+            "f1": 0.5561377245508982,
+            "iou": 0.38517366511145673,
+            "static_preservation": 0.9999218458800755,
+            "true_positive": 2229,
+            "false_positive": 13,
+            "false_negative": 3545,
+            "true_negative": 166325
+          }
+        }
+      }
+    },
+    {
+      "scene": "scene-0655",
+      "map_points": 162772,
+      "gt_dynamic_points": 2662,
+      "preprocessing": {
+        "ground_z_sensor": -1.6,
+        "min_distance": 1.0,
+        "close_point_rule": "abs(sensor_x)<min_distance AND abs(sensor_y)<min_distance"
+      },
+      "manifest_sha256": "691189899335bbc5e06da2811fe980689b9abb3162fdad21b5d66908cd213324",
+      "map_sha256": "1ebf32cb787af21232dc4645ca8b5c11c69775e762f85c36b5475fd004452ac3",
+      "gt_sha256": "5039a158cf5de9c539794649be7be54dd1ff58cd773f7dffa4a589703b1a8e45",
+      "gt_decisions": {
+        "both_dynamic": 38,
+        "range_dynamic_only": 2363,
+        "scan_ratio_dynamic_only": 5,
+        "neither_dynamic": 256
+      },
+      "channels": {
+        "range_only": {
+          "precision": 0.23180150608225525,
+          "recall": 0.9019534184823441,
+          "f1": 0.3688172043010753,
+          "iou": 0.22610415293342123,
+          "static_preservation": 0.950302916744738,
+          "true_positive": 2401,
+          "false_positive": 7957,
+          "false_negative": 261,
+          "true_negative": 152153
+        },
+        "scan_ratio_only": {
+          "precision": 0.0073756432246998285,
+          "recall": 0.016153268219383923,
+          "f1": 0.010127178520960903,
+          "iou": 0.0050893596875369864,
+          "static_preservation": 0.9638560989319842,
+          "true_positive": 43,
+          "false_positive": 5787,
+          "false_negative": 2619,
+          "true_negative": 154323
+        }
+      },
+      "variants": {
+        "baseline": {
+          "scan_ratio_parameters": {},
+          "metrics": {
+            "precision": 0.05241379310344828,
+            "recall": 0.014274981217129978,
+            "f1": 0.02243873634484795,
+            "iou": 0.011346670647954613,
+            "static_preservation": 0.9957091999250516,
+            "true_positive": 38,
+            "false_positive": 687,
+            "false_negative": 2624,
+            "true_negative": 159423
+          }
+        },
+        "ratio_0_3": {
+          "scan_ratio_parameters": {
+            "scan_ratio_threshold": 0.3
+          },
+          "metrics": {
+            "precision": 0.0365296803652968,
+            "recall": 0.015026296018031555,
+            "f1": 0.021293585307426137,
+            "iou": 0.010761366693570083,
+            "static_preservation": 0.993410780088689,
+            "true_positive": 40,
+            "false_positive": 1055,
+            "false_negative": 2622,
+            "true_negative": 159055
+          }
+        },
+        "ratio_0_4": {
+          "scan_ratio_parameters": {
+            "scan_ratio_threshold": 0.4
+          },
+          "metrics": {
+            "precision": 0.01716001716001716,
+            "recall": 0.015026296018031555,
+            "f1": 0.016022431403965552,
+            "iou": 0.00807591358772461,
+            "static_preservation": 0.985691087377428,
+            "true_positive": 40,
+            "false_positive": 2291,
+            "false_negative": 2622,
+            "true_negative": 157819
+          }
+        },
+        "votes_fraction_0_35": {
+          "scan_ratio_parameters": {
+            "votes_fraction": 0.35
+          },
+          "metrics": {
+            "precision": 0.028210838901262063,
+            "recall": 0.014274981217129978,
+            "f1": 0.018957345971563982,
+            "iou": 0.009569377990430622,
+            "static_preservation": 0.9918243707451128,
+            "true_positive": 38,
+            "false_positive": 1309,
+            "false_negative": 2624,
+            "true_negative": 158801
+          }
+        },
+        "votes_floor_2": {
+          "scan_ratio_parameters": {
+            "votes_floor": 2
+          },
+          "metrics": {
+            "precision": 0.5277777777777778,
+            "recall": 0.34259954921111946,
+            "f1": 0.41548974943052397,
+            "iou": 0.2622196664749856,
+            "static_preservation": 0.9949035038411093,
+            "true_positive": 912,
+            "false_positive": 816,
+            "false_negative": 1750,
+            "true_negative": 159294
+          }
+        },
+        "sectors_216": {
+          "scan_ratio_parameters": {
+            "n_sectors": 216
+          },
+          "metrics": {
+            "precision": 0.049163179916317995,
+            "recall": 0.017655897821187077,
+            "f1": 0.025981205085682697,
+            "iou": 0.013161579389526744,
+            "static_preservation": 0.9943226531759416,
+            "true_positive": 47,
+            "false_positive": 909,
+            "false_negative": 2615,
+            "true_negative": 159201
+          }
+        }
+      }
+    },
+    {
+      "scene": "scene-0757",
+      "map_points": 197381,
+      "gt_dynamic_points": 48529,
+      "preprocessing": {
+        "ground_z_sensor": -1.6,
+        "min_distance": 1.0,
+        "close_point_rule": "abs(sensor_x)<min_distance AND abs(sensor_y)<min_distance"
+      },
+      "manifest_sha256": "c8710ebbc75718e96a9b9d3013c006d2adbe6cfcae2ab68cbd62cafddb0644c2",
+      "map_sha256": "326d1fe2e64915713416e6d13dd3e5150fdcb69cb64f70596718bb18a0530455",
+      "gt_sha256": "98f709118402b707494f6b55ec989a27a1f5c59e2f50c606b97e8aa6f7b1a91e",
+      "gt_decisions": {
+        "both_dynamic": 24679,
+        "range_dynamic_only": 20013,
+        "scan_ratio_dynamic_only": 933,
+        "neither_dynamic": 2904
+      },
+      "channels": {
+        "range_only": {
+          "precision": 0.8994887895986797,
+          "recall": 0.9209338745904511,
+          "f1": 0.9100850175635087,
+          "iou": 0.8350055116491976,
+          "static_preservation": 0.9664498965415312,
+          "true_positive": 44692,
+          "false_positive": 4994,
+          "false_negative": 3837,
+          "true_negative": 143858
+        },
+        "scan_ratio_only": {
+          "precision": 0.8242790937178167,
+          "recall": 0.5277669022646253,
+          "f1": 0.6435095036494517,
+          "iou": 0.4743929318935339,
+          "static_preservation": 0.963319270147529,
+          "true_positive": 25612,
+          "false_positive": 5460,
+          "false_negative": 22917,
+          "true_negative": 143392
+        }
+      },
+      "variants": {
+        "baseline": {
+          "scan_ratio_parameters": {},
+          "metrics": {
+            "precision": 0.9689438555162937,
+            "recall": 0.5085412845927177,
+            "f1": 0.6670090136353194,
+            "iou": 0.5003852392538524,
+            "static_preservation": 0.9946859968290651,
+            "true_positive": 24679,
+            "false_positive": 791,
+            "false_negative": 23850,
+            "true_negative": 148061
+          }
+        },
+        "ratio_0_3": {
+          "scan_ratio_parameters": {
+            "scan_ratio_threshold": 0.3
+          },
+          "metrics": {
+            "precision": 0.9688063270185764,
+            "recall": 0.5427064229635887,
+            "f1": 0.6956969648942072,
+            "iou": 0.5333859894282763,
+            "static_preservation": 0.9943030661328031,
+            "true_positive": 26337,
+            "false_positive": 848,
+            "false_negative": 22192,
+            "true_negative": 148004
+          }
+        },
+        "ratio_0_4": {
+          "scan_ratio_parameters": {
+            "scan_ratio_threshold": 0.4
+          },
+          "metrics": {
+            "precision": 0.9674310170847976,
+            "recall": 0.5729151641286654,
+            "f1": 0.7196510845369365,
+            "iou": 0.5620741938744567,
+            "static_preservation": 0.9937118748824335,
+            "true_positive": 27803,
+            "false_positive": 936,
+            "false_negative": 20726,
+            "true_negative": 147916
+          }
+        },
+        "votes_fraction_0_35": {
+          "scan_ratio_parameters": {
+            "votes_fraction": 0.35
+          },
+          "metrics": {
+            "precision": 0.9794068066882318,
+            "recall": 0.8859444868017062,
+            "f1": 0.9303342097006285,
+            "iou": 0.8697428843080534,
+            "static_preservation": 0.9939268535189315,
+            "true_positive": 42994,
+            "false_positive": 904,
+            "false_negative": 5535,
+            "true_negative": 147948
+          }
+        },
+        "votes_floor_2": {
+          "scan_ratio_parameters": {
+            "votes_floor": 2
+          },
+          "metrics": {
+            "precision": 0.9691460909337571,
+            "recall": 0.515217704877496,
+            "f1": 0.6727747282316221,
+            "iou": 0.5069031931069438,
+            "static_preservation": 0.9946524064171123,
+            "true_positive": 25003,
+            "false_positive": 796,
+            "false_negative": 23526,
+            "true_negative": 148056
+          }
+        },
+        "sectors_216": {
+          "scan_ratio_parameters": {
+            "n_sectors": 216
+          },
+          "metrics": {
+            "precision": 0.9558648300843621,
+            "recall": 0.41325805188650083,
+            "f1": 0.5770392749244713,
+            "iou": 0.40552016985138006,
+            "static_preservation": 0.9937790557063392,
+            "true_positive": 20055,
+            "false_positive": 926,
+            "false_negative": 28474,
+            "true_negative": 147926
+          }
+        }
+      }
+    },
+    {
+      "scene": "scene-0796",
+      "map_points": 166983,
+      "gt_dynamic_points": 9308,
+      "preprocessing": {
+        "ground_z_sensor": -1.6,
+        "min_distance": 1.0,
+        "close_point_rule": "abs(sensor_x)<min_distance AND abs(sensor_y)<min_distance"
+      },
+      "manifest_sha256": "7f6d7b89f180d94596ff6ffd48d1fdec529b32885d898283b4f4e0bd18f5b8f2",
+      "map_sha256": "8654ed2309ac4e2eec80d8811c32e2b55ef3572651b0a82e85e6f34d3cc04a7b",
+      "gt_sha256": "a76a7c37e244f5302ed878dc0846d2390b212bd2513f8b6ad93720e3e476fe23",
+      "gt_decisions": {
+        "both_dynamic": 331,
+        "range_dynamic_only": 3372,
+        "scan_ratio_dynamic_only": 327,
+        "neither_dynamic": 5278
+      },
+      "channels": {
+        "range_only": {
+          "precision": 0.5226534932956951,
+          "recall": 0.39782982380747745,
+          "f1": 0.4517781980113463,
+          "iou": 0.29180457052797476,
+          "static_preservation": 0.9785508165530363,
+          "true_positive": 3703,
+          "false_positive": 3382,
+          "false_negative": 5605,
+          "true_negative": 154293
+        },
+        "scan_ratio_only": {
+          "precision": 0.049159506910720956,
+          "recall": 0.07069187795444778,
+          "f1": 0.057991451108271266,
+          "iou": 0.02986158384388473,
+          "static_preservation": 0.9192833359758998,
+          "true_positive": 658,
+          "false_positive": 12727,
+          "false_negative": 8650,
+          "true_negative": 144948
+        }
+      },
+      "variants": {
+        "baseline": {
+          "scan_ratio_parameters": {},
+          "metrics": {
+            "precision": 0.2937000887311446,
+            "recall": 0.035560807907176625,
+            "f1": 0.06344034499281266,
+            "iou": 0.032759303246239116,
+            "static_preservation": 0.994951641033772,
+            "true_positive": 331,
+            "false_positive": 796,
+            "false_negative": 8977,
+            "true_negative": 156879
+          }
+        },
+        "ratio_0_3": {
+          "scan_ratio_parameters": {
+            "scan_ratio_threshold": 0.3
+          },
+          "metrics": {
+            "precision": 0.28417818740399386,
+            "recall": 0.03975075204125483,
+            "f1": 0.06974552309142319,
+            "iou": 0.0361328125,
+            "static_preservation": 0.9940891073410496,
+            "true_positive": 370,
+            "false_positive": 932,
+            "false_negative": 8938,
+            "true_negative": 156743
+          }
+        },
+        "ratio_0_4": {
+          "scan_ratio_parameters": {
+            "scan_ratio_threshold": 0.4
+          },
+          "metrics": {
+            "precision": 0.2585627938213566,
+            "recall": 0.0413622690159003,
+            "f1": 0.07131610632583125,
+            "iou": 0.0369765655013446,
+            "static_preservation": 0.992998255906136,
+            "true_positive": 385,
+            "false_positive": 1104,
+            "false_negative": 8923,
+            "true_negative": 156571
+          }
+        },
+        "votes_fraction_0_35": {
+          "scan_ratio_parameters": {
+            "votes_fraction": 0.35
+          },
+          "metrics": {
+            "precision": 0.27860696517412936,
+            "recall": 0.036097980232058444,
+            "f1": 0.06391478029294273,
+            "iou": 0.033012379642365884,
+            "static_preservation": 0.9944823212303789,
+            "true_positive": 336,
+            "false_positive": 870,
+            "false_negative": 8972,
+            "true_negative": 156805
+          }
+        },
+        "votes_floor_2": {
+          "scan_ratio_parameters": {
+            "votes_floor": 2
+          },
+          "metrics": {
+            "precision": 0.6504493337465138,
+            "recall": 0.22550494198538892,
+            "f1": 0.3349022736338253,
+            "iou": 0.20113070141816788,
+            "static_preservation": 0.9928460440780086,
+            "true_positive": 2099,
+            "false_positive": 1128,
+            "false_negative": 7209,
+            "true_negative": 156547
+          }
+        },
+        "sectors_216": {
+          "scan_ratio_parameters": {
+            "n_sectors": 216
+          },
+          "metrics": {
+            "precision": 0.16558861578266496,
+            "recall": 0.013751611516974646,
+            "f1": 0.02539430612042456,
+            "iou": 0.012860444087209887,
+            "static_preservation": 0.995909307119074,
+            "true_positive": 128,
+            "false_positive": 645,
+            "false_negative": 9180,
+            "true_negative": 157030
+          }
+        }
+      }
+    },
+    {
+      "scene": "scene-0916",
+      "map_points": 158781,
+      "gt_dynamic_points": 3232,
+      "preprocessing": {
+        "ground_z_sensor": -1.6,
+        "min_distance": 1.0,
+        "close_point_rule": "abs(sensor_x)<min_distance AND abs(sensor_y)<min_distance"
+      },
+      "manifest_sha256": "18577fbdbd1e0051b7705fbd6774e8f93a3e74dbf26be11595035c1c7121b457",
+      "map_sha256": "f5a00a3b57ddcb85d1f03c096580f513660a8484e81bb3279d3bc05c318a286e",
+      "gt_sha256": "596cfd4655590d085e779fffcfb216914d2ac09b11e56faa8b0e39faafbb13d6",
+      "gt_decisions": {
+        "both_dynamic": 584,
+        "range_dynamic_only": 1803,
+        "scan_ratio_dynamic_only": 149,
+        "neither_dynamic": 696
+      },
+      "channels": {
+        "range_only": {
+          "precision": 0.10296781986023638,
+          "recall": 0.7385519801980198,
+          "f1": 0.18073748769591882,
+          "iou": 0.09934656844383402,
+          "static_preservation": 0.866312223157976,
+          "true_positive": 2387,
+          "false_positive": 20795,
+          "false_negative": 845,
+          "true_negative": 134754
+        },
+        "scan_ratio_only": {
+          "precision": 0.050181419867186966,
+          "recall": 0.22679455445544555,
+          "f1": 0.08217949436627613,
+          "iou": 0.04285046182625979,
+          "static_preservation": 0.9108062411201615,
+          "true_positive": 733,
+          "false_positive": 13874,
+          "false_negative": 2499,
+          "true_negative": 141675
+        }
+      },
+      "variants": {
+        "baseline": {
+          "scan_ratio_parameters": {},
+          "metrics": {
+            "precision": 0.10556760665220535,
+            "recall": 0.1806930693069307,
+            "f1": 0.13327247832040162,
+            "iou": 0.07139364303178485,
+            "static_preservation": 0.9681900880108519,
+            "true_positive": 584,
+            "false_positive": 4948,
+            "false_negative": 2648,
+            "true_negative": 150601
+          }
+        },
+        "ratio_0_3": {
+          "scan_ratio_parameters": {
+            "scan_ratio_threshold": 0.3
+          },
+          "metrics": {
+            "precision": 0.1226896887159533,
+            "recall": 0.31219059405940597,
+            "f1": 0.1761522346368715,
+            "iou": 0.09658275102900354,
+            "static_preservation": 0.9536159023844576,
+            "true_positive": 1009,
+            "false_positive": 7215,
+            "false_negative": 2223,
+            "true_negative": 148334
+          }
+        },
+        "ratio_0_4": {
+          "scan_ratio_parameters": {
+            "scan_ratio_threshold": 0.4
+          },
+          "metrics": {
+            "precision": 0.12149273080840818,
+            "recall": 0.40594059405940597,
+            "f1": 0.18701446796379448,
+            "iou": 0.10315276358204262,
+            "static_preservation": 0.9390095725462716,
+            "true_positive": 1312,
+            "false_positive": 9487,
+            "false_negative": 1920,
+            "true_negative": 146062
+          }
+        },
+        "votes_fraction_0_35": {
+          "scan_ratio_parameters": {
+            "votes_fraction": 0.35
+          },
+          "metrics": {
+            "precision": 0.10562685093780849,
+            "recall": 0.2979579207920792,
+            "f1": 0.15596404567171432,
+            "iou": 0.08457755137888635,
+            "static_preservation": 0.9475792194099608,
+            "true_positive": 963,
+            "false_positive": 8154,
+            "false_negative": 2269,
+            "true_negative": 147395
+          }
+        },
+        "votes_floor_2": {
+          "scan_ratio_parameters": {
+            "votes_floor": 2
+          },
+          "metrics": {
+            "precision": 0.12827492344334807,
+            "recall": 0.2332920792079208,
+            "f1": 0.16553238199780462,
+            "iou": 0.09023456199138344,
+            "static_preservation": 0.9670586117557811,
+            "true_positive": 754,
+            "false_positive": 5124,
+            "false_negative": 2478,
+            "true_negative": 150425
+          }
+        },
+        "sectors_216": {
+          "scan_ratio_parameters": {
+            "n_sectors": 216
+          },
+          "metrics": {
+            "precision": 0.09498080477747761,
+            "recall": 0.20668316831683167,
+            "f1": 0.13015099853872383,
+            "iou": 0.06960508492237158,
+            "static_preservation": 0.9590804183890607,
+            "true_positive": 668,
+            "false_positive": 6365,
+            "false_negative": 2564,
+            "true_negative": 149184
+          }
+        }
+      }
+    },
+    {
+      "scene": "scene-1077",
+      "map_points": 161874,
+      "gt_dynamic_points": 4517,
+      "preprocessing": {
+        "ground_z_sensor": -1.6,
+        "min_distance": 1.0,
+        "close_point_rule": "abs(sensor_x)<min_distance AND abs(sensor_y)<min_distance"
+      },
+      "manifest_sha256": "5a2b461848554666b8ab2a83fe93cd617bf28814403f45b55c75184304d41b97",
+      "map_sha256": "67d16eb95cd305e32665780bb048b3f1405c1e41e0a7c17089b79efe0eeae5b4",
+      "gt_sha256": "0275a8a871ca522ad290a28b3c19133381c8a6b24068035fe2f88c4aeea9e091",
+      "gt_decisions": {
+        "both_dynamic": 11,
+        "range_dynamic_only": 103,
+        "scan_ratio_dynamic_only": 222,
+        "neither_dynamic": 4181
+      },
+      "channels": {
+        "range_only": {
+          "precision": 0.13751507840772015,
+          "recall": 0.025237989816249723,
+          "f1": 0.04264870931537598,
+          "iou": 0.021788990825688075,
+          "static_preservation": 0.995456191971123,
+          "true_positive": 114,
+          "false_positive": 715,
+          "false_negative": 4403,
+          "true_negative": 156642
+        },
+        "scan_ratio_only": {
+          "precision": 0.03604021655065739,
+          "recall": 0.05158290901040514,
+          "f1": 0.04243307230012748,
+          "iou": 0.021676435017210904,
+          "static_preservation": 0.9603957879217321,
+          "true_positive": 233,
+          "false_positive": 6232,
+          "false_negative": 4284,
+          "true_negative": 151125
+        }
+      },
+      "variants": {
+        "baseline": {
+          "scan_ratio_parameters": {},
+          "metrics": {
+            "precision": 0.054187192118226604,
+            "recall": 0.0024352446313925173,
+            "f1": 0.004661016949152542,
+            "iou": 0.002335952431514122,
+            "static_preservation": 0.9987798445572805,
+            "true_positive": 11,
+            "false_positive": 192,
+            "false_negative": 4506,
+            "true_negative": 157165
+          }
+        },
+        "ratio_0_3": {
+          "scan_ratio_parameters": {
+            "scan_ratio_threshold": 0.3
+          },
+          "metrics": {
+            "precision": 0.04780876494023904,
+            "recall": 0.002656630506973655,
+            "f1": 0.0050335570469798654,
+            "iou": 0.002523128679562658,
+            "static_preservation": 0.9984811606728649,
+            "true_positive": 12,
+            "false_positive": 239,
+            "false_negative": 4505,
+            "true_negative": 157118
+          }
+        },
+        "ratio_0_4": {
+          "scan_ratio_parameters": {
+            "scan_ratio_threshold": 0.4
+          },
+          "metrics": {
+            "precision": 0.1220159151193634,
+            "recall": 0.010183750276732344,
+            "f1": 0.01879852881078872,
+            "iou": 0.009488448844884489,
+            "static_preservation": 0.9978965028565618,
+            "true_positive": 46,
+            "false_positive": 331,
+            "false_negative": 4471,
+            "true_negative": 157026
+          }
+        },
+        "votes_fraction_0_35": {
+          "scan_ratio_parameters": {
+            "votes_fraction": 0.35
+          },
+          "metrics": {
+            "precision": 0.044715447154471545,
+            "recall": 0.0024352446313925173,
+            "f1": 0.004618937644341801,
+            "iou": 0.0023148148148148147,
+            "static_preservation": 0.9985065805779215,
+            "true_positive": 11,
+            "false_positive": 235,
+            "false_negative": 4506,
+            "true_negative": 157122
+          }
+        },
+        "votes_floor_2": {
+          "scan_ratio_parameters": {
+            "votes_floor": 2
+          },
+          "metrics": {
+            "precision": 0.20491803278688525,
+            "recall": 0.011069293779056896,
+            "f1": 0.021003990758244065,
+            "iou": 0.010613457864572278,
+            "static_preservation": 0.9987671346047523,
+            "true_positive": 50,
+            "false_positive": 194,
+            "false_negative": 4467,
+            "true_negative": 157163
+          }
+        },
+        "sectors_216": {
+          "scan_ratio_parameters": {
+            "n_sectors": 216
+          },
+          "metrics": {
+            "precision": 0.015789473684210527,
+            "recall": 0.0006641576267434137,
+            "f1": 0.0012746972594008922,
+            "iou": 0.0006377551020408163,
+            "static_preservation": 0.9988116194386014,
+            "true_positive": 3,
+            "false_positive": 187,
+            "false_negative": 4514,
+            "true_negative": 157170
+          }
+        }
+      }
+    },
+    {
+      "scene": "scene-1094",
+      "map_points": 174008,
+      "gt_dynamic_points": 8097,
+      "preprocessing": {
+        "ground_z_sensor": -1.6,
+        "min_distance": 1.0,
+        "close_point_rule": "abs(sensor_x)<min_distance AND abs(sensor_y)<min_distance"
+      },
+      "manifest_sha256": "36238296b59211fc46833d545f035f94d8c77f718ea984c50006c9b4691ca7ae",
+      "map_sha256": "c0641984f32a6f096473eafba59ffca3903a547aa668eff1d8f00e6f93bd66ac",
+      "gt_sha256": "d8c174ef6284b2b23fb25116fd81f0dd8f2084a73adf0d52d9542fdc7bd19062",
+      "gt_decisions": {
+        "both_dynamic": 664,
+        "range_dynamic_only": 1513,
+        "scan_ratio_dynamic_only": 952,
+        "neither_dynamic": 4968
+      },
+      "channels": {
+        "range_only": {
+          "precision": 0.19696010132995567,
+          "recall": 0.2688650117327405,
+          "f1": 0.22736292428198435,
+          "iou": 0.12826253461379838,
+          "static_preservation": 0.9465014375177053,
+          "true_positive": 2177,
+          "false_positive": 8876,
+          "false_negative": 5920,
+          "true_negative": 157035
+        },
+        "scan_ratio_only": {
+          "precision": 0.16510012259910095,
+          "recall": 0.19958009139187352,
+          "f1": 0.1807100922560805,
+          "iou": 0.09933001413731637,
+          "static_preservation": 0.9507446763626282,
+          "true_positive": 1616,
+          "false_positive": 8172,
+          "false_negative": 6481,
+          "true_negative": 157739
+        }
+      },
+      "variants": {
+        "baseline": {
+          "scan_ratio_parameters": {},
+          "metrics": {
+            "precision": 0.3008608971454463,
+            "recall": 0.08200568111646289,
+            "f1": 0.12888198757763977,
+            "iou": 0.06887966804979254,
+            "static_preservation": 0.990699833043017,
+            "true_positive": 664,
+            "false_positive": 1543,
+            "false_negative": 7433,
+            "true_negative": 164368
+          }
+        },
+        "ratio_0_3": {
+          "scan_ratio_parameters": {
+            "scan_ratio_threshold": 0.3
+          },
+          "metrics": {
+            "precision": 0.29593001141118297,
+            "recall": 0.0960849697418797,
+            "f1": 0.14506805892224503,
+            "iou": 0.07820667470848412,
+            "static_preservation": 0.9888434160483632,
+            "true_positive": 778,
+            "false_positive": 1851,
+            "false_negative": 7319,
+            "true_negative": 164060
+          }
+        },
+        "ratio_0_4": {
+          "scan_ratio_parameters": {
+            "scan_ratio_threshold": 0.4
+          },
+          "metrics": {
+            "precision": 0.21669218989280245,
+            "recall": 0.10485364949981475,
+            "f1": 0.14132334581772785,
+            "iou": 0.07603439011284256,
+            "static_preservation": 0.9815021306604144,
+            "true_positive": 849,
+            "false_positive": 3069,
+            "false_negative": 7248,
+            "true_negative": 162842
+          }
+        },
+        "votes_fraction_0_35": {
+          "scan_ratio_parameters": {
+            "votes_fraction": 0.35
+          },
+          "metrics": {
+            "precision": 0.24514715090795242,
+            "recall": 0.09670248240088922,
+            "f1": 0.13869453547072888,
+            "iou": 0.074514655500571,
+            "static_preservation": 0.98546811242172,
+            "true_positive": 783,
+            "false_positive": 2411,
+            "false_negative": 7314,
+            "true_negative": 163500
+          }
+        },
+        "votes_floor_2": {
+          "scan_ratio_parameters": {
+            "votes_floor": 2
+          },
+          "metrics": {
+            "precision": 0.327672713238132,
+            "recall": 0.10485364949981475,
+            "f1": 0.15886976047904192,
+            "iou": 0.0862892570383169,
+            "static_preservation": 0.9895003947899778,
+            "true_positive": 849,
+            "false_positive": 1742,
+            "false_negative": 7248,
+            "true_negative": 164169
+          }
+        },
+        "sectors_216": {
+          "scan_ratio_parameters": {
+            "n_sectors": 216
+          },
+          "metrics": {
+            "precision": 0.21464762782128052,
+            "recall": 0.05755217981968631,
+            "f1": 0.09076743280093494,
+            "iou": 0.047541318098347274,
+            "static_preservation": 0.9897234059224524,
+            "true_positive": 466,
+            "false_positive": 1705,
+            "false_negative": 7631,
+            "true_negative": 164206
+          }
+        }
+      }
+    },
+    {
+      "scene": "scene-1100",
+      "map_points": 149454,
+      "gt_dynamic_points": 6082,
+      "preprocessing": {
+        "ground_z_sensor": -1.6,
+        "min_distance": 1.0,
+        "close_point_rule": "abs(sensor_x)<min_distance AND abs(sensor_y)<min_distance"
+      },
+      "manifest_sha256": "81fc4151bbbd46a83c074f6af6322f5c44d8e0c26cb644014c3acba637e581d7",
+      "map_sha256": "737cca2b922905e681cddb5737ad2a55ebd388dc3f1cc6407e80c4e6f59fa87a",
+      "gt_sha256": "fda0b7429d577bf2c08c974a286a9abf3d436149d175217dc17923d6d496ce34",
+      "gt_decisions": {
+        "both_dynamic": 595,
+        "range_dynamic_only": 1102,
+        "scan_ratio_dynamic_only": 120,
+        "neither_dynamic": 4265
+      },
+      "channels": {
+        "range_only": {
+          "precision": 0.18298468837610524,
+          "recall": 0.27902005919105555,
+          "f1": 0.22102109924459493,
+          "iou": 0.12424042755692218,
+          "static_preservation": 0.9471514661161176,
+          "true_positive": 1697,
+          "false_positive": 7577,
+          "false_negative": 4385,
+          "true_negative": 135795
+        },
+        "scan_ratio_only": {
+          "precision": 0.21581648053124056,
+          "recall": 0.1175600131535679,
+          "f1": 0.15220862160723786,
+          "iou": 0.08237327188940093,
+          "static_preservation": 0.9818793069776526,
+          "true_positive": 715,
+          "false_positive": 2598,
+          "false_negative": 5367,
+          "true_negative": 140774
+        }
+      },
+      "variants": {
+        "baseline": {
+          "scan_ratio_parameters": {},
+          "metrics": {
+            "precision": 0.6524122807017544,
+            "recall": 0.09782966129562644,
+            "f1": 0.1701458392908207,
+            "iou": 0.09298327863728707,
+            "static_preservation": 0.9977889685573195,
+            "true_positive": 595,
+            "false_positive": 317,
+            "false_negative": 5487,
+            "true_negative": 143055
+          }
+        },
+        "ratio_0_3": {
+          "scan_ratio_parameters": {
+            "scan_ratio_threshold": 0.3
+          },
+          "metrics": {
+            "precision": 0.5362068965517242,
+            "recall": 0.10226899046366326,
+            "f1": 0.17177575255454294,
+            "iou": 0.09395770392749245,
+            "static_preservation": 0.9962475239237787,
+            "true_positive": 622,
+            "false_positive": 538,
+            "false_negative": 5460,
+            "true_negative": 142834
+          }
+        },
+        "ratio_0_4": {
+          "scan_ratio_parameters": {
+            "scan_ratio_threshold": 0.4
+          },
+          "metrics": {
+            "precision": 0.5330073349633252,
+            "recall": 0.107530417625781,
+            "f1": 0.1789574497195239,
+            "iou": 0.09827197595792637,
+            "static_preservation": 0.9960034037329465,
+            "true_positive": 654,
+            "false_positive": 573,
+            "false_negative": 5428,
+            "true_negative": 142799
+          }
+        },
+        "votes_fraction_0_35": {
+          "scan_ratio_parameters": {
+            "votes_fraction": 0.35
+          },
+          "metrics": {
+            "precision": 0.6075581395348837,
+            "recall": 0.10309108845774416,
+            "f1": 0.17627213944335116,
+            "iou": 0.09665484815785418,
+            "static_preservation": 0.9971751806489412,
+            "true_positive": 627,
+            "false_positive": 405,
+            "false_negative": 5455,
+            "true_negative": 142967
+          }
+        },
+        "votes_floor_2": {
+          "scan_ratio_parameters": {
+            "votes_floor": 2
+          },
+          "metrics": {
+            "precision": 0.6524590163934426,
+            "recall": 0.09815850049325879,
+            "f1": 0.17064456195512362,
+            "iou": 0.09328125,
+            "static_preservation": 0.9977819936947242,
+            "true_positive": 597,
+            "false_positive": 318,
+            "false_negative": 5485,
+            "true_negative": 143054
+          }
+        },
+        "sectors_216": {
+          "scan_ratio_parameters": {
+            "n_sectors": 216
+          },
+          "metrics": {
+            "precision": 0.5970443349753695,
+            "recall": 0.0996382768826044,
+            "f1": 0.1707763843877695,
+            "iou": 0.09336003697427207,
+            "static_preservation": 0.9971472811985604,
+            "true_positive": 606,
+            "false_positive": 409,
+            "false_negative": 5476,
+            "true_negative": 142963
+          }
+        }
+      }
+    }
+  ],
+  "aggregate": {
+    "min_gt_dynamic_points": 5000,
+    "included_scenes": [
+      "scene-0103",
+      "scene-0553",
+      "scene-0757",
+      "scene-0796",
+      "scene-1094",
+      "scene-1100"
+    ],
+    "excluded_scenes": [
+      "scene-0061",
+      "scene-0655",
+      "scene-0916",
+      "scene-1077"
+    ],
+    "methods": {
+      "baseline": {
+        "precision": 0.5865913815452704,
+        "recall": 0.20440047010671156,
+        "f1": 0.2924538271676158,
+        "static_preservation": 0.9947566244287048
+      },
+      "ratio_0_3": {
+        "precision": 0.573579049814195,
+        "recall": 0.2259847239115742,
+        "f1": 0.31476637187532924,
+        "static_preservation": 0.9936118310336308
+      },
+      "ratio_0_4": {
+        "precision": 0.5517287142516857,
+        "recall": 0.24783673508027038,
+        "f1": 0.32964083915841247,
+        "static_preservation": 0.9909231940811406
+      },
+      "votes_fraction_0_35": {
+        "precision": 0.5607418187610157,
+        "recall": 0.2751886840606046,
+        "f1": 0.3420205059247516,
+        "static_preservation": 0.9928250840975442
+      },
+      "votes_floor_2": {
+        "precision": 0.6615891175603724,
+        "recall": 0.24922978842561583,
+        "f1": 0.35391318298918345,
+        "static_preservation": 0.9941071923839441
+      },
+      "sectors_216": {
+        "precision": 0.5336805546305353,
+        "recall": 0.17907852931850265,
+        "f1": 0.2618734948159733,
+        "static_preservation": 0.9943580018198972
+      }
+    },
+    "channels": {
+      "range_only": {
+        "precision": 0.49287964376984256,
+        "recall": 0.5034922360163793,
+        "f1": 0.47260558276453485,
+        "static_preservation": 0.9612030673884666
+      },
+      "scan_ratio_only": {
+        "precision": 0.38311356641166633,
+        "recall": 0.25945856258912436,
+        "f1": 0.29906057472102715,
+        "static_preservation": 0.9607676363472112
+      }
+    }
+  },
+  "limitations": "One-factor exploratory ablations on the same mini scenes, without held-out validation. Range parameters and devkit input selection fixed. Rigid poses without deskew; GT uses moving-instance boxes. No production defaults changed.",
+  "validation_date": "2026-10-08",
+  "source_base_commit": "767f4b4"
+}

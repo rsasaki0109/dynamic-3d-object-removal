@@ -141,3 +141,48 @@ scene, not held-out validation or proof about longer delays. Later queries
 still affect normalized vote thresholds and surface evidence, while the
 parameter values remain fixed. The record includes query file and transformed
 point hashes, poses, relative times and individual target evidence counts.
+
+## Empty-column neighbor experiment
+
+[neighbor_columns.json](neighbor_columns.json) tests a research-only support
+rule for query columns with no points. Pool height extrema from the immediately
+adjacent angular sectors within the same radial ring. Angular adjacency wraps
+at 360°, radial rings never mix, and occupied center columns are unchanged.
+Compare requiring both adjacent columns to contain points versus allowing
+either one. These are inferred column observations, not direct measurements;
+they also change the revisit-normalized vote threshold. Range, map/GT inputs,
+and all numerical thresholds remain fixed.
+
+| Query support | nuScenes precision | Recall | F1 | Static kept | AV2 recall | AV2 static kept |
+|---|---:|---:|---:|---:|---:|---:|
+| Native only | 0.5866 | 20.440% | 0.2925 | 99.476% | 16.139% | 99.991% |
+| Both adjacent columns | 0.5877 | 20.424% | 0.2924 | 99.475% | 16.046% | 99.991% |
+| Either adjacent column | 0.6431 | 30.492% | 0.3898 | 99.384% | 16.093% | 99.991% |
+
+nuScenes means use the same six eligible scenes. On `scene-0796`, either-side
+support raises scene recall 3.56% → 18.62%, while static preservation falls
+99.50% → 99.23%. This is scene-level evidence, not a claim about the individual
+car track. On AV2 it adds 90 true positives but loses 129 baseline true positives,
+for a net loss of 39. More inferred revisits can raise a point's threshold,
+so additional support does not imply monotonic removal.
+
+The native-only research implementation must match the production per-point
+scan-ratio masks exactly on all ten mini scenes and AV2 before results are
+accepted. Inputs and baseline metrics are fingerprint-verified. Unit tests
+cover angular wrapping, radial isolation, preservation of occupied columns,
+and native-mask equivalence with nonzero dynamic points.
+
+The either-side result is promising for the sparse mini data but not a general
+default improvement. Scene means are not per-scene guarantees (`scene-0916`
+still retains only about 96.78% of static points). These are experiments on
+already examined data, with no held-out validation. Borrowed heights can
+cross object boundaries and do not prove free space in the empty column.
+The helper is not a public API or CLI option; production filters are unchanged.
+
+```bash
+python scripts/experiment_neighbor_columns.py \
+  --validation-root output/cli_nuscenes_devkit_selection \
+  --av2-manifest output/cli_av2/manifest.json \
+  --av2-baseline examples/cli_validation/av2_12_sweeps.json \
+  --report-json output/neighbor_columns.json
+```

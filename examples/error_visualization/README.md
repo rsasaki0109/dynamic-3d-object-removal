@@ -186,3 +186,61 @@ python scripts/experiment_neighbor_columns.py \
   --av2-baseline examples/cli_validation/av2_12_sweeps.json \
   --report-json output/neighbor_columns.json
 ```
+
+## Changed-point diagnostics and native-threshold counterfactual
+
+[neighbor_error_analysis.json](neighbor_error_analysis.json) replays both native
+and either-neighbor masks against the fingerprinted inputs and recorded metrics.
+It selects the previously examined scene-0796, the largest additional moving
+removal (scene-0757), the largest additional static removal (scene-0916), and
+AV2. These are selected diagnostics, not an unbiased aggregate. Every changed
+point is classified into added moving removal, added static removal, lost moving
+removal or recovered static points. Reports include source-frame counts, 3D
+acquisition range, dynamic votes, native/inferred observations and thresholds.
+
+All 129 lost AV2 moving removals have higher thresholds and no loss of dynamic
+votes; 128 receive no inferred dynamic votes. All lost moving removals in the
+three selected mini scenes likewise have increased thresholds and no decreased
+votes. This isolates the loss mechanism to revisit normalization, rather than
+fewer dynamic votes. It does not establish that normalization should be removed.
+
+A separate counterfactual uses either-neighbor dynamic votes with the native-only
+observation threshold, leaving the map, labels, range channel and numerical
+parameters fixed:
+
+| Scene | Extra moving removed | Lost moving removed | Extra static removed | Recovered static points |
+|---|---:|---:|---:|---:|
+| 0757 | 18,006 | 0 | 46 | 0 |
+| 0796 | 1,455 | 0 | 502 | 0 |
+| 0916 | 455 | 0 | 2,211 | 0 |
+| AV2 | 118 | 0 | 1 | 0 |
+
+The AV2 loss disappears, but scene-0916 static preservation falls to 95.40%.
+Freezing the threshold is therefore not a general safety fix. Neighbor votes
+can cross object boundaries, and the existing normalization also suppresses
+some false removals.
+
+In scene-0796, additional moving removals have median acquisition range 2.94 m,
+versus 1.17 m for additional static removals. Scene-0916 additional static
+removals span 1.09–74.61 m (median 6.91 m), so a close-range exclusion alone
+would not address all errors. These distributions do not justify a fitted
+range cutoff on already examined data. A next candidate should constrain
+inferred height support at object boundaries while retaining normalization,
+then measure its gains and losses on separate data before changing defaults.
+No static object categories are inferred from these point plots; GT describes
+moving annotation boxes, not per-point motion.
+
+```bash
+python scripts/analyze_neighbor_errors.py \
+  --experiment-json examples/error_visualization/neighbor_columns.json \
+  --validation-root output/cli_nuscenes_devkit_selection \
+  --av2-manifest output/cli_av2/manifest.json \
+  --output output/neighbor_error_analysis
+```
+
+Choose a new output directory. Matplotlib is required only for rendering.
+Each scene produces a four-panel map PNG/SVG and a report; the root report
+includes all four examples. Every changed point is displayed; only the gray
+background is deterministically sampled to at most 15,000 points. Black lines
+show sensor origins. Full accumulated maps are offline and include future
+points. Core behavior and public demos are unchanged.

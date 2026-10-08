@@ -27,6 +27,39 @@ This command retains full clouds, GT, masks, commands and summaries in the
 ignored output directory. The checked-in JSON keeps metrics, parameters and
 input hashes only. Use a new output directory when repeating it.
 
+## Sparse-sensor error diagnosis
+
+[nuscenes_error_analysis.json](nuscenes_error_analysis.json) replays the baseline
+exactly in all 10 scenes and measures distance/height bins and four exploratory
+alternatives. Of 244,581 baseline false positives across all scenes, 236,778
+(96.8%) were acquired less than 2 m from their source sensor. The worst scene
+is `scene-0916`, with 78,661 false positives, including 74,875 inside 2 m.
+This is consistent with ego-vehicle returns contaminating the static category,
+but source identity has not been verified. Here "static" means outside the
+moving-instance annotation boxes, not a semantic static label.
+
+| Configuration | Precision | Recall | F1 | Static kept |
+|---|---:|---:|---:|---:|
+| Baseline | 0.2971 | 0.2632 | 0.2401 | 93.084% |
+| Maximum surface confirmations: 2 | 0.3368 | 0.1415 | 0.1642 | 93.374% |
+| Minimum see-through scans: 5 | 0.3041 | 0.1839 | 0.2132 | 97.035% |
+| Resolution consensus: 1° and 2.5° | 0.3457 | 0.1634 | 0.1947 | 96.483% |
+| Protect acquisition range below 2 m (diagnostic) | 0.6920 | 0.2632 | 0.3393 | 99.836% |
+
+Means use the same six eligible scenes. The last experiment needs each map
+point's source scan, which an arbitrary accumulated map does not provide.
+It preserves near-sensor points rather than proving they are static; it is
+not a new CLI option or a recommendation for production. These exploratory
+measurements use the same mini scenes without held-out validation. Existing
+defaults remain unchanged. Verify ego returns and define an explicit
+evaluation exclusion before drawing conclusions about static preservation.
+
+```bash
+python scripts/analyze_nuscenes_errors.py \
+  --validation-root output/cli_nuscenes_validation \
+  --report-json output/cli_nuscenes_error_analysis.json
+```
+
 [av2_12_sweeps.json](av2_12_sweeps.json) records a real AV2 CLI validation:
 12 sweeps, stride 3, 1,235,563 map points, 84,471 moving-GT points.
 Both CLI modes produced exactly the same point clouds and boolean keep masks as

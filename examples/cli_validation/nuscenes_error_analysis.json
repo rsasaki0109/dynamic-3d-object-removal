@@ -1,0 +1,2591 @@
+{
+  "dataset": "nuscenes-mini",
+  "scene_results": [
+    {
+      "scene": "scene-0061",
+      "map_points": 279818,
+      "gt_dynamic_points": 3564,
+      "channels": {
+        "range": {
+          "precision": 0.009783311772315654,
+          "recall": 0.2037037037037037,
+          "f1": 0.018669958339762385,
+          "iou": 0.009422942138462736,
+          "static_preservation": 0.7340056614564857,
+          "true_positive": 726,
+          "false_positive": 73482,
+          "false_negative": 2838,
+          "true_negative": 202772
+        },
+        "scan_ratio": {
+          "precision": 0.014358077329543384,
+          "recall": 0.33164983164983164,
+          "f1": 0.02752453805581753,
+          "iou": 0.013954312024083584,
+          "static_preservation": 0.7062811760191707,
+          "true_positive": 1182,
+          "false_positive": 81141,
+          "false_negative": 2382,
+          "true_negative": 195113
+        }
+      },
+      "diagnostics": {
+        "acquisition_distance_m": [
+          {
+            "low": 0,
+            "high": 2,
+            "points": 103676,
+            "static_points": 103676,
+            "false_positive": 58082,
+            "static_removal_fraction": 0.5602260889694819,
+            "moving_points": 0,
+            "true_positive": 0
+          },
+          {
+            "low": 2,
+            "high": 5,
+            "points": 26924,
+            "static_points": 26924,
+            "false_positive": 138,
+            "static_removal_fraction": 0.005125538552963898,
+            "moving_points": 0,
+            "true_positive": 0
+          },
+          {
+            "low": 5,
+            "high": 10,
+            "points": 47979,
+            "static_points": 46076,
+            "false_positive": 225,
+            "static_removal_fraction": 0.004883236392047921,
+            "moving_points": 1903,
+            "true_positive": 108
+          },
+          {
+            "low": 10,
+            "high": 20,
+            "points": 50722,
+            "static_points": 49682,
+            "false_positive": 159,
+            "static_removal_fraction": 0.0032003542530493942,
+            "moving_points": 1040,
+            "true_positive": 177
+          },
+          {
+            "low": 20,
+            "high": 40,
+            "points": 32597,
+            "static_points": 32056,
+            "false_positive": 107,
+            "static_removal_fraction": 0.003337908659845271,
+            "moving_points": 541,
+            "true_positive": 57
+          },
+          {
+            "low": 40,
+            "high": 80,
+            "points": 16429,
+            "static_points": 16349,
+            "false_positive": 96,
+            "static_removal_fraction": 0.005871918771790324,
+            "moving_points": 80,
+            "true_positive": 7
+          },
+          {
+            "low": 80,
+            "high": 1000000,
+            "points": 1491,
+            "static_points": 1491,
+            "false_positive": 0,
+            "static_removal_fraction": 0.0,
+            "moving_points": 0,
+            "true_positive": 0
+          }
+        ],
+        "acquisition_height_m": [
+          {
+            "low": -1000000,
+            "high": -1,
+            "points": 73949,
+            "static_points": 72059,
+            "false_positive": 117,
+            "static_removal_fraction": 0.0016236694930543028,
+            "moving_points": 1890,
+            "true_positive": 30
+          },
+          {
+            "low": -1,
+            "high": 0,
+            "points": 100625,
+            "static_points": 99065,
+            "false_positive": 33388,
+            "static_removal_fraction": 0.3370312421137637,
+            "moving_points": 1560,
+            "true_positive": 302
+          },
+          {
+            "low": 0,
+            "high": 1,
+            "points": 54880,
+            "static_points": 54766,
+            "false_positive": 25250,
+            "static_removal_fraction": 0.46105247781470254,
+            "moving_points": 114,
+            "true_positive": 17
+          },
+          {
+            "low": 1,
+            "high": 2,
+            "points": 15903,
+            "static_points": 15903,
+            "false_positive": 12,
+            "static_removal_fraction": 0.0007545746085644218,
+            "moving_points": 0,
+            "true_positive": 0
+          },
+          {
+            "low": 2,
+            "high": 1000000,
+            "points": 34461,
+            "static_points": 34461,
+            "false_positive": 40,
+            "static_removal_fraction": 0.0011607324221583819,
+            "moving_points": 0,
+            "true_positive": 0
+          }
+        ]
+      },
+      "variants": {
+        "baseline": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 3,
+            "max_surface_hits": 5
+          },
+          "metrics": {
+            "precision": 0.005899655149097302,
+            "recall": 0.09792368125701459,
+            "f1": 0.011128826530612245,
+            "iou": 0.005595549213576823,
+            "static_preservation": 0.7871270642235044,
+            "true_positive": 349,
+            "false_positive": 58807,
+            "false_negative": 3215,
+            "true_negative": 217447
+          }
+        },
+        "acquisition_range_guard_2m": {
+          "parameters": {
+            "minimum_acquisition_range_m": 2.0
+          },
+          "metrics": {
+            "precision": 0.3249534450651769,
+            "recall": 0.09792368125701459,
+            "f1": 0.1504959034066408,
+            "iou": 0.08137094893914665,
+            "static_preservation": 0.9973756036111694,
+            "true_positive": 349,
+            "false_positive": 725,
+            "false_negative": 3215,
+            "true_negative": 275529
+          }
+        },
+        "surface_guard_2": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 3,
+            "max_surface_hits": 2
+          },
+          "metrics": {
+            "precision": 0.005925397714731999,
+            "recall": 0.09792368125701459,
+            "f1": 0.011174615372300403,
+            "iou": 0.005618701097981131,
+            "static_preservation": 0.7880573674951313,
+            "true_positive": 349,
+            "false_positive": 58550,
+            "false_negative": 3215,
+            "true_negative": 217704
+          }
+        },
+        "see_through_5": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 5,
+            "max_surface_hits": 5
+          },
+          "metrics": {
+            "precision": 0.003094290863341154,
+            "recall": 0.025533108866442198,
+            "f1": 0.00551966760682983,
+            "iou": 0.002767471564989964,
+            "static_preservation": 0.8938730298927798,
+            "true_positive": 91,
+            "false_positive": 29318,
+            "false_negative": 3473,
+            "true_negative": 246936
+          }
+        },
+        "consensus_1_2_5": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 3,
+            "max_surface_hits": 5,
+            "resolutions": [
+              1.0,
+              2.5
+            ]
+          },
+          "metrics": {
+            "precision": 0.003988456936395842,
+            "recall": 0.04769921436588103,
+            "f1": 0.007361378742936324,
+            "iou": 0.0036942868939739662,
+            "static_preservation": 0.846326207041346,
+            "true_positive": 170,
+            "false_positive": 42453,
+            "false_negative": 3394,
+            "true_negative": 233801
+          }
+        }
+      },
+      "analysis_seconds": 1.5065365970000357
+    },
+    {
+      "scene": "scene-0103",
+      "map_points": 256347,
+      "gt_dynamic_points": 5248,
+      "channels": {
+        "range": {
+          "precision": 0.08332702450349509,
+          "recall": 0.6291920731707317,
+          "f1": 0.14716434540389975,
+          "iou": 0.07942655088639261,
+          "static_preservation": 0.8553359431937204,
+          "true_positive": 3302,
+          "false_positive": 36325,
+          "false_negative": 1946,
+          "true_negative": 214774
+        },
+        "scan_ratio": {
+          "precision": 0.009521015035311735,
+          "recall": 0.1793064024390244,
+          "f1": 0.018081896965853845,
+          "iou": 0.009123432970399744,
+          "static_preservation": 0.6101418165743392,
+          "true_positive": 941,
+          "false_positive": 97893,
+          "false_negative": 4307,
+          "true_negative": 153206
+        }
+      },
+      "diagnostics": {
+        "acquisition_distance_m": [
+          {
+            "low": 0,
+            "high": 2,
+            "points": 113189,
+            "static_points": 113189,
+            "false_positive": 26715,
+            "static_removal_fraction": 0.23602116813471274,
+            "moving_points": 0,
+            "true_positive": 0
+          },
+          {
+            "low": 2,
+            "high": 5,
+            "points": 4039,
+            "static_points": 3446,
+            "false_positive": 0,
+            "static_removal_fraction": 0.0,
+            "moving_points": 593,
+            "true_positive": 0
+          },
+          {
+            "low": 5,
+            "high": 10,
+            "points": 31980,
+            "static_points": 29631,
+            "false_positive": 169,
+            "static_removal_fraction": 0.005703486213762613,
+            "moving_points": 2349,
+            "true_positive": 208
+          },
+          {
+            "low": 10,
+            "high": 20,
+            "points": 63584,
+            "static_points": 61835,
+            "false_positive": 101,
+            "static_removal_fraction": 0.0016333791542006953,
+            "moving_points": 1749,
+            "true_positive": 305
+          },
+          {
+            "low": 20,
+            "high": 40,
+            "points": 32907,
+            "static_points": 32427,
+            "false_positive": 17,
+            "static_removal_fraction": 0.0005242544792919481,
+            "moving_points": 480,
+            "true_positive": 59
+          },
+          {
+            "low": 40,
+            "high": 80,
+            "points": 10483,
+            "static_points": 10406,
+            "false_positive": 3,
+            "static_removal_fraction": 0.00028829521429944266,
+            "moving_points": 77,
+            "true_positive": 19
+          },
+          {
+            "low": 80,
+            "high": 1000000,
+            "points": 165,
+            "static_points": 165,
+            "false_positive": 0,
+            "static_removal_fraction": 0.0,
+            "moving_points": 0,
+            "true_positive": 0
+          }
+        ],
+        "acquisition_height_m": [
+          {
+            "low": -1000000,
+            "high": -1,
+            "points": 50783,
+            "static_points": 48078,
+            "false_positive": 94,
+            "static_removal_fraction": 0.001955156204501019,
+            "moving_points": 2705,
+            "true_positive": 245
+          },
+          {
+            "low": -1,
+            "high": 0,
+            "points": 117464,
+            "static_points": 115029,
+            "false_positive": 26804,
+            "static_removal_fraction": 0.23301949943057837,
+            "moving_points": 2435,
+            "true_positive": 316
+          },
+          {
+            "low": 0,
+            "high": 1,
+            "points": 39055,
+            "static_points": 38949,
+            "false_positive": 58,
+            "static_removal_fraction": 0.0014891268068499832,
+            "moving_points": 106,
+            "true_positive": 30
+          },
+          {
+            "low": 1,
+            "high": 2,
+            "points": 19464,
+            "static_points": 19462,
+            "false_positive": 44,
+            "static_removal_fraction": 0.002260815949028877,
+            "moving_points": 2,
+            "true_positive": 0
+          },
+          {
+            "low": 2,
+            "high": 1000000,
+            "points": 29581,
+            "static_points": 29581,
+            "false_positive": 5,
+            "static_removal_fraction": 0.00016902741624691525,
+            "moving_points": 0,
+            "true_positive": 0
+          }
+        ]
+      },
+      "variants": {
+        "baseline": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 3,
+            "max_surface_hits": 5
+          },
+          "metrics": {
+            "precision": 0.02141614726771996,
+            "recall": 0.11261432926829268,
+            "f1": 0.035988308366825,
+            "iou": 0.01832387684866524,
+            "static_preservation": 0.8924527775897156,
+            "true_positive": 591,
+            "false_positive": 27005,
+            "false_negative": 4657,
+            "true_negative": 224094
+          }
+        },
+        "acquisition_range_guard_2m": {
+          "parameters": {
+            "minimum_acquisition_range_m": 2.0
+          },
+          "metrics": {
+            "precision": 0.6708286038592508,
+            "recall": 0.11261432926829268,
+            "f1": 0.19285364659814,
+            "iou": 0.1067172264355363,
+            "static_preservation": 0.9988450770413263,
+            "true_positive": 591,
+            "false_positive": 290,
+            "false_negative": 4657,
+            "true_negative": 250809
+          }
+        },
+        "surface_guard_2": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 3,
+            "max_surface_hits": 2
+          },
+          "metrics": {
+            "precision": 0.02027223758916873,
+            "recall": 0.10613567073170732,
+            "f1": 0.03404229311820071,
+            "iou": 0.017315882736966458,
+            "static_preservation": 0.8927952719843568,
+            "true_positive": 557,
+            "false_positive": 26919,
+            "false_negative": 4691,
+            "true_negative": 224180
+          }
+        },
+        "see_through_5": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 5,
+            "max_surface_hits": 5
+          },
+          "metrics": {
+            "precision": 0.08480749219562955,
+            "recall": 0.06211890243902439,
+            "f1": 0.07171139463264407,
+            "iou": 0.03718913985854438,
+            "static_preservation": 0.9859895897634001,
+            "true_positive": 326,
+            "false_positive": 3518,
+            "false_negative": 4922,
+            "true_negative": 247581
+          }
+        },
+        "consensus_1_2_5": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 3,
+            "max_surface_hits": 5,
+            "resolutions": [
+              1.0,
+              2.5
+            ]
+          },
+          "metrics": {
+            "precision": 0.17220543806646527,
+            "recall": 0.05430640243902439,
+            "f1": 0.08257279443720121,
+            "iou": 0.04306436990027199,
+            "static_preservation": 0.9945439846435071,
+            "true_positive": 285,
+            "false_positive": 1370,
+            "false_negative": 4963,
+            "true_negative": 249729
+          }
+        }
+      },
+      "analysis_seconds": 1.3621370579999166
+    },
+    {
+      "scene": "scene-0553",
+      "map_points": 312651,
+      "gt_dynamic_points": 5774,
+      "channels": {
+        "range": {
+          "precision": 0.03882661884327163,
+          "recall": 0.5249393834430205,
+          "f1": 0.07230525173248727,
+          "iou": 0.037508662508662506,
+          "static_preservation": 0.7554916139039419,
+          "true_positive": 3031,
+          "false_positive": 75034,
+          "false_negative": 2743,
+          "true_negative": 231843
+        },
+        "scan_ratio": {
+          "precision": 0.9245152354570637,
+          "recall": 0.4624177346726706,
+          "f1": 0.6164858000461787,
+          "iou": 0.44559412550066757,
+          "static_preservation": 0.9992896176644063,
+          "true_positive": 2670,
+          "false_positive": 218,
+          "false_negative": 3104,
+          "true_negative": 306659
+        }
+      },
+      "diagnostics": {
+        "acquisition_distance_m": [
+          {
+            "low": 0,
+            "high": 2,
+            "points": 142076,
+            "static_points": 142076,
+            "false_positive": 0,
+            "static_removal_fraction": 0.0,
+            "moving_points": 0,
+            "true_positive": 0
+          },
+          {
+            "low": 2,
+            "high": 5,
+            "points": 36609,
+            "static_points": 36609,
+            "false_positive": 0,
+            "static_removal_fraction": 0.0,
+            "moving_points": 0,
+            "true_positive": 0
+          },
+          {
+            "low": 5,
+            "high": 10,
+            "points": 52067,
+            "static_points": 49759,
+            "false_positive": 0,
+            "static_removal_fraction": 0.0,
+            "moving_points": 2308,
+            "true_positive": 1109
+          },
+          {
+            "low": 10,
+            "high": 20,
+            "points": 26920,
+            "static_points": 25242,
+            "false_positive": 0,
+            "static_removal_fraction": 0.0,
+            "moving_points": 1678,
+            "true_positive": 654
+          },
+          {
+            "low": 20,
+            "high": 40,
+            "points": 47464,
+            "static_points": 45932,
+            "false_positive": 4,
+            "static_removal_fraction": 8.708525646608029e-05,
+            "moving_points": 1532,
+            "true_positive": 475
+          },
+          {
+            "low": 40,
+            "high": 80,
+            "points": 7090,
+            "static_points": 6849,
+            "false_positive": 4,
+            "static_removal_fraction": 0.0005840268652358008,
+            "moving_points": 241,
+            "true_positive": 13
+          },
+          {
+            "low": 80,
+            "high": 1000000,
+            "points": 425,
+            "static_points": 410,
+            "false_positive": 0,
+            "static_removal_fraction": 0.0,
+            "moving_points": 15,
+            "true_positive": 0
+          }
+        ],
+        "acquisition_height_m": [
+          {
+            "low": -1000000,
+            "high": -1,
+            "points": 89899,
+            "static_points": 86943,
+            "false_positive": 0,
+            "static_removal_fraction": 0.0,
+            "moving_points": 2956,
+            "true_positive": 557
+          },
+          {
+            "low": -1,
+            "high": 0,
+            "points": 143753,
+            "static_points": 141691,
+            "false_positive": 0,
+            "static_removal_fraction": 0.0,
+            "moving_points": 2062,
+            "true_positive": 1459
+          },
+          {
+            "low": 0,
+            "high": 1,
+            "points": 47526,
+            "static_points": 46991,
+            "false_positive": 4,
+            "static_removal_fraction": 8.512268306697027e-05,
+            "moving_points": 535,
+            "true_positive": 197
+          },
+          {
+            "low": 1,
+            "high": 2,
+            "points": 12626,
+            "static_points": 12424,
+            "false_positive": 1,
+            "static_removal_fraction": 8.048937540244688e-05,
+            "moving_points": 202,
+            "true_positive": 38
+          },
+          {
+            "low": 2,
+            "high": 1000000,
+            "points": 18847,
+            "static_points": 18828,
+            "false_positive": 3,
+            "static_removal_fraction": 0.00015933715742511153,
+            "moving_points": 19,
+            "true_positive": 0
+          }
+        ]
+      },
+      "variants": {
+        "baseline": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 3,
+            "max_surface_hits": 5
+          },
+          "metrics": {
+            "precision": 0.9964586100044267,
+            "recall": 0.3898510564599931,
+            "f1": 0.5604381924561185,
+            "iou": 0.3893116568661363,
+            "static_preservation": 0.9999739309234644,
+            "true_positive": 2251,
+            "false_positive": 8,
+            "false_negative": 3523,
+            "true_negative": 306869
+          }
+        },
+        "acquisition_range_guard_2m": {
+          "parameters": {
+            "minimum_acquisition_range_m": 2.0
+          },
+          "metrics": {
+            "precision": 0.9964586100044267,
+            "recall": 0.3898510564599931,
+            "f1": 0.5604381924561185,
+            "iou": 0.3893116568661363,
+            "static_preservation": 0.9999739309234644,
+            "true_positive": 2251,
+            "false_positive": 8,
+            "false_negative": 3523,
+            "true_negative": 306869
+          }
+        },
+        "surface_guard_2": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 3,
+            "max_surface_hits": 2
+          },
+          "metrics": {
+            "precision": 0.9977032613688562,
+            "recall": 0.3761690335988916,
+            "f1": 0.5463463715255943,
+            "iou": 0.37584357155217163,
+            "static_preservation": 0.9999837068271653,
+            "true_positive": 2172,
+            "false_positive": 5,
+            "false_negative": 3602,
+            "true_negative": 306872
+          }
+        },
+        "see_through_5": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 5,
+            "max_surface_hits": 5
+          },
+          "metrics": {
+            "precision": 0.9967741935483871,
+            "recall": 0.3746103221337028,
+            "f1": 0.5445619335347432,
+            "iou": 0.37415672029060715,
+            "static_preservation": 0.9999771895580314,
+            "true_positive": 2163,
+            "false_positive": 7,
+            "false_negative": 3611,
+            "true_negative": 306870
+          }
+        },
+        "consensus_1_2_5": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 3,
+            "max_surface_hits": 5,
+            "resolutions": [
+              1.0,
+              2.5
+            ]
+          },
+          "metrics": {
+            "precision": 0.9989235737351991,
+            "recall": 0.3214409421544856,
+            "f1": 0.4863731656184486,
+            "iou": 0.32132963988919666,
+            "static_preservation": 0.9999934827308661,
+            "true_positive": 1856,
+            "false_positive": 2,
+            "false_negative": 3918,
+            "true_negative": 306875
+          }
+        }
+      },
+      "analysis_seconds": 1.498967486999959
+    },
+    {
+      "scene": "scene-0655",
+      "map_points": 268453,
+      "gt_dynamic_points": 2662,
+      "channels": {
+        "range": {
+          "precision": 0.20784279778393353,
+          "recall": 0.9019534184823441,
+          "f1": 0.3378359364007317,
+          "iou": 0.20325065605688647,
+          "static_preservation": 0.9655706927623584,
+          "true_positive": 2401,
+          "false_positive": 9151,
+          "false_negative": 261,
+          "true_negative": 256640
+        },
+        "scan_ratio": {
+          "precision": 0.0008998074830501381,
+          "recall": 0.016153268219383923,
+          "f1": 0.0017046580773042617,
+          "iou": 0.000853056123157498,
+          "static_preservation": 0.8203663780940664,
+          "true_positive": 43,
+          "false_positive": 47745,
+          "false_negative": 2619,
+          "true_negative": 218046
+        }
+      },
+      "diagnostics": {
+        "acquisition_distance_m": [
+          {
+            "low": 0,
+            "high": 2,
+            "points": 107509,
+            "static_points": 107509,
+            "false_positive": 712,
+            "static_removal_fraction": 0.006622701355235376,
+            "moving_points": 0,
+            "true_positive": 0
+          },
+          {
+            "low": 2,
+            "high": 5,
+            "points": 13363,
+            "static_points": 10992,
+            "false_positive": 0,
+            "static_removal_fraction": 0.0,
+            "moving_points": 2371,
+            "true_positive": 32
+          },
+          {
+            "low": 5,
+            "high": 10,
+            "points": 42864,
+            "static_points": 42780,
+            "false_positive": 273,
+            "static_removal_fraction": 0.006381486676016831,
+            "moving_points": 84,
+            "true_positive": 0
+          },
+          {
+            "low": 10,
+            "high": 20,
+            "points": 58128,
+            "static_points": 57984,
+            "false_positive": 286,
+            "static_removal_fraction": 0.004932395143487859,
+            "moving_points": 144,
+            "true_positive": 0
+          },
+          {
+            "low": 20,
+            "high": 40,
+            "points": 36725,
+            "static_points": 36666,
+            "false_positive": 37,
+            "static_removal_fraction": 0.001009109256531937,
+            "moving_points": 59,
+            "true_positive": 3
+          },
+          {
+            "low": 40,
+            "high": 80,
+            "points": 9592,
+            "static_points": 9588,
+            "false_positive": 7,
+            "static_removal_fraction": 0.0007300792657488527,
+            "moving_points": 4,
+            "true_positive": 3
+          },
+          {
+            "low": 80,
+            "high": 1000000,
+            "points": 272,
+            "static_points": 272,
+            "false_positive": 1,
+            "static_removal_fraction": 0.003676470588235294,
+            "moving_points": 0,
+            "true_positive": 0
+          }
+        ],
+        "acquisition_height_m": [
+          {
+            "low": -1000000,
+            "high": -1,
+            "points": 55949,
+            "static_points": 54411,
+            "false_positive": 148,
+            "static_removal_fraction": 0.002720038227564279,
+            "moving_points": 1538,
+            "true_positive": 7
+          },
+          {
+            "low": -1,
+            "high": 0,
+            "points": 108159,
+            "static_points": 107036,
+            "false_positive": 926,
+            "static_removal_fraction": 0.008651294891438394,
+            "moving_points": 1123,
+            "true_positive": 31
+          },
+          {
+            "low": 0,
+            "high": 1,
+            "points": 53202,
+            "static_points": 53201,
+            "false_positive": 39,
+            "static_removal_fraction": 0.000733068927275803,
+            "moving_points": 1,
+            "true_positive": 0
+          },
+          {
+            "low": 1,
+            "high": 2,
+            "points": 20671,
+            "static_points": 20671,
+            "false_positive": 195,
+            "static_removal_fraction": 0.009433505877799815,
+            "moving_points": 0,
+            "true_positive": 0
+          },
+          {
+            "low": 2,
+            "high": 1000000,
+            "points": 30472,
+            "static_points": 30472,
+            "false_positive": 8,
+            "static_removal_fraction": 0.00026253609871357313,
+            "moving_points": 0,
+            "true_positive": 0
+          }
+        ]
+      },
+      "variants": {
+        "baseline": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 3,
+            "max_surface_hits": 5
+          },
+          "metrics": {
+            "precision": 0.028064992614475627,
+            "recall": 0.014274981217129978,
+            "f1": 0.018924302788844622,
+            "iou": 0.009552538964303671,
+            "static_preservation": 0.9950487413042579,
+            "true_positive": 38,
+            "false_positive": 1316,
+            "false_negative": 2624,
+            "true_negative": 264475
+          }
+        },
+        "acquisition_range_guard_2m": {
+          "parameters": {
+            "minimum_acquisition_range_m": 2.0
+          },
+          "metrics": {
+            "precision": 0.059190031152647975,
+            "recall": 0.014274981217129978,
+            "f1": 0.02300242130750605,
+            "iou": 0.011635027556644213,
+            "static_preservation": 0.9977275378022582,
+            "true_positive": 38,
+            "false_positive": 604,
+            "false_negative": 2624,
+            "true_negative": 265187
+          }
+        },
+        "surface_guard_2": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 3,
+            "max_surface_hits": 2
+          },
+          "metrics": {
+            "precision": 0.03476669716376944,
+            "recall": 0.014274981217129978,
+            "f1": 0.020239680426098534,
+            "iou": 0.010223298358891578,
+            "static_preservation": 0.9960307158632158,
+            "true_positive": 38,
+            "false_positive": 1055,
+            "false_negative": 2624,
+            "true_negative": 264736
+          }
+        },
+        "see_through_5": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 5,
+            "max_surface_hits": 5
+          },
+          "metrics": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "iou": 0.0,
+            "static_preservation": 0.9997479222396545,
+            "true_positive": 0,
+            "false_positive": 67,
+            "false_negative": 2662,
+            "true_negative": 265724
+          }
+        },
+        "consensus_1_2_5": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 3,
+            "max_surface_hits": 5,
+            "resolutions": [
+              1.0,
+              2.5
+            ]
+          },
+          "metrics": {
+            "precision": 0.018018018018018018,
+            "recall": 0.0015026296018031556,
+            "f1": 0.0027739251040221915,
+            "iou": 0.001388888888888889,
+            "static_preservation": 0.999179806690219,
+            "true_positive": 4,
+            "false_positive": 218,
+            "false_negative": 2658,
+            "true_negative": 265573
+          }
+        }
+      },
+      "analysis_seconds": 0.9690209870000217
+    },
+    {
+      "scene": "scene-0757",
+      "map_points": 303120,
+      "gt_dynamic_points": 48529,
+      "channels": {
+        "range": {
+          "precision": 0.47656892591999145,
+          "recall": 0.9193265882255971,
+          "f1": 0.6277296262944619,
+          "iou": 0.45743873679893365,
+          "static_preservation": 0.8075305097195109,
+          "true_positive": 44614,
+          "false_positive": 49001,
+          "false_negative": 3915,
+          "true_negative": 205590
+        },
+        "scan_ratio": {
+          "precision": 0.35774518489352625,
+          "recall": 0.8986791403078571,
+          "f1": 0.5117668111970992,
+          "iou": 0.34387541888428935,
+          "static_preservation": 0.6924635984775581,
+          "true_positive": 43612,
+          "false_positive": 78296,
+          "false_negative": 4917,
+          "true_negative": 176295
+        }
+      },
+      "diagnostics": {
+        "acquisition_distance_m": [
+          {
+            "low": 0,
+            "high": 2,
+            "points": 107450,
+            "static_points": 107445,
+            "false_positive": 40132,
+            "static_removal_fraction": 0.373512029410396,
+            "moving_points": 5,
+            "true_positive": 5
+          },
+          {
+            "low": 2,
+            "high": 5,
+            "points": 52624,
+            "static_points": 12317,
+            "false_positive": 1,
+            "static_removal_fraction": 8.118860112040269e-05,
+            "moving_points": 40307,
+            "true_positive": 38294
+          },
+          {
+            "low": 5,
+            "high": 10,
+            "points": 47010,
+            "static_points": 42947,
+            "false_positive": 96,
+            "static_removal_fraction": 0.00223531329312874,
+            "moving_points": 4063,
+            "true_positive": 1754
+          },
+          {
+            "low": 10,
+            "high": 20,
+            "points": 65812,
+            "static_points": 63638,
+            "false_positive": 86,
+            "static_removal_fraction": 0.001351393821301738,
+            "moving_points": 2174,
+            "true_positive": 1123
+          },
+          {
+            "low": 20,
+            "high": 40,
+            "points": 26400,
+            "static_points": 24466,
+            "false_positive": 17,
+            "static_removal_fraction": 0.0006948418213030328,
+            "moving_points": 1934,
+            "true_positive": 792
+          },
+          {
+            "low": 40,
+            "high": 80,
+            "points": 3704,
+            "static_points": 3664,
+            "false_positive": 2,
+            "static_removal_fraction": 0.0005458515283842794,
+            "moving_points": 40,
+            "true_positive": 3
+          },
+          {
+            "low": 80,
+            "high": 1000000,
+            "points": 120,
+            "static_points": 114,
+            "false_positive": 0,
+            "static_removal_fraction": 0.0,
+            "moving_points": 6,
+            "true_positive": 0
+          }
+        ],
+        "acquisition_height_m": [
+          {
+            "low": -1000000,
+            "high": -1,
+            "points": 67434,
+            "static_points": 59441,
+            "false_positive": 67,
+            "static_removal_fraction": 0.0011271681162833733,
+            "moving_points": 7993,
+            "true_positive": 6151
+          },
+          {
+            "low": -1,
+            "high": 0,
+            "points": 128819,
+            "static_points": 102415,
+            "false_positive": 20415,
+            "static_removal_fraction": 0.19933603476053313,
+            "moving_points": 26404,
+            "true_positive": 22862
+          },
+          {
+            "low": 0,
+            "high": 1,
+            "points": 68285,
+            "static_points": 54703,
+            "false_positive": 19812,
+            "static_removal_fraction": 0.3621739209915361,
+            "moving_points": 13582,
+            "true_positive": 12770
+          },
+          {
+            "low": 1,
+            "high": 2,
+            "points": 19513,
+            "static_points": 18963,
+            "false_positive": 39,
+            "static_removal_fraction": 0.0020566366081316246,
+            "moving_points": 550,
+            "true_positive": 188
+          },
+          {
+            "low": 2,
+            "high": 1000000,
+            "points": 19069,
+            "static_points": 19069,
+            "false_positive": 1,
+            "static_removal_fraction": 5.244113482615764e-05,
+            "moving_points": 0,
+            "true_positive": 0
+          }
+        ]
+      },
+      "variants": {
+        "baseline": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 3,
+            "max_surface_hits": 5
+          },
+          "metrics": {
+            "precision": 0.5099447178178725,
+            "recall": 0.8648643079395825,
+            "f1": 0.6415916352018588,
+            "iou": 0.47231131066923243,
+            "static_preservation": 0.8415733470546877,
+            "true_positive": 41971,
+            "false_positive": 40334,
+            "false_negative": 6558,
+            "true_negative": 214257
+          }
+        },
+        "acquisition_range_guard_2m": {
+          "parameters": {
+            "minimum_acquisition_range_m": 2.0
+          },
+          "metrics": {
+            "precision": 0.9952096376399165,
+            "recall": 0.8647612767623483,
+            "f1": 0.9254109838252644,
+            "iou": 0.8611766637253494,
+            "static_preservation": 0.9992065705386286,
+            "true_positive": 41966,
+            "false_positive": 202,
+            "false_negative": 6563,
+            "true_negative": 254389
+          }
+        },
+        "surface_guard_2": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 3,
+            "max_surface_hits": 2
+          },
+          "metrics": {
+            "precision": 0.16525522657327815,
+            "recall": 0.16044014918914465,
+            "f1": 0.1628120948517419,
+            "iou": 0.08862027362334676,
+            "static_preservation": 0.8455208550184413,
+            "true_positive": 7786,
+            "false_positive": 39329,
+            "false_negative": 40743,
+            "true_negative": 215262
+          }
+        },
+        "see_through_5": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 5,
+            "max_surface_hits": 5
+          },
+          "metrics": {
+            "precision": 0.4465669272316267,
+            "recall": 0.5332687671289332,
+            "f1": 0.4860818933132983,
+            "iou": 0.32107542090048513,
+            "static_preservation": 0.8740253975985012,
+            "true_positive": 25879,
+            "false_positive": 32072,
+            "false_negative": 22650,
+            "true_negative": 222519
+          }
+        },
+        "consensus_1_2_5": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 3,
+            "max_surface_hits": 5,
+            "resolutions": [
+              1.0,
+              2.5
+            ]
+          },
+          "metrics": {
+            "precision": 0.3947992179795498,
+            "recall": 0.4702136866615838,
+            "f1": 0.42921902038973736,
+            "iou": 0.2732519848160079,
+            "static_preservation": 0.8626031556496498,
+            "true_positive": 22819,
+            "false_positive": 34980,
+            "false_negative": 25710,
+            "true_negative": 219611
+          }
+        }
+      },
+      "analysis_seconds": 1.04289367399997
+    },
+    {
+      "scene": "scene-0796",
+      "map_points": 254177,
+      "gt_dynamic_points": 9308,
+      "channels": {
+        "range": {
+          "precision": 0.10417487199684915,
+          "recall": 0.39782982380747745,
+          "f1": 0.1651134792883578,
+          "iou": 0.08998566255984058,
+          "static_preservation": 0.8699590393230666,
+          "true_positive": 3703,
+          "false_positive": 31843,
+          "false_negative": 5605,
+          "true_negative": 213026
+        },
+        "scan_ratio": {
+          "precision": 0.017065556711758585,
+          "recall": 0.07047700902449505,
+          "f1": 0.027477590684426574,
+          "iou": 0.013930179223647329,
+          "static_preservation": 0.8456970870138727,
+          "true_positive": 656,
+          "false_positive": 37784,
+          "false_negative": 8652,
+          "true_negative": 207085
+        }
+      },
+      "diagnostics": {
+        "acquisition_distance_m": [
+          {
+            "low": 0,
+            "high": 2,
+            "points": 90517,
+            "static_points": 90517,
+            "false_positive": 14530,
+            "static_removal_fraction": 0.16052233282145895,
+            "moving_points": 0,
+            "true_positive": 0
+          },
+          {
+            "low": 2,
+            "high": 5,
+            "points": 15278,
+            "static_points": 10616,
+            "false_positive": 0,
+            "static_removal_fraction": 0.0,
+            "moving_points": 4662,
+            "true_positive": 203
+          },
+          {
+            "low": 5,
+            "high": 10,
+            "points": 51323,
+            "static_points": 49154,
+            "false_positive": 23,
+            "static_removal_fraction": 0.00046791715831875333,
+            "moving_points": 2169,
+            "true_positive": 93
+          },
+          {
+            "low": 10,
+            "high": 20,
+            "points": 37055,
+            "static_points": 35650,
+            "false_positive": 16,
+            "static_removal_fraction": 0.0004488078541374474,
+            "moving_points": 1405,
+            "true_positive": 18
+          },
+          {
+            "low": 20,
+            "high": 40,
+            "points": 38297,
+            "static_points": 37315,
+            "false_positive": 92,
+            "static_removal_fraction": 0.0024654964491491356,
+            "moving_points": 982,
+            "true_positive": 16
+          },
+          {
+            "low": 40,
+            "high": 80,
+            "points": 20512,
+            "static_points": 20429,
+            "false_positive": 23,
+            "static_removal_fraction": 0.001125850506632728,
+            "moving_points": 83,
+            "true_positive": 1
+          },
+          {
+            "low": 80,
+            "high": 1000000,
+            "points": 1195,
+            "static_points": 1188,
+            "false_positive": 2,
+            "static_removal_fraction": 0.0016835016835016834,
+            "moving_points": 7,
+            "true_positive": 0
+          }
+        ],
+        "acquisition_height_m": [
+          {
+            "low": -1000000,
+            "high": -1,
+            "points": 48224,
+            "static_points": 44437,
+            "false_positive": 44,
+            "static_removal_fraction": 0.0009901658527803408,
+            "moving_points": 3787,
+            "true_positive": 57
+          },
+          {
+            "low": -1,
+            "high": 0,
+            "points": 97743,
+            "static_points": 92744,
+            "false_positive": 8054,
+            "static_removal_fraction": 0.0868411972742172,
+            "moving_points": 4999,
+            "true_positive": 249
+          },
+          {
+            "low": 0,
+            "high": 1,
+            "points": 54133,
+            "static_points": 53846,
+            "false_positive": 6476,
+            "static_removal_fraction": 0.12026891505404301,
+            "moving_points": 287,
+            "true_positive": 14
+          },
+          {
+            "low": 1,
+            "high": 2,
+            "points": 13214,
+            "static_points": 13048,
+            "false_positive": 6,
+            "static_removal_fraction": 0.0004598405885959534,
+            "moving_points": 166,
+            "true_positive": 10
+          },
+          {
+            "low": 2,
+            "high": 1000000,
+            "points": 40863,
+            "static_points": 40794,
+            "false_positive": 106,
+            "static_removal_fraction": 0.00259842133647105,
+            "moving_points": 69,
+            "true_positive": 1
+          }
+        ]
+      },
+      "variants": {
+        "baseline": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 3,
+            "max_surface_hits": 5
+          },
+          "metrics": {
+            "precision": 0.02204168608909902,
+            "recall": 0.035560807907176625,
+            "f1": 0.027214799588900305,
+            "iou": 0.013795115445528049,
+            "static_preservation": 0.9400250746317419,
+            "true_positive": 331,
+            "false_positive": 14686,
+            "false_negative": 8977,
+            "true_negative": 230183
+          }
+        },
+        "acquisition_range_guard_2m": {
+          "parameters": {
+            "minimum_acquisition_range_m": 2.0
+          },
+          "metrics": {
+            "precision": 0.6796714579055442,
+            "recall": 0.035560807907176625,
+            "f1": 0.06758550280755489,
+            "iou": 0.034974640743871514,
+            "static_preservation": 0.9993629246658418,
+            "true_positive": 331,
+            "false_positive": 156,
+            "false_negative": 8977,
+            "true_negative": 244713
+          }
+        },
+        "surface_guard_2": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 3,
+            "max_surface_hits": 2
+          },
+          "metrics": {
+            "precision": 0.022044622044622045,
+            "recall": 0.035560807907176625,
+            "f1": 0.027217037372034705,
+            "iou": 0.01379626542180727,
+            "static_preservation": 0.9400332422642311,
+            "true_positive": 331,
+            "false_positive": 14684,
+            "false_negative": 8977,
+            "true_negative": 230185
+          }
+        },
+        "see_through_5": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 5,
+            "max_surface_hits": 5
+          },
+          "metrics": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "iou": 0.0,
+            "static_preservation": 0.9999142398588633,
+            "true_positive": 0,
+            "false_positive": 21,
+            "false_negative": 9308,
+            "true_negative": 244848
+          }
+        },
+        "consensus_1_2_5": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 3,
+            "max_surface_hits": 5,
+            "resolutions": [
+              1.0,
+              2.5
+            ]
+          },
+          "metrics": {
+            "precision": 0.17543859649122806,
+            "recall": 0.0010743446497636442,
+            "f1": 0.0021356113187399896,
+            "iou": 0.0010689470871191875,
+            "static_preservation": 0.9998080606365036,
+            "true_positive": 10,
+            "false_positive": 47,
+            "false_negative": 9298,
+            "true_negative": 244822
+          }
+        }
+      },
+      "analysis_seconds": 0.9339749990000428
+    },
+    {
+      "scene": "scene-0916",
+      "map_points": 258188,
+      "gt_dynamic_points": 3232,
+      "channels": {
+        "range": {
+          "precision": 0.019626222013928288,
+          "recall": 0.7385519801980198,
+          "f1": 0.03823635417083818,
+          "iou": 0.019490805761505046,
+          "static_preservation": 0.5323271466449113,
+          "true_positive": 2387,
+          "false_positive": 119236,
+          "false_negative": 845,
+          "true_negative": 135720
+        },
+        "scan_ratio": {
+          "precision": 0.011248251274877025,
+          "recall": 0.30847772277227725,
+          "f1": 0.02170505507902643,
+          "iou": 0.010971597099184558,
+          "static_preservation": 0.65625833477149,
+          "true_positive": 997,
+          "false_positive": 87639,
+          "false_negative": 2235,
+          "true_negative": 167317
+        }
+      },
+      "diagnostics": {
+        "acquisition_distance_m": [
+          {
+            "low": 0,
+            "high": 2,
+            "points": 100896,
+            "static_points": 100896,
+            "false_positive": 74875,
+            "static_removal_fraction": 0.7421007770377418,
+            "moving_points": 0,
+            "true_positive": 0
+          },
+          {
+            "low": 2,
+            "high": 5,
+            "points": 5924,
+            "static_points": 5924,
+            "false_positive": 672,
+            "static_removal_fraction": 0.11343686698176908,
+            "moving_points": 0,
+            "true_positive": 0
+          },
+          {
+            "low": 5,
+            "high": 10,
+            "points": 30412,
+            "static_points": 30003,
+            "false_positive": 1581,
+            "static_removal_fraction": 0.05269473052694731,
+            "moving_points": 409,
+            "true_positive": 28
+          },
+          {
+            "low": 10,
+            "high": 20,
+            "points": 46434,
+            "static_points": 44359,
+            "false_positive": 842,
+            "static_removal_fraction": 0.018981491918212762,
+            "moving_points": 2075,
+            "true_positive": 592
+          },
+          {
+            "low": 20,
+            "high": 40,
+            "points": 46300,
+            "static_points": 45646,
+            "false_positive": 561,
+            "static_removal_fraction": 0.012290233536344916,
+            "moving_points": 654,
+            "true_positive": 221
+          },
+          {
+            "low": 40,
+            "high": 80,
+            "points": 27200,
+            "static_points": 27106,
+            "false_positive": 130,
+            "static_removal_fraction": 0.004795986128532428,
+            "moving_points": 94,
+            "true_positive": 6
+          },
+          {
+            "low": 80,
+            "high": 1000000,
+            "points": 1022,
+            "static_points": 1022,
+            "false_positive": 0,
+            "static_removal_fraction": 0.0,
+            "moving_points": 0,
+            "true_positive": 0
+          }
+        ],
+        "acquisition_height_m": [
+          {
+            "low": -1000000,
+            "high": -1,
+            "points": 43433,
+            "static_points": 42825,
+            "false_positive": 1030,
+            "static_removal_fraction": 0.024051371862230005,
+            "moving_points": 608,
+            "true_positive": 29
+          },
+          {
+            "low": -1,
+            "high": 0,
+            "points": 107221,
+            "static_points": 105461,
+            "false_positive": 56287,
+            "static_removal_fraction": 0.5337233669318516,
+            "moving_points": 1760,
+            "true_positive": 414
+          },
+          {
+            "low": 0,
+            "high": 1,
+            "points": 41318,
+            "static_points": 40852,
+            "false_positive": 20925,
+            "static_removal_fraction": 0.5122148242436111,
+            "moving_points": 466,
+            "true_positive": 187
+          },
+          {
+            "low": 1,
+            "high": 2,
+            "points": 16407,
+            "static_points": 16009,
+            "false_positive": 31,
+            "static_removal_fraction": 0.0019364107689424698,
+            "moving_points": 398,
+            "true_positive": 217
+          },
+          {
+            "low": 2,
+            "high": 1000000,
+            "points": 49809,
+            "static_points": 49809,
+            "false_positive": 388,
+            "static_removal_fraction": 0.007789756871248168,
+            "moving_points": 0,
+            "true_positive": 0
+          }
+        ]
+      },
+      "variants": {
+        "baseline": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 3,
+            "max_surface_hits": 5
+          },
+          "metrics": {
+            "precision": 0.010653016048699502,
+            "recall": 0.2620668316831683,
+            "f1": 0.02047377326565144,
+            "iou": 0.01034276433883238,
+            "static_preservation": 0.6914722540359906,
+            "true_positive": 847,
+            "false_positive": 78661,
+            "false_negative": 2385,
+            "true_negative": 176295
+          }
+        },
+        "acquisition_range_guard_2m": {
+          "parameters": {
+            "minimum_acquisition_range_m": 2.0
+          },
+          "metrics": {
+            "precision": 0.18281890783509605,
+            "recall": 0.2620668316831683,
+            "f1": 0.21538461538461537,
+            "iou": 0.1206896551724138,
+            "static_preservation": 0.9851503788889063,
+            "true_positive": 847,
+            "false_positive": 3786,
+            "false_negative": 2385,
+            "true_negative": 251170
+          }
+        },
+        "surface_guard_2": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 3,
+            "max_surface_hits": 2
+          },
+          "metrics": {
+            "precision": 0.0101543043467098,
+            "recall": 0.24474009900990099,
+            "f1": 0.019499568593615183,
+            "iou": 0.009845778513548837,
+            "static_preservation": 0.6975674233985472,
+            "true_positive": 791,
+            "false_positive": 77107,
+            "false_negative": 2441,
+            "true_negative": 177849
+          }
+        },
+        "see_through_5": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 5,
+            "max_surface_hits": 5
+          },
+          "metrics": {
+            "precision": 0.006980680721290377,
+            "recall": 0.15439356435643564,
+            "f1": 0.013357424881215284,
+            "iou": 0.0067236175487765445,
+            "static_preservation": 0.7215833320259182,
+            "true_positive": 499,
+            "false_positive": 70984,
+            "false_negative": 2733,
+            "true_negative": 183972
+          }
+        },
+        "consensus_1_2_5": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 3,
+            "max_surface_hits": 5,
+            "resolutions": [
+              1.0,
+              2.5
+            ]
+          },
+          "metrics": {
+            "precision": 0.008939429221972108,
+            "recall": 0.21379950495049505,
+            "f1": 0.01716130634546132,
+            "iou": 0.008654918022520322,
+            "static_preservation": 0.6995285461020725,
+            "true_positive": 691,
+            "false_positive": 76607,
+            "false_negative": 2541,
+            "true_negative": 178349
+          }
+        }
+      },
+      "analysis_seconds": 1.0696038280000266
+    },
+    {
+      "scene": "scene-1077",
+      "map_points": 266956,
+      "gt_dynamic_points": 4517,
+      "channels": {
+        "range": {
+          "precision": 0.141439205955335,
+          "recall": 0.025237989816249723,
+          "f1": 0.04283298891602479,
+          "iou": 0.021885198694567096,
+          "static_preservation": 0.9973631967809663,
+          "true_positive": 114,
+          "false_positive": 692,
+          "false_negative": 4403,
+          "true_negative": 261747
+        },
+        "scan_ratio": {
+          "precision": 0.01008564100334739,
+          "recall": 0.051361523134824,
+          "f1": 0.016860465116279068,
+          "iou": 0.008501905599530929,
+          "static_preservation": 0.91323317037483,
+          "true_positive": 232,
+          "false_positive": 22771,
+          "false_negative": 4285,
+          "true_negative": 239668
+        }
+      },
+      "diagnostics": {
+        "acquisition_distance_m": [
+          {
+            "low": 0,
+            "high": 2,
+            "points": 109333,
+            "static_points": 109333,
+            "false_positive": 0,
+            "static_removal_fraction": 0.0,
+            "moving_points": 0,
+            "true_positive": 0
+          },
+          {
+            "low": 2,
+            "high": 5,
+            "points": 29405,
+            "static_points": 29405,
+            "false_positive": 0,
+            "static_removal_fraction": 0.0,
+            "moving_points": 0,
+            "true_positive": 0
+          },
+          {
+            "low": 5,
+            "high": 10,
+            "points": 38094,
+            "static_points": 37721,
+            "false_positive": 0,
+            "static_removal_fraction": 0.0,
+            "moving_points": 373,
+            "true_positive": 0
+          },
+          {
+            "low": 10,
+            "high": 20,
+            "points": 39531,
+            "static_points": 36942,
+            "false_positive": 0,
+            "static_removal_fraction": 0.0,
+            "moving_points": 2589,
+            "true_positive": 0
+          },
+          {
+            "low": 20,
+            "high": 40,
+            "points": 34709,
+            "static_points": 33287,
+            "false_positive": 161,
+            "static_removal_fraction": 0.004836723045032595,
+            "moving_points": 1422,
+            "true_positive": 11
+          },
+          {
+            "low": 40,
+            "high": 80,
+            "points": 15585,
+            "static_points": 15452,
+            "false_positive": 29,
+            "static_removal_fraction": 0.0018767797048925706,
+            "moving_points": 133,
+            "true_positive": 0
+          },
+          {
+            "low": 80,
+            "high": 1000000,
+            "points": 299,
+            "static_points": 299,
+            "false_positive": 1,
+            "static_removal_fraction": 0.0033444816053511705,
+            "moving_points": 0,
+            "true_positive": 0
+          }
+        ],
+        "acquisition_height_m": [
+          {
+            "low": -1000000,
+            "high": -1,
+            "points": 50320,
+            "static_points": 48608,
+            "false_positive": 0,
+            "static_removal_fraction": 0.0,
+            "moving_points": 1712,
+            "true_positive": 0
+          },
+          {
+            "low": -1,
+            "high": 0,
+            "points": 113169,
+            "static_points": 110892,
+            "false_positive": 1,
+            "static_removal_fraction": 9.017783068210512e-06,
+            "moving_points": 2277,
+            "true_positive": 6
+          },
+          {
+            "low": 0,
+            "high": 1,
+            "points": 56343,
+            "static_points": 56106,
+            "false_positive": 90,
+            "static_removal_fraction": 0.0016041065126724415,
+            "moving_points": 237,
+            "true_positive": 5
+          },
+          {
+            "low": 1,
+            "high": 2,
+            "points": 15787,
+            "static_points": 15591,
+            "false_positive": 74,
+            "static_removal_fraction": 0.004746328009749215,
+            "moving_points": 196,
+            "true_positive": 0
+          },
+          {
+            "low": 2,
+            "high": 1000000,
+            "points": 31337,
+            "static_points": 31242,
+            "false_positive": 26,
+            "static_removal_fraction": 0.0008322130465399142,
+            "moving_points": 95,
+            "true_positive": 0
+          }
+        ]
+      },
+      "variants": {
+        "baseline": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 3,
+            "max_surface_hits": 5
+          },
+          "metrics": {
+            "precision": 0.054455445544554455,
+            "recall": 0.0024352446313925173,
+            "f1": 0.004662004662004663,
+            "iou": 0.002336448598130841,
+            "static_preservation": 0.9992722118282725,
+            "true_positive": 11,
+            "false_positive": 191,
+            "false_negative": 4506,
+            "true_negative": 262248
+          }
+        },
+        "acquisition_range_guard_2m": {
+          "parameters": {
+            "minimum_acquisition_range_m": 2.0
+          },
+          "metrics": {
+            "precision": 0.054455445544554455,
+            "recall": 0.0024352446313925173,
+            "f1": 0.004662004662004663,
+            "iou": 0.002336448598130841,
+            "static_preservation": 0.9992722118282725,
+            "true_positive": 11,
+            "false_positive": 191,
+            "false_negative": 4506,
+            "true_negative": 262248
+          }
+        },
+        "surface_guard_2": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 3,
+            "max_surface_hits": 2
+          },
+          "metrics": {
+            "precision": 0.06179775280898876,
+            "recall": 0.0024352446313925173,
+            "f1": 0.00468583599574015,
+            "iou": 0.0023484201537147735,
+            "static_preservation": 0.999363661650898,
+            "true_positive": 11,
+            "false_positive": 167,
+            "false_negative": 4506,
+            "true_negative": 262272
+          }
+        },
+        "see_through_5": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 5,
+            "max_surface_hits": 5
+          },
+          "metrics": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "iou": 0.0,
+            "static_preservation": 0.9999771375443436,
+            "true_positive": 0,
+            "false_positive": 6,
+            "false_negative": 4517,
+            "true_negative": 262433
+          }
+        },
+        "consensus_1_2_5": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 3,
+            "max_surface_hits": 5,
+            "resolutions": [
+              1.0,
+              2.5
+            ]
+          },
+          "metrics": {
+            "precision": 0.037037037037037035,
+            "recall": 0.00022138587558113792,
+            "f1": 0.0004401408450704225,
+            "iou": 0.00022011886418666079,
+            "static_preservation": 0.9999009293588225,
+            "true_positive": 1,
+            "false_positive": 26,
+            "false_negative": 4516,
+            "true_negative": 262413
+          }
+        }
+      },
+      "analysis_seconds": 0.8459104199999956
+    },
+    {
+      "scene": "scene-1094",
+      "map_points": 276417,
+      "gt_dynamic_points": 8097,
+      "channels": {
+        "range": {
+          "precision": 0.03402987989454155,
+          "recall": 0.25824379399777697,
+          "f1": 0.06013545576118374,
+          "iou": 0.030999822095712507,
+          "static_preservation": 0.7787902504472272,
+          "true_positive": 2091,
+          "false_positive": 59355,
+          "false_negative": 6006,
+          "true_negative": 208965
+        },
+        "scan_ratio": {
+          "precision": 0.03379935804915878,
+          "recall": 0.19377547239718415,
+          "f1": 0.05755897134891228,
+          "iou": 0.02963228767304387,
+          "static_preservation": 0.8328413834227788,
+          "true_positive": 1569,
+          "false_positive": 44852,
+          "false_negative": 6528,
+          "true_negative": 223468
+        }
+      },
+      "diagnostics": {
+        "acquisition_distance_m": [
+          {
+            "low": 0,
+            "high": 2,
+            "points": 104497,
+            "static_points": 104497,
+            "false_positive": 20117,
+            "static_removal_fraction": 0.19251270371398221,
+            "moving_points": 0,
+            "true_positive": 0
+          },
+          {
+            "low": 2,
+            "high": 5,
+            "points": 19442,
+            "static_points": 17568,
+            "false_positive": 483,
+            "static_removal_fraction": 0.027493169398907103,
+            "moving_points": 1874,
+            "true_positive": 29
+          },
+          {
+            "low": 5,
+            "high": 10,
+            "points": 43344,
+            "static_points": 40366,
+            "false_positive": 297,
+            "static_removal_fraction": 0.0073576772531338255,
+            "moving_points": 2978,
+            "true_positive": 285
+          },
+          {
+            "low": 10,
+            "high": 20,
+            "points": 37751,
+            "static_points": 35640,
+            "false_positive": 209,
+            "static_removal_fraction": 0.005864197530864198,
+            "moving_points": 2111,
+            "true_positive": 243
+          },
+          {
+            "low": 20,
+            "high": 40,
+            "points": 50240,
+            "static_points": 49274,
+            "false_positive": 81,
+            "static_removal_fraction": 0.0016438689775540854,
+            "moving_points": 966,
+            "true_positive": 59
+          },
+          {
+            "low": 40,
+            "high": 80,
+            "points": 20075,
+            "static_points": 19908,
+            "false_positive": 23,
+            "static_removal_fraction": 0.001155314446453687,
+            "moving_points": 167,
+            "true_positive": 5
+          },
+          {
+            "low": 80,
+            "high": 1000000,
+            "points": 1068,
+            "static_points": 1067,
+            "false_positive": 1,
+            "static_removal_fraction": 0.0009372071227741331,
+            "moving_points": 1,
+            "true_positive": 0
+          }
+        ],
+        "acquisition_height_m": [
+          {
+            "low": -1000000,
+            "high": -1,
+            "points": 57942,
+            "static_points": 55166,
+            "false_positive": 382,
+            "static_removal_fraction": 0.0069245549795163685,
+            "moving_points": 2776,
+            "true_positive": 48
+          },
+          {
+            "low": -1,
+            "high": 0,
+            "points": 104752,
+            "static_points": 100046,
+            "false_positive": 16082,
+            "static_removal_fraction": 0.1607460568138656,
+            "moving_points": 4706,
+            "true_positive": 445
+          },
+          {
+            "low": 0,
+            "high": 1,
+            "points": 50232,
+            "static_points": 49774,
+            "false_positive": 4706,
+            "static_removal_fraction": 0.09454735404026199,
+            "moving_points": 458,
+            "true_positive": 109
+          },
+          {
+            "low": 1,
+            "high": 2,
+            "points": 15120,
+            "static_points": 15003,
+            "false_positive": 15,
+            "static_removal_fraction": 0.0009998000399920016,
+            "moving_points": 117,
+            "true_positive": 19
+          },
+          {
+            "low": 2,
+            "high": 1000000,
+            "points": 48371,
+            "static_points": 48331,
+            "false_positive": 26,
+            "static_removal_fraction": 0.0005379570048209223,
+            "moving_points": 40,
+            "true_positive": 0
+          }
+        ]
+      },
+      "variants": {
+        "baseline": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 3,
+            "max_surface_hits": 5
+          },
+          "metrics": {
+            "precision": 0.028444485159399048,
+            "recall": 0.0766950722489811,
+            "f1": 0.04149821243609876,
+            "iou": 0.02118875392384332,
+            "static_preservation": 0.9209488670244484,
+            "true_positive": 621,
+            "false_positive": 21211,
+            "false_negative": 7476,
+            "true_negative": 247109
+          }
+        },
+        "acquisition_range_guard_2m": {
+          "parameters": {
+            "minimum_acquisition_range_m": 2.0
+          },
+          "metrics": {
+            "precision": 0.3620991253644315,
+            "recall": 0.0766950722489811,
+            "f1": 0.12657969832857724,
+            "iou": 0.06756609726906757,
+            "static_preservation": 0.995922778771616,
+            "true_positive": 621,
+            "false_positive": 1094,
+            "false_negative": 7476,
+            "true_negative": 267226
+          }
+        },
+        "surface_guard_2": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 3,
+            "max_surface_hits": 2
+          },
+          "metrics": {
+            "precision": 0.028449022816982767,
+            "recall": 0.07298999629492404,
+            "f1": 0.0409407363790655,
+            "iou": 0.020898161244695897,
+            "static_preservation": 0.9247801132975552,
+            "true_positive": 591,
+            "false_positive": 20183,
+            "false_negative": 7506,
+            "true_negative": 248137
+          }
+        },
+        "see_through_5": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 5,
+            "max_surface_hits": 5
+          },
+          "metrics": {
+            "precision": 0.033858727378867484,
+            "recall": 0.03581573422255156,
+            "f1": 0.03480974672908414,
+            "iou": 0.017713168824822868,
+            "static_preservation": 0.9691599582587954,
+            "true_positive": 290,
+            "false_positive": 8275,
+            "false_negative": 7807,
+            "true_negative": 260045
+          }
+        },
+        "consensus_1_2_5": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 3,
+            "max_surface_hits": 5,
+            "resolutions": [
+              1.0,
+              2.5
+            ]
+          },
+          "metrics": {
+            "precision": 0.02010459035444509,
+            "recall": 0.04273187600345807,
+            "f1": 0.027344213063579245,
+            "iou": 0.013861624133648491,
+            "static_preservation": 0.9371496720333929,
+            "true_positive": 346,
+            "false_positive": 16864,
+            "false_negative": 7751,
+            "true_negative": 251456
+          }
+        }
+      },
+      "analysis_seconds": 1.0071631639999623
+    },
+    {
+      "scene": "scene-1100",
+      "map_points": 244350,
+      "gt_dynamic_points": 6082,
+      "channels": {
+        "range": {
+          "precision": 0.025932003251084974,
+          "recall": 0.2780335415981585,
+          "f1": 0.04743936822319788,
+          "iou": 0.024295977011494253,
+          "static_preservation": 0.7334178320210855,
+          "true_positive": 1691,
+          "false_positive": 63518,
+          "false_negative": 4391,
+          "true_negative": 174750
+        },
+        "scan_ratio": {
+          "precision": 0.14025407416912614,
+          "recall": 0.17971062150608352,
+          "f1": 0.15754954954954953,
+          "iou": 0.08551087466750118,
+          "static_preservation": 0.9718804035791629,
+          "true_positive": 1093,
+          "false_positive": 6700,
+          "false_negative": 4989,
+          "true_negative": 231568
+        }
+      },
+      "diagnostics": {
+        "acquisition_distance_m": [
+          {
+            "low": 0,
+            "high": 2,
+            "points": 95959,
+            "static_points": 95959,
+            "false_positive": 1615,
+            "static_removal_fraction": 0.01683010452380704,
+            "moving_points": 0,
+            "true_positive": 0
+          },
+          {
+            "low": 2,
+            "high": 5,
+            "points": 7779,
+            "static_points": 5832,
+            "false_positive": 602,
+            "static_removal_fraction": 0.10322359396433471,
+            "moving_points": 1947,
+            "true_positive": 67
+          },
+          {
+            "low": 5,
+            "high": 10,
+            "points": 13843,
+            "static_points": 11424,
+            "false_positive": 6,
+            "static_removal_fraction": 0.0005252100840336134,
+            "moving_points": 2419,
+            "true_positive": 34
+          },
+          {
+            "low": 10,
+            "high": 20,
+            "points": 40465,
+            "static_points": 39085,
+            "false_positive": 47,
+            "static_removal_fraction": 0.0012025073557630805,
+            "moving_points": 1380,
+            "true_positive": 459
+          },
+          {
+            "low": 20,
+            "high": 40,
+            "points": 57653,
+            "static_points": 57420,
+            "false_positive": 34,
+            "static_removal_fraction": 0.0005921281783350749,
+            "moving_points": 233,
+            "true_positive": 43
+          },
+          {
+            "low": 40,
+            "high": 80,
+            "points": 27651,
+            "static_points": 27557,
+            "false_positive": 58,
+            "static_removal_fraction": 0.0021047283811735677,
+            "moving_points": 94,
+            "true_positive": 3
+          },
+          {
+            "low": 80,
+            "high": 1000000,
+            "points": 1000,
+            "static_points": 991,
+            "false_positive": 0,
+            "static_removal_fraction": 0.0,
+            "moving_points": 9,
+            "true_positive": 0
+          }
+        ],
+        "acquisition_height_m": [
+          {
+            "low": -1000000,
+            "high": -1,
+            "points": 38534,
+            "static_points": 33876,
+            "false_positive": 11,
+            "static_removal_fraction": 0.00032471366158932577,
+            "moving_points": 4658,
+            "true_positive": 506
+          },
+          {
+            "low": -1,
+            "high": 0,
+            "points": 95650,
+            "static_points": 94303,
+            "false_positive": 2220,
+            "static_removal_fraction": 0.023541138670031707,
+            "moving_points": 1347,
+            "true_positive": 96
+          },
+          {
+            "low": 0,
+            "high": 1,
+            "points": 41664,
+            "static_points": 41587,
+            "false_positive": 35,
+            "static_removal_fraction": 0.000841609156707625,
+            "moving_points": 77,
+            "true_positive": 4
+          },
+          {
+            "low": 1,
+            "high": 2,
+            "points": 16713,
+            "static_points": 16713,
+            "false_positive": 45,
+            "static_removal_fraction": 0.0026925148088314485,
+            "moving_points": 0,
+            "true_positive": 0
+          },
+          {
+            "low": 2,
+            "high": 1000000,
+            "points": 51789,
+            "static_points": 51789,
+            "false_positive": 51,
+            "static_removal_fraction": 0.0009847651045588831,
+            "moving_points": 0,
+            "true_positive": 0
+          }
+        ]
+      },
+      "variants": {
+        "baseline": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 3,
+            "max_surface_hits": 5
+          },
+          "metrics": {
+            "precision": 0.204177897574124,
+            "recall": 0.0996382768826044,
+            "f1": 0.13392265193370168,
+            "iou": 0.07176693510184746,
+            "static_preservation": 0.9900867930229825,
+            "true_positive": 606,
+            "false_positive": 2362,
+            "false_negative": 5476,
+            "true_negative": 235906
+          }
+        },
+        "acquisition_range_guard_2m": {
+          "parameters": {
+            "minimum_acquisition_range_m": 2.0
+          },
+          "metrics": {
+            "precision": 0.44789356984478934,
+            "recall": 0.0996382768826044,
+            "f1": 0.16301277740416947,
+            "iou": 0.08873920046858984,
+            "static_preservation": 0.9968648748468112,
+            "true_positive": 606,
+            "false_positive": 747,
+            "false_negative": 5476,
+            "true_negative": 237521
+          }
+        },
+        "surface_guard_2": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 3,
+            "max_surface_hits": 2
+          },
+          "metrics": {
+            "precision": 0.7870370370370371,
+            "recall": 0.09782966129562644,
+            "f1": 0.1740274934191284,
+            "iou": 0.09530674355277911,
+            "static_preservation": 0.999324290294962,
+            "true_positive": 595,
+            "false_positive": 161,
+            "false_negative": 5487,
+            "true_negative": 238107
+          }
+        },
+        "see_through_5": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 5,
+            "max_surface_hits": 5
+          },
+          "metrics": {
+            "precision": 0.2625055334218681,
+            "recall": 0.09750082209799409,
+            "f1": 0.142189185948927,
+            "iou": 0.07653588022715539,
+            "static_preservation": 0.9930078734869978,
+            "true_positive": 593,
+            "false_positive": 1666,
+            "false_negative": 5489,
+            "true_negative": 236602
+          }
+        },
+        "consensus_1_2_5": {
+          "parameters": {
+            "h_res_deg": 2.5,
+            "v_res_deg": 2.5,
+            "min_see_through": 3,
+            "max_surface_hits": 5,
+            "resolutions": [
+              1.0,
+              2.5
+            ]
+          },
+          "metrics": {
+            "precision": 0.31257078142695355,
+            "recall": 0.09075961854653075,
+            "f1": 0.14067278287461774,
+            "iou": 0.0756578947368421,
+            "static_preservation": 0.9949048970067319,
+            "true_positive": 552,
+            "false_positive": 1214,
+            "false_negative": 5530,
+            "true_negative": 237054
+          }
+        }
+      },
+      "analysis_seconds": 0.8718892629999573
+    }
+  ],
+  "aggregate": {
+    "min_gt_dynamic_points": 5000,
+    "included_scenes": [
+      "scene-0103",
+      "scene-0553",
+      "scene-0757",
+      "scene-0796",
+      "scene-1094",
+      "scene-1100"
+    ],
+    "methods": {
+      "baseline": {
+        "precision": 0.2970805906521069,
+        "recall": 0.2632039751177717,
+        "f1": 0.2401089666639172,
+        "static_preservation": 0.9308434650411734
+      },
+      "surface_guard_2": {
+        "precision": 0.33679356790499076,
+        "recall": 0.14152088650291178,
+        "f1": 0.16423100444429425,
+        "static_preservation": 0.9337395799477853
+      },
+      "see_through_5": {
+        "precision": 0.30408547896272986,
+        "recall": 0.183885758003701,
+        "f1": 0.2132256923597828,
+        "static_preservation": 0.9703457080874315
+      },
+      "consensus_1_2_5": {
+        "precision": 0.34567369967564016,
+        "recall": 0.1634211450758077,
+        "f1": 0.19471959795038737,
+        "static_preservation": 0.9648338754501086
+      },
+      "acquisition_range_guard_2m": {
+        "precision": 0.6920268341030598,
+        "recall": 0.26318680325489935,
+        "f1": 0.33931346690330405,
+        "static_preservation": 0.9983626927979481
+      }
+    }
+  },
+  "limitations": "Exploratory ablations on the same ten mini scenes, without a held-out test set. Rigid poses without intra-sweep deskew. GT uses moving-instance boxes; static labels mean outside those boxes and may include ego-vehicle returns. The acquisition-range guard requires per-point source-scan provenance and is diagnostic only, not a map-only CLI option. No defaults changed.",
+  "validation_date": "2026-10-08",
+  "source_commit": "431de1d"
+}

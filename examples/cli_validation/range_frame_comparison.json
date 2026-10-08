@@ -1,0 +1,1071 @@
+{
+  "nuscenes_scene_results": [
+    {
+      "scene": "scene-0061",
+      "map_points": 177795,
+      "gt_dynamic_points": 3564,
+      "input_hashes": {
+        "manifest_sha256": "1998e84d0bd8e4f45997c8605b1d2be98db2bc0d5cf51d58b3ff1b317cdde779",
+        "map_sha256": "e4df94113846adb08ca7eddb51498f8278459e5548f0f446fe4066ed44587994",
+        "gt_sha256": "01c0bd54a9fddfe8d204e6584e5c404ef8f538e83cf91bb0c6763ad9761afb65"
+      },
+      "sensor_profile": {
+        "name": "nuScenes HDL-32E keyframes",
+        "beams": 32,
+        "rate_hz": 0.6666666666666666,
+        "deskewed": false,
+        "note": "Single rigid keyframe pose; per-point intra-sweep deskew is unavailable."
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "variants": {
+        "map_axes": {
+          "range_only_metrics": {
+            "precision": 0.18782249742002063,
+            "recall": 0.20426487093153758,
+            "f1": 0.19569892473118278,
+            "iou": 0.10846245530393325,
+            "static_preservation": 0.9819320327611045,
+            "true_positive": 728,
+            "false_positive": 3148,
+            "false_negative": 2836,
+            "true_negative": 171083
+          },
+          "intersection_metrics": {
+            "precision": 0.2289156626506024,
+            "recall": 0.10662177328843996,
+            "f1": 0.14548238897396631,
+            "iou": 0.07844756399669695,
+            "static_preservation": 0.9926534313641086,
+            "true_positive": 380,
+            "false_positive": 1280,
+            "false_negative": 3184,
+            "true_negative": 172951
+          }
+        },
+        "sensor_axes": {
+          "range_only_metrics": {
+            "precision": 0.16106735251567272,
+            "recall": 0.28114478114478114,
+            "f1": 0.2048032703117016,
+            "iou": 0.11408402595923944,
+            "static_preservation": 0.970045514288502,
+            "true_positive": 1002,
+            "false_positive": 5219,
+            "false_negative": 2562,
+            "true_negative": 169012
+          },
+          "intersection_metrics": {
+            "precision": 0.2608695652173913,
+            "recall": 0.1414141414141414,
+            "f1": 0.18340611353711792,
+            "iou": 0.10096153846153846,
+            "static_preservation": 0.9918039843655836,
+            "true_positive": 504,
+            "false_positive": 1428,
+            "false_negative": 3060,
+            "true_negative": 172803
+          }
+        }
+      },
+      "additional_moving_removed": 178,
+      "additional_static_removed": 581,
+      "lost_moving_removed": 54,
+      "recovered_static_points": 433
+    },
+    {
+      "scene": "scene-0103",
+      "map_points": 144996,
+      "gt_dynamic_points": 5248,
+      "input_hashes": {
+        "manifest_sha256": "b7e15863d6cda5586959952b62270072dbd76ac3c942bf20682dc166eaced916",
+        "map_sha256": "d9eaf67c4fad6b71c7f215562fc075c987b02136ffcf4a713d2e1d33d024908a",
+        "gt_sha256": "69d20b7b9ff7c8901ea73c20b5ed6e31649f0a2191237d38aaf760e03f3c691e"
+      },
+      "sensor_profile": {
+        "name": "nuScenes HDL-32E keyframes",
+        "beams": 32,
+        "rate_hz": 0.6666666666666666,
+        "deskewed": false,
+        "note": "Single rigid keyframe pose; per-point intra-sweep deskew is unavailable."
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "variants": {
+        "map_axes": {
+          "range_only_metrics": {
+            "precision": 0.2538828233123174,
+            "recall": 0.6291920731707317,
+            "f1": 0.36178371863701103,
+            "iou": 0.22084002140181916,
+            "static_preservation": 0.930560723588173,
+            "true_positive": 3302,
+            "false_positive": 9704,
+            "false_negative": 1946,
+            "true_negative": 130044
+          },
+          "intersection_metrics": {
+            "precision": 0.30717255717255715,
+            "recall": 0.11261432926829268,
+            "f1": 0.16480758505298382,
+            "iou": 0.08980398115787874,
+            "static_preservation": 0.9904614019520852,
+            "true_positive": 591,
+            "false_positive": 1333,
+            "false_negative": 4657,
+            "true_negative": 138415
+          }
+        },
+        "sensor_axes": {
+          "range_only_metrics": {
+            "precision": 0.25630573248407645,
+            "recall": 0.5750762195121951,
+            "f1": 0.35457909886623984,
+            "iou": 0.21549446626204927,
+            "static_preservation": 0.9373372069725506,
+            "true_positive": 3018,
+            "false_positive": 8757,
+            "false_negative": 2230,
+            "true_negative": 130991
+          },
+          "intersection_metrics": {
+            "precision": 0.3654168998321209,
+            "recall": 0.12442835365853659,
+            "f1": 0.18564321250888416,
+            "iou": 0.10231902225007834,
+            "static_preservation": 0.9918853937086756,
+            "true_positive": 653,
+            "false_positive": 1134,
+            "false_negative": 4595,
+            "true_negative": 138614
+          }
+        }
+      },
+      "additional_moving_removed": 104,
+      "additional_static_removed": 117,
+      "lost_moving_removed": 42,
+      "recovered_static_points": 316
+    },
+    {
+      "scene": "scene-0553",
+      "map_points": 172112,
+      "gt_dynamic_points": 5774,
+      "input_hashes": {
+        "manifest_sha256": "6d297da7a9b4b40e95192f65e1d5031b10e193d275cfb298474ca79ff60170ce",
+        "map_sha256": "6366998699c68e0b35b27e92909de3098ef7c7a3653edf5adb6c4ba9ab438b81",
+        "gt_sha256": "8f9f17f1b9950738e64754c75e8051090705ec2f6eb76d7cb62ca6a49d01b072"
+      },
+      "sensor_profile": {
+        "name": "nuScenes HDL-32E keyframes",
+        "beams": 32,
+        "rate_hz": 0.6666666666666666,
+        "deskewed": false,
+        "note": "Single rigid keyframe pose; per-point intra-sweep deskew is unavailable."
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "variants": {
+        "map_axes": {
+          "range_only_metrics": {
+            "precision": 0.901307966706302,
+            "recall": 0.5251125736058192,
+            "f1": 0.6636025388487634,
+            "iou": 0.4965607599082869,
+            "static_preservation": 0.998004064014236,
+            "true_positive": 3032,
+            "false_positive": 332,
+            "false_negative": 2742,
+            "true_negative": 166006
+          },
+          "intersection_metrics": {
+            "precision": 0.9964586100044267,
+            "recall": 0.3898510564599931,
+            "f1": 0.5604381924561185,
+            "iou": 0.3893116568661363,
+            "static_preservation": 0.9999519051569695,
+            "true_positive": 2251,
+            "false_positive": 8,
+            "false_negative": 3523,
+            "true_negative": 166330
+          }
+        },
+        "sensor_axes": {
+          "range_only_metrics": {
+            "precision": 0.8520118822576289,
+            "recall": 0.5464149636300658,
+            "f1": 0.6658225176743695,
+            "iou": 0.4990509332489718,
+            "static_preservation": 0.9967055032524138,
+            "true_positive": 3155,
+            "false_positive": 548,
+            "false_negative": 2619,
+            "true_negative": 165790
+          },
+          "intersection_metrics": {
+            "precision": 0.989826197541331,
+            "recall": 0.4043990301350883,
+            "f1": 0.5742038608139678,
+            "iou": 0.40272507761297,
+            "static_preservation": 0.9998557154709087,
+            "true_positive": 2335,
+            "false_positive": 24,
+            "false_negative": 3439,
+            "true_negative": 166314
+          }
+        }
+      },
+      "additional_moving_removed": 227,
+      "additional_static_removed": 19,
+      "lost_moving_removed": 143,
+      "recovered_static_points": 3
+    },
+    {
+      "scene": "scene-0655",
+      "map_points": 162772,
+      "gt_dynamic_points": 2662,
+      "input_hashes": {
+        "manifest_sha256": "691189899335bbc5e06da2811fe980689b9abb3162fdad21b5d66908cd213324",
+        "map_sha256": "1ebf32cb787af21232dc4645ca8b5c11c69775e762f85c36b5475fd004452ac3",
+        "gt_sha256": "5039a158cf5de9c539794649be7be54dd1ff58cd773f7dffa4a589703b1a8e45"
+      },
+      "sensor_profile": {
+        "name": "nuScenes HDL-32E keyframes",
+        "beams": 32,
+        "rate_hz": 0.6666666666666666,
+        "deskewed": false,
+        "note": "Single rigid keyframe pose; per-point intra-sweep deskew is unavailable."
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "variants": {
+        "map_axes": {
+          "range_only_metrics": {
+            "precision": 0.23180150608225525,
+            "recall": 0.9019534184823441,
+            "f1": 0.3688172043010753,
+            "iou": 0.22610415293342123,
+            "static_preservation": 0.950302916744738,
+            "true_positive": 2401,
+            "false_positive": 7957,
+            "false_negative": 261,
+            "true_negative": 152153
+          },
+          "intersection_metrics": {
+            "precision": 0.05241379310344828,
+            "recall": 0.014274981217129978,
+            "f1": 0.02243873634484795,
+            "iou": 0.011346670647954613,
+            "static_preservation": 0.9957091999250516,
+            "true_positive": 38,
+            "false_positive": 687,
+            "false_negative": 2624,
+            "true_negative": 159423
+          }
+        },
+        "sensor_axes": {
+          "range_only_metrics": {
+            "precision": 0.23182030884417407,
+            "recall": 0.930503380916604,
+            "f1": 0.3711695512100097,
+            "iou": 0.22787488500459982,
+            "static_preservation": 0.948735244519393,
+            "true_positive": 2477,
+            "false_positive": 8208,
+            "false_negative": 185,
+            "true_negative": 151902
+          },
+          "intersection_metrics": {
+            "precision": 0.0611353711790393,
+            "recall": 0.015777610818933134,
+            "f1": 0.025082114063899673,
+            "iou": 0.012700332627759298,
+            "static_preservation": 0.9959715195802885,
+            "true_positive": 42,
+            "false_positive": 645,
+            "false_negative": 2620,
+            "true_negative": 159465
+          }
+        }
+      },
+      "additional_moving_removed": 4,
+      "additional_static_removed": 292,
+      "lost_moving_removed": 0,
+      "recovered_static_points": 334
+    },
+    {
+      "scene": "scene-0757",
+      "map_points": 197381,
+      "gt_dynamic_points": 48529,
+      "input_hashes": {
+        "manifest_sha256": "c8710ebbc75718e96a9b9d3013c006d2adbe6cfcae2ab68cbd62cafddb0644c2",
+        "map_sha256": "326d1fe2e64915713416e6d13dd3e5150fdcb69cb64f70596718bb18a0530455",
+        "gt_sha256": "98f709118402b707494f6b55ec989a27a1f5c59e2f50c606b97e8aa6f7b1a91e"
+      },
+      "sensor_profile": {
+        "name": "nuScenes HDL-32E keyframes",
+        "beams": 32,
+        "rate_hz": 0.6666666666666666,
+        "deskewed": false,
+        "note": "Single rigid keyframe pose; per-point intra-sweep deskew is unavailable."
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "variants": {
+        "map_axes": {
+          "range_only_metrics": {
+            "precision": 0.8994887895986797,
+            "recall": 0.9209338745904511,
+            "f1": 0.9100850175635087,
+            "iou": 0.8350055116491976,
+            "static_preservation": 0.9664498965415312,
+            "true_positive": 44692,
+            "false_positive": 4994,
+            "false_negative": 3837,
+            "true_negative": 143858
+          },
+          "intersection_metrics": {
+            "precision": 0.9689438555162937,
+            "recall": 0.5085412845927177,
+            "f1": 0.6670090136353194,
+            "iou": 0.5003852392538524,
+            "static_preservation": 0.9946859968290651,
+            "true_positive": 24679,
+            "false_positive": 791,
+            "false_negative": 23850,
+            "true_negative": 148061
+          }
+        },
+        "sensor_axes": {
+          "range_only_metrics": {
+            "precision": 0.839618397870825,
+            "recall": 0.9230975293123699,
+            "f1": 0.8793812510428629,
+            "iou": 0.7847283046631398,
+            "static_preservation": 0.9425133689839572,
+            "true_positive": 44797,
+            "false_positive": 8557,
+            "false_negative": 3732,
+            "true_negative": 140295
+          },
+          "intersection_metrics": {
+            "precision": 0.9672079827822344,
+            "recall": 0.5093243215396979,
+            "f1": 0.6672695858754927,
+            "iou": 0.5006785909615735,
+            "static_preservation": 0.9943702469567087,
+            "true_positive": 24717,
+            "false_positive": 838,
+            "false_negative": 23812,
+            "true_negative": 148014
+          }
+        }
+      },
+      "additional_moving_removed": 300,
+      "additional_static_removed": 308,
+      "lost_moving_removed": 262,
+      "recovered_static_points": 261
+    },
+    {
+      "scene": "scene-0796",
+      "map_points": 166983,
+      "gt_dynamic_points": 9308,
+      "input_hashes": {
+        "manifest_sha256": "7f6d7b89f180d94596ff6ffd48d1fdec529b32885d898283b4f4e0bd18f5b8f2",
+        "map_sha256": "8654ed2309ac4e2eec80d8811c32e2b55ef3572651b0a82e85e6f34d3cc04a7b",
+        "gt_sha256": "a76a7c37e244f5302ed878dc0846d2390b212bd2513f8b6ad93720e3e476fe23"
+      },
+      "sensor_profile": {
+        "name": "nuScenes HDL-32E keyframes",
+        "beams": 32,
+        "rate_hz": 0.6666666666666666,
+        "deskewed": false,
+        "note": "Single rigid keyframe pose; per-point intra-sweep deskew is unavailable."
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "variants": {
+        "map_axes": {
+          "range_only_metrics": {
+            "precision": 0.5226534932956951,
+            "recall": 0.39782982380747745,
+            "f1": 0.4517781980113463,
+            "iou": 0.29180457052797476,
+            "static_preservation": 0.9785508165530363,
+            "true_positive": 3703,
+            "false_positive": 3382,
+            "false_negative": 5605,
+            "true_negative": 154293
+          },
+          "intersection_metrics": {
+            "precision": 0.2937000887311446,
+            "recall": 0.035560807907176625,
+            "f1": 0.06344034499281266,
+            "iou": 0.032759303246239116,
+            "static_preservation": 0.994951641033772,
+            "true_positive": 331,
+            "false_positive": 796,
+            "false_negative": 8977,
+            "true_negative": 156879
+          }
+        },
+        "sensor_axes": {
+          "range_only_metrics": {
+            "precision": 0.40146430750457596,
+            "recall": 0.28276751181779114,
+            "f1": 0.3318204740292486,
+            "iou": 0.1989117291414752,
+            "static_preservation": 0.9751133661011574,
+            "true_positive": 2632,
+            "false_positive": 3924,
+            "false_negative": 6676,
+            "true_negative": 153751
+          },
+          "intersection_metrics": {
+            "precision": 0.18576104746317512,
+            "recall": 0.024387623549634724,
+            "f1": 0.04311490978157645,
+            "iou": 0.022032417742405126,
+            "static_preservation": 0.993689551292215,
+            "true_positive": 227,
+            "false_positive": 995,
+            "false_negative": 9081,
+            "true_negative": 156680
+          }
+        }
+      },
+      "additional_moving_removed": 64,
+      "additional_static_removed": 344,
+      "lost_moving_removed": 168,
+      "recovered_static_points": 145
+    },
+    {
+      "scene": "scene-0916",
+      "map_points": 158781,
+      "gt_dynamic_points": 3232,
+      "input_hashes": {
+        "manifest_sha256": "18577fbdbd1e0051b7705fbd6774e8f93a3e74dbf26be11595035c1c7121b457",
+        "map_sha256": "f5a00a3b57ddcb85d1f03c096580f513660a8484e81bb3279d3bc05c318a286e",
+        "gt_sha256": "596cfd4655590d085e779fffcfb216914d2ac09b11e56faa8b0e39faafbb13d6"
+      },
+      "sensor_profile": {
+        "name": "nuScenes HDL-32E keyframes",
+        "beams": 32,
+        "rate_hz": 0.6666666666666666,
+        "deskewed": false,
+        "note": "Single rigid keyframe pose; per-point intra-sweep deskew is unavailable."
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "variants": {
+        "map_axes": {
+          "range_only_metrics": {
+            "precision": 0.10296781986023638,
+            "recall": 0.7385519801980198,
+            "f1": 0.18073748769591882,
+            "iou": 0.09934656844383402,
+            "static_preservation": 0.866312223157976,
+            "true_positive": 2387,
+            "false_positive": 20795,
+            "false_negative": 845,
+            "true_negative": 134754
+          },
+          "intersection_metrics": {
+            "precision": 0.10556760665220535,
+            "recall": 0.1806930693069307,
+            "f1": 0.13327247832040162,
+            "iou": 0.07139364303178485,
+            "static_preservation": 0.9681900880108519,
+            "true_positive": 584,
+            "false_positive": 4948,
+            "false_negative": 2648,
+            "true_negative": 150601
+          }
+        },
+        "sensor_axes": {
+          "range_only_metrics": {
+            "precision": 0.10538496507831549,
+            "recall": 0.7889851485148515,
+            "f1": 0.18593459477195667,
+            "iou": 0.10249608103219583,
+            "static_preservation": 0.8608348494686562,
+            "true_positive": 2550,
+            "false_positive": 21647,
+            "false_negative": 682,
+            "true_negative": 133902
+          },
+          "intersection_metrics": {
+            "precision": 0.11075029909417193,
+            "recall": 0.2004950495049505,
+            "f1": 0.1426841351976219,
+            "iou": 0.07682276229994073,
+            "static_preservation": 0.9665507332094709,
+            "true_positive": 648,
+            "false_positive": 5203,
+            "false_negative": 2584,
+            "true_negative": 150346
+          }
+        }
+      },
+      "additional_moving_removed": 88,
+      "additional_static_removed": 828,
+      "lost_moving_removed": 24,
+      "recovered_static_points": 573
+    },
+    {
+      "scene": "scene-1077",
+      "map_points": 161874,
+      "gt_dynamic_points": 4517,
+      "input_hashes": {
+        "manifest_sha256": "5a2b461848554666b8ab2a83fe93cd617bf28814403f45b55c75184304d41b97",
+        "map_sha256": "67d16eb95cd305e32665780bb048b3f1405c1e41e0a7c17089b79efe0eeae5b4",
+        "gt_sha256": "0275a8a871ca522ad290a28b3c19133381c8a6b24068035fe2f88c4aeea9e091"
+      },
+      "sensor_profile": {
+        "name": "nuScenes HDL-32E keyframes",
+        "beams": 32,
+        "rate_hz": 0.6666666666666666,
+        "deskewed": false,
+        "note": "Single rigid keyframe pose; per-point intra-sweep deskew is unavailable."
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "variants": {
+        "map_axes": {
+          "range_only_metrics": {
+            "precision": 0.13751507840772015,
+            "recall": 0.025237989816249723,
+            "f1": 0.04264870931537598,
+            "iou": 0.021788990825688075,
+            "static_preservation": 0.995456191971123,
+            "true_positive": 114,
+            "false_positive": 715,
+            "false_negative": 4403,
+            "true_negative": 156642
+          },
+          "intersection_metrics": {
+            "precision": 0.054187192118226604,
+            "recall": 0.0024352446313925173,
+            "f1": 0.004661016949152542,
+            "iou": 0.002335952431514122,
+            "static_preservation": 0.9987798445572805,
+            "true_positive": 11,
+            "false_positive": 192,
+            "false_negative": 4506,
+            "true_negative": 157165
+          }
+        },
+        "sensor_axes": {
+          "range_only_metrics": {
+            "precision": 0.09529664924684907,
+            "recall": 0.06862962143015276,
+            "f1": 0.07979407979407979,
+            "iou": 0.04155495978552279,
+            "static_preservation": 0.9812973048545663,
+            "true_positive": 310,
+            "false_positive": 2943,
+            "false_negative": 4207,
+            "true_negative": 154414
+          },
+          "intersection_metrics": {
+            "precision": 0.06070287539936102,
+            "recall": 0.00841266327208324,
+            "f1": 0.014777367295352905,
+            "iou": 0.0074436826640548485,
+            "static_preservation": 0.9962632739566718,
+            "true_positive": 38,
+            "false_positive": 588,
+            "false_negative": 4479,
+            "true_negative": 156769
+          }
+        }
+      },
+      "additional_moving_removed": 29,
+      "additional_static_removed": 534,
+      "lost_moving_removed": 2,
+      "recovered_static_points": 138
+    },
+    {
+      "scene": "scene-1094",
+      "map_points": 174008,
+      "gt_dynamic_points": 8097,
+      "input_hashes": {
+        "manifest_sha256": "36238296b59211fc46833d545f035f94d8c77f718ea984c50006c9b4691ca7ae",
+        "map_sha256": "c0641984f32a6f096473eafba59ffca3903a547aa668eff1d8f00e6f93bd66ac",
+        "gt_sha256": "d8c174ef6284b2b23fb25116fd81f0dd8f2084a73adf0d52d9542fdc7bd19062"
+      },
+      "sensor_profile": {
+        "name": "nuScenes HDL-32E keyframes",
+        "beams": 32,
+        "rate_hz": 0.6666666666666666,
+        "deskewed": false,
+        "note": "Single rigid keyframe pose; per-point intra-sweep deskew is unavailable."
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "variants": {
+        "map_axes": {
+          "range_only_metrics": {
+            "precision": 0.19696010132995567,
+            "recall": 0.2688650117327405,
+            "f1": 0.22736292428198435,
+            "iou": 0.12826253461379838,
+            "static_preservation": 0.9465014375177053,
+            "true_positive": 2177,
+            "false_positive": 8876,
+            "false_negative": 5920,
+            "true_negative": 157035
+          },
+          "intersection_metrics": {
+            "precision": 0.3008608971454463,
+            "recall": 0.08200568111646289,
+            "f1": 0.12888198757763977,
+            "iou": 0.06887966804979254,
+            "static_preservation": 0.990699833043017,
+            "true_positive": 664,
+            "false_positive": 1543,
+            "false_negative": 7433,
+            "true_negative": 164368
+          }
+        },
+        "sensor_axes": {
+          "range_only_metrics": {
+            "precision": 0.22791712104689205,
+            "recall": 0.28393232061257256,
+            "f1": 0.25285965684117906,
+            "iou": 0.1447277305634246,
+            "static_preservation": 0.9530591702780407,
+            "true_positive": 2299,
+            "false_positive": 7788,
+            "false_negative": 5798,
+            "true_negative": 158123
+          },
+          "intersection_metrics": {
+            "precision": 0.3788793103448276,
+            "recall": 0.10855872545387181,
+            "f1": 0.16876259959681292,
+            "iou": 0.09215768504927657,
+            "static_preservation": 0.9913146204892985,
+            "true_positive": 879,
+            "false_positive": 1441,
+            "false_negative": 7218,
+            "true_negative": 164470
+          }
+        }
+      },
+      "additional_moving_removed": 310,
+      "additional_static_removed": 607,
+      "lost_moving_removed": 95,
+      "recovered_static_points": 709
+    },
+    {
+      "scene": "scene-1100",
+      "map_points": 149454,
+      "gt_dynamic_points": 6082,
+      "input_hashes": {
+        "manifest_sha256": "81fc4151bbbd46a83c074f6af6322f5c44d8e0c26cb644014c3acba637e581d7",
+        "map_sha256": "737cca2b922905e681cddb5737ad2a55ebd388dc3f1cc6407e80c4e6f59fa87a",
+        "gt_sha256": "fda0b7429d577bf2c08c974a286a9abf3d436149d175217dc17923d6d496ce34"
+      },
+      "sensor_profile": {
+        "name": "nuScenes HDL-32E keyframes",
+        "beams": 32,
+        "rate_hz": 0.6666666666666666,
+        "deskewed": false,
+        "note": "Single rigid keyframe pose; per-point intra-sweep deskew is unavailable."
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "variants": {
+        "map_axes": {
+          "range_only_metrics": {
+            "precision": 0.18298468837610524,
+            "recall": 0.27902005919105555,
+            "f1": 0.22102109924459493,
+            "iou": 0.12424042755692218,
+            "static_preservation": 0.9471514661161176,
+            "true_positive": 1697,
+            "false_positive": 7577,
+            "false_negative": 4385,
+            "true_negative": 135795
+          },
+          "intersection_metrics": {
+            "precision": 0.6524122807017544,
+            "recall": 0.09782966129562644,
+            "f1": 0.1701458392908207,
+            "iou": 0.09298327863728707,
+            "static_preservation": 0.9977889685573195,
+            "true_positive": 595,
+            "false_positive": 317,
+            "false_negative": 5487,
+            "true_negative": 143055
+          }
+        },
+        "sensor_axes": {
+          "range_only_metrics": {
+            "precision": 0.15435110440876432,
+            "recall": 0.2860901019401513,
+            "f1": 0.20051858254105445,
+            "iou": 0.11143131604226705,
+            "static_preservation": 0.9335086348798929,
+            "true_positive": 1740,
+            "false_positive": 9533,
+            "false_negative": 4342,
+            "true_negative": 133839
+          },
+          "intersection_metrics": {
+            "precision": 0.5561072492552135,
+            "recall": 0.09207497533706017,
+            "f1": 0.15799125405557907,
+            "iou": 0.08577117475876857,
+            "static_preservation": 0.9968822364199426,
+            "true_positive": 560,
+            "false_positive": 447,
+            "false_negative": 5522,
+            "true_negative": 142925
+          }
+        }
+      },
+      "additional_moving_removed": 30,
+      "additional_static_removed": 174,
+      "lost_moving_removed": 65,
+      "recovered_static_points": 44
+    }
+  ],
+  "av2_scene_result": {
+    "scene": "0b5142c1-420b-3fea-9e98-b87327ae22c6",
+    "map_points": 1235563,
+    "gt_dynamic_points": 84471,
+    "input_hashes": {
+      "manifest_sha256": "36a8b5c4e86afcb9fd8735c64fa3063e46bce29eb6ec8d64b193ff915d6af81b",
+      "map_sha256": "5da31155fa7b54b564900e80084614a2144702ec05f61d10b306fbda9ecf5df0",
+      "gt_sha256": "549ec2c75f73d7aee951b935f689604a9ebb9d42f401a200bf4422f270942c1c"
+    },
+    "sensor_profile": {
+      "name": "dual VLP-32C",
+      "beams": 64,
+      "rate_hz": 3.3333333333333335,
+      "deskewed": true,
+      "source": "https://argoverse.github.io/user-guide/datasets/sensor.html"
+    },
+    "parameters": {
+      "range": {
+        "h_res_deg": 1.0,
+        "v_res_deg": 1.0,
+        "range_margin": 0.5,
+        "min_see_through": 3,
+        "max_surface_hits": 3,
+        "ground_z": -1.4,
+        "resolutions": null
+      },
+      "scan_ratio": {
+        "n_rings": 20,
+        "n_sectors": 108,
+        "max_range": 80.0,
+        "scan_ratio_threshold": 0.2,
+        "min_map_height": 0.5,
+        "ground_margin": 0.2,
+        "min_votes": null,
+        "votes_fraction": 0.5,
+        "votes_floor": 3
+      }
+    },
+    "variants": {
+      "map_axes": {
+        "range_only_metrics": {
+          "precision": 0.6792393501534776,
+          "recall": 0.5370245409667223,
+          "f1": 0.5998175278997195,
+          "iou": 0.4283852568158424,
+          "static_preservation": 0.9813898454684769,
+          "true_positive": 45363,
+          "false_positive": 21422,
+          "false_negative": 39108,
+          "true_negative": 1129670
+        },
+        "intersection_metrics": {
+          "precision": 0.9924292057945694,
+          "recall": 0.16139266730593932,
+          "f1": 0.2776352231997393,
+          "iou": 0.16119420632574638,
+          "static_preservation": 0.99990965100965,
+          "true_positive": 13633,
+          "false_positive": 104,
+          "false_negative": 70838,
+          "true_negative": 1150988
+        }
+      },
+      "sensor_axes": {
+        "range_only_metrics": {
+          "precision": 0.6520026741076619,
+          "recall": 0.5311053497650081,
+          "f1": 0.5853769922820479,
+          "iou": 0.4138042355371901,
+          "static_preservation": 0.9791980137121967,
+          "true_positive": 44863,
+          "false_positive": 23945,
+          "false_negative": 39608,
+          "true_negative": 1127147
+        },
+        "intersection_metrics": {
+          "precision": 0.992975595626041,
+          "recall": 0.16232789951581017,
+          "f1": 0.2790394790394791,
+          "iou": 0.16214170844763978,
+          "static_preservation": 0.9999157321916927,
+          "true_positive": 13712,
+          "false_positive": 97,
+          "false_negative": 70759,
+          "true_negative": 1150995
+        }
+      }
+    },
+    "additional_moving_removed": 267,
+    "additional_static_removed": 20,
+    "lost_moving_removed": 188,
+    "recovered_static_points": 27
+  },
+  "aggregate": {
+    "included_scenes": [
+      "scene-0103",
+      "scene-0553",
+      "scene-0757",
+      "scene-0796",
+      "scene-1094",
+      "scene-1100"
+    ],
+    "min_gt_dynamic_points": 5000,
+    "methods": {
+      "map_axes": {
+        "range_only_metrics": {
+          "precision": 0.49287964376984256,
+          "recall": 0.5034922360163793,
+          "f1": 0.47260558276453485,
+          "static_preservation": 0.9612030673884666
+        },
+        "intersection_metrics": {
+          "precision": 0.5865913815452704,
+          "recall": 0.20440047010671156,
+          "f1": 0.2924538271676158,
+          "static_preservation": 0.9947566244287048
+        }
+      },
+      "sensor_axes": {
+        "range_only_metrics": {
+          "precision": 0.45527809092879384,
+          "recall": 0.4828964411375243,
+          "f1": 0.44749693016582576,
+          "static_preservation": 0.9563728750780021
+        },
+        "intersection_metrics": {
+          "precision": 0.5738664478698171,
+          "recall": 0.2105288382789816,
+          "f1": 0.29949757043871883,
+          "static_preservation": 0.9946662940562915
+        }
+      }
+    }
+  },
+  "limitations": "Experimental sensor-oriented range images; no deskew added. Uses native local query points and inverse posed map points. Ground guard remains in map Z; scan-ratio unchanged. Fixed inputs and thresholds. Ten previously examined mini scenes and one AV2 scene, not held-out validation. No production defaults or CLI behavior changed; sensor-axis variant is a research helper.",
+  "validation_date": "2026-10-08",
+  "source_base_commit": "71915a1"
+}

@@ -1,0 +1,960 @@
+{
+  "nuscenes_scene_results": [
+    {
+      "scene": "scene-0061",
+      "input_hashes": {
+        "manifest_sha256": "1998e84d0bd8e4f45997c8605b1d2be98db2bc0d5cf51d58b3ff1b317cdde779",
+        "map_sha256": "e4df94113846adb08ca7eddb51498f8278459e5548f0f446fe4066ed44587994",
+        "gt_sha256": "01c0bd54a9fddfe8d204e6584e5c404ef8f538e83cf91bb0c6763ad9761afb65"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "gt_dynamic_points": 3564,
+      "common_misses": 2060,
+      "evidence_api_masks_equal": true,
+      "range": {
+        "insufficient_see_through": 2053,
+        "surface_guard": 21,
+        "no_see_through_or_surface_evidence": 401,
+        "ground_guard": 0,
+        "see_through_quantiles": [
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          3.0
+        ],
+        "surface_quantiles": [
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          8.0
+        ]
+      },
+      "scan_ratio": {
+        "insufficient_revisits_for_floor": 202,
+        "adequate_revisits_below_threshold": 1858,
+        "zero_dynamic_votes": 1179,
+        "observed_point_scan_opportunities": {
+          "total": 11100,
+          "map_height_too_small": 189,
+          "query_map_height_ratio_too_large": 6611,
+          "ground_reverted": 2554,
+          "dynamic_votes": 1746
+        },
+        "revisit_quantiles": [
+          1.0,
+          4.0,
+          5.0,
+          7.0,
+          12.0
+        ],
+        "dynamic_vote_quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          2.0,
+          4.0
+        ]
+      },
+      "acquisition_distance_quantiles_m": [
+        6.846010778074221,
+        7.603973017735571,
+        9.546694378277664,
+        18.393174540571778,
+        77.35107782002335
+      ]
+    },
+    {
+      "scene": "scene-0103",
+      "input_hashes": {
+        "manifest_sha256": "b7e15863d6cda5586959952b62270072dbd76ac3c942bf20682dc166eaced916",
+        "map_sha256": "d9eaf67c4fad6b71c7f215562fc075c987b02136ffcf4a713d2e1d33d024908a",
+        "gt_sha256": "69d20b7b9ff7c8901ea73c20b5ed6e31649f0a2191237d38aaf760e03f3c691e"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "gt_dynamic_points": 5248,
+      "common_misses": 1599,
+      "evidence_api_masks_equal": true,
+      "range": {
+        "insufficient_see_through": 1593,
+        "surface_guard": 49,
+        "no_see_through_or_surface_evidence": 128,
+        "ground_guard": 0,
+        "see_through_quantiles": [
+          0.0,
+          0.0,
+          1.0,
+          2.0,
+          5.0
+        ],
+        "surface_quantiles": [
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          8.0
+        ]
+      },
+      "scan_ratio": {
+        "insufficient_revisits_for_floor": 428,
+        "adequate_revisits_below_threshold": 1171,
+        "zero_dynamic_votes": 670,
+        "observed_point_scan_opportunities": {
+          "total": 8326,
+          "map_height_too_small": 132,
+          "query_map_height_ratio_too_large": 5867,
+          "ground_reverted": 990,
+          "dynamic_votes": 1337
+        },
+        "revisit_quantiles": [
+          1.0,
+          2.0,
+          5.0,
+          7.0,
+          12.0
+        ],
+        "dynamic_vote_quantiles": [
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          5.0
+        ]
+      },
+      "acquisition_distance_quantiles_m": [
+        4.1162187528762955,
+        6.476050874571957,
+        12.398807717530964,
+        17.905247278419765,
+        74.05034458726041
+      ]
+    },
+    {
+      "scene": "scene-0553",
+      "input_hashes": {
+        "manifest_sha256": "6d297da7a9b4b40e95192f65e1d5031b10e193d275cfb298474ca79ff60170ce",
+        "map_sha256": "6366998699c68e0b35b27e92909de3098ef7c7a3653edf5adb6c4ba9ab438b81",
+        "gt_sha256": "8f9f17f1b9950738e64754c75e8051090705ec2f6eb76d7cb62ca6a49d01b072"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "gt_dynamic_points": 5774,
+      "common_misses": 2323,
+      "evidence_api_masks_equal": true,
+      "range": {
+        "insufficient_see_through": 2318,
+        "surface_guard": 1036,
+        "no_see_through_or_surface_evidence": 1004,
+        "ground_guard": 0,
+        "see_through_quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          4.0
+        ],
+        "surface_quantiles": [
+          0.0,
+          0.0,
+          1.0,
+          11.0,
+          12.0
+        ]
+      },
+      "scan_ratio": {
+        "insufficient_revisits_for_floor": 293,
+        "adequate_revisits_below_threshold": 2030,
+        "zero_dynamic_votes": 2292,
+        "observed_point_scan_opportunities": {
+          "total": 23335,
+          "map_height_too_small": 1936,
+          "query_map_height_ratio_too_large": 6216,
+          "ground_reverted": 15143,
+          "dynamic_votes": 40
+        },
+        "revisit_quantiles": [
+          0.0,
+          11.0,
+          12.0,
+          12.0,
+          12.0
+        ],
+        "dynamic_vote_quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          5.0
+        ]
+      },
+      "acquisition_distance_quantiles_m": [
+        6.617920523148437,
+        8.743007002218317,
+        10.582000855135204,
+        21.4088977008522,
+        100.18603342592976
+      ]
+    },
+    {
+      "scene": "scene-0655",
+      "input_hashes": {
+        "manifest_sha256": "691189899335bbc5e06da2811fe980689b9abb3162fdad21b5d66908cd213324",
+        "map_sha256": "1ebf32cb787af21232dc4645ca8b5c11c69775e762f85c36b5475fd004452ac3",
+        "gt_sha256": "5039a158cf5de9c539794649be7be54dd1ff58cd773f7dffa4a589703b1a8e45"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "gt_dynamic_points": 2662,
+      "common_misses": 256,
+      "evidence_api_masks_equal": true,
+      "range": {
+        "insufficient_see_through": 256,
+        "surface_guard": 0,
+        "no_see_through_or_surface_evidence": 16,
+        "ground_guard": 0,
+        "see_through_quantiles": [
+          0.0,
+          1.0,
+          1.0,
+          2.0,
+          2.0
+        ],
+        "surface_quantiles": [
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          5.0
+        ]
+      },
+      "scan_ratio": {
+        "insufficient_revisits_for_floor": 140,
+        "adequate_revisits_below_threshold": 116,
+        "zero_dynamic_votes": 121,
+        "observed_point_scan_opportunities": {
+          "total": 948,
+          "map_height_too_small": 39,
+          "query_map_height_ratio_too_large": 589,
+          "ground_reverted": 114,
+          "dynamic_votes": 206
+        },
+        "revisit_quantiles": [
+          1.0,
+          2.0,
+          2.0,
+          3.0,
+          12.0
+        ],
+        "dynamic_vote_quantiles": [
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          5.0
+        ]
+      },
+      "acquisition_distance_quantiles_m": [
+        3.113603167165558,
+        3.6109844498533725,
+        14.451823463868624,
+        17.385831257290054,
+        34.13378510601622
+      ]
+    },
+    {
+      "scene": "scene-0757",
+      "input_hashes": {
+        "manifest_sha256": "c8710ebbc75718e96a9b9d3013c006d2adbe6cfcae2ab68cbd62cafddb0644c2",
+        "map_sha256": "326d1fe2e64915713416e6d13dd3e5150fdcb69cb64f70596718bb18a0530455",
+        "gt_sha256": "98f709118402b707494f6b55ec989a27a1f5c59e2f50c606b97e8aa6f7b1a91e"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "gt_dynamic_points": 48529,
+      "common_misses": 2904,
+      "evidence_api_masks_equal": true,
+      "range": {
+        "insufficient_see_through": 2373,
+        "surface_guard": 689,
+        "no_see_through_or_surface_evidence": 338,
+        "ground_guard": 0,
+        "see_through_quantiles": [
+          0.0,
+          0.0,
+          2.0,
+          2.0,
+          5.0
+        ],
+        "surface_quantiles": [
+          0.0,
+          1.0,
+          1.0,
+          5.0,
+          9.0
+        ]
+      },
+      "scan_ratio": {
+        "insufficient_revisits_for_floor": 402,
+        "adequate_revisits_below_threshold": 2502,
+        "zero_dynamic_votes": 1190,
+        "observed_point_scan_opportunities": {
+          "total": 21498,
+          "map_height_too_small": 213,
+          "query_map_height_ratio_too_large": 11822,
+          "ground_reverted": 4122,
+          "dynamic_votes": 5341
+        },
+        "revisit_quantiles": [
+          0.0,
+          4.0,
+          9.0,
+          10.0,
+          12.0
+        ],
+        "dynamic_vote_quantiles": [
+          0.0,
+          0.0,
+          2.0,
+          3.0,
+          5.0
+        ]
+      },
+      "acquisition_distance_quantiles_m": [
+        2.1820154064023165,
+        4.718912029136618,
+        10.312809698384811,
+        20.44511523765675,
+        97.83415247277868
+      ]
+    },
+    {
+      "scene": "scene-0796",
+      "input_hashes": {
+        "manifest_sha256": "7f6d7b89f180d94596ff6ffd48d1fdec529b32885d898283b4f4e0bd18f5b8f2",
+        "map_sha256": "8654ed2309ac4e2eec80d8811c32e2b55ef3572651b0a82e85e6f34d3cc04a7b",
+        "gt_sha256": "a76a7c37e244f5302ed878dc0846d2390b212bd2513f8b6ad93720e3e476fe23"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "gt_dynamic_points": 9308,
+      "common_misses": 5278,
+      "evidence_api_masks_equal": true,
+      "range": {
+        "insufficient_see_through": 5278,
+        "surface_guard": 0,
+        "no_see_through_or_surface_evidence": 321,
+        "ground_guard": 0,
+        "see_through_quantiles": [
+          0.0,
+          0.0,
+          1.0,
+          2.0,
+          2.0
+        ],
+        "surface_quantiles": [
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          3.0
+        ]
+      },
+      "scan_ratio": {
+        "insufficient_revisits_for_floor": 1916,
+        "adequate_revisits_below_threshold": 3362,
+        "zero_dynamic_votes": 2543,
+        "observed_point_scan_opportunities": {
+          "total": 14932,
+          "map_height_too_small": 317,
+          "query_map_height_ratio_too_large": 8042,
+          "ground_reverted": 2580,
+          "dynamic_votes": 3993
+        },
+        "revisit_quantiles": [
+          1.0,
+          2.0,
+          3.0,
+          3.0,
+          9.0
+        ],
+        "dynamic_vote_quantiles": [
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          4.0
+        ]
+      },
+      "acquisition_distance_quantiles_m": [
+        3.1370686116144575,
+        4.206719482888742,
+        7.560998380860148,
+        13.086684370396659,
+        103.67691992598617
+      ]
+    },
+    {
+      "scene": "scene-0916",
+      "input_hashes": {
+        "manifest_sha256": "18577fbdbd1e0051b7705fbd6774e8f93a3e74dbf26be11595035c1c7121b457",
+        "map_sha256": "f5a00a3b57ddcb85d1f03c096580f513660a8484e81bb3279d3bc05c318a286e",
+        "gt_sha256": "596cfd4655590d085e779fffcfb216914d2ac09b11e56faa8b0e39faafbb13d6"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "gt_dynamic_points": 3232,
+      "common_misses": 696,
+      "evidence_api_masks_equal": true,
+      "range": {
+        "insufficient_see_through": 681,
+        "surface_guard": 25,
+        "no_see_through_or_surface_evidence": 43,
+        "ground_guard": 0,
+        "see_through_quantiles": [
+          0.0,
+          1.0,
+          2.0,
+          2.0,
+          6.0
+        ],
+        "surface_quantiles": [
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          8.0
+        ]
+      },
+      "scan_ratio": {
+        "insufficient_revisits_for_floor": 114,
+        "adequate_revisits_below_threshold": 582,
+        "zero_dynamic_votes": 384,
+        "observed_point_scan_opportunities": {
+          "total": 4664,
+          "map_height_too_small": 11,
+          "query_map_height_ratio_too_large": 2734,
+          "ground_reverted": 1316,
+          "dynamic_votes": 603
+        },
+        "revisit_quantiles": [
+          1.0,
+          3.0,
+          7.0,
+          9.0,
+          12.0
+        ],
+        "dynamic_vote_quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          5.0
+        ]
+      },
+      "acquisition_distance_quantiles_m": [
+        6.73791103228616,
+        12.591485441088505,
+        14.162098254495405,
+        19.25860067678782,
+        52.81235012451213
+      ]
+    },
+    {
+      "scene": "scene-1077",
+      "input_hashes": {
+        "manifest_sha256": "5a2b461848554666b8ab2a83fe93cd617bf28814403f45b55c75184304d41b97",
+        "map_sha256": "67d16eb95cd305e32665780bb048b3f1405c1e41e0a7c17089b79efe0eeae5b4",
+        "gt_sha256": "0275a8a871ca522ad290a28b3c19133381c8a6b24068035fe2f88c4aeea9e091"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "gt_dynamic_points": 4517,
+      "common_misses": 4181,
+      "evidence_api_masks_equal": true,
+      "range": {
+        "insufficient_see_through": 4181,
+        "surface_guard": 0,
+        "no_see_through_or_surface_evidence": 378,
+        "ground_guard": 0,
+        "see_through_quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          2.0
+        ],
+        "surface_quantiles": [
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          4.0
+        ]
+      },
+      "scan_ratio": {
+        "insufficient_revisits_for_floor": 2349,
+        "adequate_revisits_below_threshold": 1832,
+        "zero_dynamic_votes": 2860,
+        "observed_point_scan_opportunities": {
+          "total": 11111,
+          "map_height_too_small": 451,
+          "query_map_height_ratio_too_large": 7046,
+          "ground_reverted": 1970,
+          "dynamic_votes": 1644
+        },
+        "revisit_quantiles": [
+          1.0,
+          1.0,
+          2.0,
+          4.0,
+          8.0
+        ],
+        "dynamic_vote_quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          3.0
+        ]
+      },
+      "acquisition_distance_quantiles_m": [
+        8.894570289433416,
+        13.092015203773615,
+        15.749760442886146,
+        22.532953984664985,
+        76.56916582366874
+      ]
+    },
+    {
+      "scene": "scene-1094",
+      "input_hashes": {
+        "manifest_sha256": "36238296b59211fc46833d545f035f94d8c77f718ea984c50006c9b4691ca7ae",
+        "map_sha256": "c0641984f32a6f096473eafba59ffca3903a547aa668eff1d8f00e6f93bd66ac",
+        "gt_sha256": "d8c174ef6284b2b23fb25116fd81f0dd8f2084a73adf0d52d9542fdc7bd19062"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "gt_dynamic_points": 8097,
+      "common_misses": 4968,
+      "evidence_api_masks_equal": true,
+      "range": {
+        "insufficient_see_through": 4968,
+        "surface_guard": 4,
+        "no_see_through_or_surface_evidence": 309,
+        "ground_guard": 0,
+        "see_through_quantiles": [
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          2.0
+        ],
+        "surface_quantiles": [
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          7.0
+        ]
+      },
+      "scan_ratio": {
+        "insufficient_revisits_for_floor": 2388,
+        "adequate_revisits_below_threshold": 2580,
+        "zero_dynamic_votes": 3742,
+        "observed_point_scan_opportunities": {
+          "total": 17781,
+          "map_height_too_small": 297,
+          "query_map_height_ratio_too_large": 10242,
+          "ground_reverted": 5084,
+          "dynamic_votes": 2158
+        },
+        "revisit_quantiles": [
+          1.0,
+          1.0,
+          3.0,
+          5.0,
+          12.0
+        ],
+        "dynamic_vote_quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          5.0
+        ]
+      },
+      "acquisition_distance_quantiles_m": [
+        2.1405245299911724,
+        3.1776969316788497,
+        9.262883859940604,
+        13.768009188530353,
+        91.3994176071424
+      ]
+    },
+    {
+      "scene": "scene-1100",
+      "input_hashes": {
+        "manifest_sha256": "81fc4151bbbd46a83c074f6af6322f5c44d8e0c26cb644014c3acba637e581d7",
+        "map_sha256": "737cca2b922905e681cddb5737ad2a55ebd388dc3f1cc6407e80c4e6f59fa87a",
+        "gt_sha256": "fda0b7429d577bf2c08c974a286a9abf3d436149d175217dc17923d6d496ce34"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "gt_dynamic_points": 6082,
+      "common_misses": 4265,
+      "evidence_api_masks_equal": true,
+      "range": {
+        "insufficient_see_through": 4232,
+        "surface_guard": 111,
+        "no_see_through_or_surface_evidence": 272,
+        "ground_guard": 0,
+        "see_through_quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          5.0
+        ],
+        "surface_quantiles": [
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          12.0
+        ]
+      },
+      "scan_ratio": {
+        "insufficient_revisits_for_floor": 2607,
+        "adequate_revisits_below_threshold": 1658,
+        "zero_dynamic_votes": 3802,
+        "observed_point_scan_opportunities": {
+          "total": 13516,
+          "map_height_too_small": 227,
+          "query_map_height_ratio_too_large": 8808,
+          "ground_reverted": 3946,
+          "dynamic_votes": 535
+        },
+        "revisit_quantiles": [
+          0.0,
+          1.0,
+          2.0,
+          3.0,
+          12.0
+        ],
+        "dynamic_vote_quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          5.0
+        ]
+      },
+      "acquisition_distance_quantiles_m": [
+        3.406143362141486,
+        3.9440960332311166,
+        6.097997287154431,
+        7.045962410592369,
+        104.04594253617087
+      ]
+    }
+  ],
+  "av2_scene_result": {
+    "scene": "0b5142c1-420b-3fea-9e98-b87327ae22c6",
+    "input_hashes": {
+      "manifest_sha256": "36a8b5c4e86afcb9fd8735c64fa3063e46bce29eb6ec8d64b193ff915d6af81b",
+      "map_sha256": "5da31155fa7b54b564900e80084614a2144702ec05f61d10b306fbda9ecf5df0",
+      "gt_sha256": "549ec2c75f73d7aee951b935f689604a9ebb9d42f401a200bf4422f270942c1c"
+    },
+    "parameters": {
+      "range": {
+        "h_res_deg": 1.0,
+        "v_res_deg": 1.0,
+        "range_margin": 0.5,
+        "min_see_through": 3,
+        "max_surface_hits": 3,
+        "ground_z": -1.4,
+        "resolutions": null
+      },
+      "scan_ratio": {
+        "n_rings": 20,
+        "n_sectors": 108,
+        "max_range": 80.0,
+        "scan_ratio_threshold": 0.2,
+        "min_map_height": 0.5,
+        "ground_margin": 0.2,
+        "min_votes": null,
+        "votes_fraction": 0.5,
+        "votes_floor": 3
+      }
+    },
+    "gt_dynamic_points": 84471,
+    "common_misses": 37274,
+    "evidence_api_masks_equal": true,
+    "range": {
+      "insufficient_see_through": 25021,
+      "surface_guard": 14477,
+      "no_see_through_or_surface_evidence": 9291,
+      "ground_guard": 0,
+      "see_through_quantiles": [
+        0.0,
+        0.0,
+        1.0,
+        4.0,
+        8.0
+      ],
+      "surface_quantiles": [
+        0.0,
+        0.0,
+        2.0,
+        5.0,
+        11.0
+      ]
+    },
+    "scan_ratio": {
+      "insufficient_revisits_for_floor": 1092,
+      "adequate_revisits_below_threshold": 36182,
+      "zero_dynamic_votes": 15871,
+      "observed_point_scan_opportunities": {
+        "total": 404271,
+        "map_height_too_small": 691,
+        "query_map_height_ratio_too_large": 319532,
+        "ground_reverted": 33494,
+        "dynamic_votes": 50554
+      },
+      "revisit_quantiles": [
+        0.0,
+        11.0,
+        12.0,
+        12.0,
+        12.0
+      ],
+      "dynamic_vote_quantiles": [
+        0.0,
+        0.0,
+        1.0,
+        2.0,
+        5.0
+      ]
+    },
+    "acquisition_distance_quantiles_m": [
+      2.5600340429303787,
+      4.3691130539805325,
+      8.508783739001466,
+      19.059412402328075,
+      108.95253770244067
+    ]
+  },
+  "quantile_order": [
+    0,
+    0.25,
+    0.5,
+    0.75,
+    1
+  ],
+  "limitations": "Counts concern moving GT missed by both baseline channels. Range reason masks overlap and must not be summed. No see-through/surface evidence also includes occlusion, not just missing pixels. Scan-ratio height gate counts classify observed point-scan opportunities, not unique points. GT is moving-instance boxes, not per-point motion. No defaults changed.",
+  "validation_date": "2026-10-08",
+  "source_base_commit": "aaac53b"
+}

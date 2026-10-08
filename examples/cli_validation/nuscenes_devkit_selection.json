@@ -1,0 +1,1068 @@
+{
+  "dataset": "nuscenes-mini",
+  "frames_requested": 12,
+  "min_distance": 1.0,
+  "stride": 3,
+  "scene_results": [
+    {
+      "dataset": "nuscenes-mini",
+      "scene": "scene-0061",
+      "frames": 12,
+      "map_points": 177795,
+      "gt_dynamic_points": 3564,
+      "sensor_profile": {
+        "name": "nuScenes HDL-32E keyframes",
+        "beams": 32,
+        "rate_hz": 0.6666666666666666,
+        "deskewed": false,
+        "note": "Single rigid keyframe pose; per-point intra-sweep deskew is unavailable."
+      },
+      "preprocessing": {
+        "ground_z_sensor": -1.6,
+        "min_distance": 1.0,
+        "close_point_rule": "abs(sensor_x)<min_distance AND abs(sensor_y)<min_distance"
+      },
+      "manifest_sha256": "1998e84d0bd8e4f45997c8605b1d2be98db2bc0d5cf51d58b3ff1b317cdde779",
+      "map_sha256": "e4df94113846adb08ca7eddb51498f8278459e5548f0f446fe4066ed44587994",
+      "gt_sha256": "01c0bd54a9fddfe8d204e6584e5c404ef8f538e83cf91bb0c6763ad9761afb65",
+      "results": {
+        "defaults": {
+          "metrics": {
+            "precision": 0.2289156626506024,
+            "recall": 0.10662177328843996,
+            "f1": 0.14548238897396631,
+            "iou": 0.07844756399669695,
+            "static_preservation": 0.9926534313641086,
+            "true_positive": 380,
+            "false_positive": 1280,
+            "false_negative": 3184,
+            "true_negative": 172951
+          },
+          "api_cli_masks_equal": true,
+          "api_cli_points_equal": true,
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "api_filter_seconds": 0.43502361200012274,
+          "cli_filter_seconds": 0.509752497999898
+        },
+        "ground_protected": {
+          "metrics": {
+            "precision": 0.2289156626506024,
+            "recall": 0.10662177328843996,
+            "f1": 0.14548238897396631,
+            "iou": 0.07844756399669695,
+            "static_preservation": 0.9926534313641086,
+            "true_positive": 380,
+            "false_positive": 1280,
+            "false_negative": 3184,
+            "true_negative": 172951
+          },
+          "api_cli_masks_equal": true,
+          "api_cli_points_equal": true,
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": -0.05804210805413026,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "api_filter_seconds": 0.5467171539999072,
+          "cli_filter_seconds": 0.6049794079999629
+        }
+      }
+    },
+    {
+      "dataset": "nuscenes-mini",
+      "scene": "scene-0103",
+      "frames": 12,
+      "map_points": 144996,
+      "gt_dynamic_points": 5248,
+      "sensor_profile": {
+        "name": "nuScenes HDL-32E keyframes",
+        "beams": 32,
+        "rate_hz": 0.6666666666666666,
+        "deskewed": false,
+        "note": "Single rigid keyframe pose; per-point intra-sweep deskew is unavailable."
+      },
+      "preprocessing": {
+        "ground_z_sensor": -1.6,
+        "min_distance": 1.0,
+        "close_point_rule": "abs(sensor_x)<min_distance AND abs(sensor_y)<min_distance"
+      },
+      "manifest_sha256": "b7e15863d6cda5586959952b62270072dbd76ac3c942bf20682dc166eaced916",
+      "map_sha256": "d9eaf67c4fad6b71c7f215562fc075c987b02136ffcf4a713d2e1d33d024908a",
+      "gt_sha256": "69d20b7b9ff7c8901ea73c20b5ed6e31649f0a2191237d38aaf760e03f3c691e",
+      "results": {
+        "defaults": {
+          "metrics": {
+            "precision": 0.30717255717255715,
+            "recall": 0.11261432926829268,
+            "f1": 0.16480758505298382,
+            "iou": 0.08980398115787874,
+            "static_preservation": 0.9904614019520852,
+            "true_positive": 591,
+            "false_positive": 1333,
+            "false_negative": 4657,
+            "true_negative": 138415
+          },
+          "api_cli_masks_equal": true,
+          "api_cli_points_equal": true,
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "api_filter_seconds": 0.29377538099993217,
+          "cli_filter_seconds": 0.4429827750000186
+        },
+        "ground_protected": {
+          "metrics": {
+            "precision": 0.30717255717255715,
+            "recall": 0.11261432926829268,
+            "f1": 0.16480758505298382,
+            "iou": 0.08980398115787874,
+            "static_preservation": 0.9904614019520852,
+            "true_positive": 591,
+            "false_positive": 1333,
+            "false_negative": 4657,
+            "true_negative": 138415
+          },
+          "api_cli_masks_equal": true,
+          "api_cli_points_equal": true,
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": -0.36588127809032445,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "api_filter_seconds": 0.4405880669999078,
+          "cli_filter_seconds": 0.39489039800014325
+        }
+      }
+    },
+    {
+      "dataset": "nuscenes-mini",
+      "scene": "scene-0553",
+      "frames": 12,
+      "map_points": 172112,
+      "gt_dynamic_points": 5774,
+      "sensor_profile": {
+        "name": "nuScenes HDL-32E keyframes",
+        "beams": 32,
+        "rate_hz": 0.6666666666666666,
+        "deskewed": false,
+        "note": "Single rigid keyframe pose; per-point intra-sweep deskew is unavailable."
+      },
+      "preprocessing": {
+        "ground_z_sensor": -1.6,
+        "min_distance": 1.0,
+        "close_point_rule": "abs(sensor_x)<min_distance AND abs(sensor_y)<min_distance"
+      },
+      "manifest_sha256": "6d297da7a9b4b40e95192f65e1d5031b10e193d275cfb298474ca79ff60170ce",
+      "map_sha256": "6366998699c68e0b35b27e92909de3098ef7c7a3653edf5adb6c4ba9ab438b81",
+      "gt_sha256": "8f9f17f1b9950738e64754c75e8051090705ec2f6eb76d7cb62ca6a49d01b072",
+      "results": {
+        "defaults": {
+          "metrics": {
+            "precision": 0.9964586100044267,
+            "recall": 0.3898510564599931,
+            "f1": 0.5604381924561185,
+            "iou": 0.3893116568661363,
+            "static_preservation": 0.9999519051569695,
+            "true_positive": 2251,
+            "false_positive": 8,
+            "false_negative": 3523,
+            "true_negative": 166330
+          },
+          "api_cli_masks_equal": true,
+          "api_cli_points_equal": true,
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "api_filter_seconds": 0.42885899999987487,
+          "cli_filter_seconds": 0.41070547599997553
+        },
+        "ground_protected": {
+          "metrics": {
+            "precision": 0.9964586100044267,
+            "recall": 0.3898510564599931,
+            "f1": 0.5604381924561185,
+            "iou": 0.3893116568661363,
+            "static_preservation": 0.9999519051569695,
+            "true_positive": 2251,
+            "false_positive": 8,
+            "false_negative": 3523,
+            "true_negative": 166330
+          },
+          "api_cli_masks_equal": true,
+          "api_cli_points_equal": true,
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": -0.05165377374264144,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "api_filter_seconds": 0.3314697740001975,
+          "cli_filter_seconds": 0.42050077799990504
+        }
+      }
+    },
+    {
+      "dataset": "nuscenes-mini",
+      "scene": "scene-0655",
+      "frames": 12,
+      "map_points": 162772,
+      "gt_dynamic_points": 2662,
+      "sensor_profile": {
+        "name": "nuScenes HDL-32E keyframes",
+        "beams": 32,
+        "rate_hz": 0.6666666666666666,
+        "deskewed": false,
+        "note": "Single rigid keyframe pose; per-point intra-sweep deskew is unavailable."
+      },
+      "preprocessing": {
+        "ground_z_sensor": -1.6,
+        "min_distance": 1.0,
+        "close_point_rule": "abs(sensor_x)<min_distance AND abs(sensor_y)<min_distance"
+      },
+      "manifest_sha256": "691189899335bbc5e06da2811fe980689b9abb3162fdad21b5d66908cd213324",
+      "map_sha256": "1ebf32cb787af21232dc4645ca8b5c11c69775e762f85c36b5475fd004452ac3",
+      "gt_sha256": "5039a158cf5de9c539794649be7be54dd1ff58cd773f7dffa4a589703b1a8e45",
+      "results": {
+        "defaults": {
+          "metrics": {
+            "precision": 0.05241379310344828,
+            "recall": 0.014274981217129978,
+            "f1": 0.02243873634484795,
+            "iou": 0.011346670647954613,
+            "static_preservation": 0.9957091999250516,
+            "true_positive": 38,
+            "false_positive": 687,
+            "false_negative": 2624,
+            "true_negative": 159423
+          },
+          "api_cli_masks_equal": true,
+          "api_cli_points_equal": true,
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "api_filter_seconds": 0.26712385899986657,
+          "cli_filter_seconds": 0.37235869999994975
+        },
+        "ground_protected": {
+          "metrics": {
+            "precision": 0.05241379310344828,
+            "recall": 0.014274981217129978,
+            "f1": 0.02243873634484795,
+            "iou": 0.011346670647954613,
+            "static_preservation": 0.9957091999250516,
+            "true_positive": 38,
+            "false_positive": 687,
+            "false_negative": 2624,
+            "true_negative": 159423
+          },
+          "api_cli_masks_equal": true,
+          "api_cli_points_equal": true,
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": -0.19384441749220355,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "api_filter_seconds": 0.25188561499999196,
+          "cli_filter_seconds": 0.3973061770000186
+        }
+      }
+    },
+    {
+      "dataset": "nuscenes-mini",
+      "scene": "scene-0757",
+      "frames": 12,
+      "map_points": 197381,
+      "gt_dynamic_points": 48529,
+      "sensor_profile": {
+        "name": "nuScenes HDL-32E keyframes",
+        "beams": 32,
+        "rate_hz": 0.6666666666666666,
+        "deskewed": false,
+        "note": "Single rigid keyframe pose; per-point intra-sweep deskew is unavailable."
+      },
+      "preprocessing": {
+        "ground_z_sensor": -1.6,
+        "min_distance": 1.0,
+        "close_point_rule": "abs(sensor_x)<min_distance AND abs(sensor_y)<min_distance"
+      },
+      "manifest_sha256": "c8710ebbc75718e96a9b9d3013c006d2adbe6cfcae2ab68cbd62cafddb0644c2",
+      "map_sha256": "326d1fe2e64915713416e6d13dd3e5150fdcb69cb64f70596718bb18a0530455",
+      "gt_sha256": "98f709118402b707494f6b55ec989a27a1f5c59e2f50c606b97e8aa6f7b1a91e",
+      "results": {
+        "defaults": {
+          "metrics": {
+            "precision": 0.9689438555162937,
+            "recall": 0.5085412845927177,
+            "f1": 0.6670090136353194,
+            "iou": 0.5003852392538524,
+            "static_preservation": 0.9946859968290651,
+            "true_positive": 24679,
+            "false_positive": 791,
+            "false_negative": 23850,
+            "true_negative": 148061
+          },
+          "api_cli_masks_equal": true,
+          "api_cli_points_equal": true,
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "api_filter_seconds": 0.399307318999945,
+          "cli_filter_seconds": 0.4616437740000947
+        },
+        "ground_protected": {
+          "metrics": {
+            "precision": 0.9689438555162937,
+            "recall": 0.5085412845927177,
+            "f1": 0.6670090136353194,
+            "iou": 0.5003852392538524,
+            "static_preservation": 0.9946859968290651,
+            "true_positive": 24679,
+            "false_positive": 791,
+            "false_negative": 23850,
+            "true_negative": 148061
+          },
+          "api_cli_masks_equal": true,
+          "api_cli_points_equal": true,
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": -0.5364831467768976,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "api_filter_seconds": 0.3307884460000423,
+          "cli_filter_seconds": 0.4619202410001435
+        }
+      }
+    },
+    {
+      "dataset": "nuscenes-mini",
+      "scene": "scene-0796",
+      "frames": 12,
+      "map_points": 166983,
+      "gt_dynamic_points": 9308,
+      "sensor_profile": {
+        "name": "nuScenes HDL-32E keyframes",
+        "beams": 32,
+        "rate_hz": 0.6666666666666666,
+        "deskewed": false,
+        "note": "Single rigid keyframe pose; per-point intra-sweep deskew is unavailable."
+      },
+      "preprocessing": {
+        "ground_z_sensor": -1.6,
+        "min_distance": 1.0,
+        "close_point_rule": "abs(sensor_x)<min_distance AND abs(sensor_y)<min_distance"
+      },
+      "manifest_sha256": "7f6d7b89f180d94596ff6ffd48d1fdec529b32885d898283b4f4e0bd18f5b8f2",
+      "map_sha256": "8654ed2309ac4e2eec80d8811c32e2b55ef3572651b0a82e85e6f34d3cc04a7b",
+      "gt_sha256": "a76a7c37e244f5302ed878dc0846d2390b212bd2513f8b6ad93720e3e476fe23",
+      "results": {
+        "defaults": {
+          "metrics": {
+            "precision": 0.2937000887311446,
+            "recall": 0.035560807907176625,
+            "f1": 0.06344034499281266,
+            "iou": 0.032759303246239116,
+            "static_preservation": 0.994951641033772,
+            "true_positive": 331,
+            "false_positive": 796,
+            "false_negative": 8977,
+            "true_negative": 156879
+          },
+          "api_cli_masks_equal": true,
+          "api_cli_points_equal": true,
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "api_filter_seconds": 0.35465713399980814,
+          "cli_filter_seconds": 0.4641214460000356
+        },
+        "ground_protected": {
+          "metrics": {
+            "precision": 0.2937000887311446,
+            "recall": 0.035560807907176625,
+            "f1": 0.06344034499281266,
+            "iou": 0.032759303246239116,
+            "static_preservation": 0.994951641033772,
+            "true_positive": 331,
+            "false_positive": 796,
+            "false_negative": 8977,
+            "true_negative": 156879
+          },
+          "api_cli_masks_equal": true,
+          "api_cli_points_equal": true,
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": -0.34339728437635525,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "api_filter_seconds": 0.3385521790000894,
+          "cli_filter_seconds": 0.4373012739999922
+        }
+      }
+    },
+    {
+      "dataset": "nuscenes-mini",
+      "scene": "scene-0916",
+      "frames": 12,
+      "map_points": 158781,
+      "gt_dynamic_points": 3232,
+      "sensor_profile": {
+        "name": "nuScenes HDL-32E keyframes",
+        "beams": 32,
+        "rate_hz": 0.6666666666666666,
+        "deskewed": false,
+        "note": "Single rigid keyframe pose; per-point intra-sweep deskew is unavailable."
+      },
+      "preprocessing": {
+        "ground_z_sensor": -1.6,
+        "min_distance": 1.0,
+        "close_point_rule": "abs(sensor_x)<min_distance AND abs(sensor_y)<min_distance"
+      },
+      "manifest_sha256": "18577fbdbd1e0051b7705fbd6774e8f93a3e74dbf26be11595035c1c7121b457",
+      "map_sha256": "f5a00a3b57ddcb85d1f03c096580f513660a8484e81bb3279d3bc05c318a286e",
+      "gt_sha256": "596cfd4655590d085e779fffcfb216914d2ac09b11e56faa8b0e39faafbb13d6",
+      "results": {
+        "defaults": {
+          "metrics": {
+            "precision": 0.10556760665220535,
+            "recall": 0.1806930693069307,
+            "f1": 0.13327247832040162,
+            "iou": 0.07139364303178485,
+            "static_preservation": 0.9681900880108519,
+            "true_positive": 584,
+            "false_positive": 4948,
+            "false_negative": 2648,
+            "true_negative": 150601
+          },
+          "api_cli_masks_equal": true,
+          "api_cli_points_equal": true,
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "api_filter_seconds": 0.41932664899991323,
+          "cli_filter_seconds": 0.6144299469999623
+        },
+        "ground_protected": {
+          "metrics": {
+            "precision": 0.1057587830496197,
+            "recall": 0.1806930693069307,
+            "f1": 0.13342472012794152,
+            "iou": 0.07148102815177479,
+            "static_preservation": 0.9682543764344355,
+            "true_positive": 584,
+            "false_positive": 4938,
+            "false_negative": 2648,
+            "true_negative": 150611
+          },
+          "api_cli_masks_equal": true,
+          "api_cli_points_equal": true,
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": -0.22203653323417005,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "api_filter_seconds": 0.456729507999853,
+          "cli_filter_seconds": 0.5966928820000703
+        }
+      }
+    },
+    {
+      "dataset": "nuscenes-mini",
+      "scene": "scene-1077",
+      "frames": 12,
+      "map_points": 161874,
+      "gt_dynamic_points": 4517,
+      "sensor_profile": {
+        "name": "nuScenes HDL-32E keyframes",
+        "beams": 32,
+        "rate_hz": 0.6666666666666666,
+        "deskewed": false,
+        "note": "Single rigid keyframe pose; per-point intra-sweep deskew is unavailable."
+      },
+      "preprocessing": {
+        "ground_z_sensor": -1.6,
+        "min_distance": 1.0,
+        "close_point_rule": "abs(sensor_x)<min_distance AND abs(sensor_y)<min_distance"
+      },
+      "manifest_sha256": "5a2b461848554666b8ab2a83fe93cd617bf28814403f45b55c75184304d41b97",
+      "map_sha256": "67d16eb95cd305e32665780bb048b3f1405c1e41e0a7c17089b79efe0eeae5b4",
+      "gt_sha256": "0275a8a871ca522ad290a28b3c19133381c8a6b24068035fe2f88c4aeea9e091",
+      "results": {
+        "defaults": {
+          "metrics": {
+            "precision": 0.054187192118226604,
+            "recall": 0.0024352446313925173,
+            "f1": 0.004661016949152542,
+            "iou": 0.002335952431514122,
+            "static_preservation": 0.9987798445572805,
+            "true_positive": 11,
+            "false_positive": 192,
+            "false_negative": 4506,
+            "true_negative": 157165
+          },
+          "api_cli_masks_equal": true,
+          "api_cli_points_equal": true,
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "api_filter_seconds": 0.3455218019998938,
+          "cli_filter_seconds": 0.476132638000081
+        },
+        "ground_protected": {
+          "metrics": {
+            "precision": 0.054187192118226604,
+            "recall": 0.0024352446313925173,
+            "f1": 0.004661016949152542,
+            "iou": 0.002335952431514122,
+            "static_preservation": 0.9987798445572805,
+            "true_positive": 11,
+            "false_positive": 192,
+            "false_negative": 4506,
+            "true_negative": 157165
+          },
+          "api_cli_masks_equal": true,
+          "api_cli_points_equal": true,
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": -0.06408192746814975,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "api_filter_seconds": 0.34770017999994707,
+          "cli_filter_seconds": 0.3925104329998703
+        }
+      }
+    },
+    {
+      "dataset": "nuscenes-mini",
+      "scene": "scene-1094",
+      "frames": 12,
+      "map_points": 174008,
+      "gt_dynamic_points": 8097,
+      "sensor_profile": {
+        "name": "nuScenes HDL-32E keyframes",
+        "beams": 32,
+        "rate_hz": 0.6666666666666666,
+        "deskewed": false,
+        "note": "Single rigid keyframe pose; per-point intra-sweep deskew is unavailable."
+      },
+      "preprocessing": {
+        "ground_z_sensor": -1.6,
+        "min_distance": 1.0,
+        "close_point_rule": "abs(sensor_x)<min_distance AND abs(sensor_y)<min_distance"
+      },
+      "manifest_sha256": "36238296b59211fc46833d545f035f94d8c77f718ea984c50006c9b4691ca7ae",
+      "map_sha256": "c0641984f32a6f096473eafba59ffca3903a547aa668eff1d8f00e6f93bd66ac",
+      "gt_sha256": "d8c174ef6284b2b23fb25116fd81f0dd8f2084a73adf0d52d9542fdc7bd19062",
+      "results": {
+        "defaults": {
+          "metrics": {
+            "precision": 0.3008608971454463,
+            "recall": 0.08200568111646289,
+            "f1": 0.12888198757763977,
+            "iou": 0.06887966804979254,
+            "static_preservation": 0.990699833043017,
+            "true_positive": 664,
+            "false_positive": 1543,
+            "false_negative": 7433,
+            "true_negative": 164368
+          },
+          "api_cli_masks_equal": true,
+          "api_cli_points_equal": true,
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "api_filter_seconds": 0.4222345309999582,
+          "cli_filter_seconds": 0.6294821660001162
+        },
+        "ground_protected": {
+          "metrics": {
+            "precision": 0.3008608971454463,
+            "recall": 0.08200568111646289,
+            "f1": 0.12888198757763977,
+            "iou": 0.06887966804979254,
+            "static_preservation": 0.990699833043017,
+            "true_positive": 664,
+            "false_positive": 1543,
+            "false_negative": 7433,
+            "true_negative": 164368
+          },
+          "api_cli_masks_equal": true,
+          "api_cli_points_equal": true,
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": 0.11346292910402019,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "api_filter_seconds": 0.45933500000001004,
+          "cli_filter_seconds": 0.5869612920000691
+        }
+      }
+    },
+    {
+      "dataset": "nuscenes-mini",
+      "scene": "scene-1100",
+      "frames": 12,
+      "map_points": 149454,
+      "gt_dynamic_points": 6082,
+      "sensor_profile": {
+        "name": "nuScenes HDL-32E keyframes",
+        "beams": 32,
+        "rate_hz": 0.6666666666666666,
+        "deskewed": false,
+        "note": "Single rigid keyframe pose; per-point intra-sweep deskew is unavailable."
+      },
+      "preprocessing": {
+        "ground_z_sensor": -1.6,
+        "min_distance": 1.0,
+        "close_point_rule": "abs(sensor_x)<min_distance AND abs(sensor_y)<min_distance"
+      },
+      "manifest_sha256": "81fc4151bbbd46a83c074f6af6322f5c44d8e0c26cb644014c3acba637e581d7",
+      "map_sha256": "737cca2b922905e681cddb5737ad2a55ebd388dc3f1cc6407e80c4e6f59fa87a",
+      "gt_sha256": "fda0b7429d577bf2c08c974a286a9abf3d436149d175217dc17923d6d496ce34",
+      "results": {
+        "defaults": {
+          "metrics": {
+            "precision": 0.6524122807017544,
+            "recall": 0.09782966129562644,
+            "f1": 0.1701458392908207,
+            "iou": 0.09298327863728707,
+            "static_preservation": 0.9977889685573195,
+            "true_positive": 595,
+            "false_positive": 317,
+            "false_negative": 5487,
+            "true_negative": 143055
+          },
+          "api_cli_masks_equal": true,
+          "api_cli_points_equal": true,
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": null,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "api_filter_seconds": 0.38539530599996397,
+          "cli_filter_seconds": 0.43568674500011184
+        },
+        "ground_protected": {
+          "metrics": {
+            "precision": 0.6524122807017544,
+            "recall": 0.09782966129562644,
+            "f1": 0.1701458392908207,
+            "iou": 0.09298327863728707,
+            "static_preservation": 0.9977889685573195,
+            "true_positive": 595,
+            "false_positive": 317,
+            "false_negative": 5487,
+            "true_negative": 143055
+          },
+          "api_cli_masks_equal": true,
+          "api_cli_points_equal": true,
+          "parameters": {
+            "range": {
+              "h_res_deg": 2.5,
+              "v_res_deg": 2.5,
+              "range_margin": 0.5,
+              "min_see_through": 3,
+              "max_surface_hits": 5,
+              "ground_z": -0.901983877740472,
+              "resolutions": null
+            },
+            "scan_ratio": {
+              "n_rings": 20,
+              "n_sectors": 108,
+              "max_range": 80.0,
+              "scan_ratio_threshold": 0.2,
+              "min_map_height": 0.5,
+              "ground_margin": 0.2,
+              "min_votes": null,
+              "votes_fraction": 0.5,
+              "votes_floor": 3
+            }
+          },
+          "api_filter_seconds": 0.4541176230000019,
+          "cli_filter_seconds": 0.4138302270000622
+        }
+      }
+    }
+  ],
+  "aggregate": {
+    "min_gt_dynamic_points": 5000,
+    "included_scenes": [
+      "scene-0103",
+      "scene-0553",
+      "scene-0757",
+      "scene-0796",
+      "scene-1094",
+      "scene-1100"
+    ],
+    "excluded_scenes": [
+      "scene-0061",
+      "scene-0655",
+      "scene-0916",
+      "scene-1077"
+    ],
+    "methods": {
+      "defaults": {
+        "precision": 0.5865913815452704,
+        "recall": 0.20440047010671156,
+        "f1": 0.2924538271676158,
+        "static_preservation": 0.9947566244287048
+      },
+      "ground_protected": {
+        "precision": 0.5865913815452704,
+        "recall": 0.20440047010671156,
+        "f1": 0.2924538271676158,
+        "static_preservation": 0.9947566244287048
+      }
+    }
+  },
+  "limitations": "Rigid keyframe poses without intra-sweep deskew. Offline filter timing only. Ground-protected configuration uses map Z second percentile; defaults have no global ground protection.",
+  "validation_date": "2026-10-08",
+  "source_base_commit": "d809f79",
+  "preprocessing_reference": "https://github.com/nutonomy/nuscenes-devkit/blob/master/python-sdk/nuscenes/utils/data_classes.py",
+  "reference_check": {
+    "scene": "scene-0757",
+    "metrics_equal": true,
+    "min_distance": 1
+  }
+}

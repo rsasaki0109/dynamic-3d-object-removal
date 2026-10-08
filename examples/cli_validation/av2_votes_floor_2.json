@@ -1,0 +1,103 @@
+{
+  "dataset": "argoverse-2-sensor-val",
+  "scene": "0b5142c1-420b-3fea-9e98-b87327ae22c6",
+  "frames": 12,
+  "stride": 3,
+  "map_points": 1235563,
+  "gt_dynamic_points": 84471,
+  "sensor_profile": {
+    "name": "dual VLP-32C",
+    "beams": 64,
+    "rate_hz": 3.3333333333333335,
+    "deskewed": true,
+    "source": "https://argoverse.github.io/user-guide/datasets/sensor.html"
+  },
+  "input_hashes": {
+    "manifest_sha256": "36a8b5c4e86afcb9fd8735c64fa3063e46bce29eb6ec8d64b193ff915d6af81b",
+    "map_sha256": "5da31155fa7b54b564900e80084614a2144702ec05f61d10b306fbda9ecf5df0",
+    "gt_sha256": "549ec2c75f73d7aee951b935f689604a9ebb9d42f401a200bf4422f270942c1c"
+  },
+  "results": {
+    "baseline": {
+      "parameters": {
+        "range": {
+          "h_res_deg": 1.0,
+          "v_res_deg": 1.0,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 3,
+          "ground_z": -1.4,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "metrics": {
+        "precision": 0.9924292057945694,
+        "recall": 0.16139266730593932,
+        "f1": 0.2776352231997393,
+        "iou": 0.16119420632574638,
+        "static_preservation": 0.99990965100965,
+        "true_positive": 13633,
+        "false_positive": 104,
+        "false_negative": 70838,
+        "true_negative": 1150988
+      },
+      "api_cli_masks_equal": true,
+      "api_cli_points_equal": true,
+      "api_scan_ratio_seconds": 1.8523623080000107,
+      "cli_filter_seconds": 2.4924133449999317
+    },
+    "candidate": {
+      "parameters": {
+        "range": {
+          "h_res_deg": 1.0,
+          "v_res_deg": 1.0,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 3,
+          "ground_z": -1.4,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 2
+        }
+      },
+      "metrics": {
+        "precision": 0.9924319604133314,
+        "recall": 0.16145185921795646,
+        "f1": 0.2777229083726187,
+        "iou": 0.16125332545078333,
+        "static_preservation": 0.99990965100965,
+        "true_positive": 13638,
+        "false_positive": 104,
+        "false_negative": 70833,
+        "true_negative": 1150988
+      },
+      "api_cli_masks_equal": true,
+      "api_cli_points_equal": true,
+      "api_scan_ratio_seconds": 1.5569766709995747,
+      "cli_filter_seconds": 2.4464171839999835
+    }
+  },
+  "limitations": "Frozen candidate from nuScenes mini, tested on one previously benchmarked AV2 scene without retuning. Single scene is not broad held-out validation. API timing covers scan-ratio only; CLI timing covers both filters.",
+  "validation_date": "2026-10-08",
+  "source_base_commit": "5d46c52"
+}

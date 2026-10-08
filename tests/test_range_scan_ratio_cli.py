@@ -35,6 +35,48 @@ def cli_args(root):
             "--summary-json", str(root / "summary.json"), "--quiet"]
 
 
+@pytest.mark.parametrize("deskewed", [False, None, 0, "false"])
+def test_undeskewed_requires_explicit_boolean_and_opt_in(tmp_path, capsys, deskewed):
+    points, scans = make_scene(tmp_path)
+    path = tmp_path / "manifest.json"
+    manifest = json.loads(path.read_text())
+    manifest["sensor_profile"]["deskewed"] = deskewed
+    path.write_text(json.dumps(manifest))
+    assert core.main(cli_args(tmp_path)) == 1
+    assert not (tmp_path / "out.npy").exists()
+    status = core.main(cli_args(tmp_path) + ["--allow-undeskewed"])
+    if deskewed is not False:
+        assert status == 1
+        assert not (tmp_path / "out.npy").exists()
+        return
+    assert status == 0
+    summary = json.loads((tmp_path / "summary.json").read_text())
+    assert summary["sensor_profile"]["deskewed"] is False
+    assert summary["allow_undeskewed"] is True
+    _, kr = core.clean_map_by_visibility(points, scans, h_res_deg=2.5,
+                                        v_res_deg=2.5, min_see_through=3, max_surface_hits=5)
+    _, ks = core.clean_map_by_scan_ratio(points, scans)
+    np.testing.assert_array_equal(np.load(tmp_path / "out.npy"), points[kr | ks])
+    assert "warning:" not in capsys.readouterr().err
+
+
+def test_undeskewed_emits_rigid_pose_warning(tmp_path, capsys):
+    make_scene(tmp_path)
+    path = tmp_path / "manifest.json"
+    manifest = json.loads(path.read_text())
+    manifest["sensor_profile"]["deskewed"] = False
+    path.write_text(json.dumps(manifest))
+    args = [arg for arg in cli_args(tmp_path) if arg != "--quiet"]
+    assert core.main(args + ["--allow-undeskewed"]) == 0
+    assert "intra-sweep motion" in capsys.readouterr().err
+
+
+def test_undeskewed_flag_rejected_for_single_scan(tmp_path):
+    with pytest.raises(SystemExit) as error:
+        core.main(["--output-cloud", str(tmp_path / "out.npy"), "--allow-undeskewed"])
+    assert error.value.code == 2
+
+
 def test_intersection_keeps_single_channel_candidates(tmp_path):
     points, scans = make_scene(tmp_path)
     result = subprocess.run([

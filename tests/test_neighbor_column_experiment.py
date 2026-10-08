@@ -32,3 +32,29 @@ def test_no_neighbor_mode_matches_native_per_scan_masks():
     np.testing.assert_array_equal(dynamic, expected_dynamic)
     np.testing.assert_array_equal(observed, expected_observed)
     assert not inferred.any()
+
+
+def test_lower_z_continuity_rejects_height_steps_and_missing_extrema():
+    from scripts.experiment_neighbor_columns import ground_aligned_support
+    borrowed = np.array([True, True, True, True, False])
+    query_low = np.array([0., .5, np.inf, 0., 0.])
+    map_low = np.array([.125, 0., 0., np.inf, 0.])
+    counts = np.array([2, 2, 2, 0, 2])
+    assert ground_aligned_support(borrowed, query_low, map_low, counts, .125).tolist() == [True, False, False, False, False]
+
+
+def test_lower_z_gate_preserves_native_votes_and_only_reduces_inference():
+    rng = np.random.default_rng(64)
+    points = rng.uniform([-15, -15, -1], [15, 15, 3], (3000, 3))
+    query = points[::20].copy()
+    origin = np.array([1., -2., .5])
+    params = {"n_rings": 10, "n_sectors": 80, "max_range": 30.,
+              "scan_ratio_threshold": .8, "min_map_height": .5, "ground_margin": .2}
+    native, obs, _ = scan_votes(points, query, origin, params, "none")
+    either, eo, ei = scan_votes(points, query, origin, params, "either")
+    gated, go, gi = scan_votes(points, query, origin, params, "ground_aligned")
+    assert ei.any() and (ei & ~gi).any()
+    np.testing.assert_array_equal(gated[obs], native[obs])
+    np.testing.assert_array_equal(go[obs], obs[obs])
+    assert not (gi & ~ei).any() and not (go & ~eo).any()
+    assert not (gated & ~either).any()

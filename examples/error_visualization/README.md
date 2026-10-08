@@ -244,3 +244,47 @@ includes all four examples. Every changed point is displayed; only the gray
 background is deterministically sampled to at most 15,000 points. Black lines
 show sensor origins. Full accumulated maps are offline and include future
 points. Core behavior and public demos are unchanged.
+
+## Lower-Z continuity gate
+
+[neighbor_ground_aligned.json](neighbor_ground_aligned.json) adds one research
+candidate: accept an inferred either-neighbor column only if its pooled minimum
+Z agrees with the target map column's minimum Z within the existing 0.2 m
+`ground_margin`. Empty map columns and nonfinite extrema are rejected. Native
+occupied query columns remain unchanged. This is a lower-Z continuity proxy,
+not semantic ground detection or a proven object-boundary test. It uses no GT
+for decisions and leaves range and normalized voting unchanged.
+
+| Support | nuScenes mean recall | Mean static kept | AV2 moving removed | AV2 static falsely removed |
+|---|---:|---:|---:|---:|
+| Native | 20.440% | 99.476% | 13,633 | 104 |
+| Either neighbor | 30.492% | 99.384% | 13,594 | 99 |
+| Lower-Z agreement | 21.188% | 99.462% | 13,630 | 103 |
+
+Means use the same six eligible mini scenes; all ten per-scene records are
+included. Existing native/both/either results exactly match the previous
+experiment on all ten scenes and AV2. Native masks also match production.
+The gate reduces additional static removals in scene-0796 from 478 to 17,
+but additional moving removals fall from 1,420 to 100. Scene-0916 still adds
+150 static removals (versus 594 without the gate). On AV2 it adds 88 moving
+removals and loses 91, a net loss of 3. Restricting inferred observations can
+both reduce votes and lower normalized thresholds, so final masks need not
+be subsets of either-neighbor masks.
+
+This candidate largely suppresses the useful recall gain and does not establish
+an improvement across datasets. No production default change is justified.
+Minimum Z is sensitive to map contamination, slope and outliers. The next
+hypothesis needs a more robust local surface estimate or per-ray free-space
+evidence, rather than treating a borrowed height column as a direct observation.
+These remain previously examined data, with no held-out validation.
+
+```bash
+python scripts/experiment_neighbor_columns.py \
+  --validation-root output/cli_nuscenes_devkit_selection \
+  --av2-manifest output/cli_av2/manifest.json \
+  --av2-baseline examples/cli_validation/av2_12_sweeps.json \
+  --ground-aligned --report-json output/neighbor_ground_aligned.json
+```
+
+Use a new report path. Tests cover rejection at height steps/missing extrema,
+the inclusive margin, native-column preservation and reduction of inference.

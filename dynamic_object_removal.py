@@ -2302,13 +2302,15 @@ _FUSION_CLI_PRESETS = {
 }
 
 
-def _load_scan_manifest(path: Path) -> tuple[list[tuple[np.ndarray, np.ndarray]], dict[str, Any]]:
-    """Load deskewed scans with explicit sensor-to-map poses or map-frame origins."""
+def _load_scan_manifest(path: Path, *, allow_undeskewed: bool = False) -> tuple[list[tuple[np.ndarray, np.ndarray]], dict[str, Any]]:
+    """Load posed scans; uncorrected sweeps require an explicit offline opt-in."""
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         raise ValueError("manifest must be an object")
     profile = payload.get("sensor_profile")
-    if not isinstance(profile, dict) or profile.get("deskewed") is not True:
+    if not isinstance(profile, dict) or not (
+            profile.get("deskewed") is True or
+            (allow_undeskewed and profile.get("deskewed") is False)):
         raise ValueError("manifest requires sensor_profile.deskewed=true")
     frames = payload.get("frames")
     if not isinstance(frames, list) or not frames:
@@ -2478,7 +2480,10 @@ def _run_multiscan_cli(args: argparse.Namespace) -> int:
         map_points = load_points(Path(args.input_map), fmt=args.cloud_format)
         if not len(map_points) or not np.isfinite(map_points).all():
             raise ValueError("input map must contain finite, nonempty points")
-        scans, profile = _load_scan_manifest(Path(args.input_manifest))
+        scans, profile = _load_scan_manifest(
+            Path(args.input_manifest), allow_undeskewed=args.allow_undeskewed)
+        if profile["deskewed"] is False and not args.quiet:
+            _eprint("warning: undeskewed sweeps use a single rigid pose; intra-sweep motion may affect results")
         _check_multiscan_output_paths(args)
         filter_started = time.perf_counter()
         channel_counts = {}
@@ -2513,6 +2518,7 @@ def _run_multiscan_cli(args: argparse.Namespace) -> int:
                 "removed_ratio": removed / total, "scan_count": len(scans),
                 "scan_points": sum(len(points) for points, _ in scans),
                 "sensor_profile": profile, "preset": args.preset, "parameters": params,
+                "allow_undeskewed": args.allow_undeskewed,
                 **({"channel_removed_points": channel_counts} if channel_counts else {}),
                 "input_map": str(Path(args.input_map).resolve()),
                 "input_manifest": str(Path(args.input_manifest).resolve()),
@@ -2538,6 +2544,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output-mask", help="fusion/range_scan_ratio: optional boolean .npy keep mask in input-map row order.")
     parser.add_argument("--algorithm", choices=["box", "range", "scan_ratio", "fusion", "range_scan_ratio"], default="box", help="box: detection crop. range/scan_ratio: single-query map cleaning. fusion/range_scan_ratio: multi-scan offline map cleaning; range_scan_ratio intersects dynamic masks.")
     parser.add_argument("--input-manifest", help="fusion/range_scan_ratio: JSON manifest of deskewed scans with sensor-to-map poses or map-frame sensor origins.")
+    parser.add_argument("--allow-undeskewed", action="store_true", help="Offline experiments only: accept manifests explicitly declaring deskewed=false. Uses rigid poses without intra-sweep motion correction.")
     fusion_group = parser.add_argument_group("fusion parameters (same defaults as the Python API)")
     fusion_group.add_argument("--preset", choices=list(_FUSION_CLI_PRESETS),
                              help="fusion: long-map uses API defaults; short-window uses 0.7/3/4 voting thresholds for about 12 scans. Explicit --fusion-* options take precedence.")
@@ -2610,6 +2617,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             setattr(args, name, 2.5 if args.algorithm == "range_scan_ratio" else default)
     if args.algorithm != "fusion" and args.preset:
         parser.error("--preset requires --algorithm fusion")
+    if args.allow_undeskewed and args.algorithm not in {"fusion", "range_scan_ratio"}:
+        parser.error("--allow-undeskewed requires --algorithm fusion or range_scan_ratio")
     if args.algorithm != "fusion" and any(
             hasattr(args, "fusion_" + name) for name in _FUSION_CLI_DEFAULTS):
         parser.error("--fusion-* options require --algorithm fusion")

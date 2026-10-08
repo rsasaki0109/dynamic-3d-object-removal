@@ -105,6 +105,28 @@ format is inferred from its extension. A pose can instead provide a proper 3×3
 be nonempty and finite, and `sensor_profile.deskewed` must explicitly be `true`.
 The CLI applies rigid poses; it does not deskew scans or estimate poses.
 
+For offline experiments with nuScenes keyframes, `--allow-undeskewed` accepts
+an explicit `sensor_profile.deskewed: false`. Missing or non-boolean deskew
+metadata still fails validation. The CLI warns about intra-sweep motion unless
+`--quiet` is used, and the JSON summary preserves the original sensor profile
+and records the opt-in. These experiments do not validate deskewed or live
+moving-platform behavior.
+
+Validate sparse 32-beam nuScenes mini data with the CLI defaults and, separately,
+the benchmark's map-Z ground protection:
+
+```bash
+python scripts/validate_nuscenes_cli.py --scenes all \
+  --frames 12 --stride 3 --output output/cli_nuscenes_validation
+```
+
+This downloads the official mini archive when necessary (about 4 GB streamed,
+keeping only LiDAR keyframes and metadata). Each scene retains its manifest,
+GT, commands, keep masks, cleaned points, and timings. The validator requires
+exact API/CLI masks and points for both configurations. Its aggregate reports
+unweighted means only for scenes with at least 5,000 moving-GT points, listing
+excluded scenes explicitly. Use a new output directory for each run.
+
 Without `--preset`, defaults match `clean_map_by_fusion` and target long
 sequences. Choose a preset explicitly; it is not inferred from sensor metadata
 or scan count:

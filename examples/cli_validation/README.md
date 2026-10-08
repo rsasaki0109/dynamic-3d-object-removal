@@ -1,5 +1,32 @@
 # Multi-scan CLI validation
 
+[nuscenes_10_scenes.json](nuscenes_10_scenes.json) records all 10 real nuScenes
+mini scenes: 12 keyframes each, stride 3, 2,720,477 accumulated points total.
+The sparse 2.5° CLI defaults and a separate ground-protected configuration both
+produced exactly the API's point clouds and masks in every scene. The protected
+`scene-0757` metrics also matched the existing benchmark exactly.
+
+| Configuration | Eligible scenes | Precision | Recall | F1 | Static kept |
+|---|---:|---:|---:|---:|---:|
+| CLI defaults | 6 | 0.2971 | 0.2632 | 0.2401 | 93.084% |
+| Map-Z ground protection | 6 | 0.2970 | 0.2631 | 0.2401 | 93.087% |
+
+Four scenes with fewer than 5,000 moving-GT points are excluded from the
+unweighted mean and retained in the record. Default CLI filter time totaled
+6.60 seconds across all 10 scenes; this excludes I/O and process startup and
+is one measurement. These are rigid keyframe poses with **no intra-sweep
+deskew**. Low accuracy remains visible; this validates implementation
+equivalence rather than suitability for live moving-platform use.
+
+```bash
+python scripts/validate_nuscenes_cli.py --scenes all --frames 12 --stride 3 \
+  --output output/cli_nuscenes_validation
+```
+
+This command retains full clouds, GT, masks, commands and summaries in the
+ignored output directory. The checked-in JSON keeps metrics, parameters and
+input hashes only. Use a new output directory when repeating it.
+
 [av2_12_sweeps.json](av2_12_sweeps.json) records a real AV2 CLI validation:
 12 sweeps, stride 3, 1,235,563 map points, 84,471 moving-GT points.
 Both CLI modes produced exactly the same point clouds and boolean keep masks as

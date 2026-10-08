@@ -561,3 +561,10 @@ More demos: [single scan](https://rsasaki0109.github.io/dynamic-3d-object-remova
 ## Related Work
 
 - [UTS-RI/dynamic_object_detection](https://github.com/UTS-RI/dynamic_object_detection)
+
+AV2 ground preprocessing uses an ego-frame Z cutoff before pose alignment.
+New benchmark runs do not reuse that cutoff as absolute city-map Z; the range
+channel records `ground_z: null` and the sensor cutoff separately. Earlier
+AV2 results retain their recorded settings. See the
+[coordinate-safe validation notes](examples/cli_validation/README.md#coordinate-safe-av2-ground-preprocessing)
+when comparing old and new runs.

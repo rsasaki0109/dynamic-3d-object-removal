@@ -82,3 +82,23 @@ def test_mask_output_validation(tmp_path, mask_name):
                       "--output-cloud", str(tmp_path / "out.npy"),
                       "--output-mask", str(tmp_path / mask_name)]) == 1
     assert not (tmp_path / "out.npy").exists()
+
+
+def test_default_validation_is_invariant_to_map_vertical_translation(tmp_path):
+    manifest = manifest_fixture(tmp_path)
+    # Tall accumulated column, low query column, and a farther return along the ghost direction.
+    np.save(tmp_path / 'scan0.npy', np.array([[5, 0, 0], [5, 0, 10], [5, 0, 1]], float))
+    for i in range(1, 4):
+        np.save(tmp_path / f'scan{i}.npy', np.array([[7, 0, 0], [7, 0, 1.4]], float))
+    original = validation.validate(manifest, tmp_path / 'original', workers=1)
+    content = json.loads(manifest.read_text())
+    for frame in content['frames']:
+        frame['pose']['translation'][2] = -20
+    manifest.write_text(json.dumps(content))
+    shifted = validation.validate(manifest, tmp_path / 'shifted', workers=1)
+    assert original['summaries']['range_scan_ratio']['parameters']['range']['ground_z'] is None
+    assert shifted['summaries']['range_scan_ratio']['parameters']['range']['ground_z'] is None
+    np.testing.assert_array_equal(np.load(tmp_path / 'original' / 'range_scan_ratio_keep.npy'),
+                                  np.load(tmp_path / 'shifted' / 'range_scan_ratio_keep.npy'))
+    assert original['metrics']['range_scan_ratio']['true_positive'] == 1
+    assert original['metrics']['range_scan_ratio'] == shifted['metrics']['range_scan_ratio']

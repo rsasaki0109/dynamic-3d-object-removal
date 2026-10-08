@@ -318,3 +318,50 @@ first (`pip install -e ".[benchmarks]"`). Public unsigned S3 access is needed
 for acquisition; no dataset is committed here. The JSON retains all effective
 parameters and hashes of the manifest, map, and GT. Regenerated inputs must
 match those fingerprints for a regression comparison.
+
+## Coordinate-safe AV2 ground preprocessing
+
+New AV2 benchmark runs exclude points with ego-frame Z <= -1.4 m **before**
+pose transformation. The range channel then uses `ground_z=None`: the ego cutoff
+must not be reused as an absolute city-map elevation. Benchmark configuration
+now distinguishes `sensor_ground_z=-1.4` and
+`ground_preprocessing_frame=ego_before_pose_transform` from `ground_z=null`.
+The optional sensor-aware ablation likewise does not classify retained map
+points by absolute city Z.
+
+`validate_multiscan_cli.py` uses no absolute range ground guard for new runs
+without a reference. When replaying a reference, it honors the recorded
+`ground_z`, including legacy numeric values (or the historical -1.4 fallback
+for old references lacking the key). Old records remain unchanged and must not
+be mixed with new metrics without acknowledging the configuration change.
+This changes AV2 benchmark/validation defaults, not core API/CLI defaults.
+Source sensor-height exclusion is still a simple heuristic, not a local terrain
+estimator; the library scan-ratio channel retains its per-column ground logic.
+
+A regression scene with a removable moving point produces identical range plus
+scan-ratio masks after translating all poses 20 m downward. Both translated and
+untranslated runs also verify exact API/CLI mask agreement. The new real log
+is replayed to validate the corrected path separately from the earlier frozen
+neighbor evaluation. Generated outputs remain ignored.
+
+```bash
+python scripts/validate_multiscan_cli.py \
+  --manifest output/av2_unseen_02a/manifest.json \
+  --output-dir output/av2_unseen_02a/coordinate_fix_validation --workers 2
+python scripts/run_av2_benchmark.py \
+  --scene 02a00399-3857-444e-8db3-a8f58489c394 --frames 12 --stride 3 \
+  --fusion-workers 2 \
+  --summary-json output/av2_unseen_02a/coordinate_fix_benchmark.json
+```
+
+Use new output locations. The export manifest can be reproduced with the
+command above in the new-log evaluation section; the fix itself does not
+require that evaluation PR's helper.
+
+[av2_coordinate_ground_fix.json](av2_coordinate_ground_fix.json) records the
+corrected benchmark and API/CLI replay on `02a00399…`: range plus scan-ratio
+recall 67.440%, F1 0.7832, static preservation 99.955%, 7,502 moving removals
+and 532 static false removals. All API/CLI point masks match. This reproduces
+the earlier diagnostic result; it is a corrected replay, not fresh held-out
+validation. The full benchmark method metrics and coordinate-specific settings
+are included so historical configurations remain distinguishable.

@@ -1,0 +1,158 @@
+{
+  "dataset": "argoverse-2-sensor-val",
+  "scene": "02a00399-3857-444e-8db3-a8f58489c394",
+  "frames": 12,
+  "stride": 3,
+  "map_points": 1185246,
+  "gt_dynamic_points": 11124,
+  "validation_config": {
+    "manifest_sha256": "aaadf4639bc7eedec0e4662c165a42a32bd5c84f2a6e51a1513cb6d36ffeaa24",
+    "map_sha256": "34943377fc32aea0101d4e02d7fd27af274764f788851aed04ee7e527f3bc7d8",
+    "gt_sha256": "f65fe6db875d94003a4bcd0a825bc260856d5d5a80eb142114fd429d08a5a0ee",
+    "parameters": {
+      "fusion": {
+        "min_range": 1.0,
+        "max_range": 60.0,
+        "free_voxel": 0.3,
+        "free_step": 0.3,
+        "free_carve_margin": 0.6,
+        "free_ground_margin": 0.25,
+        "free_votes_fraction": 0.7,
+        "free_votes_floor": 3,
+        "void_voxel": 0.2,
+        "void_step": 0.1,
+        "void_hit_inflation": 0.2,
+        "void_min_scans": 4,
+        "sr_votes_fraction": 0.7,
+        "sr_votes_floor": 3,
+        "n_rings": 20,
+        "n_sectors": 108,
+        "sr_max_range": 80.0,
+        "scan_ratio_threshold": 0.2,
+        "min_map_height": 0.5,
+        "sr_ground_margin": 0.2,
+        "workers": 2
+      },
+      "range_scan_ratio": {
+        "range": {
+          "h_res_deg": 1.0,
+          "v_res_deg": 1.0,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 3,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      }
+    }
+  },
+  "api_cli_point_masks_identical": true,
+  "range_scan_ratio_metrics": {
+    "precision": 0.93378142892706,
+    "recall": 0.6743976986695434,
+    "f1": 0.7831715210355987,
+    "iou": 0.6436170212765957,
+    "static_preservation": 0.9995468954674216,
+    "true_positive": 7502,
+    "false_positive": 532,
+    "false_negative": 3622,
+    "true_negative": 1173590
+  },
+  "benchmark_config": {
+    "h_res": 1.0,
+    "v_res": 1.0,
+    "range_margin": 0.5,
+    "min_see_through": 3,
+    "max_surface_hits": 3,
+    "ground_z": null,
+    "sensor_ground_z": -1.4,
+    "ground_preprocessing_frame": "ego_before_pose_transform",
+    "moving_thresh": 2.0,
+    "voxel_size": 0.1,
+    "temporal_min_hits": 2,
+    "temporal_visibility_h_res": 1.0,
+    "temporal_visibility_v_res": 1.0,
+    "temporal_visibility_margin": 0.5,
+    "temporal_visibility_fraction": 0.3,
+    "temporal_visibility_min_hits": 1,
+    "sr_rings": 20,
+    "sr_sectors": 108,
+    "sr_max_range": 80.0,
+    "sr_ratio": 0.2,
+    "sr_min_map_height": 0.5,
+    "sr_ground_margin": 0.2,
+    "sr_min_votes": null,
+    "fusion_free_fraction": 0.7,
+    "fusion_free_floor": 3,
+    "fusion_void_min_scans": 4
+  },
+  "benchmark_metrics": {
+    "range": {
+      "precision": 0.2720019259208309,
+      "recall": 0.710985257101762,
+      "f1": 0.39347279918409983,
+      "iou": 0.24492134274742972,
+      "static_preservation": 0.9819712091247758,
+      "true_positive": 7909,
+      "false_positive": 21168,
+      "false_negative": 3215,
+      "true_negative": 1152954
+    },
+    "scan_ratio": {
+      "precision": 0.5474870017331023,
+      "recall": 0.8519417475728155,
+      "f1": 0.6665963283393121,
+      "iou": 0.4999208735559424,
+      "static_preservation": 0.9933286319479577,
+      "true_positive": 9477,
+      "false_positive": 7833,
+      "false_negative": 1647,
+      "true_negative": 1166289
+    },
+    "temporal": {
+      "precision": 0.029692715865473486,
+      "recall": 0.9819309600862999,
+      "f1": 0.05764237767551821,
+      "iou": 0.029676500873477528,
+      "static_preservation": 0.6959898545466314,
+      "true_positive": 10923,
+      "false_positive": 356945,
+      "false_negative": 201,
+      "true_negative": 817177
+    },
+    "temporal_visibility": {
+      "precision": 0.2267722840229918,
+      "recall": 0.7128730672419993,
+      "f1": 0.34408695463519406,
+      "iou": 0.20779288839975893,
+      "static_preservation": 0.9769708769616786,
+      "true_positive": 7930,
+      "false_positive": 27039,
+      "false_negative": 3194,
+      "true_negative": 1147083
+    },
+    "fusion": {
+      "precision": 0.186071646131777,
+      "recall": 0.8512225818051061,
+      "f1": 0.3053875800235435,
+      "iou": 0.18021087088915957,
+      "static_preservation": 0.9647225756778256,
+      "true_positive": 9469,
+      "false_positive": 41420,
+      "false_negative": 1655,
+      "true_negative": 1132702
+    }
+  },
+  "limitations": "Corrected benchmark replay of a previously examined log, not new held-out evidence. Sensor-frame source cutoff is a heuristic; no local terrain estimation. Core defaults and historical reference configurations unchanged."
+}

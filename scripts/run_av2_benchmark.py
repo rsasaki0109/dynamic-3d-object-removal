@@ -455,12 +455,14 @@ def _run_scene(args: argparse.Namespace, scene: str) -> dict:
         if args.online_only:
             return 0
 
+    # Ground was excluded in ego coordinates before pose transformation.
+    # GROUND_Z is not an absolute city-map elevation and must not be reused here.
     # --- range: multi-scan visibility cleaner ---
     _, keep_range = core.clean_map_by_visibility(
         acc_map, scans,
         h_res_deg=args.h_res, v_res_deg=args.v_res, range_margin=args.range_margin,
         min_see_through=args.min_see_through, max_surface_hits=args.max_surface_hits,
-        ground_z=GROUND_Z, resolutions=args.resolutions,
+        ground_z=None, resolutions=args.resolutions,
     )
     range_metrics = bench.compute_accuracy_metrics(~keep_range, gt_mask)
 
@@ -553,7 +555,8 @@ def _run_scene(args: argparse.Namespace, scene: str) -> dict:
             evidence,
             min_raw_see_through=args.min_see_through,
             max_raw_surface_hits=args.max_surface_hits,
-            ground_mask=acc_map[:, 2] <= GROUND_Z,
+            # All retained points already passed the ego-frame ground cutoff.
+            ground_mask=np.zeros(len(acc_map), dtype=bool),
         )
         normalized_metrics = bench.compute_accuracy_metrics(normalized_range, gt_mask)
         sensor_aware = {
@@ -596,7 +599,9 @@ def _run_scene(args: argparse.Namespace, scene: str) -> dict:
         "config": {
             "h_res": args.h_res, "v_res": args.v_res, "range_margin": args.range_margin,
             "min_see_through": args.min_see_through, "max_surface_hits": args.max_surface_hits,
-            "ground_z": GROUND_Z, "moving_thresh": args.moving_thresh,
+            "ground_z": None, "sensor_ground_z": GROUND_Z,
+            "ground_preprocessing_frame": "ego_before_pose_transform",
+            "moving_thresh": args.moving_thresh,
             "voxel_size": args.voxel_size, "temporal_min_hits": args.temporal_min_hits,
             "temporal_visibility_h_res": args.temporal_visibility_h_res,
             "temporal_visibility_v_res": args.temporal_visibility_v_res,

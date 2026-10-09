@@ -48,7 +48,7 @@ def validate(manifest_path: Path, output: Path, *, workers=2, stride=3, referenc
         "range_margin": config.get("range_margin", core.DEFAULT_RANGE_MARGIN),
         "min_see_through": config.get("min_see_through", 3),
         "max_surface_hits": config.get("max_surface_hits", 3),
-        "ground_z": config.get("ground_z", -1.4),
+        "ground_z": config.get("ground_z", -1.4) if reference else None,
         "resolutions": config.get("resolutions"),
     }
     sr = {

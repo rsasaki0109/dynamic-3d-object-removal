@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "fingerprints": {
+    "density_results": "50e8efe6afc7f427bea4d3abe73710e3107a71f3e996d13193b11783c27569e5",
+    "frozen_results": "dd3b8060e1bf40960c747b589345597b9aa9b57c8fd3fad2eccee0e72444e249",
+    "code": {
+      "scripts/diagnose_av2_density_scan_ratio.py": "d97692fc8bf3c3d0fb87ef16d010ed919b18dccb13b52d9be188cb8535e5ede1",
+      "dynamic_object_removal.py": "e4c668b9ea721b45c89930d06ad52266d06ee420fcc09893603aed818d0b62ad",
+      "scripts/experiment_av2_laser_density.py": "6b7e50523a34b4df1d8fe3ce795905d798c3602487c0e6d6608d5f22a07f066f",
+      "scripts/validate_frozen_av2_suite.py": "46050bb23abf11412709003c6d1d3e3b6af7262d1e0c02bcd6637607af60f993",
+      "scripts/validate_frozen_nuscenes_suite.py": "909174890fb8f4d29823ceba112fc5ff6e79ed8b7176c7916bdf46e677ec4e13"
+    }
+  },
+  "scope": "All three previously examined AV2 scenes and all six thinned phases; no tuning or scene/phase exclusion.",
+  "method": "GT-free scan-ratio stage replay; compare identical source rows. GT is used only for post-replay grouping.",
+  "states": [
+    "outside_polar_domain",
+    "empty_query_column",
+    "map_height_too_small",
+    "height_ratio_too_large",
+    "ground_reverted",
+    "dynamic_vote"
+  ],
+  "limitations": "Descriptive stage transitions, not an intervention separating map and query thinning. No new generalization or physical-sensor claim."
+}

@@ -1,0 +1,2145 @@
+{
+  "frozen_results_sha256": "5d26b07edc6d143e876b6979608d4900432d4eab29b2eb9be467100f1f8d8c91",
+  "plan_sha256": "c19221c2e5cd89b0ec6678ae72ac3ba4400337557521b5a4a361051973aaa391",
+  "diagnostic_code_sha256": {
+    "scripts/diagnose_common_misses.py": "47976451f642ebe5534b8b591649b5f142e38a80d8640e2776e9af18535ac88a",
+    "scripts/diagnose_frozen_nuscenes_misses.py": "d97929c02237f87553043865c78d36c29bd7388430ac3c40874b307546073bb6"
+  },
+  "status": "Post-result baseline diagnosis; no tuning, candidates, or defaults changed.",
+  "range_state_codes": {
+    "0": "invalid_map_range",
+    "1": "empty_angular_pixel",
+    "2": "nearer_return",
+    "3": "margin_boundary",
+    "4": "surface",
+    "5": "see_through"
+  },
+  "scan_ratio_state_codes": {
+    "0": "outside_polar_domain",
+    "1": "empty_query_column",
+    "2": "map_height_too_small",
+    "3": "height_ratio_too_large",
+    "4": "ground_reverted",
+    "5": "dynamic_vote"
+  },
+  "group_codes": {
+    "0": "static_kept",
+    "1": "static_removed",
+    "2": "moving_both_dynamic",
+    "3": "moving_range_only",
+    "4": "moving_scan_ratio_only",
+    "5": "moving_common_miss"
+  },
+  "quantile_order": [
+    0,
+    0.25,
+    0.5,
+    0.75,
+    1
+  ],
+  "scene_results": [
+    {
+      "scene": "scene-0004",
+      "input_hashes": {
+        "manifest_sha256": "797f190308364fa2a8355578ede23547835f9062b57109abfed8e06b17ea57ae",
+        "map_sha256": "c4bcfabeb3697a1714ace0b8b9407701162ce9640330c1b83b4d61c6e86651e0",
+        "gt_sha256": "898c1483efba8fcc7a0e1904fa493ee24788d30f908898a61ee61c9bfdf547b4"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "map_points": 145804,
+      "gt_dynamic_points": 5697,
+      "api_masks_equal": true,
+      "groups": {
+        "static_kept": {
+          "points": 139698,
+          "point_scan_opportunities": 1676376,
+          "range_opportunities": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 291565,
+            "nearer_return": 1098297,
+            "margin_boundary": 0,
+            "surface": 223647,
+            "see_through": 62867
+          },
+          "scan_ratio_opportunities": {
+            "outside_polar_domain": 407818,
+            "empty_query_column": 336502,
+            "map_height_too_small": 28475,
+            "height_ratio_too_large": 686004,
+            "ground_reverted": 77951,
+            "dynamic_vote": 139626
+          },
+          "range_blockers": {
+            "low_see_only": 133301,
+            "surface_only": 155,
+            "both": 3306,
+            "zero_see_through": 95286
+          },
+          "scan_ratio": {
+            "zero_dynamic_votes": 66984,
+            "positive_votes_below_threshold": 66204,
+            "insufficient_revisits_for_floor": 7432,
+            "vote_quantiles": [
+              0.0,
+              0.0,
+              1.0,
+              2.0,
+              8.0
+            ],
+            "revisit_quantiles": [
+              0.0,
+              5.0,
+              7.0,
+              9.0,
+              12.0
+            ],
+            "threshold_gap_quantiles": [
+              -3.0,
+              2.0,
+              3.0,
+              3.0,
+              6.0
+            ]
+          }
+        },
+        "static_removed": {
+          "points": 409,
+          "point_scan_opportunities": 4908,
+          "range_opportunities": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 1237,
+            "nearer_return": 1662,
+            "margin_boundary": 0,
+            "surface": 587,
+            "see_through": 1422
+          },
+          "scan_ratio_opportunities": {
+            "outside_polar_domain": 1127,
+            "empty_query_column": 1236,
+            "map_height_too_small": 15,
+            "height_ratio_too_large": 865,
+            "ground_reverted": 63,
+            "dynamic_vote": 1602
+          },
+          "range_blockers": {
+            "low_see_only": 0,
+            "surface_only": 0,
+            "both": 0,
+            "zero_see_through": 0
+          },
+          "scan_ratio": {
+            "zero_dynamic_votes": 0,
+            "positive_votes_below_threshold": 0,
+            "insufficient_revisits_for_floor": 0,
+            "vote_quantiles": [
+              3.0,
+              3.0,
+              4.0,
+              4.0,
+              7.0
+            ],
+            "revisit_quantiles": [
+              3.0,
+              4.0,
+              6.0,
+              7.0,
+              11.0
+            ],
+            "threshold_gap_quantiles": [
+              -3.0,
+              -1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "moving_both_dynamic": {
+          "points": 111,
+          "point_scan_opportunities": 1332,
+          "range_opportunities": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 175,
+            "nearer_return": 517,
+            "margin_boundary": 0,
+            "surface": 110,
+            "see_through": 530
+          },
+          "scan_ratio_opportunities": {
+            "outside_polar_domain": 91,
+            "empty_query_column": 684,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 214,
+            "ground_reverted": 0,
+            "dynamic_vote": 343
+          },
+          "range_blockers": {
+            "low_see_only": 0,
+            "surface_only": 0,
+            "both": 0,
+            "zero_see_through": 0
+          },
+          "scan_ratio": {
+            "zero_dynamic_votes": 0,
+            "positive_votes_below_threshold": 0,
+            "insufficient_revisits_for_floor": 0,
+            "vote_quantiles": [
+              3.0,
+              3.0,
+              3.0,
+              3.0,
+              5.0
+            ],
+            "revisit_quantiles": [
+              3.0,
+              4.0,
+              5.0,
+              6.0,
+              7.0
+            ],
+            "threshold_gap_quantiles": [
+              -2.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "moving_range_only": {
+          "points": 2153,
+          "point_scan_opportunities": 25836,
+          "range_opportunities": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 11928,
+            "nearer_return": 3999,
+            "margin_boundary": 0,
+            "surface": 2031,
+            "see_through": 7878
+          },
+          "scan_ratio_opportunities": {
+            "outside_polar_domain": 3656,
+            "empty_query_column": 15832,
+            "map_height_too_small": 221,
+            "height_ratio_too_large": 4140,
+            "ground_reverted": 265,
+            "dynamic_vote": 1722
+          },
+          "range_blockers": {
+            "low_see_only": 0,
+            "surface_only": 0,
+            "both": 0,
+            "zero_see_through": 0
+          },
+          "scan_ratio": {
+            "zero_dynamic_votes": 709,
+            "positive_votes_below_threshold": 1444,
+            "insufficient_revisits_for_floor": 780,
+            "vote_quantiles": [
+              0.0,
+              0.0,
+              1.0,
+              1.0,
+              3.0
+            ],
+            "revisit_quantiles": [
+              1.0,
+              2.0,
+              3.0,
+              3.0,
+              11.0
+            ],
+            "threshold_gap_quantiles": [
+              1.0,
+              2.0,
+              2.0,
+              3.0,
+              5.0
+            ]
+          }
+        },
+        "moving_scan_ratio_only": {
+          "points": 103,
+          "point_scan_opportunities": 1236,
+          "range_opportunities": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 274,
+            "nearer_return": 706,
+            "margin_boundary": 0,
+            "surface": 110,
+            "see_through": 146
+          },
+          "scan_ratio_opportunities": {
+            "outside_polar_domain": 289,
+            "empty_query_column": 380,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 200,
+            "ground_reverted": 2,
+            "dynamic_vote": 365
+          },
+          "range_blockers": {
+            "low_see_only": 103,
+            "surface_only": 0,
+            "both": 0,
+            "zero_see_through": 20
+          },
+          "scan_ratio": {
+            "zero_dynamic_votes": 0,
+            "positive_votes_below_threshold": 0,
+            "insufficient_revisits_for_floor": 0,
+            "vote_quantiles": [
+              3.0,
+              3.0,
+              3.0,
+              4.0,
+              5.0
+            ],
+            "revisit_quantiles": [
+              3.0,
+              4.0,
+              5.0,
+              7.0,
+              8.0
+            ],
+            "threshold_gap_quantiles": [
+              -1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "moving_common_miss": {
+          "points": 3330,
+          "point_scan_opportunities": 39960,
+          "range_opportunities": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 18705,
+            "nearer_return": 13064,
+            "margin_boundary": 0,
+            "surface": 4424,
+            "see_through": 3767
+          },
+          "scan_ratio_opportunities": {
+            "outside_polar_domain": 4745,
+            "empty_query_column": 23627,
+            "map_height_too_small": 294,
+            "height_ratio_too_large": 7796,
+            "ground_reverted": 1945,
+            "dynamic_vote": 1553
+          },
+          "range_blockers": {
+            "low_see_only": 3330,
+            "surface_only": 0,
+            "both": 0,
+            "zero_see_through": 942
+          },
+          "scan_ratio": {
+            "zero_dynamic_votes": 2184,
+            "positive_votes_below_threshold": 1146,
+            "insufficient_revisits_for_floor": 997,
+            "vote_quantiles": [
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              4.0
+            ],
+            "revisit_quantiles": [
+              1.0,
+              2.0,
+              3.0,
+              4.0,
+              11.0
+            ],
+            "threshold_gap_quantiles": [
+              1.0,
+              2.0,
+              3.0,
+              3.0,
+              5.0
+            ]
+          }
+        }
+      },
+      "acquisition_frames": [
+        {
+          "frame": 0,
+          "relative_seconds": 0.0,
+          "common_misses": 189
+        },
+        {
+          "frame": 1,
+          "relative_seconds": 1.4498889446258545,
+          "common_misses": 349
+        },
+        {
+          "frame": 2,
+          "relative_seconds": 2.950049877166748,
+          "common_misses": 467
+        },
+        {
+          "frame": 3,
+          "relative_seconds": 4.451333045959473,
+          "common_misses": 343
+        },
+        {
+          "frame": 4,
+          "relative_seconds": 6.000170946121216,
+          "common_misses": 784
+        },
+        {
+          "frame": 5,
+          "relative_seconds": 7.5009448528289795,
+          "common_misses": 141
+        },
+        {
+          "frame": 6,
+          "relative_seconds": 9.000536918640137,
+          "common_misses": 58
+        },
+        {
+          "frame": 7,
+          "relative_seconds": 10.500171899795532,
+          "common_misses": 666
+        },
+        {
+          "frame": 8,
+          "relative_seconds": 11.949476957321167,
+          "common_misses": 232
+        },
+        {
+          "frame": 9,
+          "relative_seconds": 13.449654817581177,
+          "common_misses": 15
+        },
+        {
+          "frame": 10,
+          "relative_seconds": 14.84976601600647,
+          "common_misses": 26
+        },
+        {
+          "frame": 11,
+          "relative_seconds": 16.349946975708008,
+          "common_misses": 60
+        }
+      ],
+      "query_frames": [
+        {
+          "frame": 0,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 242,
+            "nearer_return": 2330,
+            "margin_boundary": 0,
+            "surface": 305,
+            "see_through": 453
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 90,
+            "empty_query_column": 1757,
+            "map_height_too_small": 3,
+            "height_ratio_too_large": 448,
+            "ground_reverted": 479,
+            "dynamic_vote": 553
+          }
+        },
+        {
+          "frame": 1,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 217,
+            "nearer_return": 2124,
+            "margin_boundary": 0,
+            "surface": 309,
+            "see_through": 680
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 87,
+            "empty_query_column": 2324,
+            "map_height_too_small": 18,
+            "height_ratio_too_large": 457,
+            "ground_reverted": 243,
+            "dynamic_vote": 201
+          }
+        },
+        {
+          "frame": 2,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 707,
+            "nearer_return": 1353,
+            "margin_boundary": 0,
+            "surface": 871,
+            "see_through": 399
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 87,
+            "empty_query_column": 1703,
+            "map_height_too_small": 6,
+            "height_ratio_too_large": 1239,
+            "ground_reverted": 165,
+            "dynamic_vote": 130
+          }
+        },
+        {
+          "frame": 3,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 1890,
+            "nearer_return": 423,
+            "margin_boundary": 0,
+            "surface": 367,
+            "see_through": 650
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 87,
+            "empty_query_column": 2485,
+            "map_height_too_small": 146,
+            "height_ratio_too_large": 429,
+            "ground_reverted": 122,
+            "dynamic_vote": 61
+          }
+        },
+        {
+          "frame": 4,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 1224,
+            "nearer_return": 1301,
+            "margin_boundary": 0,
+            "surface": 722,
+            "see_through": 83
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 85,
+            "empty_query_column": 1957,
+            "map_height_too_small": 92,
+            "height_ratio_too_large": 877,
+            "ground_reverted": 168,
+            "dynamic_vote": 151
+          }
+        },
+        {
+          "frame": 5,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 2752,
+            "nearer_return": 318,
+            "margin_boundary": 0,
+            "surface": 137,
+            "see_through": 123
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 84,
+            "empty_query_column": 2753,
+            "map_height_too_small": 4,
+            "height_ratio_too_large": 378,
+            "ground_reverted": 69,
+            "dynamic_vote": 42
+          }
+        },
+        {
+          "frame": 6,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 1898,
+            "nearer_return": 628,
+            "margin_boundary": 0,
+            "surface": 55,
+            "see_through": 749
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 11,
+            "empty_query_column": 2793,
+            "map_height_too_small": 9,
+            "height_ratio_too_large": 271,
+            "ground_reverted": 172,
+            "dynamic_vote": 74
+          }
+        },
+        {
+          "frame": 7,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 2045,
+            "nearer_return": 526,
+            "margin_boundary": 0,
+            "surface": 716,
+            "see_through": 43
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 53,
+            "empty_query_column": 1985,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 1028,
+            "ground_reverted": 171,
+            "dynamic_vote": 93
+          }
+        },
+        {
+          "frame": 8,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 1959,
+            "nearer_return": 815,
+            "margin_boundary": 0,
+            "surface": 431,
+            "see_through": 125
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 276,
+            "empty_query_column": 2112,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 872,
+            "ground_reverted": 59,
+            "dynamic_vote": 11
+          }
+        },
+        {
+          "frame": 9,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 2044,
+            "nearer_return": 808,
+            "margin_boundary": 0,
+            "surface": 131,
+            "see_through": 347
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 742,
+            "empty_query_column": 1565,
+            "map_height_too_small": 5,
+            "height_ratio_too_large": 901,
+            "ground_reverted": 78,
+            "dynamic_vote": 39
+          }
+        },
+        {
+          "frame": 10,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 1912,
+            "nearer_return": 969,
+            "margin_boundary": 0,
+            "surface": 339,
+            "see_through": 110
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 1126,
+            "empty_query_column": 1256,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 879,
+            "ground_reverted": 54,
+            "dynamic_vote": 15
+          }
+        },
+        {
+          "frame": 11,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 1815,
+            "nearer_return": 1469,
+            "margin_boundary": 0,
+            "surface": 41,
+            "see_through": 5
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 2017,
+            "empty_query_column": 937,
+            "map_height_too_small": 11,
+            "height_ratio_too_large": 17,
+            "ground_reverted": 165,
+            "dynamic_vote": 183
+          }
+        }
+      ],
+      "trace_sha256": "a7b7137290a5b3ef5973234ba8474569b7e627f442929cf4a0f2a8a869d06212"
+    },
+    {
+      "scene": "scene-0005",
+      "input_hashes": {
+        "manifest_sha256": "2d0566d86d247b88eb0d55179b75776de87f8336c81bbdd80bd76f90b55fd5da",
+        "map_sha256": "07b6aaca85d8a1ab3af5b564a8e7fe4e7803cf3eb76e947c1bbdd823a6c36e5f",
+        "gt_sha256": "f074a38a62f404f421b6a6a06885d17acdbbcc84fb9098e193d4e85a783dfec8"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "map_points": 199133,
+      "gt_dynamic_points": 9018,
+      "api_masks_equal": true,
+      "groups": {
+        "static_kept": {
+          "points": 187979,
+          "point_scan_opportunities": 2255748,
+          "range_opportunities": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 136890,
+            "nearer_return": 1666386,
+            "margin_boundary": 0,
+            "surface": 394021,
+            "see_through": 58451
+          },
+          "scan_ratio_opportunities": {
+            "outside_polar_domain": 130918,
+            "empty_query_column": 490233,
+            "map_height_too_small": 19847,
+            "height_ratio_too_large": 1233495,
+            "ground_reverted": 179780,
+            "dynamic_vote": 201475
+          },
+          "range_blockers": {
+            "low_see_only": 177572,
+            "surface_only": 218,
+            "both": 6970,
+            "zero_see_through": 148190
+          },
+          "scan_ratio": {
+            "zero_dynamic_votes": 94788,
+            "positive_votes_below_threshold": 85291,
+            "insufficient_revisits_for_floor": 2865,
+            "vote_quantiles": [
+              0.0,
+              0.0,
+              0.0,
+              2.0,
+              11.0
+            ],
+            "revisit_quantiles": [
+              0.0,
+              7.0,
+              9.0,
+              11.0,
+              12.0
+            ],
+            "threshold_gap_quantiles": [
+              -5.0,
+              3.0,
+              4.0,
+              5.0,
+              6.0
+            ]
+          }
+        },
+        "static_removed": {
+          "points": 2136,
+          "point_scan_opportunities": 25632,
+          "range_opportunities": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 4421,
+            "nearer_return": 7173,
+            "margin_boundary": 0,
+            "surface": 3819,
+            "see_through": 10219
+          },
+          "scan_ratio_opportunities": {
+            "outside_polar_domain": 235,
+            "empty_query_column": 7233,
+            "map_height_too_small": 145,
+            "height_ratio_too_large": 4223,
+            "ground_reverted": 695,
+            "dynamic_vote": 13101
+          },
+          "range_blockers": {
+            "low_see_only": 0,
+            "surface_only": 0,
+            "both": 0,
+            "zero_see_through": 0
+          },
+          "scan_ratio": {
+            "zero_dynamic_votes": 0,
+            "positive_votes_below_threshold": 0,
+            "insufficient_revisits_for_floor": 0,
+            "vote_quantiles": [
+              3.0,
+              5.0,
+              6.0,
+              8.0,
+              10.0
+            ],
+            "revisit_quantiles": [
+              3.0,
+              5.0,
+              9.0,
+              12.0,
+              12.0
+            ],
+            "threshold_gap_quantiles": [
+              -4.0,
+              -2.0,
+              -2.0,
+              -1.0,
+              0.0
+            ]
+          }
+        },
+        "moving_both_dynamic": {
+          "points": 150,
+          "point_scan_opportunities": 1800,
+          "range_opportunities": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 687,
+            "nearer_return": 464,
+            "margin_boundary": 0,
+            "surface": 124,
+            "see_through": 525
+          },
+          "scan_ratio_opportunities": {
+            "outside_polar_domain": 56,
+            "empty_query_column": 820,
+            "map_height_too_small": 2,
+            "height_ratio_too_large": 127,
+            "ground_reverted": 34,
+            "dynamic_vote": 761
+          },
+          "range_blockers": {
+            "low_see_only": 0,
+            "surface_only": 0,
+            "both": 0,
+            "zero_see_through": 0
+          },
+          "scan_ratio": {
+            "zero_dynamic_votes": 0,
+            "positive_votes_below_threshold": 0,
+            "insufficient_revisits_for_floor": 0,
+            "vote_quantiles": [
+              3.0,
+              4.0,
+              5.0,
+              5.0,
+              9.0
+            ],
+            "revisit_quantiles": [
+              3.0,
+              5.0,
+              6.0,
+              7.0,
+              9.0
+            ],
+            "threshold_gap_quantiles": [
+              -4.0,
+              -2.0,
+              -2.0,
+              -1.0,
+              0.0
+            ]
+          }
+        },
+        "moving_range_only": {
+          "points": 69,
+          "point_scan_opportunities": 828,
+          "range_opportunities": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 221,
+            "nearer_return": 329,
+            "margin_boundary": 0,
+            "surface": 32,
+            "see_through": 246
+          },
+          "scan_ratio_opportunities": {
+            "outside_polar_domain": 112,
+            "empty_query_column": 414,
+            "map_height_too_small": 11,
+            "height_ratio_too_large": 104,
+            "ground_reverted": 112,
+            "dynamic_vote": 75
+          },
+          "range_blockers": {
+            "low_see_only": 0,
+            "surface_only": 0,
+            "both": 0,
+            "zero_see_through": 0
+          },
+          "scan_ratio": {
+            "zero_dynamic_votes": 25,
+            "positive_votes_below_threshold": 44,
+            "insufficient_revisits_for_floor": 14,
+            "vote_quantiles": [
+              0.0,
+              0.0,
+              1.0,
+              2.0,
+              5.0
+            ],
+            "revisit_quantiles": [
+              1.0,
+              3.0,
+              5.0,
+              5.0,
+              11.0
+            ],
+            "threshold_gap_quantiles": [
+              1.0,
+              1.0,
+              2.0,
+              3.0,
+              4.0
+            ]
+          }
+        },
+        "moving_scan_ratio_only": {
+          "points": 1139,
+          "point_scan_opportunities": 13668,
+          "range_opportunities": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 1529,
+            "nearer_return": 9995,
+            "margin_boundary": 0,
+            "surface": 1457,
+            "see_through": 687
+          },
+          "scan_ratio_opportunities": {
+            "outside_polar_domain": 168,
+            "empty_query_column": 4927,
+            "map_height_too_small": 19,
+            "height_ratio_too_large": 2681,
+            "ground_reverted": 246,
+            "dynamic_vote": 5627
+          },
+          "range_blockers": {
+            "low_see_only": 1139,
+            "surface_only": 0,
+            "both": 0,
+            "zero_see_through": 572
+          },
+          "scan_ratio": {
+            "zero_dynamic_votes": 0,
+            "positive_votes_below_threshold": 0,
+            "insufficient_revisits_for_floor": 0,
+            "vote_quantiles": [
+              3.0,
+              4.0,
+              5.0,
+              5.0,
+              9.0
+            ],
+            "revisit_quantiles": [
+              3.0,
+              6.0,
+              8.0,
+              9.0,
+              12.0
+            ],
+            "threshold_gap_quantiles": [
+              -4.0,
+              -2.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "moving_common_miss": {
+          "points": 7660,
+          "point_scan_opportunities": 91920,
+          "range_opportunities": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 3039,
+            "nearer_return": 72309,
+            "margin_boundary": 0,
+            "surface": 15203,
+            "see_through": 1369
+          },
+          "scan_ratio_opportunities": {
+            "outside_polar_domain": 688,
+            "empty_query_column": 11350,
+            "map_height_too_small": 131,
+            "height_ratio_too_large": 58500,
+            "ground_reverted": 9607,
+            "dynamic_vote": 11644
+          },
+          "range_blockers": {
+            "low_see_only": 7660,
+            "surface_only": 0,
+            "both": 0,
+            "zero_see_through": 6379
+          },
+          "scan_ratio": {
+            "zero_dynamic_votes": 2825,
+            "positive_votes_below_threshold": 4835,
+            "insufficient_revisits_for_floor": 53,
+            "vote_quantiles": [
+              0.0,
+              0.0,
+              1.0,
+              3.0,
+              5.0
+            ],
+            "revisit_quantiles": [
+              1.0,
+              9.0,
+              12.0,
+              12.0,
+              12.0
+            ],
+            "threshold_gap_quantiles": [
+              1.0,
+              3.0,
+              4.0,
+              5.0,
+              6.0
+            ]
+          }
+        }
+      },
+      "acquisition_frames": [
+        {
+          "frame": 0,
+          "relative_seconds": 0.0,
+          "common_misses": 204
+        },
+        {
+          "frame": 1,
+          "relative_seconds": 1.500756025314331,
+          "common_misses": 208
+        },
+        {
+          "frame": 2,
+          "relative_seconds": 2.9002771377563477,
+          "common_misses": 696
+        },
+        {
+          "frame": 3,
+          "relative_seconds": 4.401004076004028,
+          "common_misses": 1919
+        },
+        {
+          "frame": 4,
+          "relative_seconds": 5.9006640911102295,
+          "common_misses": 2876
+        },
+        {
+          "frame": 5,
+          "relative_seconds": 7.301339149475098,
+          "common_misses": 1208
+        },
+        {
+          "frame": 6,
+          "relative_seconds": 8.800368070602417,
+          "common_misses": 264
+        },
+        {
+          "frame": 7,
+          "relative_seconds": 10.300004959106445,
+          "common_misses": 62
+        },
+        {
+          "frame": 8,
+          "relative_seconds": 11.75041913986206,
+          "common_misses": 43
+        },
+        {
+          "frame": 9,
+          "relative_seconds": 13.30147099494934,
+          "common_misses": 42
+        },
+        {
+          "frame": 10,
+          "relative_seconds": 14.80165696144104,
+          "common_misses": 74
+        },
+        {
+          "frame": 11,
+          "relative_seconds": 16.25095009803772,
+          "common_misses": 64
+        }
+      ],
+      "query_frames": [
+        {
+          "frame": 0,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 63,
+            "nearer_return": 7228,
+            "margin_boundary": 0,
+            "surface": 280,
+            "see_through": 89
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 218,
+            "empty_query_column": 595,
+            "map_height_too_small": 20,
+            "height_ratio_too_large": 4249,
+            "ground_reverted": 1142,
+            "dynamic_vote": 1436
+          }
+        },
+        {
+          "frame": 1,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 133,
+            "nearer_return": 6712,
+            "margin_boundary": 0,
+            "surface": 684,
+            "see_through": 131
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 201,
+            "empty_query_column": 376,
+            "map_height_too_small": 1,
+            "height_ratio_too_large": 4656,
+            "ground_reverted": 1240,
+            "dynamic_vote": 1186
+          }
+        },
+        {
+          "frame": 2,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 306,
+            "nearer_return": 5353,
+            "margin_boundary": 0,
+            "surface": 1809,
+            "see_through": 192
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 44,
+            "empty_query_column": 440,
+            "map_height_too_small": 15,
+            "height_ratio_too_large": 6235,
+            "ground_reverted": 569,
+            "dynamic_vote": 357
+          }
+        },
+        {
+          "frame": 3,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 346,
+            "nearer_return": 3489,
+            "margin_boundary": 0,
+            "surface": 3674,
+            "see_through": 151
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 36,
+            "empty_query_column": 377,
+            "map_height_too_small": 52,
+            "height_ratio_too_large": 6559,
+            "ground_reverted": 515,
+            "dynamic_vote": 121
+          }
+        },
+        {
+          "frame": 4,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 426,
+            "nearer_return": 2870,
+            "margin_boundary": 0,
+            "surface": 4332,
+            "see_through": 32
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 36,
+            "empty_query_column": 328,
+            "map_height_too_small": 2,
+            "height_ratio_too_large": 6098,
+            "ground_reverted": 799,
+            "dynamic_vote": 397
+          }
+        },
+        {
+          "frame": 5,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 281,
+            "nearer_return": 3996,
+            "margin_boundary": 0,
+            "surface": 3316,
+            "see_through": 67
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 13,
+            "empty_query_column": 1175,
+            "map_height_too_small": 3,
+            "height_ratio_too_large": 3608,
+            "ground_reverted": 1187,
+            "dynamic_vote": 1674
+          }
+        },
+        {
+          "frame": 6,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 187,
+            "nearer_return": 6619,
+            "margin_boundary": 0,
+            "surface": 710,
+            "see_through": 144
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 6,
+            "empty_query_column": 847,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 5744,
+            "ground_reverted": 566,
+            "dynamic_vote": 497
+          }
+        },
+        {
+          "frame": 7,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 504,
+            "nearer_return": 6874,
+            "margin_boundary": 0,
+            "surface": 241,
+            "see_through": 41
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 8,
+            "empty_query_column": 1197,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 5044,
+            "ground_reverted": 589,
+            "dynamic_vote": 822
+          }
+        },
+        {
+          "frame": 8,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 290,
+            "nearer_return": 7336,
+            "margin_boundary": 0,
+            "surface": 21,
+            "see_through": 13
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 25,
+            "empty_query_column": 1038,
+            "map_height_too_small": 10,
+            "height_ratio_too_large": 4829,
+            "ground_reverted": 749,
+            "dynamic_vote": 1009
+          }
+        },
+        {
+          "frame": 9,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 170,
+            "nearer_return": 7031,
+            "margin_boundary": 0,
+            "surface": 18,
+            "see_through": 441
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 33,
+            "empty_query_column": 1345,
+            "map_height_too_small": 16,
+            "height_ratio_too_large": 4844,
+            "ground_reverted": 533,
+            "dynamic_vote": 889
+          }
+        },
+        {
+          "frame": 10,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 215,
+            "nearer_return": 7385,
+            "margin_boundary": 0,
+            "surface": 46,
+            "see_through": 14
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 34,
+            "empty_query_column": 2006,
+            "map_height_too_small": 10,
+            "height_ratio_too_large": 3763,
+            "ground_reverted": 767,
+            "dynamic_vote": 1080
+          }
+        },
+        {
+          "frame": 11,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 118,
+            "nearer_return": 7416,
+            "margin_boundary": 0,
+            "surface": 72,
+            "see_through": 54
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 34,
+            "empty_query_column": 1626,
+            "map_height_too_small": 2,
+            "height_ratio_too_large": 2871,
+            "ground_reverted": 951,
+            "dynamic_vote": 2176
+          }
+        }
+      ],
+      "trace_sha256": "4f7818931d148623c803f8de0ba5da1a203aa1ec7de0927fd8b5cae557ededbd"
+    },
+    {
+      "scene": "scene-0006",
+      "input_hashes": {
+        "manifest_sha256": "82a9de80ff38c18b53002af82509622664eeebfe452c93b1a183017404e6d5a4",
+        "map_sha256": "2b48c25303f325e1c00aa0cf4b25aafcdb03268bda3454ca00845d06bbf0e5fc",
+        "gt_sha256": "b6db130e05607865a90bcf16301fb41e2377fda512868ca4a0e05c921ce73b3f"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "map_points": 179558,
+      "gt_dynamic_points": 28840,
+      "api_masks_equal": true,
+      "groups": {
+        "static_kept": {
+          "points": 145554,
+          "point_scan_opportunities": 1746648,
+          "range_opportunities": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 257322,
+            "nearer_return": 1238549,
+            "margin_boundary": 0,
+            "surface": 176984,
+            "see_through": 73793
+          },
+          "scan_ratio_opportunities": {
+            "outside_polar_domain": 121555,
+            "empty_query_column": 416256,
+            "map_height_too_small": 4143,
+            "height_ratio_too_large": 777621,
+            "ground_reverted": 71756,
+            "dynamic_vote": 355317
+          },
+          "range_blockers": {
+            "low_see_only": 137867,
+            "surface_only": 0,
+            "both": 1247,
+            "zero_see_through": 101823
+          },
+          "scan_ratio": {
+            "zero_dynamic_votes": 23859,
+            "positive_votes_below_threshold": 98202,
+            "insufficient_revisits_for_floor": 4674,
+            "vote_quantiles": [
+              0.0,
+              1.0,
+              2.0,
+              4.0,
+              11.0
+            ],
+            "revisit_quantiles": [
+              0.0,
+              6.0,
+              9.0,
+              11.0,
+              12.0
+            ],
+            "threshold_gap_quantiles": [
+              -5.0,
+              1.0,
+              2.0,
+              3.0,
+              6.0
+            ]
+          }
+        },
+        "static_removed": {
+          "points": 5164,
+          "point_scan_opportunities": 61968,
+          "range_opportunities": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 13163,
+            "nearer_return": 21446,
+            "margin_boundary": 0,
+            "surface": 5001,
+            "see_through": 22358
+          },
+          "scan_ratio_opportunities": {
+            "outside_polar_domain": 4784,
+            "empty_query_column": 25880,
+            "map_height_too_small": 746,
+            "height_ratio_too_large": 6344,
+            "ground_reverted": 1634,
+            "dynamic_vote": 22580
+          },
+          "range_blockers": {
+            "low_see_only": 0,
+            "surface_only": 0,
+            "both": 0,
+            "zero_see_through": 0
+          },
+          "scan_ratio": {
+            "zero_dynamic_votes": 0,
+            "positive_votes_below_threshold": 0,
+            "insufficient_revisits_for_floor": 0,
+            "vote_quantiles": [
+              3.0,
+              3.0,
+              4.0,
+              5.0,
+              10.0
+            ],
+            "revisit_quantiles": [
+              3.0,
+              4.0,
+              5.0,
+              8.0,
+              12.0
+            ],
+            "threshold_gap_quantiles": [
+              -5.0,
+              -1.0,
+              -1.0,
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "moving_both_dynamic": {
+          "points": 68,
+          "point_scan_opportunities": 816,
+          "range_opportunities": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 48,
+            "nearer_return": 501,
+            "margin_boundary": 0,
+            "surface": 54,
+            "see_through": 213
+          },
+          "scan_ratio_opportunities": {
+            "outside_polar_domain": 13,
+            "empty_query_column": 250,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 224,
+            "ground_reverted": 4,
+            "dynamic_vote": 325
+          },
+          "range_blockers": {
+            "low_see_only": 0,
+            "surface_only": 0,
+            "both": 0,
+            "zero_see_through": 0
+          },
+          "scan_ratio": {
+            "zero_dynamic_votes": 0,
+            "positive_votes_below_threshold": 0,
+            "insufficient_revisits_for_floor": 0,
+            "vote_quantiles": [
+              3.0,
+              4.0,
+              5.0,
+              6.0,
+              7.0
+            ],
+            "revisit_quantiles": [
+              4.0,
+              4.0,
+              10.0,
+              10.0,
+              12.0
+            ],
+            "threshold_gap_quantiles": [
+              -1.0,
+              -1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "moving_range_only": {
+          "points": 1047,
+          "point_scan_opportunities": 12564,
+          "range_opportunities": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 880,
+            "nearer_return": 6136,
+            "margin_boundary": 0,
+            "surface": 1924,
+            "see_through": 3624
+          },
+          "scan_ratio_opportunities": {
+            "outside_polar_domain": 53,
+            "empty_query_column": 556,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 9031,
+            "ground_reverted": 109,
+            "dynamic_vote": 2815
+          },
+          "range_blockers": {
+            "low_see_only": 0,
+            "surface_only": 0,
+            "both": 0,
+            "zero_see_through": 0
+          },
+          "scan_ratio": {
+            "zero_dynamic_votes": 9,
+            "positive_votes_below_threshold": 1038,
+            "insufficient_revisits_for_floor": 0,
+            "vote_quantiles": [
+              0.0,
+              2.0,
+              2.0,
+              3.0,
+              5.0
+            ],
+            "revisit_quantiles": [
+              4.0,
+              11.0,
+              12.0,
+              12.0,
+              12.0
+            ],
+            "threshold_gap_quantiles": [
+              1.0,
+              2.0,
+              3.0,
+              4.0,
+              5.0
+            ]
+          }
+        },
+        "moving_scan_ratio_only": {
+          "points": 5036,
+          "point_scan_opportunities": 60432,
+          "range_opportunities": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 13034,
+            "nearer_return": 37148,
+            "margin_boundary": 0,
+            "surface": 8160,
+            "see_through": 2090
+          },
+          "scan_ratio_opportunities": {
+            "outside_polar_domain": 287,
+            "empty_query_column": 12401,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 21100,
+            "ground_reverted": 479,
+            "dynamic_vote": 26165
+          },
+          "range_blockers": {
+            "low_see_only": 5036,
+            "surface_only": 0,
+            "both": 0,
+            "zero_see_through": 3267
+          },
+          "scan_ratio": {
+            "zero_dynamic_votes": 0,
+            "positive_votes_below_threshold": 0,
+            "insufficient_revisits_for_floor": 0,
+            "vote_quantiles": [
+              3.0,
+              5.0,
+              5.0,
+              6.0,
+              9.0
+            ],
+            "revisit_quantiles": [
+              3.0,
+              9.0,
+              10.0,
+              10.0,
+              12.0
+            ],
+            "threshold_gap_quantiles": [
+              -4.0,
+              -1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "moving_common_miss": {
+          "points": 22689,
+          "point_scan_opportunities": 272268,
+          "range_opportunities": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 62431,
+            "nearer_return": 157131,
+            "margin_boundary": 0,
+            "surface": 42787,
+            "see_through": 9919
+          },
+          "scan_ratio_opportunities": {
+            "outside_polar_domain": 2894,
+            "empty_query_column": 55782,
+            "map_height_too_small": 23,
+            "height_ratio_too_large": 144673,
+            "ground_reverted": 7498,
+            "dynamic_vote": 61398
+          },
+          "range_blockers": {
+            "low_see_only": 22683,
+            "surface_only": 0,
+            "both": 6,
+            "zero_see_through": 15006
+          },
+          "scan_ratio": {
+            "zero_dynamic_votes": 1621,
+            "positive_votes_below_threshold": 21068,
+            "insufficient_revisits_for_floor": 204,
+            "vote_quantiles": [
+              0.0,
+              2.0,
+              3.0,
+              4.0,
+              5.0
+            ],
+            "revisit_quantiles": [
+              1.0,
+              9.0,
+              10.0,
+              11.0,
+              12.0
+            ],
+            "threshold_gap_quantiles": [
+              1.0,
+              1.0,
+              2.0,
+              3.0,
+              6.0
+            ]
+          }
+        }
+      },
+      "acquisition_frames": [
+        {
+          "frame": 0,
+          "relative_seconds": 0.0,
+          "common_misses": 1536
+        },
+        {
+          "frame": 1,
+          "relative_seconds": 1.4996321201324463,
+          "common_misses": 1731
+        },
+        {
+          "frame": 2,
+          "relative_seconds": 3.0003440380096436,
+          "common_misses": 2716
+        },
+        {
+          "frame": 3,
+          "relative_seconds": 4.499423027038574,
+          "common_misses": 2416
+        },
+        {
+          "frame": 4,
+          "relative_seconds": 6.000159025192261,
+          "common_misses": 2583
+        },
+        {
+          "frame": 5,
+          "relative_seconds": 7.499781131744385,
+          "common_misses": 2279
+        },
+        {
+          "frame": 6,
+          "relative_seconds": 8.999426126480103,
+          "common_misses": 1750
+        },
+        {
+          "frame": 7,
+          "relative_seconds": 10.499032974243164,
+          "common_misses": 2284
+        },
+        {
+          "frame": 8,
+          "relative_seconds": 11.99922513961792,
+          "common_misses": 3611
+        },
+        {
+          "frame": 9,
+          "relative_seconds": 13.49941897392273,
+          "common_misses": 1281
+        },
+        {
+          "frame": 10,
+          "relative_seconds": 14.950922966003418,
+          "common_misses": 435
+        },
+        {
+          "frame": 11,
+          "relative_seconds": 16.45002818107605,
+          "common_misses": 67
+        }
+      ],
+      "query_frames": [
+        {
+          "frame": 0,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 1,
+            "nearer_return": 19856,
+            "margin_boundary": 0,
+            "surface": 1943,
+            "see_through": 889
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 267,
+            "empty_query_column": 4087,
+            "map_height_too_small": 10,
+            "height_ratio_too_large": 9997,
+            "ground_reverted": 294,
+            "dynamic_vote": 8034
+          }
+        },
+        {
+          "frame": 1,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 730,
+            "nearer_return": 18285,
+            "margin_boundary": 0,
+            "surface": 2411,
+            "see_through": 1263
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 37,
+            "empty_query_column": 2509,
+            "map_height_too_small": 13,
+            "height_ratio_too_large": 15270,
+            "ground_reverted": 972,
+            "dynamic_vote": 3888
+          }
+        },
+        {
+          "frame": 2,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 3944,
+            "nearer_return": 14284,
+            "margin_boundary": 0,
+            "surface": 3480,
+            "see_through": 981
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 6,
+            "empty_query_column": 1086,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 12950,
+            "ground_reverted": 909,
+            "dynamic_vote": 7738
+          }
+        },
+        {
+          "frame": 3,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 5774,
+            "nearer_return": 11662,
+            "margin_boundary": 0,
+            "surface": 3828,
+            "see_through": 1425
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 5,
+            "empty_query_column": 1568,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 17590,
+            "ground_reverted": 265,
+            "dynamic_vote": 3261
+          }
+        },
+        {
+          "frame": 4,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 5360,
+            "nearer_return": 9355,
+            "margin_boundary": 0,
+            "surface": 5360,
+            "see_through": 2614
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 1,
+            "empty_query_column": 2389,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 16487,
+            "ground_reverted": 587,
+            "dynamic_vote": 3225
+          }
+        },
+        {
+          "frame": 5,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 7628,
+            "nearer_return": 8248,
+            "margin_boundary": 0,
+            "surface": 5473,
+            "see_through": 1340
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 2,
+            "empty_query_column": 2680,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 15266,
+            "ground_reverted": 570,
+            "dynamic_vote": 4171
+          }
+        },
+        {
+          "frame": 6,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 8881,
+            "nearer_return": 8756,
+            "margin_boundary": 0,
+            "surface": 4650,
+            "see_through": 402
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 3,
+            "empty_query_column": 2030,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 14727,
+            "ground_reverted": 1350,
+            "dynamic_vote": 4579
+          }
+        },
+        {
+          "frame": 7,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 9777,
+            "nearer_return": 6576,
+            "margin_boundary": 0,
+            "surface": 5992,
+            "see_through": 344
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 3,
+            "empty_query_column": 4289,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 13620,
+            "ground_reverted": 992,
+            "dynamic_vote": 3785
+          }
+        },
+        {
+          "frame": 8,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 11433,
+            "nearer_return": 5936,
+            "margin_boundary": 0,
+            "surface": 4983,
+            "see_through": 337
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 3,
+            "empty_query_column": 4508,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 11877,
+            "ground_reverted": 905,
+            "dynamic_vote": 5396
+          }
+        },
+        {
+          "frame": 9,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 4544,
+            "nearer_return": 15137,
+            "margin_boundary": 0,
+            "surface": 2923,
+            "see_through": 85
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 3,
+            "empty_query_column": 7945,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 6467,
+            "ground_reverted": 326,
+            "dynamic_vote": 7948
+          }
+        },
+        {
+          "frame": 10,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 3352,
+            "nearer_return": 17928,
+            "margin_boundary": 0,
+            "surface": 1354,
+            "see_through": 55
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 1055,
+            "empty_query_column": 9403,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 6643,
+            "ground_reverted": 275,
+            "dynamic_vote": 5313
+          }
+        },
+        {
+          "frame": 11,
+          "range": {
+            "invalid_map_range": 0,
+            "empty_angular_pixel": 1007,
+            "nearer_return": 21108,
+            "margin_boundary": 0,
+            "surface": 390,
+            "see_through": 184
+          },
+          "scan_ratio": {
+            "outside_polar_domain": 1509,
+            "empty_query_column": 13288,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 3779,
+            "ground_reverted": 53,
+            "dynamic_vote": 4060
+          }
+        }
+      ],
+      "trace_sha256": "582ab0d713c196c0674588725c09feb4635c3b865bd8445a26d07feea5da04dc"
+    }
+  ],
+  "aggregate_counts": {
+    "static_kept": {
+      "points": 473231,
+      "range_opportunities": {
+        "invalid_map_range": 0,
+        "empty_angular_pixel": 685777,
+        "nearer_return": 4003232,
+        "margin_boundary": 0,
+        "surface": 794652,
+        "see_through": 195111
+      },
+      "scan_ratio_opportunities": {
+        "outside_polar_domain": 660291,
+        "empty_query_column": 1242991,
+        "map_height_too_small": 52465,
+        "height_ratio_too_large": 2697120,
+        "ground_reverted": 329487,
+        "dynamic_vote": 696418
+      },
+      "range_blockers": {
+        "low_see_only": 448740,
+        "surface_only": 373,
+        "both": 11523,
+        "zero_see_through": 345299
+      },
+      "scan_ratio": {
+        "zero_dynamic_votes": 185631,
+        "positive_votes_below_threshold": 249697,
+        "insufficient_revisits_for_floor": 14971
+      }
+    },
+    "static_removed": {
+      "points": 7709,
+      "range_opportunities": {
+        "invalid_map_range": 0,
+        "empty_angular_pixel": 18821,
+        "nearer_return": 30281,
+        "margin_boundary": 0,
+        "surface": 9407,
+        "see_through": 33999
+      },
+      "scan_ratio_opportunities": {
+        "outside_polar_domain": 6146,
+        "empty_query_column": 34349,
+        "map_height_too_small": 906,
+        "height_ratio_too_large": 11432,
+        "ground_reverted": 2392,
+        "dynamic_vote": 37283
+      },
+      "range_blockers": {
+        "low_see_only": 0,
+        "surface_only": 0,
+        "both": 0,
+        "zero_see_through": 0
+      },
+      "scan_ratio": {
+        "zero_dynamic_votes": 0,
+        "positive_votes_below_threshold": 0,
+        "insufficient_revisits_for_floor": 0
+      }
+    },
+    "moving_both_dynamic": {
+      "points": 329,
+      "range_opportunities": {
+        "invalid_map_range": 0,
+        "empty_angular_pixel": 910,
+        "nearer_return": 1482,
+        "margin_boundary": 0,
+        "surface": 288,
+        "see_through": 1268
+      },
+      "scan_ratio_opportunities": {
+        "outside_polar_domain": 160,
+        "empty_query_column": 1754,
+        "map_height_too_small": 2,
+        "height_ratio_too_large": 565,
+        "ground_reverted": 38,
+        "dynamic_vote": 1429
+      },
+      "range_blockers": {
+        "low_see_only": 0,
+        "surface_only": 0,
+        "both": 0,
+        "zero_see_through": 0
+      },
+      "scan_ratio": {
+        "zero_dynamic_votes": 0,
+        "positive_votes_below_threshold": 0,
+        "insufficient_revisits_for_floor": 0
+      }
+    },
+    "moving_range_only": {
+      "points": 3269,
+      "range_opportunities": {
+        "invalid_map_range": 0,
+        "empty_angular_pixel": 13029,
+        "nearer_return": 10464,
+        "margin_boundary": 0,
+        "surface": 3987,
+        "see_through": 11748
+      },
+      "scan_ratio_opportunities": {
+        "outside_polar_domain": 3821,
+        "empty_query_column": 16802,
+        "map_height_too_small": 232,
+        "height_ratio_too_large": 13275,
+        "ground_reverted": 486,
+        "dynamic_vote": 4612
+      },
+      "range_blockers": {
+        "low_see_only": 0,
+        "surface_only": 0,
+        "both": 0,
+        "zero_see_through": 0
+      },
+      "scan_ratio": {
+        "zero_dynamic_votes": 743,
+        "positive_votes_below_threshold": 2526,
+        "insufficient_revisits_for_floor": 794
+      }
+    },
+    "moving_scan_ratio_only": {
+      "points": 6278,
+      "range_opportunities": {
+        "invalid_map_range": 0,
+        "empty_angular_pixel": 14837,
+        "nearer_return": 47849,
+        "margin_boundary": 0,
+        "surface": 9727,
+        "see_through": 2923
+      },
+      "scan_ratio_opportunities": {
+        "outside_polar_domain": 744,
+        "empty_query_column": 17708,
+        "map_height_too_small": 19,
+        "height_ratio_too_large": 23981,
+        "ground_reverted": 727,
+        "dynamic_vote": 32157
+      },
+      "range_blockers": {
+        "low_see_only": 6278,
+        "surface_only": 0,
+        "both": 0,
+        "zero_see_through": 3859
+      },
+      "scan_ratio": {
+        "zero_dynamic_votes": 0,
+        "positive_votes_below_threshold": 0,
+        "insufficient_revisits_for_floor": 0
+      }
+    },
+    "moving_common_miss": {
+      "points": 33679,
+      "range_opportunities": {
+        "invalid_map_range": 0,
+        "empty_angular_pixel": 84175,
+        "nearer_return": 242504,
+        "margin_boundary": 0,
+        "surface": 62414,
+        "see_through": 15055
+      },
+      "scan_ratio_opportunities": {
+        "outside_polar_domain": 8327,
+        "empty_query_column": 90759,
+        "map_height_too_small": 448,
+        "height_ratio_too_large": 210969,
+        "ground_reverted": 19050,
+        "dynamic_vote": 74595
+      },
+      "range_blockers": {
+        "low_see_only": 33673,
+        "surface_only": 0,
+        "both": 6,
+        "zero_see_through": 22327
+      },
+      "scan_ratio": {
+        "zero_dynamic_votes": 6630,
+        "positive_votes_below_threshold": 27049,
+        "insufficient_revisits_for_floor": 1254
+      }
+    }
+  },
+  "limitations": "Three correlated scenes from one drive. Range state counts describe angular pixels, not exact rays or physical occlusion; strict margin equality is ambiguous. Scan-ratio gates classify repeated point/scan opportunities, not distinct points. Guard-failure counts are points; zero-vote/revisit counts overlap. Full-map ground fits retain static context. Offline maps include future points; input is undeskewed; GT is moving-instance boxes. Neither and static-removed groups are diagnostic populations, not unbiased samples for tuning."
+}

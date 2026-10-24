@@ -1,0 +1,732 @@
+{
+  "plan_sha256": "e20ef5ba45dfc23397ca6810e30beaaea0f9853d52952d4ed26f604280c2d271",
+  "plan": {
+    "schema_version": 1,
+    "created_utc": "2026-10-24T01:05:20.904535+00:00",
+    "dataset": "argoverse-2-sensor-val",
+    "catalogue_source": "https://argoverse.s3.amazonaws.com/?list-type=2&prefix=datasets/av2/sensor/val/&delimiter=/",
+    "catalogue_sha256": "c0c7a4a477297be91ed9c7a7a764b994db48d420d12dc81d7ba6f7ad1f71a594",
+    "catalogue_scenes": [
+      "02678d04-cc9f-3148-9f95-1ba66347dff9",
+      "02a00399-3857-444e-8db3-a8f58489c394",
+      "04994d08-156c-3018-9717-ba0e29be8153",
+      "05fa5048-f355-3274-b565-c0ddc547b315",
+      "070bbf42-31d3-3aa9-aca4-c262afc9077d",
+      "0aa4e8f5-2f9a-39a1-8f80-c2fdde4405a2",
+      "0b5142c1-420b-3fea-9e98-b87327ae22c6",
+      "0b86f508-5df9-4a46-bc59-5b9536dbde9f",
+      "0bae3b5e-417d-3b03-abaa-806b433233b8",
+      "0c3bad78-9f1e-395d-a376-2eb7499229fd",
+      "0fb7276f-ecb5-3e5b-87a8-cc74c709c715",
+      "11ba4e81-c26f-3cd1-827d-b6913bcef64e",
+      "15ec0778-826e-3ed7-9775-54fbf66997f4",
+      "182ba3f7-b89a-36cc-ae40-32a341b0d3e9",
+      "185d3943-dd15-397a-8b2e-69cd86628fb7",
+      "19350c96-623d-4d77-af96-f8c23f00c358",
+      "19f53e16-9f99-3035-9672-7e860f3b0048",
+      "1da4a0aa-22ae-3958-856d-05303de1f576",
+      "1f434d15-8745-3fba-9c3e-ccb026688397",
+      "201fe83b-7dd7-38f4-9d26-7b4a668638a9",
+      "20bcd747-ef60-391a-9f4a-ae99f049c260",
+      "20d47f81-46e8-3adf-a0ca-564fbb5c599d",
+      "20dd185d-b4eb-3024-a17a-b4e5d8b15b65",
+      "214e388e-cbd7-3dde-a204-d2ec42298808",
+      "22052525-4f85-3fe8-9d7d-000a9fffce36",
+      "24642607-2a51-384a-90a7-228067956d05",
+      "25e5c600-36fe-3245-9cc0-40ef91620c22",
+      "27be7d34-ecb4-377b-8477-ccfd7cf4d0bc",
+      "27c03d98-6ac3-38a3-ba5e-102b184d01ef",
+      "280269f9-6111-311d-b351-ce9f63f88c81",
+      "29a00842-ead2-3050-b587-c5ef507e4125",
+      "2c652f9e-8db8-3572-aa49-fae1344a875b",
+      "2e3f2ae7-9ab9-3aef-a3ce-a0a97a0cb1ab",
+      "2f2321d2-7912-3567-a789-25e46a145bda",
+      "2ff4f798-78d9-3384-87e9-61928aa4cb6d",
+      "335aabef-269e-3211-a99d-2c3a3a8f8475",
+      "36aec72e-5086-376c-b109-295b128e77e1",
+      "3b3570b4-7b0b-3268-a571-b0889dbf40b6",
+      "3bffdcff-c3a7-38b6-a0f2-64196d130958",
+      "3de5b5d6-68c4-3c95-84ed-be7c83d829f8",
+      "42f92807-0c5e-3397-bd45-9d5303b4db2a",
+      "44adf4c4-6064-362f-94d3-323ed42cfda9",
+      "47286726-5dd4-4e26-bd2d-5324f429e445",
+      "472a240a-10cd-39cd-8681-558f7c7cf868",
+      "4c33fc38-5e59-34f8-96ba-4e5a404d3988",
+      "4e3fedbb-847c-3d5b-8a62-c9ff84550985",
+      "51bbdd4d-3065-34ae-b369-b6e0444f34db",
+      "52071780-5758-3ed4-8835-0d64ecdc5575",
+      "52971a8a-ed62-3bfd-bcd4-ca3308b594e0",
+      "544a8102-0ef5-3044-921e-dc0544370376",
+      "5589de60-1727-3e3f-9423-33437fc5da4b",
+      "58e82365-03bc-3b2f-b55a-a4ad0e3e792d",
+      "58fed0d4-97d5-469b-89a4-4394838e10c7",
+      "5c0584a3-52a6-3029-b6ff-ca45a19d8aa6",
+      "5f278cdd-ca28-3c53-8f5c-04e62308811d",
+      "5f8f4a26-59b1-3f70-bcab-b5e3e615d3bc",
+      "65387aee-4490-38b9-8f4f-1fc43bd4ac06",
+      "6803104a-bb06-402e-8471-e5af492db0a8",
+      "6aaf5b08-9f84-3a2e-8a32-2e50e5e11a3c",
+      "6c932547-4c11-31d7-b8ef-0c16a13dbfc3",
+      "6f128f23-ee40-3ea9-8c50-c9cdb9d3e8b6",
+      "7039e410-b5ab-35aa-96bc-2c4b89d3c5e3",
+      "72cf3ca1-1a9e-3254-bca0-29c62521e454",
+      "7606de8d-486c-4916-9cbb-002ee966f834",
+      "76916359-96f4-3274-81fe-bb145d497c11",
+      "77574006-881f-3bc8-bbb6-81d79cf02d83",
+      "78683234-e6f1-3e4e-af52-6f839254e4c0",
+      "78da7b7e-8ddf-3c7d-8716-eaa890106dd3",
+      "78f7cb5c-9d51-34f0-b356-9b3d83263c75",
+      "7a2c222d-addc-30b2-aac6-596cb65a22e3",
+      "7dbc2eac-5871-3480-b322-246e03d954d2",
+      "7de2e535-81df-3d5f-a5ca-62e4b940eb54",
+      "7e4d67b3-c3cc-3288-afe5-043602ea3c70",
+      "7fab2350-7eaf-3b7e-a39d-6937a4c1bede",
+      "858d739b-a0ba-35aa-bafc-4f7988bcad17",
+      "8749f79f-a30b-3c3f-8a44-dbfa682bbef1",
+      "87ca3d9f-f317-3efb-b1cb-aaaf525227e5",
+      "88f47a10-87b4-3ea8-a0c7-a07d825b647d",
+      "91aab547-1912-3b8e-8e7f-df3b202147bf",
+      "92b900b1-ac4a-3d41-b118-e42c66382c91",
+      "95bf6003-7068-3a78-a0c0-9e470a06e60f",
+      "96dd6923-994c-3afe-9830-b15bdfd60f64",
+      "9a448a80-0e9a-3bf0-90f3-21750dfef55a",
+      "9bb1f857-8b61-369f-a537-484c1323ae32",
+      "9e9bcfb7-601d-3d80-bc12-ef7025174beb",
+      "9f871fb4-3b8e-34b3-9161-ed961e71a6da",
+      "a060c4c1-b9fc-39c1-9d30-d93a124c9066",
+      "a1589ae2-2678-310e-91cc-c4b512cd7fa5",
+      "a33a44fb-6008-3dc2-b7c5-2d27b70741e8",
+      "a7636fca-4d9e-3052-bef2-af0ce5d1df74",
+      "a91d4c7b-bf55-3a0e-9eba-1a43577bcca8",
+      "adf9a841-e0db-30ab-b5b3-bf0b61658e1e",
+      "b19f3c1a-a84a-3a2d-8d1b-8a4ae201020b",
+      "b2053fdc-0b94-30bc-aee7-5bc6fb7e9f52",
+      "b213af37-7d89-342d-ae39-8a3c72159a01",
+      "b50c4763-5d1e-37f4-a009-2244aeebabcd",
+      "b5a7ff7e-d74a-3be6-b95d-3fc0042215f6",
+      "b6500255-eba3-3f77-acfd-626c07aa8621",
+      "b6e967f6-92bc-3bf5-99c9-1b0c4649fd67",
+      "b8489c02-60d0-3f44-a3b4-9de62830d666",
+      "b87683ae-14c5-321f-8af3-623e7bafc3a7",
+      "ba67827f-6b99-3d2a-96ab-7c829eb999bb",
+      "bbd19ca1-805a-3c22-8df3-cd7501aa06f3",
+      "bd90cd1a-38b6-33b7-adec-ba7d4207a8c0",
+      "bdb9d309-f14b-3ff6-ad1f-5d3f3f95a13e",
+      "bf360aeb-1bbd-3c1e-b143-09cf83e4f2e4",
+      "bf382949-3515-3c16-b505-319442937a43",
+      "c222c78d-b574-4b9d-82e1-96a4f3f8bb27",
+      "c2d44a70-9fd4-3298-ad0a-c4c9712e6f1e",
+      "c85a88a8-c916-30a7-923c-0c66bd3ebbd3",
+      "c865c156-0f26-411c-a16c-be985333f675",
+      "c8ec7be0-92aa-3222-946e-fbcf398c841e",
+      "cae56e40-8470-3c9c-af75-6e444189488f",
+      "cd22abca-9150-3279-87a4-cb00ba517372",
+      "cf5aaa11-4f92-3377-a7a2-861f305023eb",
+      "d1395998-7e8a-417d-91e9-5ca6ec045ee1",
+      "d3ca0450-2167-38fb-b34b-449741cb38f3",
+      "d46ff5df-95e8-32da-a0d7-87f7b976a959",
+      "d5d6f11c-3026-3e0e-9d67-c111233e22de",
+      "d5fa4d54-74ba-369c-a758-636441ad7f07",
+      "d770f926-bca8-31de-9790-73fbb7b6a890",
+      "d89f80be-76d0-3853-8daa-76605cf4ce5e",
+      "da036982-92bf-36a8-b880-4ccf4e20b74e",
+      "dafe14f5-825c-4e7a-9009-6dfdfdd5b030",
+      "dc9077b9-2fe0-3d18-9b97-8067ff090874",
+      "de56b100-508b-3479-81fe-735349f8e8de",
+      "de9cf513-a0cd-3389-bc79-3f9f6f261317",
+      "ded5ef6e-46ea-3a66-9180-18a6fa0a2db4",
+      "dfc32963-1524-34f4-9f5e-0292f0f223ae",
+      "dfc6d65f-20f5-389d-a5cd-81c1c7ecb11f",
+      "e0ea281b-6956-3605-b720-71b54ec87d25",
+      "e13c06cb-cd01-380e-946f-6d92ac1af49d",
+      "e1d68dde-22a9-3918-a526-0850b21ff2eb",
+      "e2e921fe-e489-3656-a0a2-5e17bd399ddf",
+      "e42aa296-0e5d-4733-87ec-131a82f917bc",
+      "e50e7698-de3d-355f-aca2-eddd09c09533",
+      "e72ef05c-8b94-3885-a34f-fff3b2b954b4",
+      "e8c9fd64-fdd2-422d-a2a2-6f47500d1d12",
+      "ecbe6def-7560-352c-8822-b2b92613e1e4",
+      "eec284b2-840a-3c75-aa42-04d2e309bbe1",
+      "f1275002-842e-3571-8f7d-05816bc7cf56",
+      "f2576c8a-da9b-450e-88cf-a70af1b0eadf",
+      "f292cc5c-7a90-360d-b62a-074c643bdf59",
+      "f3cd0d0d-8b71-3266-9732-d9f0d5778eb6",
+      "f4c94798-4d77-36ab-bdc5-c1194e5e7aff",
+      "f668074d-d6c6-3ea7-a7b5-aad0a1203b03",
+      "f6cc0ebf-fc6a-3bf2-8bcb-76d8c43f194e",
+      "fbd62533-2d32-3c95-8590-7fd81bd68c87",
+      "fbee355f-8878-31fa-8ac8-b9a45a3f130a",
+      "ff0dbfc5-8a7b-3a6e-8936-e5e812e45408"
+    ],
+    "previously_examined_scenes": [
+      "02678d04-cc9f-3148-9f95-1ba66347dff9",
+      "02a00399-3857-444e-8db3-a8f58489c394",
+      "04994d08-156c-3018-9717-ba0e29be8153",
+      "05fa5048-f355-3274-b565-c0ddc547b315",
+      "0b5142c1-420b-3fea-9e98-b87327ae22c6"
+    ],
+    "selection_evidence_sha256": "7fef5b592243e23e0bd2394f944abbac2f0cc4c6c71020cac675e43efc8487cd",
+    "scenes": [
+      "070bbf42-31d3-3aa9-aca4-c262afc9077d",
+      "0aa4e8f5-2f9a-39a1-8f80-c2fdde4405a2",
+      "0b86f508-5df9-4a46-bc59-5b9536dbde9f"
+    ],
+    "selection": "First lexicographic unexamined logs; no moving-content screening or result-based reselection.",
+    "frames": 12,
+    "stride": 3,
+    "moving_threshold_m": 2.0,
+    "box_margin_m": 0.2,
+    "sensor_ground_z": -1.4,
+    "ground_preprocessing_frame": "ego_before_pose_transform",
+    "parameters": {
+      "range": {
+        "h_res_deg": 1.0,
+        "v_res_deg": 1.0,
+        "range_margin": 0.5,
+        "min_see_through": 3,
+        "max_surface_hits": 3,
+        "ground_z": null,
+        "resolutions": null
+      },
+      "scan_ratio": {
+        "n_rings": 20,
+        "n_sectors": 108,
+        "max_range": 80.0,
+        "scan_ratio_threshold": 0.2,
+        "min_map_height": 0.5,
+        "ground_margin": 0.2,
+        "min_votes": null,
+        "votes_fraction": 0.5,
+        "votes_floor": 3
+      }
+    },
+    "parameters_source_sha256": "15c7a09f893817226ea0df0a25af6395587de057865fb79157fe4d4880098bbd",
+    "modes": [
+      "none",
+      "either",
+      "visibility_supported"
+    ],
+    "code_sha256": {
+      "dynamic_object_removal.py": "e4c668b9ea721b45c89930d06ad52266d06ee420fcc09893603aed818d0b62ad",
+      "bench.py": "6e14eb49076546a07ba0caad08bab8154bfc4a2f36bc7dbe77c8ce90cd134ce2",
+      "scripts/run_av2_benchmark.py": "1e79f479e1994515b3c52c48c23c54c08fa4b8afce279cfd64d8dd6d7e7acf39",
+      "scripts/experiment_neighbor_columns.py": "801837ba42a2bdb18bb9fdc4d40f068914f5ab0af9642f2dc6370669b1eccd51",
+      "scripts/validate_frozen_av2_suite.py": "46050bb23abf11412709003c6d1d3e3b6af7262d1e0c02bcd6637607af60f993"
+    },
+    "aggregation": "Unweighted mean over every selected scene, including zero-moving-GT scenes; also report worst-scene static preservation and every per-scene delta. No minimum-GT exclusion."
+  },
+  "scene_results": [
+    {
+      "scene": "070bbf42-31d3-3aa9-aca4-c262afc9077d",
+      "gt_dynamic_points": 22957,
+      "input_hashes": {
+        "manifest_sha256": "4435c3b15d245dde0a7a1270a614ebb92620ddb590fd7a3ed92b35e299ced12f",
+        "map_sha256": "e19639903101ae84cf57242084e869b95cf6c26c2ae219eaaa7f1a4ae6ab2b6e",
+        "gt_sha256": "93d379fc43801789cff490b85061969aa91953d5b4d1b8040e9a8086aba7d659"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 1.0,
+          "v_res_deg": 1.0,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 3,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "results": {
+        "none": {
+          "metrics": {
+            "precision": 0.969017094017094,
+            "recall": 0.671646992202814,
+            "f1": 0.7933829015410739,
+            "iou": 0.6575266524520256,
+            "static_preservation": 0.999576809504189,
+            "true_positive": 15419,
+            "false_positive": 493,
+            "false_negative": 7538,
+            "true_negative": 1164467
+          },
+          "inferred_point_scan_observations": 0,
+          "additional_moving_removed": 0,
+          "additional_static_removed": 0,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "either": {
+          "metrics": {
+            "precision": 0.9695384615384616,
+            "recall": 0.6862830509212876,
+            "f1": 0.8036830157879971,
+            "iou": 0.6717977144806413,
+            "static_preservation": 0.9995750927070457,
+            "true_positive": 15755,
+            "false_positive": 495,
+            "false_negative": 7202,
+            "true_negative": 1164465
+          },
+          "inferred_point_scan_observations": 343213,
+          "additional_moving_removed": 383,
+          "additional_static_removed": 18,
+          "lost_moving_removed": 47,
+          "recovered_static_points": 16
+        },
+        "visibility_supported": {
+          "metrics": {
+            "precision": 0.9695739097838311,
+            "recall": 0.6760029620595025,
+            "f1": 0.7966019043708132,
+            "iou": 0.6619604163112097,
+            "static_preservation": 0.9995819598956187,
+            "true_positive": 15519,
+            "false_positive": 487,
+            "false_negative": 7438,
+            "true_negative": 1164473
+          },
+          "inferred_point_scan_observations": 10429,
+          "additional_moving_removed": 158,
+          "additional_static_removed": 2,
+          "lost_moving_removed": 58,
+          "recovered_static_points": 8
+        }
+      },
+      "map_points": 1187917,
+      "timestamps_ns": [
+        315970819160050000,
+        315970819459975000,
+        315970819759901000,
+        315970820059816000,
+        315970820360405000,
+        315970820660331000,
+        315970820960256000,
+        315970821260171000,
+        315970821560097000,
+        315970821860022000,
+        315970822159937000,
+        315970822459863000
+      ],
+      "native_api_mask_verified": true,
+      "asset_sha256": {
+        "manifest_assets/315970819160050000_cloud.npy": "b3b8bccc331f27acd2acd64c82e6266fbe035761cc65215ab245d376d90e22e1",
+        "manifest_assets/315970819160050000_labels.npy": "599bb157636f7670535ebb85561f8bd35f8c121878e9134fc531eb429147e4df",
+        "manifest_assets/315970819459975000_cloud.npy": "f0ffeb64c04a46a5069b27c9bd636be6d03dc2322130065b4159ffcfaae96206",
+        "manifest_assets/315970819459975000_labels.npy": "0f9039df4bc1d8577b03d3b8f5fb9515257d1a5d92e49d8a00117a42de767662",
+        "manifest_assets/315970819759901000_cloud.npy": "e2639b43fa468ff7715f2053074b9ed7f572ac8b1742a38947c047688e6d4055",
+        "manifest_assets/315970819759901000_labels.npy": "ef98918be5af3591d7baa0caa972f57fae53f862ca2f11ae10a95e82bb446ac2",
+        "manifest_assets/315970820059816000_cloud.npy": "c38a3af2f7921b00999e198927ff7d9181dc27f65dbec95ce15a73ae95291764",
+        "manifest_assets/315970820059816000_labels.npy": "e27d280ed7cda62a1cb23e009ee03ca887628ddfe97ce16845d346455e3ec297",
+        "manifest_assets/315970820360405000_cloud.npy": "c92f6e5c9f015cc16acc650970bc7f52eb22cbd88bd2be1038a197e4b2109013",
+        "manifest_assets/315970820360405000_labels.npy": "5778ac4b6f9f183a1cb1f08cf5a4801953b499a23ea4009b4d58d9229cb24bd1",
+        "manifest_assets/315970820660331000_cloud.npy": "6b5b02eb1f6b61163cad6a3551f301567acfdd3f03c88d83cd4788e137b17f68",
+        "manifest_assets/315970820660331000_labels.npy": "3525b128807ae01f4cedd87779e22bc25c99984edb8dc80e78295542e367f2e8",
+        "manifest_assets/315970820960256000_cloud.npy": "d0025f1f76bc48ebf1afd4cce71c788f786b782ae4e830c93f839afc33deb3a2",
+        "manifest_assets/315970820960256000_labels.npy": "db54ef483d6a7975797d72c518bc44c60c5c0ed2a02b4d30f55baf4c1fa496bb",
+        "manifest_assets/315970821260171000_cloud.npy": "39ba916c70d877399c669a5785f1c94a21b7fc80f18bb56b3433e07c0ec3a86f",
+        "manifest_assets/315970821260171000_labels.npy": "028b63f5c96f41e728dedb0a700f20db984b8b79237a3a8756e096c718890cc3",
+        "manifest_assets/315970821560097000_cloud.npy": "6c591dd66dd4a02e04b3f9a96cb353f4bebee5df30c07ae6b19e6cf1368e94aa",
+        "manifest_assets/315970821560097000_labels.npy": "3f8e1ccd1af0595d5ba1bcbb3e71f27b2bdbd92b0ba0d998c6c3d7c1a3cdde56",
+        "manifest_assets/315970821860022000_cloud.npy": "aab3219a767f844bdf0375ff6bf716aeaf401eeaf5bb875b312fe25f2a30dc7b",
+        "manifest_assets/315970821860022000_labels.npy": "b53cde64b282ff4d88a1e26a9fb513dfacac53eeaecd1b9d7c86179315daf846",
+        "manifest_assets/315970822159937000_cloud.npy": "0e3b04395bef45732f6d9186e96a8ffc90fefe31ce0840905aa2bf1f1ff222d8",
+        "manifest_assets/315970822159937000_labels.npy": "ce4fc2ace9ee35fbe1bf00e7d6d295b300e54c3d6e80c490bf4a76c34ea667d7",
+        "manifest_assets/315970822459863000_cloud.npy": "6fc083b737f7efaf2a3376f1daaff2cb21306cd1f69678bd6849e5bf09a17bbe",
+        "manifest_assets/315970822459863000_labels.npy": "ffd5254ee54ef209767b06d3043fa2106c44b47585016c7e62cb749905a8a015"
+      },
+      "annotation_sha256": "04338ecd12d23625ffff9165b59fa8768618f975b22798dc9bbdfa44e61ca18d",
+      "poses_sha256": "e5b54597acdaec857fbb575550b0cb2420d83bfa98ac18634c25796f6e13cff5"
+    },
+    {
+      "scene": "0aa4e8f5-2f9a-39a1-8f80-c2fdde4405a2",
+      "gt_dynamic_points": 19444,
+      "input_hashes": {
+        "manifest_sha256": "e4d5679c413d04779118831e4b009905c439c2126eeb58e0ae076bad72f81cf9",
+        "map_sha256": "717abff69599af3c84d6fa1c39896c1fd6aa0394950eab5ccf3d5f88e659707d",
+        "gt_sha256": "294e97c8e0a5457fca54560848c91e2b2b6b5d8ec208a6044de17c7420da3eab"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 1.0,
+          "v_res_deg": 1.0,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 3,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "results": {
+        "none": {
+          "metrics": {
+            "precision": 0.985738255033557,
+            "recall": 0.6042995268463279,
+            "f1": 0.7492666751689836,
+            "iou": 0.5990618945651066,
+            "static_preservation": 0.9998602190942362,
+            "true_positive": 11750,
+            "false_positive": 170,
+            "false_negative": 7694,
+            "true_negative": 1216019
+          },
+          "inferred_point_scan_observations": 0,
+          "additional_moving_removed": 0,
+          "additional_static_removed": 0,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "either": {
+          "metrics": {
+            "precision": 0.9858209581340717,
+            "recall": 0.6042995268463279,
+            "f1": 0.7492905653158181,
+            "iou": 0.5990924386886249,
+            "static_preservation": 0.9998610413348583,
+            "true_positive": 11750,
+            "false_positive": 169,
+            "false_negative": 7694,
+            "true_negative": 1216020
+          },
+          "inferred_point_scan_observations": 24801,
+          "additional_moving_removed": 0,
+          "additional_static_removed": 0,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 1
+        },
+        "visibility_supported": {
+          "metrics": {
+            "precision": 0.985738255033557,
+            "recall": 0.6042995268463279,
+            "f1": 0.7492666751689836,
+            "iou": 0.5990618945651066,
+            "static_preservation": 0.9998602190942362,
+            "true_positive": 11750,
+            "false_positive": 170,
+            "false_negative": 7694,
+            "true_negative": 1216019
+          },
+          "inferred_point_scan_observations": 2002,
+          "additional_moving_removed": 0,
+          "additional_static_removed": 0,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        }
+      },
+      "map_points": 1235633,
+      "timestamps_ns": [
+        315971843759817000,
+        315971844059733000,
+        315971844360322000,
+        315971844660248000,
+        315971844960174000,
+        315971845260090000,
+        315971845560016000,
+        315971845859942000,
+        315971846159859000,
+        315971846459785000,
+        315971846760374000,
+        315971847060291000
+      ],
+      "native_api_mask_verified": true,
+      "asset_sha256": {
+        "manifest_assets/315971843759817000_cloud.npy": "5af633a9f6555955aeedc5b3e09e79528a2ec357eaab78511e49623b12761932",
+        "manifest_assets/315971843759817000_labels.npy": "4b388c8431abe168ee86609ce747b6c1bae135b9595f68d9db7b1600167ee776",
+        "manifest_assets/315971844059733000_cloud.npy": "0774c7c02d76ff11f148b0094cf41fb8c4ca326be621ec34b70998dba928ea15",
+        "manifest_assets/315971844059733000_labels.npy": "9b12a1f46dc832f9ec2c15024cbf460ef115ebf9dbfcb6063cd901b0ffe95056",
+        "manifest_assets/315971844360322000_cloud.npy": "420c42f19f86763f1e7e3453b6e92e23e5b24ff8114914236e6a239c3eecdab4",
+        "manifest_assets/315971844360322000_labels.npy": "712b12c0bea0bf2dd6916b95ffb1ad0ab50cccb3a779f33cf184c39cd6b87c42",
+        "manifest_assets/315971844660248000_cloud.npy": "5fa1542905461a779695584ec9d735e7047690b4526fd1462a8ecd9e711e450c",
+        "manifest_assets/315971844660248000_labels.npy": "b43ca21a255e8737872335c5b634c24960d9e65af15a2263ec1b72980448c287",
+        "manifest_assets/315971844960174000_cloud.npy": "e8f8ef6879a0ebe4183d5f24029fa55f8ed8cafe2ed0e916cfebd8660577cfd1",
+        "manifest_assets/315971844960174000_labels.npy": "1e792d0a1deec7cd0da1af8bbb1692031bd9910131fcc3f22cb1ca9e730c03de",
+        "manifest_assets/315971845260090000_cloud.npy": "7094830fde780d050a3b7caabf9867411ee5676913f3c67dc2f736e5f06df627",
+        "manifest_assets/315971845260090000_labels.npy": "ca56b745b660490ec2f6c4f081b292283a5fa18e9edb12e131a460b62f48c024",
+        "manifest_assets/315971845560016000_cloud.npy": "cbd6c902f859ed0fdb2b29ab277a08292e943b2727303caad540a9a6b1ef42a0",
+        "manifest_assets/315971845560016000_labels.npy": "9ad11a304bae624baf1437d8a5a85dde808fe37eec3d11154730ecd950a61518",
+        "manifest_assets/315971845859942000_cloud.npy": "26b438624c5841f54fc3fd496b66e7a12fc02925fe47aed5e890bca58a838853",
+        "manifest_assets/315971845859942000_labels.npy": "be48ebdefd7bd73ed0b9cbc6a9c25049eb658f912e0d8f5843c8bcfe6d1c2aa7",
+        "manifest_assets/315971846159859000_cloud.npy": "656c8df0a57ea9a520cd4d29cf7fd84a41d6675ea4a0735ec7b2736259afc952",
+        "manifest_assets/315971846159859000_labels.npy": "7eadebec2883861657cc6cc9ddd29ffef9949a8b574583f4224071d5124a437e",
+        "manifest_assets/315971846459785000_cloud.npy": "2dfa4e4949c43e6b1073db333cf6d16d714f8d47de28f95af5fd14bb8d754f4c",
+        "manifest_assets/315971846459785000_labels.npy": "e51c41e58784ed89c2c23bdf933ae05f7f008c2d8a800828842bd1aae4dd51ac",
+        "manifest_assets/315971846760374000_cloud.npy": "8f1af6af09a2d21d83b140c2e07c382d7f485d2d83d9b016d77f310ee09f872a",
+        "manifest_assets/315971846760374000_labels.npy": "7db79085c3f3a308b1d13fc72abe0d385767356e4ffd3621f53c1a729c4ece37",
+        "manifest_assets/315971847060291000_cloud.npy": "3429f1a5f7a013d5b745c23906c7cef5aea268ab3276aa0f4f960bbad50bdd17",
+        "manifest_assets/315971847060291000_labels.npy": "22bcd23e90c93eb63cb2ac2f4a3c17bbd758fddbaecf8dfcf420fdcf4ea9cc93"
+      },
+      "annotation_sha256": "415d307b2ad789375b935c5ae29c8efd03625ac0d5ab8b3cbbcad12174050351",
+      "poses_sha256": "e84f1c1b5ece718d41d652422eaf114700cdc53ebeace0b26e615537e8e5ad54"
+    },
+    {
+      "scene": "0b86f508-5df9-4a46-bc59-5b9536dbde9f",
+      "gt_dynamic_points": 54750,
+      "input_hashes": {
+        "manifest_sha256": "33a2d2244db429a86a8c368fcdaa8bba8c10cf8ec609834714f1f77d05e94e3f",
+        "map_sha256": "5f2e3ff8c0bcb82d1068433aa637ad9131e3a93a5d61f8f89c8d34c0c4e02a7a",
+        "gt_sha256": "55ff5e925e783e47dcc32b64d333a38ee00b3c89ccd8b4053151dfb5faa38035"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 1.0,
+          "v_res_deg": 1.0,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 3,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "results": {
+        "none": {
+          "metrics": {
+            "precision": 0.9597937511509422,
+            "recall": 0.5711780821917808,
+            "f1": 0.7161636055512298,
+            "iou": 0.5578308954691402,
+            "static_preservation": 0.9987270405733953,
+            "true_positive": 31272,
+            "false_positive": 1310,
+            "false_negative": 23478,
+            "true_negative": 1027788
+          },
+          "inferred_point_scan_observations": 0,
+          "additional_moving_removed": 0,
+          "additional_static_removed": 0,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "either": {
+          "metrics": {
+            "precision": 0.9637032530923206,
+            "recall": 0.607634703196347,
+            "f1": 0.7453260297296995,
+            "iou": 0.5940396050211596,
+            "static_preservation": 0.9987824288843239,
+            "true_positive": 33268,
+            "false_positive": 1253,
+            "false_negative": 21482,
+            "true_negative": 1027845
+          },
+          "inferred_point_scan_observations": 416781,
+          "additional_moving_removed": 2234,
+          "additional_static_removed": 22,
+          "lost_moving_removed": 238,
+          "recovered_static_points": 79
+        },
+        "visibility_supported": {
+          "metrics": {
+            "precision": 0.960837581270413,
+            "recall": 0.5749406392694064,
+            "f1": 0.7194067031573175,
+            "iou": 0.5617760962290079,
+            "static_preservation": 0.9987532771417299,
+            "true_positive": 31478,
+            "false_positive": 1283,
+            "false_negative": 23272,
+            "true_negative": 1027815
+          },
+          "inferred_point_scan_observations": 41614,
+          "additional_moving_removed": 325,
+          "additional_static_removed": 7,
+          "lost_moving_removed": 119,
+          "recovered_static_points": 34
+        }
+      },
+      "map_points": 1083848,
+      "timestamps_ns": [
+        315967856960208000,
+        315967857260116000,
+        315967857560041000,
+        315967857859967000,
+        315967858159875000,
+        315967858459801000,
+        315967858760391000,
+        315967859060299000,
+        315967859360225000,
+        315967859660150000,
+        315967859960076000,
+        315967860259983000
+      ],
+      "native_api_mask_verified": true,
+      "asset_sha256": {
+        "manifest_assets/315967856960208000_cloud.npy": "0d2edd7b5b00abb3a187b55fa9e4b50f1147e40e9958678c64cabbbc5cb3062c",
+        "manifest_assets/315967856960208000_labels.npy": "1c89dd176bdc869d2c07d91621ad8596b1baf3e35f561e6589d1f3cae3a15f6b",
+        "manifest_assets/315967857260116000_cloud.npy": "844f47c5df41e38e6f418d6ca9593d7eca82827e168acbda025e6b200284753f",
+        "manifest_assets/315967857260116000_labels.npy": "db91fc90139396bbc10e1492a838fb93de1c4283c1c8a92f7c80ec96f328f406",
+        "manifest_assets/315967857560041000_cloud.npy": "dcebd6044eeb82a2c29b6231e30466687d5ded8d59dfb98ff6f567c1b0284b27",
+        "manifest_assets/315967857560041000_labels.npy": "8ab881211ca3bbf82e06cd712aa60536390ad07b6fd6beddf60d5defc183ded4",
+        "manifest_assets/315967857859967000_cloud.npy": "d2550a336cc65e246bfe0abd1113ce4842fb09df4ac7b75901246710e41ef0f4",
+        "manifest_assets/315967857859967000_labels.npy": "c0700c10849cfa73d480a74327e787ea8d8bb3b3695f40dc12433dd9730170d3",
+        "manifest_assets/315967858159875000_cloud.npy": "15ebe9f3190d4e02254389fb2df81da65a2a9c28d200476f26f8a3c3bd962aba",
+        "manifest_assets/315967858159875000_labels.npy": "9f59f46535cb9c86ecb8ebda59daf75233c2b752ffec8fde882cd052f03bc8ff",
+        "manifest_assets/315967858459801000_cloud.npy": "b5731ca8501fe17d1145e3407109c931eb66673a3f7a7335707cb1a32eb5004d",
+        "manifest_assets/315967858459801000_labels.npy": "ce502582f5b56a6009ee06a3afc78b12677e08251f1b1e41a3b6dab519b95305",
+        "manifest_assets/315967858760391000_cloud.npy": "bd0f6e96fd5b1ad8dfc8ee389367835203d3e7a60aec2500674800d88973d844",
+        "manifest_assets/315967858760391000_labels.npy": "787a763804c1c5aef87831d5e74779e8724c647c95ff018788ce3673823a2db4",
+        "manifest_assets/315967859060299000_cloud.npy": "6a42b06001da38f090638e69cf1f832f374b852c28028dac546832e4b31c7a56",
+        "manifest_assets/315967859060299000_labels.npy": "f7afdef5c17127aea2ce093ab906b4c394f2d2c91fbfc4519ead3d63127ddbb0",
+        "manifest_assets/315967859360225000_cloud.npy": "d428aa1dc2c89b370242c80c8dbe66c07d27b1e2a7dc4aab7f26e573b406b7f1",
+        "manifest_assets/315967859360225000_labels.npy": "68e38d4f7b81b8928a89765f28f47f31186dad96d7fc7bd7534032cef85abc40",
+        "manifest_assets/315967859660150000_cloud.npy": "0b15de9af3025629ac9a3b7eda1e31dd0b09914c890ec31cf4d53eb03ab75e91",
+        "manifest_assets/315967859660150000_labels.npy": "4486aa13db38e8f7a30502c08d244417ac7ceafe8da45ca0cda26aaf0934276d",
+        "manifest_assets/315967859960076000_cloud.npy": "2063a318e66f38d4699c02a339dc25393d55f1cf5ca920b63fc6a4ae3457cc39",
+        "manifest_assets/315967859960076000_labels.npy": "a5755b01e017cda80747443bcc4d5e62fd6f526c8ca9f1db1530ee75b6efcd37",
+        "manifest_assets/315967860259983000_cloud.npy": "da25fd8cb44fc269c66c7bd6df96d9cdb8b5d4ea98a8fb46073176e24464bd64",
+        "manifest_assets/315967860259983000_labels.npy": "eea91c76575fccea4715983abe299c2e95a52c0e18e0d84b7a498293cd99dcdd"
+      },
+      "annotation_sha256": "9fb5d9b06052ea008ee622503109c9a0a26a4a2506a4742ce62c782d88805989",
+      "poses_sha256": "789342d1e22d0a79d87928ab542391f25c7dcb2fa547a134c9759a977a1af9b9"
+    }
+  ],
+  "aggregate": {
+    "included_scenes": [
+      "070bbf42-31d3-3aa9-aca4-c262afc9077d",
+      "0aa4e8f5-2f9a-39a1-8f80-c2fdde4405a2",
+      "0b86f508-5df9-4a46-bc59-5b9536dbde9f"
+    ],
+    "excluded_scenes": [],
+    "zero_moving_gt_scenes": [],
+    "methods": {
+      "none": {
+        "mean": {
+          "precision": 0.9715163667338644,
+          "recall": 0.6157082004136409,
+          "f1": 0.7529377274204291,
+          "iou": 0.6048064808287575,
+          "static_preservation": 0.9993880230572736
+        },
+        "worst_scene_static_preservation": 0.9987270405733953,
+        "per_scene_delta_from_native": {
+          "070bbf42-31d3-3aa9-aca4-c262afc9077d": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "iou": 0.0,
+            "static_preservation": 0.0
+          },
+          "0aa4e8f5-2f9a-39a1-8f80-c2fdde4405a2": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "iou": 0.0,
+            "static_preservation": 0.0
+          },
+          "0b86f508-5df9-4a46-bc59-5b9536dbde9f": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "iou": 0.0,
+            "static_preservation": 0.0
+          }
+        },
+        "f1_regression_scenes": [],
+        "static_regression_scenes": []
+      },
+      "either": {
+        "mean": {
+          "precision": 0.9730208909216179,
+          "recall": 0.6327390936546542,
+          "f1": 0.7660998702778382,
+          "iou": 0.621643252730142,
+          "static_preservation": 0.999406187642076
+        },
+        "worst_scene_static_preservation": 0.9987824288843239,
+        "per_scene_delta_from_native": {
+          "070bbf42-31d3-3aa9-aca4-c262afc9077d": {
+            "precision": 0.000521367521367555,
+            "recall": 0.014636058718473621,
+            "f1": 0.01030011424692312,
+            "iou": 0.014271062028615722,
+            "static_preservation": -1.7167971433362794e-06
+          },
+          "0aa4e8f5-2f9a-39a1-8f80-c2fdde4405a2": {
+            "precision": 8.270310051461394e-05,
+            "recall": 0.0,
+            "f1": 2.389014683445989e-05,
+            "iou": 3.0544123518327915e-05,
+            "static_preservation": 8.222406221447542e-07
+          },
+          "0b86f508-5df9-4a46-bc59-5b9536dbde9f": {
+            "precision": 0.003909501941378402,
+            "recall": 0.03645662100456626,
+            "f1": 0.029162424178469704,
+            "iou": 0.03620870955201938,
+            "static_preservation": 5.538831092855023e-05
+          }
+        },
+        "f1_regression_scenes": [],
+        "static_regression_scenes": [
+          "070bbf42-31d3-3aa9-aca4-c262afc9077d"
+        ]
+      },
+      "visibility_supported": {
+        "mean": {
+          "precision": 0.9720499153626004,
+          "recall": 0.6184143760584123,
+          "f1": 0.7550917608990382,
+          "iou": 0.6075994690351081,
+          "static_preservation": 0.999398485377195
+        },
+        "worst_scene_static_preservation": 0.9987532771417299,
+        "per_scene_delta_from_native": {
+          "070bbf42-31d3-3aa9-aca4-c262afc9077d": {
+            "precision": 0.000556815766737051,
+            "recall": 0.004355969856688513,
+            "f1": 0.0032190028297393036,
+            "iou": 0.004433763859184148,
+            "static_preservation": 5.150391429675771e-06
+          },
+          "0aa4e8f5-2f9a-39a1-8f80-c2fdde4405a2": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "iou": 0.0,
+            "static_preservation": 0.0
+          },
+          "0b86f508-5df9-4a46-bc59-5b9536dbde9f": {
+            "precision": 0.0010438301194707345,
+            "recall": 0.003762557077625628,
+            "f1": 0.0032430976060876526,
+            "iou": 0.003945200759867706,
+            "static_preservation": 2.6236568334558896e-05
+          }
+        },
+        "f1_regression_scenes": [],
+        "static_regression_scenes": []
+      }
+    }
+  },
+  "limitations": "Three new AV2 val logs selected without content screening; not an official held-out test split or sparse-sensor validation. Moving annotation-box GT is not per-point motion. Offline maps include future points. Visibility support is an angular-bin approximation and reuses range evidence. Zero-GT scenes remain included with the benchmark's zero precision/recall/F1 convention. No production defaults changed; per-scene regressions are reported without a promotion claim."
+}

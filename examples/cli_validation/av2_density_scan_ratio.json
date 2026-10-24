@@ -1,0 +1,7941 @@
+{
+  "plan_sha256": "c4304dfb1b2c7db7fc2031d6e61d8f37e40029567b3ec54b6749f05a3eebc95a",
+  "plan": {
+    "schema_version": 1,
+    "fingerprints": {
+      "density_results": "50e8efe6afc7f427bea4d3abe73710e3107a71f3e996d13193b11783c27569e5",
+      "frozen_results": "dd3b8060e1bf40960c747b589345597b9aa9b57c8fd3fad2eccee0e72444e249",
+      "code": {
+        "scripts/diagnose_av2_density_scan_ratio.py": "d97692fc8bf3c3d0fb87ef16d010ed919b18dccb13b52d9be188cb8535e5ede1",
+        "dynamic_object_removal.py": "e4c668b9ea721b45c89930d06ad52266d06ee420fcc09893603aed818d0b62ad",
+        "scripts/experiment_av2_laser_density.py": "6b7e50523a34b4df1d8fe3ce795905d798c3602487c0e6d6608d5f22a07f066f",
+        "scripts/validate_frozen_av2_suite.py": "46050bb23abf11412709003c6d1d3e3b6af7262d1e0c02bcd6637607af60f993",
+        "scripts/validate_frozen_nuscenes_suite.py": "909174890fb8f4d29823ceba112fc5ff6e79ed8b7176c7916bdf46e677ec4e13"
+      }
+    },
+    "scope": "All three previously examined AV2 scenes and all six thinned phases; no tuning or scene/phase exclusion.",
+    "method": "GT-free scan-ratio stage replay; compare identical source rows. GT is used only for post-replay grouping.",
+    "states": [
+      "outside_polar_domain",
+      "empty_query_column",
+      "map_height_too_small",
+      "height_ratio_too_large",
+      "ground_reverted",
+      "dynamic_vote"
+    ],
+    "limitations": "Descriptive stage transitions, not an intervention separating map and query thinning. No new generalization or physical-sensor claim."
+  },
+  "records": [
+    {
+      "scene": "070bbf42-31d3-3aa9-aca4-c262afc9077d",
+      "variant": {
+        "name": "mod2_0",
+        "modulus": 2,
+        "remainder": 0,
+        "nominal_ids": 32
+      },
+      "groups": {
+        "all_retained": {
+          "points": 604838,
+          "point_scan_opportunities": 7258056,
+          "stage_transition_dense_to_sparse": [
+            [
+              235757,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              315887,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              93895,
+              498920,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              10905,
+              9120,
+              5534593,
+              58069,
+              74754
+            ],
+            [
+              0,
+              60173,
+              40542,
+              2393,
+              170345,
+              904
+            ],
+            [
+              0,
+              43941,
+              77,
+              3440,
+              3275,
+              101066
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 43941,
+            "map_height_too_small": 77,
+            "height_ratio_too_large": 3440,
+            "ground_reverted": 3275,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 74754,
+            "ground_reverted": 904,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 50733,
+          "gained_votes": 75658,
+          "dense_votes": 151799,
+          "sparse_votes": 176724,
+          "threshold_lowered_points": 64552,
+          "dense_threshold_sum": 3442776,
+          "sparse_threshold_sum": 3351629
+        },
+        "moving_lost_removal": {
+          "points": 434,
+          "point_scan_opportunities": 5208,
+          "stage_transition_dense_to_sparse": [
+            [
+              82,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              895,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              2,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              13,
+              4,
+              1356,
+              68,
+              110
+            ],
+            [
+              0,
+              63,
+              0,
+              0,
+              66,
+              2
+            ],
+            [
+              0,
+              1112,
+              1,
+              0,
+              527,
+              907
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 1112,
+            "map_height_too_small": 1,
+            "height_ratio_too_large": 0,
+            "ground_reverted": 527,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 110,
+            "ground_reverted": 2,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 1640,
+          "gained_votes": 112,
+          "dense_votes": 2547,
+          "sparse_votes": 1019,
+          "threshold_lowered_points": 348,
+          "dense_threshold_sum": 2215,
+          "sparse_threshold_sum": 1699
+        },
+        "moving_gained_removal": {
+          "points": 356,
+          "point_scan_opportunities": 4272,
+          "stage_transition_dense_to_sparse": [
+            [
+              120,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              642,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              4,
+              3,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              34,
+              0,
+              1119,
+              24,
+              755
+            ],
+            [
+              0,
+              60,
+              0,
+              0,
+              48,
+              87
+            ],
+            [
+              0,
+              459,
+              0,
+              0,
+              2,
+              915
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 459,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 0,
+            "ground_reverted": 2,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 755,
+            "ground_reverted": 87,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 461,
+          "gained_votes": 842,
+          "dense_votes": 1376,
+          "sparse_votes": 1757,
+          "threshold_lowered_points": 275,
+          "dense_threshold_sum": 1873,
+          "sparse_threshold_sum": 1554
+        },
+        "static_added_removal": {
+          "points": 1413,
+          "point_scan_opportunities": 16956,
+          "stage_transition_dense_to_sparse": [
+            [
+              1345,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1635,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              96,
+              0,
+              5547,
+              66,
+              3942
+            ],
+            [
+              0,
+              36,
+              0,
+              1,
+              23,
+              28
+            ],
+            [
+              0,
+              830,
+              0,
+              22,
+              5,
+              3380
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 830,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 22,
+            "ground_reverted": 5,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 3942,
+            "ground_reverted": 28,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 857,
+          "gained_votes": 3970,
+          "dense_votes": 4237,
+          "sparse_votes": 7350,
+          "threshold_lowered_points": 447,
+          "dense_threshold_sum": 7236,
+          "sparse_threshold_sum": 6762
+        },
+        "static_recovered": {
+          "points": 254,
+          "point_scan_opportunities": 3048,
+          "stage_transition_dense_to_sparse": [
+            [
+              84,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              835,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              32,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              5,
+              13,
+              661,
+              100,
+              27
+            ],
+            [
+              0,
+              19,
+              0,
+              3,
+              21,
+              20
+            ],
+            [
+              0,
+              466,
+              3,
+              42,
+              180,
+              537
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 466,
+            "map_height_too_small": 3,
+            "height_ratio_too_large": 42,
+            "ground_reverted": 180,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 27,
+            "ground_reverted": 20,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 691,
+          "gained_votes": 47,
+          "dense_votes": 1228,
+          "sparse_votes": 584,
+          "threshold_lowered_points": 117,
+          "dense_threshold_sum": 1142,
+          "sparse_threshold_sum": 993
+        }
+      }
+    },
+    {
+      "scene": "070bbf42-31d3-3aa9-aca4-c262afc9077d",
+      "variant": {
+        "name": "mod2_1",
+        "modulus": 2,
+        "remainder": 1,
+        "nominal_ids": 32
+      },
+      "groups": {
+        "all_retained": {
+          "points": 583079,
+          "point_scan_opportunities": 6996948,
+          "stage_transition_dense_to_sparse": [
+            [
+              212451,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              326429,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              122684,
+              630610,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              10644,
+              3751,
+              5033219,
+              48149,
+              61985
+            ],
+            [
+              0,
+              63479,
+              31677,
+              3477,
+              301102,
+              663
+            ],
+            [
+              0,
+              29417,
+              128,
+              2935,
+              3007,
+              111141
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 29417,
+            "map_height_too_small": 128,
+            "height_ratio_too_large": 2935,
+            "ground_reverted": 3007,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 61985,
+            "ground_reverted": 663,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 35487,
+          "gained_votes": 62648,
+          "dense_votes": 146628,
+          "sparse_votes": 173789,
+          "threshold_lowered_points": 71011,
+          "dense_threshold_sum": 3321221,
+          "sparse_threshold_sum": 3225502
+        },
+        "moving_lost_removal": {
+          "points": 1126,
+          "point_scan_opportunities": 13512,
+          "stage_transition_dense_to_sparse": [
+            [
+              879,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1975,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              7,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              17,
+              0,
+              3817,
+              74,
+              149
+            ],
+            [
+              0,
+              12,
+              0,
+              0,
+              10,
+              3
+            ],
+            [
+              0,
+              4089,
+              1,
+              10,
+              291,
+              2178
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 4089,
+            "map_height_too_small": 1,
+            "height_ratio_too_large": 10,
+            "ground_reverted": 291,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 149,
+            "ground_reverted": 3,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 4391,
+          "gained_votes": 152,
+          "dense_votes": 6569,
+          "sparse_votes": 2330,
+          "threshold_lowered_points": 895,
+          "dense_threshold_sum": 5564,
+          "sparse_threshold_sum": 4139
+        },
+        "moving_gained_removal": {
+          "points": 240,
+          "point_scan_opportunities": 2880,
+          "stage_transition_dense_to_sparse": [
+            [
+              31,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              334,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              17,
+              0,
+              705,
+              0,
+              738
+            ],
+            [
+              0,
+              4,
+              0,
+              0,
+              5,
+              14
+            ],
+            [
+              0,
+              99,
+              0,
+              24,
+              0,
+              909
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 99,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 24,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 738,
+            "ground_reverted": 14,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 123,
+          "gained_votes": 752,
+          "dense_votes": 1032,
+          "sparse_votes": 1661,
+          "threshold_lowered_points": 84,
+          "dense_threshold_sum": 1318,
+          "sparse_threshold_sum": 1232
+        },
+        "static_added_removal": {
+          "points": 746,
+          "point_scan_opportunities": 8952,
+          "stage_transition_dense_to_sparse": [
+            [
+              482,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1027,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              166,
+              7,
+              2728,
+              38,
+              2429
+            ],
+            [
+              0,
+              23,
+              4,
+              0,
+              29,
+              29
+            ],
+            [
+              0,
+              416,
+              1,
+              34,
+              5,
+              1534
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 416,
+            "map_height_too_small": 1,
+            "height_ratio_too_large": 34,
+            "ground_reverted": 5,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 2429,
+            "ground_reverted": 29,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 456,
+          "gained_votes": 2458,
+          "dense_votes": 1990,
+          "sparse_votes": 3992,
+          "threshold_lowered_points": 226,
+          "dense_threshold_sum": 3846,
+          "sparse_threshold_sum": 3553
+        },
+        "static_recovered": {
+          "points": 336,
+          "point_scan_opportunities": 4032,
+          "stage_transition_dense_to_sparse": [
+            [
+              39,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1027,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              6,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              6,
+              0,
+              1179,
+              37,
+              41
+            ],
+            [
+              0,
+              6,
+              1,
+              0,
+              35,
+              1
+            ],
+            [
+              0,
+              352,
+              9,
+              212,
+              129,
+              952
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 352,
+            "map_height_too_small": 9,
+            "height_ratio_too_large": 212,
+            "ground_reverted": 129,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 41,
+            "ground_reverted": 1,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 702,
+          "gained_votes": 42,
+          "dense_votes": 1654,
+          "sparse_votes": 994,
+          "threshold_lowered_points": 71,
+          "dense_threshold_sum": 1563,
+          "sparse_threshold_sum": 1461
+        }
+      }
+    },
+    {
+      "scene": "070bbf42-31d3-3aa9-aca4-c262afc9077d",
+      "variant": {
+        "name": "mod4_0",
+        "modulus": 4,
+        "remainder": 0,
+        "nominal_ids": 16
+      },
+      "groups": {
+        "all_retained": {
+          "points": 300066,
+          "point_scan_opportunities": 3600792,
+          "stage_transition_dense_to_sparse": [
+            [
+              109450,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              152913,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              145682,
+              238419,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              26777,
+              8361,
+              2517091,
+              60043,
+              79427
+            ],
+            [
+              0,
+              70505,
+              38146,
+              576,
+              79765,
+              388
+            ],
+            [
+              0,
+              32404,
+              406,
+              939,
+              1804,
+              37696
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 32404,
+            "map_height_too_small": 406,
+            "height_ratio_too_large": 939,
+            "ground_reverted": 1804,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 79427,
+            "ground_reverted": 388,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 35553,
+          "gained_votes": 79815,
+          "dense_votes": 73249,
+          "sparse_votes": 117511,
+          "threshold_lowered_points": 68382,
+          "dense_threshold_sum": 1713206,
+          "sparse_threshold_sum": 1593278
+        },
+        "moving_lost_removal": {
+          "points": 562,
+          "point_scan_opportunities": 6744,
+          "stage_transition_dense_to_sparse": [
+            [
+              291,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              912,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              209,
+              113,
+              1125,
+              134,
+              180
+            ],
+            [
+              0,
+              40,
+              0,
+              0,
+              17,
+              0
+            ],
+            [
+              0,
+              2610,
+              242,
+              0,
+              228,
+              643
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 2610,
+            "map_height_too_small": 242,
+            "height_ratio_too_large": 0,
+            "ground_reverted": 228,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 180,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 3080,
+          "gained_votes": 180,
+          "dense_votes": 3723,
+          "sparse_votes": 823,
+          "threshold_lowered_points": 532,
+          "dense_threshold_sum": 2910,
+          "sparse_threshold_sum": 1848
+        },
+        "moving_gained_removal": {
+          "points": 209,
+          "point_scan_opportunities": 2508,
+          "stage_transition_dense_to_sparse": [
+            [
+              3,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              606,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              144,
+              0,
+              387,
+              15,
+              566
+            ],
+            [
+              0,
+              23,
+              0,
+              0,
+              0,
+              2
+            ],
+            [
+              0,
+              359,
+              0,
+              0,
+              0,
+              402
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 359,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 0,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 566,
+            "ground_reverted": 2,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 359,
+          "gained_votes": 568,
+          "dense_votes": 761,
+          "sparse_votes": 970,
+          "threshold_lowered_points": 149,
+          "dense_threshold_sum": 1008,
+          "sparse_threshold_sum": 734
+        },
+        "static_added_removal": {
+          "points": 3322,
+          "point_scan_opportunities": 39864,
+          "stage_transition_dense_to_sparse": [
+            [
+              8133,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              2938,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              846,
+              8,
+              9177,
+              225,
+              14062
+            ],
+            [
+              0,
+              21,
+              1,
+              0,
+              54,
+              72
+            ],
+            [
+              0,
+              1440,
+              3,
+              13,
+              87,
+              2784
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 1440,
+            "map_height_too_small": 3,
+            "height_ratio_too_large": 13,
+            "ground_reverted": 87,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 14062,
+            "ground_reverted": 72,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 1543,
+          "gained_votes": 14134,
+          "dense_votes": 4327,
+          "sparse_votes": 16918,
+          "threshold_lowered_points": 848,
+          "dense_threshold_sum": 15575,
+          "sparse_threshold_sum": 14563
+        },
+        "static_recovered": {
+          "points": 120,
+          "point_scan_opportunities": 1440,
+          "stage_transition_dense_to_sparse": [
+            [
+              39,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              416,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              7,
+              2,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              49,
+              7,
+              248,
+              51,
+              27
+            ],
+            [
+              0,
+              11,
+              0,
+              3,
+              20,
+              1
+            ],
+            [
+              0,
+              295,
+              3,
+              10,
+              117,
+              134
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 295,
+            "map_height_too_small": 3,
+            "height_ratio_too_large": 10,
+            "ground_reverted": 117,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 27,
+            "ground_reverted": 1,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 425,
+          "gained_votes": 28,
+          "dense_votes": 559,
+          "sparse_votes": 162,
+          "threshold_lowered_points": 74,
+          "dense_threshold_sum": 522,
+          "sparse_threshold_sum": 413
+        }
+      }
+    },
+    {
+      "scene": "070bbf42-31d3-3aa9-aca4-c262afc9077d",
+      "variant": {
+        "name": "mod4_1",
+        "modulus": 4,
+        "remainder": 1,
+        "nominal_ids": 16
+      },
+      "groups": {
+        "all_retained": {
+          "points": 293984,
+          "point_scan_opportunities": 3527808,
+          "stage_transition_dense_to_sparse": [
+            [
+              110649,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              165489,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              166061,
+              215763,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              42023,
+              10254,
+              2364686,
+              67606,
+              98783
+            ],
+            [
+              0,
+              84457,
+              50739,
+              2171,
+              75755,
+              371
+            ],
+            [
+              0,
+              35144,
+              291,
+              2500,
+              3495,
+              31571
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 35144,
+            "map_height_too_small": 291,
+            "height_ratio_too_large": 2500,
+            "ground_reverted": 3495,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 98783,
+            "ground_reverted": 371,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 41430,
+          "gained_votes": 99154,
+          "dense_votes": 73001,
+          "sparse_votes": 130725,
+          "threshold_lowered_points": 74901,
+          "dense_threshold_sum": 1673077,
+          "sparse_threshold_sum": 1530975
+        },
+        "moving_lost_removal": {
+          "points": 1641,
+          "point_scan_opportunities": 19692,
+          "stage_transition_dense_to_sparse": [
+            [
+              621,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              2082,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              5,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              333,
+              194,
+              3981,
+              378,
+              597
+            ],
+            [
+              0,
+              32,
+              0,
+              0,
+              11,
+              0
+            ],
+            [
+              0,
+              10752,
+              57,
+              0,
+              110,
+              538
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 10752,
+            "map_height_too_small": 57,
+            "height_ratio_too_large": 0,
+            "ground_reverted": 110,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 597,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 10919,
+          "gained_votes": 597,
+          "dense_votes": 11457,
+          "sparse_votes": 1135,
+          "threshold_lowered_points": 1534,
+          "dense_threshold_sum": 8775,
+          "sparse_threshold_sum": 4983
+        },
+        "moving_gained_removal": {
+          "points": 99,
+          "point_scan_opportunities": 1188,
+          "stage_transition_dense_to_sparse": [
+            [
+              12,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              152,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              148,
+              9,
+              203,
+              18,
+              222
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              212,
+              0,
+              0,
+              2,
+              210
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 212,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 0,
+            "ground_reverted": 2,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 222,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 214,
+          "gained_votes": 222,
+          "dense_votes": 424,
+          "sparse_votes": 432,
+          "threshold_lowered_points": 82,
+          "dense_threshold_sum": 531,
+          "sparse_threshold_sum": 353
+        },
+        "static_added_removal": {
+          "points": 4905,
+          "point_scan_opportunities": 58860,
+          "stage_transition_dense_to_sparse": [
+            [
+              975,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              2126,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              3100,
+              81,
+              19730,
+              437,
+              27538
+            ],
+            [
+              0,
+              54,
+              5,
+              3,
+              29,
+              75
+            ],
+            [
+              0,
+              1212,
+              18,
+              201,
+              97,
+              3178
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 1212,
+            "map_height_too_small": 18,
+            "height_ratio_too_large": 201,
+            "ground_reverted": 97,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 27538,
+            "ground_reverted": 75,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 1528,
+          "gained_votes": 27613,
+          "dense_votes": 4706,
+          "sparse_votes": 30791,
+          "threshold_lowered_points": 1553,
+          "dense_threshold_sum": 28265,
+          "sparse_threshold_sum": 26428
+        },
+        "static_recovered": {
+          "points": 241,
+          "point_scan_opportunities": 2892,
+          "stage_transition_dense_to_sparse": [
+            [
+              53,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              717,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              15,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              100,
+              3,
+              542,
+              91,
+              78
+            ],
+            [
+              0,
+              10,
+              1,
+              0,
+              15,
+              0
+            ],
+            [
+              0,
+              634,
+              14,
+              54,
+              203,
+              361
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 634,
+            "map_height_too_small": 14,
+            "height_ratio_too_large": 54,
+            "ground_reverted": 203,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 78,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 905,
+          "gained_votes": 78,
+          "dense_votes": 1266,
+          "sparse_votes": 439,
+          "threshold_lowered_points": 110,
+          "dense_threshold_sum": 1124,
+          "sparse_threshold_sum": 904
+        }
+      }
+    },
+    {
+      "scene": "070bbf42-31d3-3aa9-aca4-c262afc9077d",
+      "variant": {
+        "name": "mod4_2",
+        "modulus": 4,
+        "remainder": 2,
+        "nominal_ids": 16
+      },
+      "groups": {
+        "all_retained": {
+          "points": 304772,
+          "point_scan_opportunities": 3657264,
+          "stage_transition_dense_to_sparse": [
+            [
+              126307,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              162974,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              65159,
+              143555,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              26763,
+              10394,
+              2826017,
+              46268,
+              86300
+            ],
+            [
+              0,
+              37322,
+              8338,
+              3772,
+              35234,
+              311
+            ],
+            [
+              0,
+              42799,
+              139,
+              8785,
+              2350,
+              24477
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 42799,
+            "map_height_too_small": 139,
+            "height_ratio_too_large": 8785,
+            "ground_reverted": 2350,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 86300,
+            "ground_reverted": 311,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 54073,
+          "gained_votes": 86611,
+          "dense_votes": 78550,
+          "sparse_votes": 111088,
+          "threshold_lowered_points": 39882,
+          "dense_threshold_sum": 1729570,
+          "sparse_threshold_sum": 1663415
+        },
+        "moving_lost_removal": {
+          "points": 1550,
+          "point_scan_opportunities": 18600,
+          "stage_transition_dense_to_sparse": [
+            [
+              26,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1954,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              646,
+              205,
+              3270,
+              382,
+              856
+            ],
+            [
+              0,
+              80,
+              0,
+              1,
+              48,
+              1
+            ],
+            [
+              0,
+              9070,
+              2,
+              308,
+              756,
+              994
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 9070,
+            "map_height_too_small": 2,
+            "height_ratio_too_large": 308,
+            "ground_reverted": 756,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 856,
+            "ground_reverted": 1,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 10136,
+          "gained_votes": 857,
+          "dense_votes": 11130,
+          "sparse_votes": 1851,
+          "threshold_lowered_points": 1496,
+          "dense_threshold_sum": 8654,
+          "sparse_threshold_sum": 4997
+        },
+        "moving_gained_removal": {
+          "points": 144,
+          "point_scan_opportunities": 1728,
+          "stage_transition_dense_to_sparse": [
+            [
+              24,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              285,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              75,
+              0,
+              412,
+              20,
+              284
+            ],
+            [
+              0,
+              6,
+              0,
+              0,
+              17,
+              17
+            ],
+            [
+              0,
+              350,
+              0,
+              0,
+              2,
+              236
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 350,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 0,
+            "ground_reverted": 2,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 284,
+            "ground_reverted": 17,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 352,
+          "gained_votes": 301,
+          "dense_votes": 588,
+          "sparse_votes": 537,
+          "threshold_lowered_points": 136,
+          "dense_threshold_sum": 762,
+          "sparse_threshold_sum": 519
+        },
+        "static_added_removal": {
+          "points": 2734,
+          "point_scan_opportunities": 32808,
+          "stage_transition_dense_to_sparse": [
+            [
+              5992,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1405,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1560,
+              5,
+              8939,
+              246,
+              12206
+            ],
+            [
+              0,
+              33,
+              1,
+              0,
+              2,
+              23
+            ],
+            [
+              0,
+              1106,
+              5,
+              38,
+              27,
+              1220
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 1106,
+            "map_height_too_small": 5,
+            "height_ratio_too_large": 38,
+            "ground_reverted": 27,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 12206,
+            "ground_reverted": 23,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 1176,
+          "gained_votes": 12229,
+          "dense_votes": 2396,
+          "sparse_votes": 13449,
+          "threshold_lowered_points": 663,
+          "dense_threshold_sum": 13359,
+          "sparse_threshold_sum": 12429
+        },
+        "static_recovered": {
+          "points": 242,
+          "point_scan_opportunities": 2904,
+          "stage_transition_dense_to_sparse": [
+            [
+              70,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              693,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              27,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              40,
+              89,
+              515,
+              17,
+              92
+            ],
+            [
+              0,
+              20,
+              17,
+              4,
+              3,
+              1
+            ],
+            [
+              0,
+              704,
+              30,
+              274,
+              43,
+              265
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 704,
+            "map_height_too_small": 30,
+            "height_ratio_too_large": 274,
+            "ground_reverted": 43,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 92,
+            "ground_reverted": 1,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 1051,
+          "gained_votes": 93,
+          "dense_votes": 1316,
+          "sparse_votes": 358,
+          "threshold_lowered_points": 145,
+          "dense_threshold_sum": 1151,
+          "sparse_threshold_sum": 871
+        }
+      }
+    },
+    {
+      "scene": "070bbf42-31d3-3aa9-aca4-c262afc9077d",
+      "variant": {
+        "name": "mod4_3",
+        "modulus": 4,
+        "remainder": 3,
+        "nominal_ids": 16
+      },
+      "groups": {
+        "all_retained": {
+          "points": 289095,
+          "point_scan_opportunities": 3469140,
+          "stage_transition_dense_to_sparse": [
+            [
+              101802,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              160940,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              163198,
+              208272,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              24215,
+              3860,
+              2420983,
+              54738,
+              70600
+            ],
+            [
+              0,
+              82129,
+              17009,
+              853,
+              86758,
+              156
+            ],
+            [
+              0,
+              31608,
+              257,
+              1940,
+              2387,
+              37435
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 31608,
+            "map_height_too_small": 257,
+            "height_ratio_too_large": 1940,
+            "ground_reverted": 2387,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 70600,
+            "ground_reverted": 156,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 36192,
+          "gained_votes": 70756,
+          "dense_votes": 73627,
+          "sparse_votes": 108191,
+          "threshold_lowered_points": 68092,
+          "dense_threshold_sum": 1648144,
+          "sparse_threshold_sum": 1517135
+        },
+        "moving_lost_removal": {
+          "points": 592,
+          "point_scan_opportunities": 7104,
+          "stage_transition_dense_to_sparse": [
+            [
+              256,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1076,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              3,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              78,
+              2,
+              1556,
+              76,
+              224
+            ],
+            [
+              0,
+              10,
+              0,
+              0,
+              6,
+              0
+            ],
+            [
+              0,
+              2938,
+              5,
+              0,
+              214,
+              660
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 2938,
+            "map_height_too_small": 5,
+            "height_ratio_too_large": 0,
+            "ground_reverted": 214,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 224,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 3157,
+          "gained_votes": 224,
+          "dense_votes": 3817,
+          "sparse_votes": 884,
+          "threshold_lowered_points": 556,
+          "dense_threshold_sum": 3016,
+          "sparse_threshold_sum": 1881
+        },
+        "moving_gained_removal": {
+          "points": 211,
+          "point_scan_opportunities": 2532,
+          "stage_transition_dense_to_sparse": [
+            [
+              48,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              453,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              138,
+              0,
+              437,
+              4,
+              580
+            ],
+            [
+              0,
+              14,
+              0,
+              0,
+              11,
+              26
+            ],
+            [
+              0,
+              326,
+              0,
+              0,
+              2,
+              492
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 326,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 0,
+            "ground_reverted": 2,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 580,
+            "ground_reverted": 26,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 328,
+          "gained_votes": 606,
+          "dense_votes": 820,
+          "sparse_votes": 1098,
+          "threshold_lowered_points": 171,
+          "dense_threshold_sum": 1081,
+          "sparse_threshold_sum": 837
+        },
+        "static_added_removal": {
+          "points": 2883,
+          "point_scan_opportunities": 34596,
+          "stage_transition_dense_to_sparse": [
+            [
+              5158,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              3069,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              6,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1225,
+              41,
+              7469,
+              385,
+              13086
+            ],
+            [
+              0,
+              70,
+              1,
+              0,
+              59,
+              8
+            ],
+            [
+              0,
+              1532,
+              1,
+              131,
+              49,
+              2306
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 1532,
+            "map_height_too_small": 1,
+            "height_ratio_too_large": 131,
+            "ground_reverted": 49,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 13086,
+            "ground_reverted": 8,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 1713,
+          "gained_votes": 13094,
+          "dense_votes": 4019,
+          "sparse_votes": 15400,
+          "threshold_lowered_points": 1000,
+          "dense_threshold_sum": 14131,
+          "sparse_threshold_sum": 12938
+        },
+        "static_recovered": {
+          "points": 161,
+          "point_scan_opportunities": 1932,
+          "stage_transition_dense_to_sparse": [
+            [
+              15,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              553,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              4,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              63,
+              32,
+              306,
+              48,
+              47
+            ],
+            [
+              0,
+              6,
+              9,
+              1,
+              3,
+              0
+            ],
+            [
+              0,
+              542,
+              39,
+              39,
+              100,
+              125
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 542,
+            "map_height_too_small": 39,
+            "height_ratio_too_large": 39,
+            "ground_reverted": 100,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 47,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 720,
+          "gained_votes": 47,
+          "dense_votes": 845,
+          "sparse_votes": 172,
+          "threshold_lowered_points": 112,
+          "dense_threshold_sum": 729,
+          "sparse_threshold_sum": 526
+        }
+      }
+    },
+    {
+      "scene": "0aa4e8f5-2f9a-39a1-8f80-c2fdde4405a2",
+      "variant": {
+        "name": "mod2_0",
+        "modulus": 2,
+        "remainder": 0,
+        "nominal_ids": 32
+      },
+      "groups": {
+        "all_retained": {
+          "points": 623503,
+          "point_scan_opportunities": 7482036,
+          "stage_transition_dense_to_sparse": [
+            [
+              100976,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              17472,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1685,
+              219397,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1171,
+              50972,
+              6833228,
+              30955,
+              10871
+            ],
+            [
+              0,
+              5288,
+              10466,
+              2389,
+              105483,
+              364
+            ],
+            [
+              0,
+              31695,
+              523,
+              895,
+              1598,
+              56608
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 31695,
+            "map_height_too_small": 523,
+            "height_ratio_too_large": 895,
+            "ground_reverted": 1598,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 10871,
+            "ground_reverted": 364,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 34711,
+          "gained_votes": 11235,
+          "dense_votes": 91319,
+          "sparse_votes": 67843,
+          "threshold_lowered_points": 5739,
+          "dense_threshold_sum": 3710968,
+          "sparse_threshold_sum": 3697772
+        },
+        "moving_lost_removal": {
+          "points": 2880,
+          "point_scan_opportunities": 34560,
+          "stage_transition_dense_to_sparse": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              235,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              178,
+              23,
+              5504,
+              38,
+              3
+            ],
+            [
+              0,
+              10,
+              0,
+              0,
+              21,
+              0
+            ],
+            [
+              0,
+              27437,
+              6,
+              0,
+              1052,
+              53
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 27437,
+            "map_height_too_small": 6,
+            "height_ratio_too_large": 0,
+            "ground_reverted": 1052,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 3,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 28495,
+          "gained_votes": 3,
+          "dense_votes": 28548,
+          "sparse_votes": 56,
+          "threshold_lowered_points": 2775,
+          "dense_threshold_sum": 17214,
+          "sparse_threshold_sum": 8959
+        },
+        "moving_gained_removal": {
+          "points": 399,
+          "point_scan_opportunities": 4788,
+          "stage_transition_dense_to_sparse": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              891,
+              10,
+              3161
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              167
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              3,
+              556
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 0,
+            "ground_reverted": 3,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 3161,
+            "ground_reverted": 167,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 3,
+          "gained_votes": 3328,
+          "dense_votes": 559,
+          "sparse_votes": 3884,
+          "threshold_lowered_points": 0,
+          "dense_threshold_sum": 2394,
+          "sparse_threshold_sum": 2394
+        },
+        "static_added_removal": {
+          "points": 441,
+          "point_scan_opportunities": 5292,
+          "stage_transition_dense_to_sparse": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              20,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              21,
+              73,
+              1525,
+              2,
+              3353
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              56
+            ],
+            [
+              0,
+              14,
+              0,
+              0,
+              0,
+              228
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 14,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 0,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 3353,
+            "ground_reverted": 56,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 14,
+          "gained_votes": 3409,
+          "dense_votes": 242,
+          "sparse_votes": 3637,
+          "threshold_lowered_points": 14,
+          "dense_threshold_sum": 2640,
+          "sparse_threshold_sum": 2624
+        },
+        "static_recovered": {
+          "points": 131,
+          "point_scan_opportunities": 1572,
+          "stage_transition_dense_to_sparse": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              8,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              12,
+              21,
+              290,
+              1,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              415,
+              31,
+              777,
+              16,
+              1
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 415,
+            "map_height_too_small": 31,
+            "height_ratio_too_large": 777,
+            "ground_reverted": 16,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 0,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 1239,
+          "gained_votes": 0,
+          "dense_votes": 1240,
+          "sparse_votes": 1,
+          "threshold_lowered_points": 42,
+          "dense_threshold_sum": 783,
+          "sparse_threshold_sum": 657
+        }
+      }
+    },
+    {
+      "scene": "0aa4e8f5-2f9a-39a1-8f80-c2fdde4405a2",
+      "variant": {
+        "name": "mod2_1",
+        "modulus": 2,
+        "remainder": 1,
+        "nominal_ids": 32
+      },
+      "groups": {
+        "all_retained": {
+          "points": 612130,
+          "point_scan_opportunities": 7345560,
+          "stage_transition_dense_to_sparse": [
+            [
+              94229,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              16495,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              874,
+              410393,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1224,
+              12425,
+              6459399,
+              20090,
+              5264
+            ],
+            [
+              0,
+              2117,
+              12553,
+              38,
+              250978,
+              646
+            ],
+            [
+              0,
+              4222,
+              590,
+              846,
+              1376,
+              51801
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 4222,
+            "map_height_too_small": 590,
+            "height_ratio_too_large": 846,
+            "ground_reverted": 1376,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 5264,
+            "ground_reverted": 646,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 7034,
+          "gained_votes": 5910,
+          "dense_votes": 58835,
+          "sparse_votes": 57711,
+          "threshold_lowered_points": 1684,
+          "dense_threshold_sum": 3645515,
+          "sparse_threshold_sum": 3642684
+        },
+        "moving_lost_removal": {
+          "points": 388,
+          "point_scan_opportunities": 4656,
+          "stage_transition_dense_to_sparse": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              176,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              60,
+              8,
+              885,
+              97,
+              86
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              5,
+              0
+            ],
+            [
+              0,
+              2768,
+              3,
+              0,
+              552,
+              16
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 2768,
+            "map_height_too_small": 3,
+            "height_ratio_too_large": 0,
+            "ground_reverted": 552,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 86,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 3323,
+          "gained_votes": 86,
+          "dense_votes": 3339,
+          "sparse_votes": 102,
+          "threshold_lowered_points": 334,
+          "dense_threshold_sum": 2252,
+          "sparse_threshold_sum": 1330
+        },
+        "moving_gained_removal": {
+          "points": 47,
+          "point_scan_opportunities": 564,
+          "stage_transition_dense_to_sparse": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              58,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              8,
+              0,
+              145,
+              0,
+              57
+            ],
+            [
+              0,
+              14,
+              0,
+              0,
+              1,
+              213
+            ],
+            [
+              0,
+              16,
+              0,
+              0,
+              0,
+              52
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 16,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 0,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 57,
+            "ground_reverted": 213,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 16,
+          "gained_votes": 270,
+          "dense_votes": 68,
+          "sparse_votes": 322,
+          "threshold_lowered_points": 11,
+          "dense_threshold_sum": 263,
+          "sparse_threshold_sum": 244
+        },
+        "static_added_removal": {
+          "points": 362,
+          "point_scan_opportunities": 4344,
+          "stage_transition_dense_to_sparse": [
+            [
+              3,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              4,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              2,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              21,
+              0,
+              1566,
+              0,
+              2371
+            ],
+            [
+              0,
+              2,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              109,
+              2,
+              0,
+              0,
+              264
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 109,
+            "map_height_too_small": 2,
+            "height_ratio_too_large": 0,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 2371,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 111,
+          "gained_votes": 2371,
+          "dense_votes": 375,
+          "sparse_votes": 2635,
+          "threshold_lowered_points": 10,
+          "dense_threshold_sum": 2172,
+          "sparse_threshold_sum": 2146
+        },
+        "static_recovered": {
+          "points": 190,
+          "point_scan_opportunities": 2280,
+          "stage_transition_dense_to_sparse": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              107,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              39,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              7,
+              90,
+              187,
+              21,
+              11
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              380,
+              268,
+              441,
+              668,
+              61
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 380,
+            "map_height_too_small": 268,
+            "height_ratio_too_large": 441,
+            "ground_reverted": 668,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 11,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 1757,
+          "gained_votes": 11,
+          "dense_votes": 1818,
+          "sparse_votes": 72,
+          "threshold_lowered_points": 58,
+          "dense_threshold_sum": 1103,
+          "sparse_threshold_sum": 993
+        }
+      }
+    },
+    {
+      "scene": "0aa4e8f5-2f9a-39a1-8f80-c2fdde4405a2",
+      "variant": {
+        "name": "mod4_0",
+        "modulus": 4,
+        "remainder": 0,
+        "nominal_ids": 16
+      },
+      "groups": {
+        "all_retained": {
+          "points": 310360,
+          "point_scan_opportunities": 3724320,
+          "stage_transition_dense_to_sparse": [
+            [
+              44506,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              10140,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              2093,
+              158605,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              3306,
+              52790,
+              3269124,
+              29409,
+              10659
+            ],
+            [
+              0,
+              4898,
+              12211,
+              1478,
+              81842,
+              27
+            ],
+            [
+              0,
+              19261,
+              92,
+              166,
+              622,
+              23091
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 19261,
+            "map_height_too_small": 92,
+            "height_ratio_too_large": 166,
+            "ground_reverted": 622,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 10659,
+            "ground_reverted": 27,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 20141,
+          "gained_votes": 10686,
+          "dense_votes": 43232,
+          "sparse_votes": 33777,
+          "threshold_lowered_points": 4438,
+          "dense_threshold_sum": 1848635,
+          "sparse_threshold_sum": 1839184
+        },
+        "moving_lost_removal": {
+          "points": 1643,
+          "point_scan_opportunities": 19716,
+          "stage_transition_dense_to_sparse": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              180,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              132,
+              69,
+              3070,
+              121,
+              117
+            ],
+            [
+              0,
+              5,
+              0,
+              0,
+              19,
+              0
+            ],
+            [
+              0,
+              15765,
+              6,
+              0,
+              223,
+              9
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 15765,
+            "map_height_too_small": 6,
+            "height_ratio_too_large": 0,
+            "ground_reverted": 223,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 117,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 15994,
+          "gained_votes": 117,
+          "dense_votes": 16003,
+          "sparse_votes": 126,
+          "threshold_lowered_points": 1617,
+          "dense_threshold_sum": 9799,
+          "sparse_threshold_sum": 4983
+        },
+        "moving_gained_removal": {
+          "points": 113,
+          "point_scan_opportunities": 1356,
+          "stage_transition_dense_to_sparse": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              262,
+              0,
+              1062
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              32
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 0,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 1062,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 0,
+          "gained_votes": 1062,
+          "dense_votes": 32,
+          "sparse_votes": 1094,
+          "threshold_lowered_points": 0,
+          "dense_threshold_sum": 678,
+          "sparse_threshold_sum": 678
+        },
+        "static_added_removal": {
+          "points": 541,
+          "point_scan_opportunities": 6492,
+          "stage_transition_dense_to_sparse": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              3,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              54,
+              56,
+              1706,
+              0,
+              4452
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              27
+            ],
+            [
+              0,
+              12,
+              0,
+              0,
+              0,
+              182
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 12,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 0,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 4452,
+            "ground_reverted": 27,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 12,
+          "gained_votes": 4479,
+          "dense_votes": 194,
+          "sparse_votes": 4661,
+          "threshold_lowered_points": 16,
+          "dense_threshold_sum": 3245,
+          "sparse_threshold_sum": 3227
+        },
+        "static_recovered": {
+          "points": 78,
+          "point_scan_opportunities": 936,
+          "stage_transition_dense_to_sparse": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              22,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              8,
+              8,
+              117,
+              32,
+              1
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              333,
+              7,
+              165,
+              243,
+              0
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 333,
+            "map_height_too_small": 7,
+            "height_ratio_too_large": 165,
+            "ground_reverted": 243,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 1,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 748,
+          "gained_votes": 1,
+          "dense_votes": 748,
+          "sparse_votes": 1,
+          "threshold_lowered_points": 34,
+          "dense_threshold_sum": 459,
+          "sparse_threshold_sum": 360
+        }
+      }
+    },
+    {
+      "scene": "0aa4e8f5-2f9a-39a1-8f80-c2fdde4405a2",
+      "variant": {
+        "name": "mod4_1",
+        "modulus": 4,
+        "remainder": 1,
+        "nominal_ids": 16
+      },
+      "groups": {
+        "all_retained": {
+          "points": 309130,
+          "point_scan_opportunities": 3709560,
+          "stage_transition_dense_to_sparse": [
+            [
+              48134,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              8410,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1374,
+              151402,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              3367,
+              42842,
+              3239823,
+              17892,
+              9756
+            ],
+            [
+              0,
+              1917,
+              22618,
+              0,
+              137410,
+              381
+            ],
+            [
+              0,
+              4005,
+              505,
+              111,
+              138,
+              19475
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 4005,
+            "map_height_too_small": 505,
+            "height_ratio_too_large": 111,
+            "ground_reverted": 138,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 9756,
+            "ground_reverted": 381,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 4759,
+          "gained_votes": 10137,
+          "dense_votes": 24234,
+          "sparse_votes": 29612,
+          "threshold_lowered_points": 2380,
+          "dense_threshold_sum": 1840838,
+          "sparse_threshold_sum": 1836941
+        },
+        "moving_lost_removal": {
+          "points": 364,
+          "point_scan_opportunities": 4368,
+          "stage_transition_dense_to_sparse": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              173,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              188,
+              166,
+              622,
+              75,
+              84
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              3056,
+              4,
+              0,
+              0,
+              0
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 3056,
+            "map_height_too_small": 4,
+            "height_ratio_too_large": 0,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 84,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 3060,
+          "gained_votes": 84,
+          "dense_votes": 3060,
+          "sparse_votes": 84,
+          "threshold_lowered_points": 364,
+          "dense_threshold_sum": 2144,
+          "sparse_threshold_sum": 1092
+        },
+        "moving_gained_removal": {
+          "points": 145,
+          "point_scan_opportunities": 1740,
+          "stage_transition_dense_to_sparse": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              15,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              34,
+              0,
+              338,
+              0,
+              1046
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              3,
+              193
+            ],
+            [
+              0,
+              4,
+              0,
+              0,
+              0,
+              107
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 4,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 0,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 1046,
+            "ground_reverted": 193,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 4,
+          "gained_votes": 1239,
+          "dense_votes": 111,
+          "sparse_votes": 1346,
+          "threshold_lowered_points": 5,
+          "dense_threshold_sum": 864,
+          "sparse_threshold_sum": 849
+        },
+        "static_added_removal": {
+          "points": 373,
+          "point_scan_opportunities": 4476,
+          "stage_transition_dense_to_sparse": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              7,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              2,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              39,
+              35,
+              659,
+              28,
+              3489
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              166
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              51
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 0,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 3489,
+            "ground_reverted": 166,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 0,
+          "gained_votes": 3655,
+          "dense_votes": 51,
+          "sparse_votes": 3706,
+          "threshold_lowered_points": 6,
+          "dense_threshold_sum": 2235,
+          "sparse_threshold_sum": 2223
+        },
+        "static_recovered": {
+          "points": 29,
+          "point_scan_opportunities": 348,
+          "stage_transition_dense_to_sparse": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              26,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              20,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              8,
+              14,
+              11,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              179,
+              90,
+              0,
+              0,
+              0
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 179,
+            "map_height_too_small": 90,
+            "height_ratio_too_large": 0,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 0,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 269,
+          "gained_votes": 0,
+          "dense_votes": 269,
+          "sparse_votes": 0,
+          "threshold_lowered_points": 19,
+          "dense_threshold_sum": 168,
+          "sparse_threshold_sum": 117
+        }
+      }
+    },
+    {
+      "scene": "0aa4e8f5-2f9a-39a1-8f80-c2fdde4405a2",
+      "variant": {
+        "name": "mod4_2",
+        "modulus": 4,
+        "remainder": 2,
+        "nominal_ids": 16
+      },
+      "groups": {
+        "all_retained": {
+          "points": 313143,
+          "point_scan_opportunities": 3757716,
+          "stage_transition_dense_to_sparse": [
+            [
+              56470,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              7332,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1721,
+              58663,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              4271,
+              69956,
+              3463306,
+              16840,
+              7536
+            ],
+            [
+              0,
+              2595,
+              3242,
+              410,
+              16851,
+              436
+            ],
+            [
+              0,
+              40187,
+              1158,
+              379,
+              339,
+              6024
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 40187,
+            "map_height_too_small": 1158,
+            "height_ratio_too_large": 379,
+            "ground_reverted": 339,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 7536,
+            "ground_reverted": 436,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 42063,
+          "gained_votes": 7972,
+          "dense_votes": 48087,
+          "sparse_votes": 13996,
+          "threshold_lowered_points": 5914,
+          "dense_threshold_sum": 1862333,
+          "sparse_threshold_sum": 1846950
+        },
+        "moving_lost_removal": {
+          "points": 4051,
+          "point_scan_opportunities": 48612,
+          "stage_transition_dense_to_sparse": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              388,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              652,
+              1243,
+              6049,
+              739,
+              439
+            ],
+            [
+              0,
+              11,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              38942,
+              1,
+              0,
+              126,
+              22
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 38942,
+            "map_height_too_small": 1,
+            "height_ratio_too_large": 0,
+            "ground_reverted": 126,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 439,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 39069,
+          "gained_votes": 439,
+          "dense_votes": 39091,
+          "sparse_votes": 461,
+          "threshold_lowered_points": 4031,
+          "dense_threshold_sum": 24267,
+          "sparse_threshold_sum": 12197
+        },
+        "moving_gained_removal": {
+          "points": 188,
+          "point_scan_opportunities": 2256,
+          "stage_transition_dense_to_sparse": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              11,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              200,
+              0,
+              473,
+              0,
+              974
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              35
+            ],
+            [
+              0,
+              105,
+              0,
+              0,
+              1,
+              457
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 105,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 0,
+            "ground_reverted": 1,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 974,
+            "ground_reverted": 35,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 106,
+          "gained_votes": 1009,
+          "dense_votes": 563,
+          "sparse_votes": 1466,
+          "threshold_lowered_points": 50,
+          "dense_threshold_sum": 1128,
+          "sparse_threshold_sum": 978
+        },
+        "static_added_removal": {
+          "points": 312,
+          "point_scan_opportunities": 3744,
+          "stage_transition_dense_to_sparse": [
+            [
+              5,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              181,
+              0,
+              1125,
+              41,
+              2168
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              56
+            ],
+            [
+              0,
+              13,
+              9,
+              0,
+              0,
+              145
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 13,
+            "map_height_too_small": 9,
+            "height_ratio_too_large": 0,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 2168,
+            "ground_reverted": 56,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 22,
+          "gained_votes": 2224,
+          "dense_votes": 167,
+          "sparse_votes": 2369,
+          "threshold_lowered_points": 23,
+          "dense_threshold_sum": 1870,
+          "sparse_threshold_sum": 1828
+        },
+        "static_recovered": {
+          "points": 112,
+          "point_scan_opportunities": 1344,
+          "stage_transition_dense_to_sparse": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              14,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              23,
+              57,
+              172,
+              4,
+              2
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              323,
+              372,
+              369,
+              7,
+              1
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 323,
+            "map_height_too_small": 372,
+            "height_ratio_too_large": 369,
+            "ground_reverted": 7,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 2,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 1071,
+          "gained_votes": 2,
+          "dense_votes": 1072,
+          "sparse_votes": 3,
+          "threshold_lowered_points": 43,
+          "dense_threshold_sum": 672,
+          "sparse_threshold_sum": 561
+        }
+      }
+    },
+    {
+      "scene": "0aa4e8f5-2f9a-39a1-8f80-c2fdde4405a2",
+      "variant": {
+        "name": "mod4_3",
+        "modulus": 4,
+        "remainder": 3,
+        "nominal_ids": 16
+      },
+      "groups": {
+        "all_retained": {
+          "points": 303000,
+          "point_scan_opportunities": 3636000,
+          "stage_transition_dense_to_sparse": [
+            [
+              46095,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              8085,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              818,
+              257673,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              2577,
+              53595,
+              3095464,
+              21359,
+              11727
+            ],
+            [
+              0,
+              3299,
+              13232,
+              703,
+              86596,
+              176
+            ],
+            [
+              0,
+              8639,
+              1089,
+              920,
+              5212,
+              18741
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 8639,
+            "map_height_too_small": 1089,
+            "height_ratio_too_large": 920,
+            "ground_reverted": 5212,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 11727,
+            "ground_reverted": 176,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 15860,
+          "gained_votes": 11903,
+          "dense_votes": 34601,
+          "sparse_votes": 30644,
+          "threshold_lowered_points": 2685,
+          "dense_threshold_sum": 1804677,
+          "sparse_threshold_sum": 1799601
+        },
+        "moving_lost_removal": {
+          "points": 1139,
+          "point_scan_opportunities": 13668,
+          "stage_transition_dense_to_sparse": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              173,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              133,
+              77,
+              2085,
+              170,
+              88
+            ],
+            [
+              0,
+              4,
+              0,
+              0,
+              1,
+              0
+            ],
+            [
+              0,
+              6399,
+              4,
+              0,
+              4525,
+              9
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 6399,
+            "map_height_too_small": 4,
+            "height_ratio_too_large": 0,
+            "ground_reverted": 4525,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 88,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 10928,
+          "gained_votes": 88,
+          "dense_votes": 10937,
+          "sparse_votes": 97,
+          "threshold_lowered_points": 692,
+          "dense_threshold_sum": 6771,
+          "sparse_threshold_sum": 4743
+        },
+        "moving_gained_removal": {
+          "points": 40,
+          "point_scan_opportunities": 480,
+          "stage_transition_dense_to_sparse": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              7,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              18,
+              0,
+              94,
+              0,
+              100
+            ],
+            [
+              0,
+              16,
+              0,
+              0,
+              0,
+              176
+            ],
+            [
+              0,
+              36,
+              0,
+              0,
+              0,
+              33
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 36,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 0,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 100,
+            "ground_reverted": 176,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 36,
+          "gained_votes": 276,
+          "dense_votes": 69,
+          "sparse_votes": 309,
+          "threshold_lowered_points": 16,
+          "dense_threshold_sum": 240,
+          "sparse_threshold_sum": 206
+        },
+        "static_added_removal": {
+          "points": 956,
+          "point_scan_opportunities": 11472,
+          "stage_transition_dense_to_sparse": [
+            [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              80,
+              12,
+              4357,
+              18,
+              6848
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              24,
+              0,
+              0,
+              0,
+              131
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 24,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 0,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 6848,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 24,
+          "gained_votes": 6848,
+          "dense_votes": 155,
+          "sparse_votes": 6979,
+          "threshold_lowered_points": 30,
+          "dense_threshold_sum": 5736,
+          "sparse_threshold_sum": 5686
+        },
+        "static_recovered": {
+          "points": 257,
+          "point_scan_opportunities": 3084,
+          "stage_transition_dense_to_sparse": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              83,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              19,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              98,
+              388,
+              150,
+              3,
+              14
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              271,
+              898,
+              441,
+              659,
+              60
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 271,
+            "map_height_too_small": 898,
+            "height_ratio_too_large": 441,
+            "ground_reverted": 659,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 14,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 2269,
+          "gained_votes": 14,
+          "dense_votes": 2329,
+          "sparse_votes": 74,
+          "threshold_lowered_points": 46,
+          "dense_threshold_sum": 1511,
+          "sparse_threshold_sum": 1431
+        }
+      }
+    },
+    {
+      "scene": "0b86f508-5df9-4a46-bc59-5b9536dbde9f",
+      "variant": {
+        "name": "mod2_0",
+        "modulus": 2,
+        "remainder": 0,
+        "nominal_ids": 32
+      },
+      "groups": {
+        "all_retained": {
+          "points": 552258,
+          "point_scan_opportunities": 6627096,
+          "stage_transition_dense_to_sparse": [
+            [
+              570746,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              363886,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              60469,
+              397520,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              25379,
+              15658,
+              4246201,
+              99996,
+              143768
+            ],
+            [
+              0,
+              74985,
+              19473,
+              6404,
+              236528,
+              1444
+            ],
+            [
+              0,
+              89729,
+              2999,
+              21766,
+              6498,
+              243647
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 89729,
+            "map_height_too_small": 2999,
+            "height_ratio_too_large": 21766,
+            "ground_reverted": 6498,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 143768,
+            "ground_reverted": 1444,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 120992,
+          "gained_votes": 145212,
+          "dense_votes": 364639,
+          "sparse_votes": 388859,
+          "threshold_lowered_points": 80028,
+          "dense_threshold_sum": 3016769,
+          "sparse_threshold_sum": 2914645
+        },
+        "moving_lost_removal": {
+          "points": 5894,
+          "point_scan_opportunities": 70728,
+          "stage_transition_dense_to_sparse": [
+            [
+              90,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              12816,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              3,
+              2,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              193,
+              16,
+              22708,
+              12,
+              806
+            ],
+            [
+              0,
+              51,
+              0,
+              0,
+              30,
+              0
+            ],
+            [
+              0,
+              20239,
+              0,
+              274,
+              688,
+              12800
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 20239,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 274,
+            "ground_reverted": 688,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 806,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 21201,
+          "gained_votes": 806,
+          "dense_votes": 34001,
+          "sparse_votes": 13606,
+          "threshold_lowered_points": 4849,
+          "dense_threshold_sum": 30272,
+          "sparse_threshold_sum": 21439
+        },
+        "moving_gained_removal": {
+          "points": 1633,
+          "point_scan_opportunities": 19596,
+          "stage_transition_dense_to_sparse": [
+            [
+              26,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1532,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              339,
+              0,
+              6851,
+              15,
+              5468
+            ],
+            [
+              0,
+              13,
+              0,
+              0,
+              26,
+              88
+            ],
+            [
+              0,
+              891,
+              0,
+              2,
+              9,
+              4335
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 891,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 2,
+            "ground_reverted": 9,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 5468,
+            "ground_reverted": 88,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 902,
+          "gained_votes": 5556,
+          "dense_votes": 5237,
+          "sparse_votes": 9891,
+          "threshold_lowered_points": 506,
+          "dense_threshold_sum": 9342,
+          "sparse_threshold_sum": 8644
+        },
+        "static_added_removal": {
+          "points": 6458,
+          "point_scan_opportunities": 77496,
+          "stage_transition_dense_to_sparse": [
+            [
+              2004,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              5237,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              38,
+              66,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1326,
+              58,
+              27997,
+              148,
+              19100
+            ],
+            [
+              0,
+              121,
+              20,
+              11,
+              58,
+              68
+            ],
+            [
+              0,
+              2196,
+              59,
+              210,
+              77,
+              18702
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 2196,
+            "map_height_too_small": 59,
+            "height_ratio_too_large": 210,
+            "ground_reverted": 77,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 19100,
+            "ground_reverted": 68,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 2542,
+          "gained_votes": 19168,
+          "dense_votes": 21244,
+          "sparse_votes": 37870,
+          "threshold_lowered_points": 1385,
+          "dense_threshold_sum": 35893,
+          "sparse_threshold_sum": 34176
+        },
+        "static_recovered": {
+          "points": 2531,
+          "point_scan_opportunities": 30372,
+          "stage_transition_dense_to_sparse": [
+            [
+              1892,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              4234,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              17,
+              127,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              392,
+              1115,
+              7405,
+              361,
+              661
+            ],
+            [
+              0,
+              75,
+              50,
+              21,
+              124,
+              8
+            ],
+            [
+              0,
+              2648,
+              1925,
+              4754,
+              1201,
+              3362
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 2648,
+            "map_height_too_small": 1925,
+            "height_ratio_too_large": 4754,
+            "ground_reverted": 1201,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 661,
+            "ground_reverted": 8,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 10528,
+          "gained_votes": 669,
+          "dense_votes": 13890,
+          "sparse_votes": 4031,
+          "threshold_lowered_points": 670,
+          "dense_threshold_sum": 12471,
+          "sparse_threshold_sum": 11481
+        }
+      }
+    },
+    {
+      "scene": "0b86f508-5df9-4a46-bc59-5b9536dbde9f",
+      "variant": {
+        "name": "mod2_1",
+        "modulus": 2,
+        "remainder": 1,
+        "nominal_ids": 32
+      },
+      "groups": {
+        "all_retained": {
+          "points": 531590,
+          "point_scan_opportunities": 6379080,
+          "stage_transition_dense_to_sparse": [
+            [
+              596248,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              352774,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              94390,
+              360545,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              17791,
+              8642,
+              3921338,
+              87407,
+              125607
+            ],
+            [
+              0,
+              70526,
+              22354,
+              1643,
+              423246,
+              2958
+            ],
+            [
+              0,
+              46157,
+              2432,
+              2841,
+              7911,
+              234270
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 46157,
+            "map_height_too_small": 2432,
+            "height_ratio_too_large": 2841,
+            "ground_reverted": 7911,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 125607,
+            "ground_reverted": 2958,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 59341,
+          "gained_votes": 128565,
+          "dense_votes": 293611,
+          "sparse_votes": 362835,
+          "threshold_lowered_points": 69760,
+          "dense_threshold_sum": 2894687,
+          "sparse_threshold_sum": 2803485
+        },
+        "moving_lost_removal": {
+          "points": 1770,
+          "point_scan_opportunities": 21240,
+          "stage_transition_dense_to_sparse": [
+            [
+              13,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              3345,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              10,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              8,
+              3,
+              7103,
+              104,
+              213
+            ],
+            [
+              0,
+              59,
+              0,
+              0,
+              82,
+              1
+            ],
+            [
+              0,
+              5903,
+              10,
+              76,
+              383,
+              3927
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 5903,
+            "map_height_too_small": 10,
+            "height_ratio_too_large": 76,
+            "ground_reverted": 383,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 213,
+            "ground_reverted": 1,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 6372,
+          "gained_votes": 214,
+          "dense_votes": 10299,
+          "sparse_votes": 4141,
+          "threshold_lowered_points": 1546,
+          "dense_threshold_sum": 9249,
+          "sparse_threshold_sum": 6900
+        },
+        "moving_gained_removal": {
+          "points": 1222,
+          "point_scan_opportunities": 14664,
+          "stage_transition_dense_to_sparse": [
+            [
+              93,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              3600,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              4,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              68,
+              0,
+              3943,
+              30,
+              2979
+            ],
+            [
+              0,
+              24,
+              0,
+              0,
+              39,
+              38
+            ],
+            [
+              0,
+              726,
+              0,
+              83,
+              13,
+              3024
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 726,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 83,
+            "ground_reverted": 13,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 2979,
+            "ground_reverted": 38,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 822,
+          "gained_votes": 3017,
+          "dense_votes": 3846,
+          "sparse_votes": 6041,
+          "threshold_lowered_points": 395,
+          "dense_threshold_sum": 5902,
+          "sparse_threshold_sum": 5422
+        },
+        "static_added_removal": {
+          "points": 7267,
+          "point_scan_opportunities": 87204,
+          "stage_transition_dense_to_sparse": [
+            [
+              2809,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              6255,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              46,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1793,
+              12,
+              26597,
+              198,
+              26073
+            ],
+            [
+              0,
+              103,
+              1,
+              3,
+              86,
+              232
+            ],
+            [
+              0,
+              2840,
+              121,
+              158,
+              122,
+              19755
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 2840,
+            "map_height_too_small": 121,
+            "height_ratio_too_large": 158,
+            "ground_reverted": 122,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 26073,
+            "ground_reverted": 232,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 3241,
+          "gained_votes": 26305,
+          "dense_votes": 22996,
+          "sparse_votes": 46060,
+          "threshold_lowered_points": 1643,
+          "dense_threshold_sum": 39874,
+          "sparse_threshold_sum": 37921
+        },
+        "static_recovered": {
+          "points": 971,
+          "point_scan_opportunities": 11652,
+          "stage_transition_dense_to_sparse": [
+            [
+              547,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              2306,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              36,
+              202,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              156,
+              102,
+              2008,
+              148,
+              468
+            ],
+            [
+              0,
+              39,
+              50,
+              3,
+              55,
+              12
+            ],
+            [
+              0,
+              1434,
+              1202,
+              327,
+              787,
+              1770
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 1434,
+            "map_height_too_small": 1202,
+            "height_ratio_too_large": 327,
+            "ground_reverted": 787,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 468,
+            "ground_reverted": 12,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 3750,
+          "gained_votes": 480,
+          "dense_votes": 5520,
+          "sparse_votes": 2250,
+          "threshold_lowered_points": 414,
+          "dense_threshold_sum": 4594,
+          "sparse_threshold_sum": 4080
+        }
+      }
+    },
+    {
+      "scene": "0b86f508-5df9-4a46-bc59-5b9536dbde9f",
+      "variant": {
+        "name": "mod4_0",
+        "modulus": 4,
+        "remainder": 0,
+        "nominal_ids": 16
+      },
+      "groups": {
+        "all_retained": {
+          "points": 270821,
+          "point_scan_opportunities": 3249852,
+          "stage_transition_dense_to_sparse": [
+            [
+              241611,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              189388,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              94781,
+              185498,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              52141,
+              18923,
+              1819224,
+              98201,
+              143219
+            ],
+            [
+              0,
+              83196,
+              20770,
+              2804,
+              124943,
+              767
+            ],
+            [
+              0,
+              68550,
+              1138,
+              7403,
+              5243,
+              92052
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 68550,
+            "map_height_too_small": 1138,
+            "height_ratio_too_large": 7403,
+            "ground_reverted": 5243,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 143219,
+            "ground_reverted": 767,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 82334,
+          "gained_votes": 143986,
+          "dense_votes": 174386,
+          "sparse_votes": 236038,
+          "threshold_lowered_points": 81668,
+          "dense_threshold_sum": 1486977,
+          "sparse_threshold_sum": 1364312
+        },
+        "moving_lost_removal": {
+          "points": 2969,
+          "point_scan_opportunities": 35628,
+          "stage_transition_dense_to_sparse": [
+            [
+              68,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              6107,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              2,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              405,
+              21,
+              10435,
+              147,
+              656
+            ],
+            [
+              0,
+              40,
+              0,
+              0,
+              16,
+              0
+            ],
+            [
+              0,
+              11550,
+              27,
+              142,
+              485,
+              5526
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 11550,
+            "map_height_too_small": 27,
+            "height_ratio_too_large": 142,
+            "ground_reverted": 485,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 656,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 12204,
+          "gained_votes": 656,
+          "dense_votes": 17730,
+          "sparse_votes": 6182,
+          "threshold_lowered_points": 2732,
+          "dense_threshold_sum": 15371,
+          "sparse_threshold_sum": 10284
+        },
+        "moving_gained_removal": {
+          "points": 1346,
+          "point_scan_opportunities": 16152,
+          "stage_transition_dense_to_sparse": [
+            [
+              4,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              2173,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1043,
+              0,
+              4161,
+              16,
+              4103
+            ],
+            [
+              0,
+              4,
+              0,
+              0,
+              11,
+              20
+            ],
+            [
+              0,
+              2363,
+              0,
+              54,
+              8,
+              2192
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 2363,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 54,
+            "ground_reverted": 8,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 4103,
+            "ground_reverted": 20,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 2425,
+          "gained_votes": 4123,
+          "dense_votes": 4617,
+          "sparse_votes": 6315,
+          "threshold_lowered_points": 1178,
+          "dense_threshold_sum": 7347,
+          "sparse_threshold_sum": 5630
+        },
+        "static_added_removal": {
+          "points": 9559,
+          "point_scan_opportunities": 114708,
+          "stage_transition_dense_to_sparse": [
+            [
+              2410,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              4865,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              11,
+              13,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              6735,
+              70,
+              32976,
+              729,
+              44611
+            ],
+            [
+              0,
+              192,
+              1,
+              0,
+              12,
+              60
+            ],
+            [
+              0,
+              6926,
+              34,
+              282,
+              235,
+              14546
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 6926,
+            "map_height_too_small": 34,
+            "height_ratio_too_large": 282,
+            "ground_reverted": 235,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 44611,
+            "ground_reverted": 60,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 7477,
+          "gained_votes": 44671,
+          "dense_votes": 22023,
+          "sparse_votes": 59217,
+          "threshold_lowered_points": 4341,
+          "dense_threshold_sum": 54581,
+          "sparse_threshold_sum": 48500
+        },
+        "static_recovered": {
+          "points": 1540,
+          "point_scan_opportunities": 18480,
+          "stage_transition_dense_to_sparse": [
+            [
+              999,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              2854,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              78,
+              132,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              796,
+              292,
+              3577,
+              423,
+              670
+            ],
+            [
+              0,
+              98,
+              15,
+              8,
+              58,
+              12
+            ],
+            [
+              0,
+              3218,
+              473,
+              2093,
+              1081,
+              1603
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 3218,
+            "map_height_too_small": 473,
+            "height_ratio_too_large": 2093,
+            "ground_reverted": 1081,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 670,
+            "ground_reverted": 12,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 6865,
+          "gained_votes": 682,
+          "dense_votes": 8468,
+          "sparse_votes": 2285,
+          "threshold_lowered_points": 684,
+          "dense_threshold_sum": 7556,
+          "sparse_threshold_sum": 6249
+        }
+      }
+    },
+    {
+      "scene": "0b86f508-5df9-4a46-bc59-5b9536dbde9f",
+      "variant": {
+        "name": "mod4_1",
+        "modulus": 4,
+        "remainder": 1,
+        "nominal_ids": 16
+      },
+      "groups": {
+        "all_retained": {
+          "points": 268004,
+          "point_scan_opportunities": 3216048,
+          "stage_transition_dense_to_sparse": [
+            [
+              311708,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              174242,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              93378,
+              147818,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              67760,
+              14238,
+              1689887,
+              130745,
+              171129
+            ],
+            [
+              0,
+              104512,
+              31716,
+              3730,
+              137755,
+              1186
+            ],
+            [
+              0,
+              55801,
+              1973,
+              4656,
+              6043,
+              67771
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 55801,
+            "map_height_too_small": 1973,
+            "height_ratio_too_large": 4656,
+            "ground_reverted": 6043,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 171129,
+            "ground_reverted": 1186,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 68473,
+          "gained_votes": 172315,
+          "dense_votes": 136244,
+          "sparse_votes": 240086,
+          "threshold_lowered_points": 79513,
+          "dense_threshold_sum": 1457642,
+          "sparse_threshold_sum": 1331342
+        },
+        "moving_lost_removal": {
+          "points": 1194,
+          "point_scan_opportunities": 14328,
+          "stage_transition_dense_to_sparse": [
+            [
+              80,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              2135,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              2,
+              2,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              394,
+              168,
+              2840,
+              175,
+              536
+            ],
+            [
+              0,
+              42,
+              6,
+              1,
+              23,
+              1
+            ],
+            [
+              0,
+              6401,
+              97,
+              67,
+              227,
+              1131
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 6401,
+            "map_height_too_small": 97,
+            "height_ratio_too_large": 67,
+            "ground_reverted": 227,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 536,
+            "ground_reverted": 1,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 6792,
+          "gained_votes": 537,
+          "dense_votes": 7923,
+          "sparse_votes": 1668,
+          "threshold_lowered_points": 1166,
+          "dense_threshold_sum": 6334,
+          "sparse_threshold_sum": 3766
+        },
+        "moving_gained_removal": {
+          "points": 1307,
+          "point_scan_opportunities": 15684,
+          "stage_transition_dense_to_sparse": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              3130,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              656,
+              9,
+              3185,
+              56,
+              4271
+            ],
+            [
+              0,
+              78,
+              0,
+              0,
+              24,
+              69
+            ],
+            [
+              0,
+              2142,
+              3,
+              98,
+              7,
+              1956
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 2142,
+            "map_height_too_small": 3,
+            "height_ratio_too_large": 98,
+            "ground_reverted": 7,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 4271,
+            "ground_reverted": 69,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 2250,
+          "gained_votes": 4340,
+          "dense_votes": 4206,
+          "sparse_votes": 6296,
+          "threshold_lowered_points": 976,
+          "dense_threshold_sum": 6665,
+          "sparse_threshold_sum": 5272
+        },
+        "static_added_removal": {
+          "points": 7233,
+          "point_scan_opportunities": 86796,
+          "stage_transition_dense_to_sparse": [
+            [
+              3201,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              6179,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              4,
+              2,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              5346,
+              124,
+              23565,
+              603,
+              33788
+            ],
+            [
+              0,
+              98,
+              11,
+              6,
+              78,
+              284
+            ],
+            [
+              0,
+              3844,
+              35,
+              176,
+              301,
+              9151
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 3844,
+            "map_height_too_small": 35,
+            "height_ratio_too_large": 176,
+            "ground_reverted": 301,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 33788,
+            "ground_reverted": 284,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 4356,
+          "gained_votes": 34072,
+          "dense_votes": 13507,
+          "sparse_votes": 43223,
+          "threshold_lowered_points": 2607,
+          "dense_threshold_sum": 39513,
+          "sparse_threshold_sum": 35792
+        },
+        "static_recovered": {
+          "points": 823,
+          "point_scan_opportunities": 9876,
+          "stage_transition_dense_to_sparse": [
+            [
+              471,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1949,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              80,
+              13,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              844,
+              80,
+              1243,
+              384,
+              200
+            ],
+            [
+              0,
+              58,
+              8,
+              3,
+              14,
+              5
+            ],
+            [
+              0,
+              2331,
+              483,
+              141,
+              778,
+              791
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 2331,
+            "map_height_too_small": 483,
+            "height_ratio_too_large": 141,
+            "ground_reverted": 778,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 200,
+            "ground_reverted": 5,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 3733,
+          "gained_votes": 205,
+          "dense_votes": 4524,
+          "sparse_votes": 996,
+          "threshold_lowered_points": 564,
+          "dense_threshold_sum": 3911,
+          "sparse_threshold_sum": 2838
+        }
+      }
+    },
+    {
+      "scene": "0b86f508-5df9-4a46-bc59-5b9536dbde9f",
+      "variant": {
+        "name": "mod4_2",
+        "modulus": 4,
+        "remainder": 2,
+        "nominal_ids": 16
+      },
+      "groups": {
+        "all_retained": {
+          "points": 281437,
+          "point_scan_opportunities": 3377244,
+          "stage_transition_dense_to_sparse": [
+            [
+              329135,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              174498,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              66469,
+              111241,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              67595,
+              21437,
+              2045652,
+              99321,
+              165289
+            ],
+            [
+              0,
+              52071,
+              8594,
+              5210,
+              39923,
+              556
+            ],
+            [
+              0,
+              100314,
+              3082,
+              13592,
+              3839,
+              69426
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 100314,
+            "map_height_too_small": 3082,
+            "height_ratio_too_large": 13592,
+            "ground_reverted": 3839,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 165289,
+            "ground_reverted": 556,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 120827,
+          "gained_votes": 165845,
+          "dense_votes": 190253,
+          "sparse_votes": 235271,
+          "threshold_lowered_points": 68013,
+          "dense_threshold_sum": 1529792,
+          "sparse_threshold_sum": 1423443
+        },
+        "moving_lost_removal": {
+          "points": 6853,
+          "point_scan_opportunities": 82236,
+          "stage_transition_dense_to_sparse": [
+            [
+              82,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              13168,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              3,
+              4,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1616,
+              115,
+              17504,
+              1242,
+              2540
+            ],
+            [
+              0,
+              47,
+              0,
+              0,
+              4,
+              0
+            ],
+            [
+              0,
+              39414,
+              156,
+              17,
+              736,
+              5588
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 39414,
+            "map_height_too_small": 156,
+            "height_ratio_too_large": 17,
+            "ground_reverted": 736,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 2540,
+            "ground_reverted": 0,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 40323,
+          "gained_votes": 2540,
+          "dense_votes": 45911,
+          "sparse_votes": 8128,
+          "threshold_lowered_points": 6506,
+          "dense_threshold_sum": 36055,
+          "sparse_threshold_sum": 21793
+        },
+        "moving_gained_removal": {
+          "points": 966,
+          "point_scan_opportunities": 11592,
+          "stage_transition_dense_to_sparse": [
+            [
+              82,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1152,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              970,
+              0,
+              3234,
+              13,
+              2602
+            ],
+            [
+              0,
+              5,
+              0,
+              0,
+              8,
+              3
+            ],
+            [
+              0,
+              1301,
+              0,
+              4,
+              8,
+              2209
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 1301,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 4,
+            "ground_reverted": 8,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 2602,
+            "ground_reverted": 3,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 1313,
+          "gained_votes": 2605,
+          "dense_votes": 3522,
+          "sparse_votes": 4814,
+          "threshold_lowered_points": 771,
+          "dense_threshold_sum": 5384,
+          "sparse_threshold_sum": 4310
+        },
+        "static_added_removal": {
+          "points": 9327,
+          "point_scan_opportunities": 111924,
+          "stage_transition_dense_to_sparse": [
+            [
+              4409,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              4322,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              177,
+              78,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              5527,
+              102,
+              33384,
+              468,
+              42895
+            ],
+            [
+              0,
+              142,
+              34,
+              18,
+              63,
+              162
+            ],
+            [
+              0,
+              3361,
+              103,
+              403,
+              187,
+              16089
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 3361,
+            "map_height_too_small": 103,
+            "height_ratio_too_large": 403,
+            "ground_reverted": 187,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 42895,
+            "ground_reverted": 162,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 4054,
+          "gained_votes": 43057,
+          "dense_votes": 20143,
+          "sparse_votes": 59146,
+          "threshold_lowered_points": 2795,
+          "dense_threshold_sum": 52521,
+          "sparse_threshold_sum": 48841
+        },
+        "static_recovered": {
+          "points": 1570,
+          "point_scan_opportunities": 18840,
+          "stage_transition_dense_to_sparse": [
+            [
+              1507,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              3154,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              25,
+              25,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              912,
+              874,
+              2474,
+              396,
+              508
+            ],
+            [
+              0,
+              77,
+              47,
+              29,
+              28,
+              4
+            ],
+            [
+              0,
+              3682,
+              1751,
+              1764,
+              433,
+              1150
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 3682,
+            "map_height_too_small": 1751,
+            "height_ratio_too_large": 1764,
+            "ground_reverted": 433,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 508,
+            "ground_reverted": 4,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 7630,
+          "gained_votes": 512,
+          "dense_votes": 8780,
+          "sparse_votes": 1662,
+          "threshold_lowered_points": 1013,
+          "dense_threshold_sum": 7381,
+          "sparse_threshold_sum": 5707
+        }
+      }
+    },
+    {
+      "scene": "0b86f508-5df9-4a46-bc59-5b9536dbde9f",
+      "variant": {
+        "name": "mod4_3",
+        "modulus": 4,
+        "remainder": 3,
+        "nominal_ids": 16
+      },
+      "groups": {
+        "all_retained": {
+          "points": 263586,
+          "point_scan_opportunities": 3163032,
+          "stage_transition_dense_to_sparse": [
+            [
+              284540,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              178532,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              87175,
+              126564,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              42210,
+              6226,
+              1759098,
+              114903,
+              164589
+            ],
+            [
+              0,
+              87908,
+              16796,
+              1040,
+              135326,
+              758
+            ],
+            [
+              0,
+              61272,
+              1780,
+              2636,
+              6178,
+              85501
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 61272,
+            "map_height_too_small": 1780,
+            "height_ratio_too_large": 2636,
+            "ground_reverted": 6178,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 164589,
+            "ground_reverted": 758,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 71866,
+          "gained_votes": 165347,
+          "dense_votes": 157367,
+          "sparse_votes": 250848,
+          "threshold_lowered_points": 73220,
+          "dense_threshold_sum": 1437045,
+          "sparse_threshold_sum": 1326266
+        },
+        "moving_lost_removal": {
+          "points": 1888,
+          "point_scan_opportunities": 22656,
+          "stage_transition_dense_to_sparse": [
+            [
+              42,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              5343,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              9,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              170,
+              121,
+              5769,
+              179,
+              403
+            ],
+            [
+              0,
+              103,
+              14,
+              0,
+              62,
+              3
+            ],
+            [
+              0,
+              7062,
+              209,
+              10,
+              581,
+              2576
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 7062,
+            "map_height_too_small": 209,
+            "height_ratio_too_large": 10,
+            "ground_reverted": 581,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 403,
+            "ground_reverted": 3,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 7862,
+          "gained_votes": 406,
+          "dense_votes": 10438,
+          "sparse_votes": 2982,
+          "threshold_lowered_points": 1624,
+          "dense_threshold_sum": 9016,
+          "sparse_threshold_sum": 6327
+        },
+        "moving_gained_removal": {
+          "points": 1075,
+          "point_scan_opportunities": 12900,
+          "stage_transition_dense_to_sparse": [
+            [
+              39,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1655,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              4,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              305,
+              8,
+              3286,
+              40,
+              4027
+            ],
+            [
+              0,
+              37,
+              0,
+              0,
+              4,
+              6
+            ],
+            [
+              0,
+              1259,
+              0,
+              9,
+              15,
+              2206
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 1259,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 9,
+            "ground_reverted": 15,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 4027,
+            "ground_reverted": 6,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 1283,
+          "gained_votes": 4033,
+          "dense_votes": 3489,
+          "sparse_votes": 6239,
+          "threshold_lowered_points": 588,
+          "dense_threshold_sum": 5865,
+          "sparse_threshold_sum": 5112
+        },
+        "static_added_removal": {
+          "points": 10962,
+          "point_scan_opportunities": 131544,
+          "stage_transition_dense_to_sparse": [
+            [
+              4590,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              7855,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              5,
+              42,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              7491,
+              46,
+              34806,
+              1250,
+              49915
+            ],
+            [
+              0,
+              215,
+              7,
+              13,
+              105,
+              169
+            ],
+            [
+              0,
+              7640,
+              24,
+              348,
+              268,
+              16755
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 7640,
+            "map_height_too_small": 24,
+            "height_ratio_too_large": 348,
+            "ground_reverted": 268,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 49915,
+            "ground_reverted": 169,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 8280,
+          "gained_votes": 50084,
+          "dense_votes": 25035,
+          "sparse_votes": 66839,
+          "threshold_lowered_points": 4823,
+          "dense_threshold_sum": 60864,
+          "sparse_threshold_sum": 54328
+        },
+        "static_recovered": {
+          "points": 1138,
+          "point_scan_opportunities": 13656,
+          "stage_transition_dense_to_sparse": [
+            [
+              1121,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              2209,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              24,
+              129,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              432,
+              188,
+              2043,
+              429,
+              616
+            ],
+            [
+              0,
+              58,
+              8,
+              8,
+              32,
+              20
+            ],
+            [
+              0,
+              3032,
+              799,
+              420,
+              643,
+              1445
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 3032,
+            "map_height_too_small": 799,
+            "height_ratio_too_large": 420,
+            "ground_reverted": 643,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 616,
+            "ground_reverted": 20,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 4894,
+          "gained_votes": 636,
+          "dense_votes": 6339,
+          "sparse_votes": 2081,
+          "threshold_lowered_points": 712,
+          "dense_threshold_sum": 5383,
+          "sparse_threshold_sum": 4249
+        }
+      }
+    }
+  ],
+  "totals": {
+    "32": {
+      "scene_phase_cases": 6,
+      "groups": {
+        "all_retained": {
+          "points": 3507398,
+          "point_scan_opportunities": 42088776,
+          "stage_transition_dense_to_sparse": [
+            [
+              1810407,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1392943,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              373997,
+              2517385,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              67114,
+              100568,
+              32027978,
+              344666,
+              422249
+            ],
+            [
+              0,
+              276568,
+              137065,
+              16344,
+              1487682,
+              6979
+            ],
+            [
+              0,
+              245161,
+              6749,
+              32723,
+              23665,
+              798533
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 245161,
+            "map_height_too_small": 6749,
+            "height_ratio_too_large": 32723,
+            "ground_reverted": 23665,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 422249,
+            "ground_reverted": 6979,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 308298,
+          "gained_votes": 429228,
+          "dense_votes": 1106831,
+          "sparse_votes": 1227761,
+          "threshold_lowered_points": 292774,
+          "dense_threshold_sum": 20031936,
+          "sparse_threshold_sum": 19635717
+        },
+        "moving_lost_removal": {
+          "points": 12492,
+          "point_scan_opportunities": 149904,
+          "stage_transition_dense_to_sparse": [
+            [
+              1064,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              19442,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              3,
+              21,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              469,
+              54,
+              41373,
+              393,
+              1367
+            ],
+            [
+              0,
+              195,
+              0,
+              0,
+              214,
+              6
+            ],
+            [
+              0,
+              61548,
+              21,
+              360,
+              3493,
+              19881
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 61548,
+            "map_height_too_small": 21,
+            "height_ratio_too_large": 360,
+            "ground_reverted": 3493,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 1367,
+            "ground_reverted": 6,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 65422,
+          "gained_votes": 1373,
+          "dense_votes": 85303,
+          "sparse_votes": 21254,
+          "threshold_lowered_points": 10747,
+          "dense_threshold_sum": 66766,
+          "sparse_threshold_sum": 44466
+        },
+        "moving_gained_removal": {
+          "points": 3897,
+          "point_scan_opportunities": 46764,
+          "stage_transition_dense_to_sparse": [
+            [
+              270,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              6166,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              4,
+              8,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              466,
+              0,
+              13654,
+              79,
+              13158
+            ],
+            [
+              0,
+              115,
+              0,
+              0,
+              119,
+              607
+            ],
+            [
+              0,
+              2191,
+              0,
+              109,
+              27,
+              9791
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 2191,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 109,
+            "ground_reverted": 27,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 13158,
+            "ground_reverted": 607,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 2327,
+          "gained_votes": 13765,
+          "dense_votes": 12118,
+          "sparse_votes": 23556,
+          "threshold_lowered_points": 1271,
+          "dense_threshold_sum": 21092,
+          "sparse_threshold_sum": 19490
+        },
+        "static_added_removal": {
+          "points": 16687,
+          "point_scan_opportunities": 200244,
+          "stage_transition_dense_to_sparse": [
+            [
+              6643,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              14178,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              40,
+              112,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              3423,
+              150,
+              65960,
+              452,
+              57268
+            ],
+            [
+              0,
+              285,
+              25,
+              15,
+              196,
+              413
+            ],
+            [
+              0,
+              6405,
+              183,
+              424,
+              209,
+              43863
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 6405,
+            "map_height_too_small": 183,
+            "height_ratio_too_large": 424,
+            "ground_reverted": 209,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 57268,
+            "ground_reverted": 413,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 7221,
+          "gained_votes": 57681,
+          "dense_votes": 51084,
+          "sparse_votes": 101544,
+          "threshold_lowered_points": 3725,
+          "dense_threshold_sum": 91661,
+          "sparse_threshold_sum": 87182
+        },
+        "static_recovered": {
+          "points": 4413,
+          "point_scan_opportunities": 52956,
+          "stage_transition_dense_to_sparse": [
+            [
+              2562,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              8517,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              53,
+              406,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              578,
+              1341,
+              11730,
+              668,
+              1208
+            ],
+            [
+              0,
+              139,
+              101,
+              27,
+              235,
+              41
+            ],
+            [
+              0,
+              5695,
+              3438,
+              6553,
+              2981,
+              6683
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 5695,
+            "map_height_too_small": 3438,
+            "height_ratio_too_large": 6553,
+            "ground_reverted": 2981,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 1208,
+            "ground_reverted": 41,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 18667,
+          "gained_votes": 1249,
+          "dense_votes": 25350,
+          "sparse_votes": 7932,
+          "threshold_lowered_points": 1372,
+          "dense_threshold_sum": 21656,
+          "sparse_threshold_sum": 19665
+        }
+      }
+    },
+    "16": {
+      "scene_phase_cases": 12,
+      "groups": {
+        "all_retained": {
+          "points": 3507398,
+          "point_scan_opportunities": 42088776,
+          "stage_transition_dense_to_sparse": [
+            [
+              1810407,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1392943,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              887909,
+              2003473,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              363005,
+              312876,
+              30510355,
+              757325,
+              1019014
+            ],
+            [
+              0,
+              614809,
+              243411,
+              22747,
+              1038158,
+              5513
+            ],
+            [
+              0,
+              499984,
+              11910,
+              44027,
+              37650,
+              513260
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 499984,
+            "map_height_too_small": 11910,
+            "height_ratio_too_large": 44027,
+            "ground_reverted": 37650,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 1019014,
+            "ground_reverted": 5513,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 593571,
+          "gained_votes": 1024527,
+          "dense_votes": 1106831,
+          "sparse_votes": 1537787,
+          "threshold_lowered_points": 569088,
+          "dense_threshold_sum": 20031936,
+          "sparse_threshold_sum": 19072842
+        },
+        "moving_lost_removal": {
+          "points": 24446,
+          "point_scan_opportunities": 293352,
+          "stage_transition_dense_to_sparse": [
+            [
+              1466,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              33691,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              9,
+              24,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              4956,
+              2494,
+              58306,
+              3818,
+              6720
+            ],
+            [
+              0,
+              414,
+              20,
+              2,
+              207,
+              5
+            ],
+            [
+              0,
+              153959,
+              810,
+              544,
+              8211,
+              17696
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 153959,
+            "map_height_too_small": 810,
+            "height_ratio_too_large": 544,
+            "ground_reverted": 8211,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 6720,
+            "ground_reverted": 5,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 163524,
+          "gained_votes": 6725,
+          "dense_votes": 181220,
+          "sparse_votes": 24421,
+          "threshold_lowered_points": 22850,
+          "dense_threshold_sum": 133112,
+          "sparse_threshold_sum": 78894
+        },
+        "moving_gained_removal": {
+          "points": 5843,
+          "point_scan_opportunities": 70116,
+          "stage_transition_dense_to_sparse": [
+            [
+              212,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              9639,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              7,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              3731,
+              26,
+              16472,
+              182,
+              19837
+            ],
+            [
+              0,
+              183,
+              0,
+              0,
+              78,
+              547
+            ],
+            [
+              0,
+              8457,
+              3,
+              165,
+              45,
+              10532
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 8457,
+            "map_height_too_small": 3,
+            "height_ratio_too_large": 165,
+            "ground_reverted": 45,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 19837,
+            "ground_reverted": 547,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 8670,
+          "gained_votes": 20384,
+          "dense_votes": 19202,
+          "sparse_votes": 30916,
+          "threshold_lowered_points": 4122,
+          "dense_threshold_sum": 31553,
+          "sparse_threshold_sum": 25478
+        },
+        "static_added_removal": {
+          "points": 53107,
+          "point_scan_opportunities": 637284,
+          "stage_transition_dense_to_sparse": [
+            [
+              34874,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              32771,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              199,
+              142,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              32184,
+              580,
+              177893,
+              4430,
+              255058
+            ],
+            [
+              0,
+              825,
+              61,
+              40,
+              402,
+              1102
+            ],
+            [
+              0,
+              27110,
+              232,
+              1592,
+              1251,
+              66538
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 27110,
+            "map_height_too_small": 232,
+            "height_ratio_too_large": 1592,
+            "ground_reverted": 1251,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 255058,
+            "ground_reverted": 1102,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 30185,
+          "gained_votes": 256160,
+          "dense_votes": 96723,
+          "sparse_votes": 322698,
+          "threshold_lowered_points": 18705,
+          "dense_threshold_sum": 291895,
+          "sparse_threshold_sum": 266783
+        },
+        "static_recovered": {
+          "points": 6311,
+          "point_scan_opportunities": 75732,
+          "stage_transition_dense_to_sparse": [
+            [
+              4275,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              12690,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              219,
+              382,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              3373,
+              2032,
+              11398,
+              1878,
+              2255
+            ],
+            [
+              0,
+              338,
+              105,
+              56,
+              173,
+              43
+            ],
+            [
+              0,
+              15544,
+              4959,
+              5770,
+              4307,
+              5935
+            ]
+          ],
+          "lost_vote_destination": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 15544,
+            "map_height_too_small": 4959,
+            "height_ratio_too_large": 5770,
+            "ground_reverted": 4307,
+            "dynamic_vote": 0
+          },
+          "gained_vote_source": {
+            "outside_polar_domain": 0,
+            "empty_query_column": 0,
+            "map_height_too_small": 0,
+            "height_ratio_too_large": 2255,
+            "ground_reverted": 43,
+            "dynamic_vote": 0
+          },
+          "lost_votes": 30580,
+          "gained_votes": 2298,
+          "dense_votes": 36515,
+          "sparse_votes": 8233,
+          "threshold_lowered_points": 3556,
+          "dense_threshold_sum": 30567,
+          "sparse_threshold_sum": 24226
+        }
+      }
+    }
+  },
+  "verified": "Every replay matches API masks, archived density masks at both resolutions and prior decision counts. Original source/GT and laser metadata verified. Threshold never increases under subset thinning."
+}

@@ -10,7 +10,8 @@ env:
 
 jobs:
   pytest:
-    runs-on: ubuntu-latest
+    # Python 3.9 has no setup-python build for Ubuntu 26.04 (ubuntu-latest).
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:

@@ -1,0 +1,2184 @@
+{
+  "plan_sha256": "c19221c2e5cd89b0ec6678ae72ac3ba4400337557521b5a4a361051973aaa391",
+  "evidence_report_sha256": "b00dca459a76863a9eba05082b11d47dd07161019525cf1278e7b65ec02b351f",
+  "status": "Post-result annotation attribution; no filter or threshold changes.",
+  "code_sha256": {
+    "scripts/attribute_nuscenes_nearer_returns.py": "05a354f02ba89b0285ba26d273d96d6e299cc96ea0a0406b58262e335bd4aa2c",
+    "scripts/visualize_nuscenes_errors.py": "5e2b12c402a5b12869eab52e8c077e91c57d353ef551d1a9ea07afc02a79ea96"
+  },
+  "relation_codes": {
+    "0": "same_moving_track",
+    "1": "other_moving_track",
+    "2": "track_not_moving_by_window_rule",
+    "3": "outside_all_annotation_boxes",
+    "4": "ambiguous_target_boxes",
+    "5": "ambiguous_nearest_boxes",
+    "6": "exact_nearest_range_tie"
+  },
+  "quantile_order": [
+    0,
+    0.25,
+    0.5,
+    0.75,
+    1
+  ],
+  "scene_results": [
+    {
+      "scene": "scene-0004",
+      "input_hashes": {
+        "manifest_sha256": "797f190308364fa2a8355578ede23547835f9062b57109abfed8e06b17ea57ae",
+        "map_sha256": "c4bcfabeb3697a1714ace0b8b9407701162ce9640330c1b83b4d61c6e86651e0",
+        "gt_sha256": "898c1483efba8fcc7a0e1904fa493ee24788d30f908898a61ee61c9bfdf547b4"
+      },
+      "source_evidence_trace_sha256": "a7b7137290a5b3ef5973234ba8474569b7e627f442929cf4a0f2a8a869d06212",
+      "moving_gt_reconstructed_exactly": true,
+      "moving_track_tokens": [
+        "0a374458cdb04efa9bff8a0a8e97667a",
+        "33ae6abe79c54c169264744932ebb551",
+        "460ccf4388fc4af08984af9d1ec10dda",
+        "583b7aa5bdd24a288bb6535695997f2f",
+        "622507bb790b40029dac2bea76b5c7f0",
+        "645ff12cb0ef44bfa42ff447d40bb309",
+        "6b08b56b68f949ec8b418cceb68570db",
+        "6c2f6afc232e44f9bdfd1045e8a8f2be",
+        "6eba15833c7641dfb9d11806f1ba5c14",
+        "6feab41a49d74fff99cf0b2f64cdb267",
+        "74de4aa589f749adbd9354f45259dff6",
+        "a0e549efdaae48a5a7e9ce447e16ddd2",
+        "a326c569f4a84999a361a7f1a61af12d",
+        "a65e08fbee8d4b16aa2d32d59a1538e6",
+        "acb2c4d8335344ad8a5a504513b6f40f",
+        "b979797dff4c4a92b8dcbf5e84cc24f6",
+        "d623cfe3156846a8a62e6e145a61b5db",
+        "f54238bdd48443fcb4a019271dbca2f8",
+        "fae7ce4e8ccd4b4eb407e7c274965b53"
+      ],
+      "owner_index_tokens": [
+        "00f65bce58e64e11bfc6d2104818f306",
+        "015b6f15f62f45059d47f440f1748565",
+        "01960c090c79418bbf67cec5d9709ce2",
+        "025374b0842f4365991fac25b8dce316",
+        "0324d45f14974ee583923c9c736e6f71",
+        "040c5adbfb254c208e7e97769472b855",
+        "0499e78938af4a7caf4577d088bf23cd",
+        "070b638bd93445b8886daea9962087d8",
+        "076013e44e604ad6aea4401d6b4a52a0",
+        "082c87a798fc49fdb0c4fa07e64d963f",
+        "0a374458cdb04efa9bff8a0a8e97667a",
+        "0a6a3baa6f2a486e936120df53c6469b",
+        "0daeea9edfdf40f5908ec1df1fbe08ce",
+        "107e51866a7c44829ea495a54228e3f6",
+        "11cdf2443ecd4ddcbdad2d0b18868238",
+        "12971f9045b6465883b42c16bc4d4d26",
+        "13db4c0c990d4ed49f74383a2aa1e73d",
+        "158976532ef543e78ed582bd46f20782",
+        "161d1fc3999246f4b155acc2ca939b17",
+        "183da2c065f440c3965e7726202ec235",
+        "1905e6bbe816419f91f8e34c8a6d67ee",
+        "1c98d685031c4290ac9e934c5c78a1dc",
+        "1db1b7e0110f4cefa3d2a14c7695b9c2",
+        "1db907962bad445fa64b77e148780601",
+        "1e6bd344bd8d46f68c6d880756961f71",
+        "1f58457e12984996ab752749dbb23752",
+        "1fe6e3e869464c97915dbd080a31c53f",
+        "1fe714092416436fab26e3b4f40e9d71",
+        "249979b430b24b1f9f587334561430af",
+        "254f6f3d4ba94d8192ce2097454bdb5c",
+        "2a4c035f18ff49f69b2dd03026ec4179",
+        "2c1015ae31414f499d711fe0089e135d",
+        "2d5cb08e5b5b492fa6393aa119958921",
+        "2d8af845ac4a47019d6beabf8e4df0a0",
+        "30e08890ecee4fc3860d147eee728f85",
+        "311d3847f0674e1fbedc2e9fd9245c63",
+        "3348e6e9e00844398b2ce96a5e043fe2",
+        "33ae6abe79c54c169264744932ebb551",
+        "33d46012cf5d472bb66c3fd901448450",
+        "3654662a94af47978853640aa4790c83",
+        "37b3ea4102084c99b77bd426401dcf6e",
+        "38bcdb09bf2a4b76bca80b1a753ab608",
+        "39333d5c712f431cbc06799961359ea1",
+        "39e93f2d43d24a3fa708f78a377eeaa9",
+        "3d39daa1c3c142328cbcd2de8512fb7e",
+        "3f397e35a93b4a7ba9d57516a196f2b0",
+        "3f5aaccbbfba47adaaf07cf1c0b9b6bd",
+        "442d7e3d61b047398fcf0a3ead5f98d5",
+        "443a37682e4d4157837e7968e2665c50",
+        "460ccf4388fc4af08984af9d1ec10dda",
+        "4bf1f9efd16b4b1dae15a033a63d5af4",
+        "4d5b5ae1beeb4daba6572d9b7c54543d",
+        "518afc6566144bfea2a33e02f47d62e5",
+        "53103c961a99451e9da68e55a7e572a3",
+        "5624251e55174a408ebd14ad79990c5d",
+        "583b7aa5bdd24a288bb6535695997f2f",
+        "5d0297e8b09a4ec5baab9573d07ec26a",
+        "5eaa1b7f51df4841be2a8f18f8757e6b",
+        "5f0cce1236944312a69e16f0e82b3009",
+        "608f3fa94952428caf6f62789e4c7d25",
+        "60f551f6bf294f33ac04ba07fea92f7c",
+        "622507bb790b40029dac2bea76b5c7f0",
+        "624ecb43fe3640efa42c2b5a7acc1dc7",
+        "631e5b80661540d7bf04bb5c6a6b9dd5",
+        "645ff12cb0ef44bfa42ff447d40bb309",
+        "646815514107475e95ac3b45a34b365f",
+        "66e3942fb73f4182bac097259363a64d",
+        "6793dde1e51a46b29620da4a74af4373",
+        "679a74d8609e4acb9273d28a526d2929",
+        "6953552dc9ca4702a87e4ce601add066",
+        "6ad523082d004fe09c82d8aa26527790",
+        "6adfb4e09b664ee5ad43d0c28ef16f54",
+        "6b08b56b68f949ec8b418cceb68570db",
+        "6c2f6afc232e44f9bdfd1045e8a8f2be",
+        "6e8735bbb737456ba7c164d97ceccee2",
+        "6ea416cf37534175ae665fae08338812",
+        "6eba15833c7641dfb9d11806f1ba5c14",
+        "6ee187bae3074a67aa9987dc2f2b02df",
+        "6efe9d4e283842dd9d9c743e8dddec50",
+        "6feab41a49d74fff99cf0b2f64cdb267",
+        "71320e745fa44781b6ed3522badf61fd",
+        "713d6dd02dcb458b93d9a71a2260a5c5",
+        "74de4aa589f749adbd9354f45259dff6",
+        "753175fc9bd04e6fa94362a7cbcde250",
+        "75e95e073e1d4450bb12d2e1c2c86e46",
+        "76c052612eba47c8a83c8814b04fd7d5",
+        "76f6fb9110e3461ba0a3d11b0d326eb3",
+        "770767ef224245eaadeb85dd2514b4a4",
+        "7831f9378e37434caf1c51858c45a0b4",
+        "78ff011eb575490487091ea618c1672e",
+        "7aa119a8297b4692943cc7f6d79b754b",
+        "7b035a9a86f3489cbc8ca4bc572affc1",
+        "7b370eac533640089929d04680860357",
+        "7ca4b92481d844ddb9d49510fb6b9096",
+        "7efad00c065f44f394449197cc3674a8",
+        "813da41ffc324a9e8e38c66cdbb6c45a",
+        "82c1630091704712bccb805cfba9df87",
+        "834c2d4df8b842bbb70d5b87913af3c7",
+        "852dfe04a2e34497a943ff027b0e3d5f",
+        "85dd2e4e9bf74767bcebf6cfac58c697",
+        "87180b76be0649de961cad4328742493",
+        "88b092e42bfb4ab8a363c8329af4c0f8",
+        "8a8f4737c971400aa45253684d5a8334",
+        "8b8e6a8e57b342ff8dcb7d59856e2627",
+        "8be478534971406c8375a12cc87a3701",
+        "8da51b7a1cdf481e994f672ff0b94857",
+        "8f36a14d235f43aeb090cd42d5b137cf",
+        "8f5e543d92c343feb48701e3d8d3d194",
+        "90706f31c3f740e6b64786ecd647d16a",
+        "91672cbefe9e40b2906b3fbb41fe85b3",
+        "928139326abf48229fd894a5bab4385b",
+        "93598b6a08144fbd875d0f053afd8d34",
+        "94406ffb60764b4c83c8249dda08a235",
+        "947f5a42061c4874b340e4e5964a7755",
+        "948f05ade3b042928af1feb2d4bb4de5",
+        "954bd6e120dc47aeaa59fb9c0d0aa755",
+        "998b9b15644a4eb39ffe1006620a2b4f",
+        "9d9064bf0e7f418dae824bf487e6d06e",
+        "a0e2ce4dfdfe41b699f3a46c1525b893",
+        "a0e549efdaae48a5a7e9ce447e16ddd2",
+        "a20ca135224446a581ab44965013c6fe",
+        "a22cc12d61f44b478a068410e20d5151",
+        "a326c569f4a84999a361a7f1a61af12d",
+        "a36be3545f0041a3aebf184eaca7140f",
+        "a4693f898fe54309a49e2a18b704baff",
+        "a4f00716871e49d79fd6c419359ab785",
+        "a5a548832a5347e68c9fa2d0242666f9",
+        "a65e08fbee8d4b16aa2d32d59a1538e6",
+        "a8efcc5868d946b39ad9ac6bd6da2ed3",
+        "aa3e0bfcd17041db877d99cf04cafb68",
+        "ab9a2a49acb940389c9a95fc9149b703",
+        "acb2c4d8335344ad8a5a504513b6f40f",
+        "acb7920a70b44a84b1a61ce6460483cb",
+        "ae03d500f9f5482f9fdaf390c796e501",
+        "b0473a456cb1439b8877cedd3b86945e",
+        "b1210242bee144a195100cc30ea6b849",
+        "b410309e0eb742388350e6e280a8a947",
+        "b5e778b8ef0849be9d365d8f7fb5a05a",
+        "b83c2b439a974e80b7bdecbd9465e225",
+        "b979797dff4c4a92b8dcbf5e84cc24f6",
+        "ba9a4a773842401db6ab527b4e891a0a",
+        "bab424bb0a2e41658d249cd2840562d7",
+        "bacb64d23625444983b48dc6b0ebedb6",
+        "bb82ae22168742ca875d15458e558b6d",
+        "bbdfa40842bc444c96aae206c56abe46",
+        "bdd8bce7153541bb93ebad917e120fa9",
+        "be8fddab474d4881999f91d9305bcab0",
+        "bf21e7ee52de4232a67e7472a6d82c00",
+        "bfb32dd99b4d4e37ad18e3b4e99dd024",
+        "c0b13c64c2e04089b65de774929ced16",
+        "c1f3a5fc7d6246b693f9c7ad188ca2d4",
+        "c20b43ffcf144eee9c1f2a7f54d7424f",
+        "c3e45882105f4312b620828823b04957",
+        "c47310b807a74cc2a448491ea303e83b",
+        "c5a55b333cb643d59e8e03233d629910",
+        "c5e055572b08482b8632fb2b64c55c54",
+        "c6b3ced8c4e44089a3fdb76fd9a4018f",
+        "c9b65478168c4e20ab529b38bbbe4416",
+        "ca73b245a1a44d36bcab946037a2435e",
+        "cc99f7a8959a492593c23f71c7364990",
+        "cfe987822e0e4cc0b424315de5f5d151",
+        "d0367ec13609463da523569d1fa97a34",
+        "d0b4b5baa1414c0c8f4464867bf9563f",
+        "d13f4885dd07491c9928f9f3a2b3a17c",
+        "d1d0cfb1742446ac91199a1c3fbb020f",
+        "d2811f8e67b240bba9d6308a926ec74a",
+        "d383ef54f04b4b03a9088d724cab7347",
+        "d43df4ae067d4253a65386491c881391",
+        "d58f896a5a314be6aa4d21c16624a4e2",
+        "d623cfe3156846a8a62e6e145a61b5db",
+        "d8dd55223be644edac73a9d4015f247b",
+        "d95de0e07d9f4c82803d8091804d4f66",
+        "d9a2cc7053a7426d999e80480c7c8fb6",
+        "dbd2e6b403ce440698b0e34aeb37502a",
+        "de88f4c9a3a94af4a0c9eb067c6ec5e0",
+        "df940a60db9b4ad6b0e5f74ae5fbd675",
+        "e17a40fe8d6a4251b6e39db4a00c7509",
+        "e2c2af4d9d54488d9664794e5f35fb58",
+        "e3455b3d754a49abb49f63c6d177ec0a",
+        "e4c35387cb9249c3aee6a741b523a0e4",
+        "e6554ea2e4af4e71a3574c5f6818665e",
+        "ea45bccbc6604b23add45654ae7d4ad7",
+        "eee2082cf4e94f619a511cb40449bc60",
+        "ef22c28492004f21be258cb9fc31abe9",
+        "f280f714a2424ebdafa753c395cebf3e",
+        "f5119339038e4823855537ac37caff10",
+        "f54238bdd48443fcb4a019271dbca2f8",
+        "f59ab2e5cc374c9a856ec24d6e41a90a",
+        "f6860e84610c4c42b313ab3bb7d02871",
+        "f7d65f226d01428999a3f4a01153ec6c",
+        "f7d9f14b6a3c4a6ba41531073316b27b",
+        "f926d5407c814303b45d185c6d48856f",
+        "f95736c379544686811b85f4ae26102c",
+        "fae7ce4e8ccd4b4eb407e7c274965b53",
+        "fb35c9b4468f49b89ba0ed569c3ae779",
+        "fcad18dcda264ec3baa2d3fe86503bb6",
+        "fe4b24ba5efa4f6980bd8ad995c33962",
+        "fe6cf205a6774df2bb8857d9bc31b955",
+        "ff086417956e4b1bb41b41233dfde109",
+        "ff51aa0b8da94a6485b0330e57bddf74"
+      ],
+      "points_in_overlapping_boxes": 5954,
+      "common_miss_points_in_overlapping_boxes": 20,
+      "populations": {
+        "all_queries": {
+          "events": 13064,
+          "distinct_target_points": 2566,
+          "counts": {
+            "same_moving_track": 1894,
+            "other_moving_track": 5033,
+            "track_not_moving_by_window_rule": 3875,
+            "outside_all_annotation_boxes": 1614,
+            "ambiguous_target_boxes": 115,
+            "ambiguous_nearest_boxes": 533,
+            "exact_nearest_range_tie": 0
+          },
+          "details": {
+            "same_moving_track": {
+              "events": 1894,
+              "distinct_target_points": 1312,
+              "range_gap_quantiles_m": [
+                0.5002771138596294,
+                0.9375345055202522,
+                1.6775928954108075,
+                5.7917272806227205,
+                26.47988741423658
+              ],
+              "angular_separation_quantiles_deg": [
+                0.005112591713510013,
+                0.9455176827228897,
+                1.2984120007297313,
+                1.7972676898365714,
+                2.9744629966010674
+              ]
+            },
+            "other_moving_track": {
+              "events": 5033,
+              "distinct_target_points": 2191,
+              "range_gap_quantiles_m": [
+                0.5072503486285278,
+                9.253526181562144,
+                38.18917720973152,
+                45.28090880467599,
+                117.81579716460392
+              ],
+              "angular_separation_quantiles_deg": [
+                0.024679885135767035,
+                0.6776218643490851,
+                1.0546451849330456,
+                1.551191722793111,
+                2.8654521995775957
+              ]
+            },
+            "track_not_moving_by_window_rule": {
+              "events": 3875,
+              "distinct_target_points": 1409,
+              "range_gap_quantiles_m": [
+                0.6190623259169641,
+                8.67038193680812,
+                10.99480952109748,
+                21.085391878075015,
+                122.62850641680382
+              ],
+              "angular_separation_quantiles_deg": [
+                0.04496976524113445,
+                1.0632601260323313,
+                1.5148712273644167,
+                1.880822455079576,
+                3.1785427924314664
+              ]
+            },
+            "outside_all_annotation_boxes": {
+              "events": 1614,
+              "distinct_target_points": 673,
+              "range_gap_quantiles_m": [
+                0.5015022453075382,
+                4.129976718051165,
+                12.652215609942104,
+                29.29769210691671,
+                91.63291305176418
+              ],
+              "angular_separation_quantiles_deg": [
+                0.08559733948598566,
+                0.8586724078160927,
+                1.310502327577284,
+                1.7014380260102333,
+                3.101779896142909
+              ]
+            },
+            "ambiguous_target_boxes": {
+              "events": 115,
+              "distinct_target_points": 20,
+              "range_gap_quantiles_m": [
+                0.690458381869373,
+                9.888936480778431,
+                28.749272520154406,
+                36.574224090999536,
+                73.54384189688521
+              ],
+              "angular_separation_quantiles_deg": [
+                0.09547821281866394,
+                0.8094565850966886,
+                1.4919433927569308,
+                1.878888490584742,
+                2.9134024223041894
+              ]
+            },
+            "ambiguous_nearest_boxes": {
+              "events": 533,
+              "distinct_target_points": 473,
+              "range_gap_quantiles_m": [
+                0.8848225937398535,
+                14.223672526653315,
+                20.98745150662507,
+                23.10275814302831,
+                121.71668852434374
+              ],
+              "angular_separation_quantiles_deg": [
+                0.15313280287432646,
+                0.9276417794318097,
+                1.5402355863734891,
+                1.8895843377361625,
+                2.984570611576572
+              ]
+            },
+            "exact_nearest_range_tie": {
+              "events": 0,
+              "distinct_target_points": 0,
+              "range_gap_quantiles_m": null,
+              "angular_separation_quantiles_deg": null
+            }
+          }
+        },
+        "same_acquisition_scan": {
+          "events": 591,
+          "distinct_target_points": 591,
+          "counts": {
+            "same_moving_track": 291,
+            "other_moving_track": 23,
+            "track_not_moving_by_window_rule": 87,
+            "outside_all_annotation_boxes": 150,
+            "ambiguous_target_boxes": 8,
+            "ambiguous_nearest_boxes": 32,
+            "exact_nearest_range_tie": 0
+          },
+          "details": {
+            "same_moving_track": {
+              "events": 291,
+              "distinct_target_points": 291,
+              "range_gap_quantiles_m": [
+                0.5002771138596294,
+                0.6258097969276486,
+                0.8827679303808438,
+                1.4484522879522101,
+                4.016678828798915
+              ],
+              "angular_separation_quantiles_deg": [
+                0.0841696983411604,
+                1.3613231698274022,
+                1.6080093260767552,
+                1.9976826101026717,
+                2.706103133789373
+              ]
+            },
+            "other_moving_track": {
+              "events": 23,
+              "distinct_target_points": 23,
+              "range_gap_quantiles_m": [
+                7.616377209613187,
+                8.60283873685054,
+                12.028458274267646,
+                13.242976335742997,
+                57.60456354024877
+              ],
+              "angular_separation_quantiles_deg": [
+                0.03912870984305027,
+                1.3497537629275735,
+                1.5702560667211132,
+                1.8031208823900822,
+                2.704517316895161
+              ]
+            },
+            "track_not_moving_by_window_rule": {
+              "events": 87,
+              "distinct_target_points": 87,
+              "range_gap_quantiles_m": [
+                0.8941124453240263,
+                3.7122045473141263,
+                4.501263962709179,
+                9.638547381178736,
+                37.4829635338872
+              ],
+              "angular_separation_quantiles_deg": [
+                0.20143562700712606,
+                1.3989084046505742,
+                1.711811150970944,
+                2.0744902939804923,
+                2.913225313322677
+              ]
+            },
+            "outside_all_annotation_boxes": {
+              "events": 150,
+              "distinct_target_points": 150,
+              "range_gap_quantiles_m": [
+                0.5323855108033193,
+                1.5855762861969414,
+                3.026420155953259,
+                4.751097887289674,
+                50.9422068354836
+              ],
+              "angular_separation_quantiles_deg": [
+                0.31876628227478937,
+                1.366740325016331,
+                1.5038298954817537,
+                1.8867671683636722,
+                2.6857573903846794
+              ]
+            },
+            "ambiguous_target_boxes": {
+              "events": 8,
+              "distinct_target_points": 8,
+              "range_gap_quantiles_m": [
+                0.690458381869373,
+                1.4997569064471978,
+                7.8029199631366115,
+                14.630452032154864,
+                21.533241399019573
+              ],
+              "angular_separation_quantiles_deg": [
+                0.3186001174210082,
+                0.6503401837956784,
+                1.3530864880837017,
+                1.504929687274169,
+                2.5479471519921177
+              ]
+            },
+            "ambiguous_nearest_boxes": {
+              "events": 32,
+              "distinct_target_points": 32,
+              "range_gap_quantiles_m": [
+                0.8848225937398535,
+                1.1033050259470696,
+                2.832467310389582,
+                3.024819096248849,
+                7.882726530895253
+              ],
+              "angular_separation_quantiles_deg": [
+                0.6555134067118119,
+                2.013400277332252,
+                2.0971099648907785,
+                2.338911442288124,
+                2.96761693370209
+              ]
+            },
+            "exact_nearest_range_tie": {
+              "events": 0,
+              "distinct_target_points": 0,
+              "range_gap_quantiles_m": null,
+              "angular_separation_quantiles_deg": null
+            }
+          }
+        },
+        "other_query_scans": {
+          "events": 12473,
+          "distinct_target_points": 2478,
+          "counts": {
+            "same_moving_track": 1603,
+            "other_moving_track": 5010,
+            "track_not_moving_by_window_rule": 3788,
+            "outside_all_annotation_boxes": 1464,
+            "ambiguous_target_boxes": 107,
+            "ambiguous_nearest_boxes": 501,
+            "exact_nearest_range_tie": 0
+          },
+          "details": {
+            "same_moving_track": {
+              "events": 1603,
+              "distinct_target_points": 1109,
+              "range_gap_quantiles_m": [
+                0.5003168208862654,
+                1.1103177219518034,
+                1.8897464940590112,
+                6.4350762543417535,
+                26.47988741423658
+              ],
+              "angular_separation_quantiles_deg": [
+                0.005112591713510013,
+                0.8999892971492585,
+                1.1821220077830155,
+                1.7371333304076568,
+                2.9744629966010674
+              ]
+            },
+            "other_moving_track": {
+              "events": 5010,
+              "distinct_target_points": 2187,
+              "range_gap_quantiles_m": [
+                0.5072503486285278,
+                9.258704295837777,
+                38.23019378736024,
+                45.28392215687044,
+                117.81579716460392
+              ],
+              "angular_separation_quantiles_deg": [
+                0.024679885135767035,
+                0.6756124408061103,
+                1.0531778709090438,
+                1.548892132667873,
+                2.8654521995775957
+              ]
+            },
+            "track_not_moving_by_window_rule": {
+              "events": 3788,
+              "distinct_target_points": 1407,
+              "range_gap_quantiles_m": [
+                0.6190623259169641,
+                8.725548248618441,
+                11.16860575950826,
+                21.14759176386667,
+                122.62850641680382
+              ],
+              "angular_separation_quantiles_deg": [
+                0.04496976524113445,
+                1.0594511639167519,
+                1.5095296524459232,
+                1.8732318814484512,
+                3.1785427924314664
+              ]
+            },
+            "outside_all_annotation_boxes": {
+              "events": 1464,
+              "distinct_target_points": 591,
+              "range_gap_quantiles_m": [
+                0.5015022453075382,
+                5.20322709004126,
+                15.747673506471202,
+                29.929795897756833,
+                91.63291305176418
+              ],
+              "angular_separation_quantiles_deg": [
+                0.08559733948598566,
+                0.8179359738151315,
+                1.2532073801694894,
+                1.6857951972199268,
+                3.101779896142909
+              ]
+            },
+            "ambiguous_target_boxes": {
+              "events": 107,
+              "distinct_target_points": 20,
+              "range_gap_quantiles_m": [
+                1.412768078750478,
+                12.113328484764642,
+                31.528462098463677,
+                36.81690651929328,
+                73.54384189688521
+              ],
+              "angular_separation_quantiles_deg": [
+                0.09547821281866394,
+                0.840496695032544,
+                1.514375040317113,
+                1.894399362578742,
+                2.9134024223041894
+              ]
+            },
+            "ambiguous_nearest_boxes": {
+              "events": 501,
+              "distinct_target_points": 465,
+              "range_gap_quantiles_m": [
+                1.657117806731911,
+                18.476621916385007,
+                21.10144622607673,
+                23.116942893015292,
+                121.71668852434374
+              ],
+              "angular_separation_quantiles_deg": [
+                0.15313280287432646,
+                0.907588165279115,
+                1.480085878741002,
+                1.857716202812396,
+                2.984570611576572
+              ]
+            },
+            "exact_nearest_range_tie": {
+              "events": 0,
+              "distinct_target_points": 0,
+              "range_gap_quantiles_m": null,
+              "angular_separation_quantiles_deg": null
+            }
+          }
+        }
+      },
+      "query_frames": [
+        {
+          "frame": 0,
+          "events": 2330,
+          "counts": {
+            "same_moving_track": 297,
+            "other_moving_track": 1594,
+            "track_not_moving_by_window_rule": 103,
+            "outside_all_annotation_boxes": 315,
+            "ambiguous_target_boxes": 14,
+            "ambiguous_nearest_boxes": 7,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 1,
+          "events": 2124,
+          "counts": {
+            "same_moving_track": 137,
+            "other_moving_track": 1717,
+            "track_not_moving_by_window_rule": 137,
+            "outside_all_annotation_boxes": 104,
+            "ambiguous_target_boxes": 8,
+            "ambiguous_nearest_boxes": 21,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 2,
+          "events": 1353,
+          "counts": {
+            "same_moving_track": 81,
+            "other_moving_track": 937,
+            "track_not_moving_by_window_rule": 156,
+            "outside_all_annotation_boxes": 152,
+            "ambiguous_target_boxes": 8,
+            "ambiguous_nearest_boxes": 19,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 3,
+          "events": 423,
+          "counts": {
+            "same_moving_track": 77,
+            "other_moving_track": 129,
+            "track_not_moving_by_window_rule": 79,
+            "outside_all_annotation_boxes": 113,
+            "ambiguous_target_boxes": 5,
+            "ambiguous_nearest_boxes": 20,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 4,
+          "events": 1301,
+          "counts": {
+            "same_moving_track": 172,
+            "other_moving_track": 48,
+            "track_not_moving_by_window_rule": 972,
+            "outside_all_annotation_boxes": 78,
+            "ambiguous_target_boxes": 18,
+            "ambiguous_nearest_boxes": 13,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 5,
+          "events": 318,
+          "counts": {
+            "same_moving_track": 35,
+            "other_moving_track": 32,
+            "track_not_moving_by_window_rule": 154,
+            "outside_all_annotation_boxes": 97,
+            "ambiguous_target_boxes": 0,
+            "ambiguous_nearest_boxes": 0,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 6,
+          "events": 628,
+          "counts": {
+            "same_moving_track": 7,
+            "other_moving_track": 21,
+            "track_not_moving_by_window_rule": 512,
+            "outside_all_annotation_boxes": 59,
+            "ambiguous_target_boxes": 2,
+            "ambiguous_nearest_boxes": 27,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 7,
+          "events": 526,
+          "counts": {
+            "same_moving_track": 145,
+            "other_moving_track": 5,
+            "track_not_moving_by_window_rule": 180,
+            "outside_all_annotation_boxes": 122,
+            "ambiguous_target_boxes": 18,
+            "ambiguous_nearest_boxes": 56,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 8,
+          "events": 815,
+          "counts": {
+            "same_moving_track": 422,
+            "other_moving_track": 107,
+            "track_not_moving_by_window_rule": 147,
+            "outside_all_annotation_boxes": 119,
+            "ambiguous_target_boxes": 20,
+            "ambiguous_nearest_boxes": 0,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 9,
+          "events": 808,
+          "counts": {
+            "same_moving_track": 30,
+            "other_moving_track": 141,
+            "track_not_moving_by_window_rule": 440,
+            "outside_all_annotation_boxes": 195,
+            "ambiguous_target_boxes": 2,
+            "ambiguous_nearest_boxes": 0,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 10,
+          "events": 969,
+          "counts": {
+            "same_moving_track": 476,
+            "other_moving_track": 159,
+            "track_not_moving_by_window_rule": 158,
+            "outside_all_annotation_boxes": 142,
+            "ambiguous_target_boxes": 2,
+            "ambiguous_nearest_boxes": 32,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 11,
+          "events": 1469,
+          "counts": {
+            "same_moving_track": 15,
+            "other_moving_track": 143,
+            "track_not_moving_by_window_rule": 837,
+            "outside_all_annotation_boxes": 118,
+            "ambiguous_target_boxes": 18,
+            "ambiguous_nearest_boxes": 338,
+            "exact_nearest_range_tie": 0
+          }
+        }
+      ],
+      "events_sha256": "45ea9409030a2df36e736c73fd309739b58fde303156e4cdac3c00d3bb4f8ab7"
+    },
+    {
+      "scene": "scene-0005",
+      "input_hashes": {
+        "manifest_sha256": "2d0566d86d247b88eb0d55179b75776de87f8336c81bbdd80bd76f90b55fd5da",
+        "map_sha256": "07b6aaca85d8a1ab3af5b564a8e7fe4e7803cf3eb76e947c1bbdd823a6c36e5f",
+        "gt_sha256": "f074a38a62f404f421b6a6a06885d17acdbbcc84fb9098e193d4e85a783dfec8"
+      },
+      "source_evidence_trace_sha256": "4f7818931d148623c803f8de0ba5da1a203aa1ec7de0927fd8b5cae557ededbd",
+      "moving_gt_reconstructed_exactly": true,
+      "moving_track_tokens": [
+        "124dd882d41f48e3b7a6341641d632f7",
+        "228c824878494bc39dddb3a5d4e315dc",
+        "4ca1be07174c483ea2555577b9af65eb",
+        "67e50b42878e4036b5b0a9f6a5ff2ecc",
+        "9bb3dacf2eea4600bfc843eebbd7f265",
+        "a6018e09bedb45c49d7499f73d2caccf",
+        "bf1a2d72eff9457f8032a1deccf74a13",
+        "c967bb082dd945bfa993ce4ae9100804",
+        "d60bb8c56c0d4c918ff41cd5452d12f8",
+        "f56040a74c7d4391bce45c0c142b7a6b"
+      ],
+      "owner_index_tokens": [
+        "068bd8a3c4424bb4b13d0f66058ba3c0",
+        "0a3a413a3c1843daa98a9c1867453b7c",
+        "0e337bc6f66e492d800f173b31aeea31",
+        "116bcbf730c2476f9235b47e33c24abc",
+        "124dd882d41f48e3b7a6341641d632f7",
+        "1a0551fbe16445bd8613ad938f2780e8",
+        "1e53ee61a0844d85bc3024bcb4691494",
+        "228c824878494bc39dddb3a5d4e315dc",
+        "2a16b3461e504fb4a9a9583b4a49bb15",
+        "32dbd51eccb64b55a53e5b2b3443afa5",
+        "344ee5c1c80f40c491b6031920c9e3d0",
+        "37d4137c58c746428f1e80adcd68a24d",
+        "3938d8ed761446a7b928398f666e88f8",
+        "3ca197d4e78a48738d920ddb4425c215",
+        "452df245d3d5439e96d4bf8fe35fd13b",
+        "45a134342bb34676ac846cc3ee29854a",
+        "45eb4b52f088452e98eca49357c3f8e5",
+        "4acc7b52b88c44fb86ee7c327525b809",
+        "4ca1be07174c483ea2555577b9af65eb",
+        "512a0254a0854223a51790f5c1c9f210",
+        "58630d3dc609437594dad1d722134702",
+        "5935d8a1bf684991bfd0a79748ee0647",
+        "5a64ec1b51b14344af5525320d85f891",
+        "5a7eee1177cb4056bfe61086e7583de9",
+        "6240abb32f2545e3bd718e6f8fd5d2bf",
+        "67e50b42878e4036b5b0a9f6a5ff2ecc",
+        "6944bf21d22e4f68a187aa7cd4502f54",
+        "698e7b1255544bbaa1c29012a45c2070",
+        "6c109c05c0ee49a5aea63a8453228cfe",
+        "7500b232568649678843622b1f4cb73f",
+        "75c0b765e7d34b71bc0f5f5af00ce7d7",
+        "7ca112cbfbc74a408af68743dae697a2",
+        "7d2b6c7560a0460dbc665b372069a2bc",
+        "857c6b75fe284877bf26fc05a51275a9",
+        "8b5bdd2a7e7f4ab889dfb4a87f69840f",
+        "9661eb841d544fcd9578722591e934f8",
+        "9bb3dacf2eea4600bfc843eebbd7f265",
+        "9d940b1cfd4246d8b8b06c35225fa88e",
+        "a48af4ccb2464bb0a73d4f8d0a239195",
+        "a6018e09bedb45c49d7499f73d2caccf",
+        "b42bdf54b9644a79aa09a76c9deee9ad",
+        "b7c3077e43a3404cb07cf0579bf8c017",
+        "bf1a2d72eff9457f8032a1deccf74a13",
+        "c01d35cfba7946fc9b2fcfc08f802b85",
+        "c967bb082dd945bfa993ce4ae9100804",
+        "ceb14dfae9c9452a8453d26b44ce6826",
+        "d490d692ce8745cc8ba1f77ca0ef0709",
+        "d60bb8c56c0d4c918ff41cd5452d12f8",
+        "d68976b79464432a93f988a879153446",
+        "dd0acd2cf6064bc793773e92889e3d97",
+        "dd82202136e9440b99b3567a92a5f29f",
+        "e532a95562b742c689ae70289d7af33d",
+        "e9ad48460193431390d61284c8e50c44",
+        "ed0035af31ad4815a58d68b5bda98171",
+        "f10aff0eb8c54e5facd87ae932c5f2c4",
+        "f39f64c66a824092aa2370cd6f0a4e01",
+        "f56040a74c7d4391bce45c0c142b7a6b",
+        "f6ded5857132445c99d8b5db5fdfd100",
+        "fa1bb7d8cafe48a7881e1ee01edbd6a8",
+        "fad272a5611a4146abed52629cbb5ee6",
+        "fc1a002dded04740a1dba7e48b233774"
+      ],
+      "points_in_overlapping_boxes": 3474,
+      "common_miss_points_in_overlapping_boxes": 1,
+      "populations": {
+        "all_queries": {
+          "events": 72309,
+          "distinct_target_points": 7634,
+          "counts": {
+            "same_moving_track": 6791,
+            "other_moving_track": 148,
+            "track_not_moving_by_window_rule": 1219,
+            "outside_all_annotation_boxes": 64134,
+            "ambiguous_target_boxes": 8,
+            "ambiguous_nearest_boxes": 9,
+            "exact_nearest_range_tie": 0
+          },
+          "details": {
+            "same_moving_track": {
+              "events": 6791,
+              "distinct_target_points": 3953,
+              "range_gap_quantiles_m": [
+                0.5004056704770363,
+                0.7622710919204985,
+                1.1804114913379706,
+                2.3704692720069946,
+                63.49526989391768
+              ],
+              "angular_separation_quantiles_deg": [
+                0.019527566252090695,
+                1.0992321566438,
+                1.5706420193845556,
+                2.0313013445047123,
+                3.3181815870832567
+              ]
+            },
+            "other_moving_track": {
+              "events": 148,
+              "distinct_target_points": 63,
+              "range_gap_quantiles_m": [
+                1.0378378330608555,
+                21.20606195502932,
+                40.96124796445053,
+                74.44148934267812,
+                136.13328976269858
+              ],
+              "angular_separation_quantiles_deg": [
+                0.31451909699414143,
+                1.5336856110950967,
+                1.810623882743467,
+                2.1030169606146867,
+                2.7872540924145928
+              ]
+            },
+            "track_not_moving_by_window_rule": {
+              "events": 1219,
+              "distinct_target_points": 930,
+              "range_gap_quantiles_m": [
+                0.527681528911307,
+                12.442974117200993,
+                23.649486911247006,
+                25.204742819493468,
+                60.885487509583214
+              ],
+              "angular_separation_quantiles_deg": [
+                0.02099994889934563,
+                1.1796164244675607,
+                1.5123295424700716,
+                1.8363287502743442,
+                3.1603698442751003
+              ]
+            },
+            "outside_all_annotation_boxes": {
+              "events": 64134,
+              "distinct_target_points": 7610,
+              "range_gap_quantiles_m": [
+                0.5342957357419138,
+                7.059047392658552,
+                9.807512292478005,
+                14.29254444556776,
+                110.490477684123
+              ],
+              "angular_separation_quantiles_deg": [
+                0.0031860035633090194,
+                0.8238209345192194,
+                1.2797303794657457,
+                1.7801614292379027,
+                3.411462752154988
+              ]
+            },
+            "ambiguous_target_boxes": {
+              "events": 8,
+              "distinct_target_points": 1,
+              "range_gap_quantiles_m": [
+                6.373003096198335,
+                13.997861501557907,
+                21.446475059321372,
+                42.82023325344926,
+                53.61372665570978
+              ],
+              "angular_separation_quantiles_deg": [
+                0.7172889221881179,
+                0.940634247254142,
+                1.532127840127686,
+                2.102917742652853,
+                2.353412955227243
+              ]
+            },
+            "ambiguous_nearest_boxes": {
+              "events": 9,
+              "distinct_target_points": 9,
+              "range_gap_quantiles_m": [
+                21.45221356113629,
+                21.56188363591005,
+                23.339264348116835,
+                23.430104774997574,
+                23.550689670094684
+              ],
+              "angular_separation_quantiles_deg": [
+                0.34319163869477204,
+                0.9249666444211921,
+                1.5533406958428886,
+                1.7446026910230334,
+                1.9723695507262513
+              ]
+            },
+            "exact_nearest_range_tie": {
+              "events": 0,
+              "distinct_target_points": 0,
+              "range_gap_quantiles_m": null,
+              "angular_separation_quantiles_deg": null
+            }
+          }
+        },
+        "same_acquisition_scan": {
+          "events": 1838,
+          "distinct_target_points": 1838,
+          "counts": {
+            "same_moving_track": 677,
+            "other_moving_track": 2,
+            "track_not_moving_by_window_rule": 6,
+            "outside_all_annotation_boxes": 1152,
+            "ambiguous_target_boxes": 1,
+            "ambiguous_nearest_boxes": 0,
+            "exact_nearest_range_tie": 0
+          },
+          "details": {
+            "same_moving_track": {
+              "events": 677,
+              "distinct_target_points": 677,
+              "range_gap_quantiles_m": [
+                0.5011489743311426,
+                0.6516951100983075,
+                0.8485417952737215,
+                1.420123687085976,
+                5.113264047614528
+              ],
+              "angular_separation_quantiles_deg": [
+                0.019527566252090695,
+                1.3459681983397427,
+                1.6317277746167704,
+                2.0316188263189128,
+                2.820153611514368
+              ]
+            },
+            "other_moving_track": {
+              "events": 2,
+              "distinct_target_points": 2,
+              "range_gap_quantiles_m": [
+                27.758607920526927,
+                27.829109028554605,
+                27.899610136582282,
+                27.970111244609956,
+                28.040612352637634
+              ],
+              "angular_separation_quantiles_deg": [
+                1.4747029312659319,
+                1.7097177370639034,
+                1.9447325428618747,
+                2.179747348659846,
+                2.4147621544578177
+              ]
+            },
+            "track_not_moving_by_window_rule": {
+              "events": 6,
+              "distinct_target_points": 6,
+              "range_gap_quantiles_m": [
+                4.199711712383273,
+                5.392046009141549,
+                10.107717839622902,
+                22.38614292321111,
+                28.19831060089399
+              ],
+              "angular_separation_quantiles_deg": [
+                0.3321684534014773,
+                1.0760210092706535,
+                1.354891821631429,
+                2.274746482339142,
+                2.6527395634597477
+              ]
+            },
+            "outside_all_annotation_boxes": {
+              "events": 1152,
+              "distinct_target_points": 1152,
+              "range_gap_quantiles_m": [
+                0.6102478120064632,
+                2.29687220435686,
+                2.870320140672034,
+                5.246705873408836,
+                34.804098442456564
+              ],
+              "angular_separation_quantiles_deg": [
+                0.017877728904000457,
+                1.326984502281521,
+                1.5098834298865067,
+                1.8861640375350794,
+                2.7463307663620204
+              ]
+            },
+            "ambiguous_target_boxes": {
+              "events": 1,
+              "distinct_target_points": 1,
+              "range_gap_quantiles_m": [
+                6.373003096198335,
+                6.373003096198335,
+                6.373003096198335,
+                6.373003096198335,
+                6.373003096198335
+              ],
+              "angular_separation_quantiles_deg": [
+                1.5018319450393438,
+                1.5018319450393438,
+                1.5018319450393438,
+                1.5018319450393438,
+                1.5018319450393438
+              ]
+            },
+            "ambiguous_nearest_boxes": {
+              "events": 0,
+              "distinct_target_points": 0,
+              "range_gap_quantiles_m": null,
+              "angular_separation_quantiles_deg": null
+            },
+            "exact_nearest_range_tie": {
+              "events": 0,
+              "distinct_target_points": 0,
+              "range_gap_quantiles_m": null,
+              "angular_separation_quantiles_deg": null
+            }
+          }
+        },
+        "other_query_scans": {
+          "events": 70471,
+          "distinct_target_points": 7615,
+          "counts": {
+            "same_moving_track": 6114,
+            "other_moving_track": 146,
+            "track_not_moving_by_window_rule": 1213,
+            "outside_all_annotation_boxes": 62982,
+            "ambiguous_target_boxes": 7,
+            "ambiguous_nearest_boxes": 9,
+            "exact_nearest_range_tie": 0
+          },
+          "details": {
+            "same_moving_track": {
+              "events": 6114,
+              "distinct_target_points": 3739,
+              "range_gap_quantiles_m": [
+                0.5004056704770363,
+                0.7847328017207884,
+                1.219531751070317,
+                2.5086405366178575,
+                63.49526989391768
+              ],
+              "angular_separation_quantiles_deg": [
+                0.03093286174103134,
+                1.08007532675795,
+                1.5659833558133225,
+                2.030915996802972,
+                3.3181815870832567
+              ]
+            },
+            "other_moving_track": {
+              "events": 146,
+              "distinct_target_points": 62,
+              "range_gap_quantiles_m": [
+                1.0378378330608555,
+                21.186370172264233,
+                41.097439468350494,
+                74.45896991464616,
+                136.13328976269858
+              ],
+              "angular_separation_quantiles_deg": [
+                0.31451909699414143,
+                1.5351354862530209,
+                1.810623882743467,
+                2.0903662193431236,
+                2.7872540924145928
+              ]
+            },
+            "track_not_moving_by_window_rule": {
+              "events": 1213,
+              "distinct_target_points": 930,
+              "range_gap_quantiles_m": [
+                0.527681528911307,
+                12.445704858450792,
+                23.658401785781233,
+                25.20513313130308,
+                60.885487509583214
+              ],
+              "angular_separation_quantiles_deg": [
+                0.02099994889934563,
+                1.1803293935142187,
+                1.5133251401752574,
+                1.835030850639989,
+                3.1603698442751003
+              ]
+            },
+            "outside_all_annotation_boxes": {
+              "events": 62982,
+              "distinct_target_points": 7610,
+              "range_gap_quantiles_m": [
+                0.5342957357419138,
+                7.21038034804792,
+                9.893156342558816,
+                14.369841302508698,
+                110.490477684123
+              ],
+              "angular_separation_quantiles_deg": [
+                0.0031860035633090194,
+                0.8194214087303247,
+                1.2705280730678523,
+                1.777817469535874,
+                3.411462752154988
+              ]
+            },
+            "ambiguous_target_boxes": {
+              "events": 7,
+              "distinct_target_points": 1,
+              "range_gap_quantiles_m": [
+                11.83575563468932,
+                15.384219625600345,
+                26.84307432462282,
+                45.017058274461334,
+                53.61372665570978
+              ],
+              "angular_separation_quantiles_deg": [
+                0.7172889221881179,
+                0.913509409365241,
+                1.5624237352160284,
+                2.1525306347010584,
+                2.353412955227243
+              ]
+            },
+            "ambiguous_nearest_boxes": {
+              "events": 9,
+              "distinct_target_points": 9,
+              "range_gap_quantiles_m": [
+                21.45221356113629,
+                21.56188363591005,
+                23.339264348116835,
+                23.430104774997574,
+                23.550689670094684
+              ],
+              "angular_separation_quantiles_deg": [
+                0.34319163869477204,
+                0.9249666444211921,
+                1.5533406958428886,
+                1.7446026910230334,
+                1.9723695507262513
+              ]
+            },
+            "exact_nearest_range_tie": {
+              "events": 0,
+              "distinct_target_points": 0,
+              "range_gap_quantiles_m": null,
+              "angular_separation_quantiles_deg": null
+            }
+          }
+        }
+      },
+      "query_frames": [
+        {
+          "frame": 0,
+          "events": 7228,
+          "counts": {
+            "same_moving_track": 43,
+            "other_moving_track": 11,
+            "track_not_moving_by_window_rule": 0,
+            "outside_all_annotation_boxes": 7173,
+            "ambiguous_target_boxes": 1,
+            "ambiguous_nearest_boxes": 0,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 1,
+          "events": 6712,
+          "counts": {
+            "same_moving_track": 827,
+            "other_moving_track": 6,
+            "track_not_moving_by_window_rule": 12,
+            "outside_all_annotation_boxes": 5866,
+            "ambiguous_target_boxes": 1,
+            "ambiguous_nearest_boxes": 0,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 2,
+          "events": 5353,
+          "counts": {
+            "same_moving_track": 1058,
+            "other_moving_track": 12,
+            "track_not_moving_by_window_rule": 0,
+            "outside_all_annotation_boxes": 4282,
+            "ambiguous_target_boxes": 1,
+            "ambiguous_nearest_boxes": 0,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 3,
+          "events": 3489,
+          "counts": {
+            "same_moving_track": 1212,
+            "other_moving_track": 18,
+            "track_not_moving_by_window_rule": 12,
+            "outside_all_annotation_boxes": 2246,
+            "ambiguous_target_boxes": 1,
+            "ambiguous_nearest_boxes": 0,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 4,
+          "events": 2870,
+          "counts": {
+            "same_moving_track": 1154,
+            "other_moving_track": 13,
+            "track_not_moving_by_window_rule": 11,
+            "outside_all_annotation_boxes": 1691,
+            "ambiguous_target_boxes": 1,
+            "ambiguous_nearest_boxes": 0,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 5,
+          "events": 3996,
+          "counts": {
+            "same_moving_track": 923,
+            "other_moving_track": 38,
+            "track_not_moving_by_window_rule": 92,
+            "outside_all_annotation_boxes": 2942,
+            "ambiguous_target_boxes": 1,
+            "ambiguous_nearest_boxes": 0,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 6,
+          "events": 6619,
+          "counts": {
+            "same_moving_track": 1013,
+            "other_moving_track": 12,
+            "track_not_moving_by_window_rule": 18,
+            "outside_all_annotation_boxes": 5575,
+            "ambiguous_target_boxes": 1,
+            "ambiguous_nearest_boxes": 0,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 7,
+          "events": 6874,
+          "counts": {
+            "same_moving_track": 231,
+            "other_moving_track": 12,
+            "track_not_moving_by_window_rule": 329,
+            "outside_all_annotation_boxes": 6297,
+            "ambiguous_target_boxes": 1,
+            "ambiguous_nearest_boxes": 4,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 8,
+          "events": 7336,
+          "counts": {
+            "same_moving_track": 96,
+            "other_moving_track": 8,
+            "track_not_moving_by_window_rule": 61,
+            "outside_all_annotation_boxes": 7171,
+            "ambiguous_target_boxes": 0,
+            "ambiguous_nearest_boxes": 0,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 9,
+          "events": 7031,
+          "counts": {
+            "same_moving_track": 175,
+            "other_moving_track": 4,
+            "track_not_moving_by_window_rule": 54,
+            "outside_all_annotation_boxes": 6798,
+            "ambiguous_target_boxes": 0,
+            "ambiguous_nearest_boxes": 0,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 10,
+          "events": 7385,
+          "counts": {
+            "same_moving_track": 24,
+            "other_moving_track": 6,
+            "track_not_moving_by_window_rule": 131,
+            "outside_all_annotation_boxes": 7219,
+            "ambiguous_target_boxes": 0,
+            "ambiguous_nearest_boxes": 5,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 11,
+          "events": 7416,
+          "counts": {
+            "same_moving_track": 35,
+            "other_moving_track": 8,
+            "track_not_moving_by_window_rule": 499,
+            "outside_all_annotation_boxes": 6874,
+            "ambiguous_target_boxes": 0,
+            "ambiguous_nearest_boxes": 0,
+            "exact_nearest_range_tie": 0
+          }
+        }
+      ],
+      "events_sha256": "89e06ff8ef05183418eec3772af6c194b72e69e5a6156c1edb64f3449415c0f4"
+    },
+    {
+      "scene": "scene-0006",
+      "input_hashes": {
+        "manifest_sha256": "82a9de80ff38c18b53002af82509622664eeebfe452c93b1a183017404e6d5a4",
+        "map_sha256": "2b48c25303f325e1c00aa0cf4b25aafcdb03268bda3454ca00845d06bbf0e5fc",
+        "gt_sha256": "b6db130e05607865a90bcf16301fb41e2377fda512868ca4a0e05c921ce73b3f"
+      },
+      "source_evidence_trace_sha256": "582ab0d713c196c0674588725c09feb4635c3b865bd8445a26d07feea5da04dc",
+      "moving_gt_reconstructed_exactly": true,
+      "moving_track_tokens": [
+        "07df1ef123cd4e40a5102c3b15f4ce5a",
+        "0aad2f2085504d32b1905b0318f096c5",
+        "11a6944bd2bf47a6a4d1dc955d56a7b3",
+        "166f0d91cb7745d2ac78d390eacf6ab8",
+        "19e50e1ea6f44bdc9b35117b038b4341",
+        "1a391c1f288f4f0a8fce5152f2656fcc",
+        "1df401e07cb24846a7a150b4599604b9",
+        "1e4987b606c44aff9eac02d1adab99c8",
+        "209568191a844e05af2e4b353778e9ed",
+        "23e14d768eab400099c816a3ac0ff041",
+        "265b9b00212445b2b34c1b3f58cb1fad",
+        "29165e62b4d94d789d4626dff1651c46",
+        "30359aa85cff4426812bca9ec5057eb5",
+        "324624662abe496d82be6793569ca970",
+        "37efe5932d7f4084ac8ed3bbb5ed6220",
+        "4b2725f4eebf45ef95cac8503d1fdcf3",
+        "4e6f9896ce2145029db3a913fc2ba6b2",
+        "56a9802dbe824219992d60debdea6646",
+        "59b031d0f4a54a8c9ae7c07a79088458",
+        "5fba546b1f154f5a8d32c7b72cca78b9",
+        "6558453605c14933bdcedcddd1316c3e",
+        "659e16f0c2724215acfbb9efd54b5597",
+        "6f068386a7644d3cac6a355a850c98c6",
+        "751ba7c2c7dc440aa2dca004c051495f",
+        "7c270b1f2cd14012b00d6447e18f46f8",
+        "8374fa0ae0324664824a759fea9119fb",
+        "85ed05bf741944c983aeb3c2a3af9649",
+        "877135629cc7439fa843f8b8e23ee0de",
+        "8a454bc5782b4630af37d18cfdcbbaec",
+        "8d9cd16311da4026b49c9ab8ec5444c6",
+        "9496b67a78cf4b8ca979114701e5f570",
+        "94b9bc45217f4e53a8fed788be256297",
+        "98300b9c4acb4da9a7aecd0084650265",
+        "99bf66ad3c5f418682abc00017889e90",
+        "9aba64373b7746fba09ee52313428b91",
+        "9cbdfb38595d421aa076bfb2131cc1de",
+        "a4e1eff670704e00844a920f938e4482",
+        "a56c66a11cf949f2bcb93ac09f1af409",
+        "b1a7a49af35b48fc92b7b32acc805d71",
+        "b3da7da9f86e47ebb2ff20ae3d0eb5b7",
+        "bd53bebcf84049f699fa69b917a471ec",
+        "c55843d1d3104163a2e097508aa33565",
+        "c6270e36e34e469d96ec972b0d0f611a",
+        "c9aaf3ce97e84545a93961a062969b12",
+        "cb999a1a3b9044f7a2b4b6eadbb1d555",
+        "d1b1ed508c6548569b84cef085f600b4",
+        "d5beff09fb134dc1922a4ff8e1ba4d6d",
+        "df7e8f12f80c4f3cac45cc3d882592c9",
+        "e73bd4f6ed2b4acc9eba8cdc12c58bf8",
+        "fc5f8f4d557e4e6c8d2462f821f0709d",
+        "fccf43c8d6b441c49ca41243e3875e07",
+        "ff4d5fb252b747d2a9a2003d32e0a87e"
+      ],
+      "owner_index_tokens": [
+        "008465f81c2a4f979fec3056e456a09c",
+        "01d3bc76857a4409a992b8d1bd650a60",
+        "07df1ef123cd4e40a5102c3b15f4ce5a",
+        "0aad2f2085504d32b1905b0318f096c5",
+        "0bec906c48734ed993da65a2da943136",
+        "11a6944bd2bf47a6a4d1dc955d56a7b3",
+        "12b510d8f30c4cec947746e011933dc7",
+        "166f0d91cb7745d2ac78d390eacf6ab8",
+        "19e50e1ea6f44bdc9b35117b038b4341",
+        "1a391c1f288f4f0a8fce5152f2656fcc",
+        "1df401e07cb24846a7a150b4599604b9",
+        "1e4987b606c44aff9eac02d1adab99c8",
+        "209568191a844e05af2e4b353778e9ed",
+        "23e14d768eab400099c816a3ac0ff041",
+        "265b9b00212445b2b34c1b3f58cb1fad",
+        "29165e62b4d94d789d4626dff1651c46",
+        "2b471529490b4f40bab9eef057a4b7b4",
+        "2b6861956edf4603bafbcbaab2f460b4",
+        "2b940c211e6f4a3aa97c340040660d76",
+        "2e32dbc3bf234c1b9bc0336fd74337fa",
+        "2f22ddc22da4409bbcf7bdd3ba8ceaaf",
+        "30359aa85cff4426812bca9ec5057eb5",
+        "324624662abe496d82be6793569ca970",
+        "331873a28a434502962e22cfa1e514ff",
+        "37efe5932d7f4084ac8ed3bbb5ed6220",
+        "3c8a82546976424abad1aa1b0562e76e",
+        "3d99c1500af24652ba64fdad577ea518",
+        "3e76f2e8cc4c41919cce905f6d25c625",
+        "48d30213ba684c3d85a6878f569dd694",
+        "4b2725f4eebf45ef95cac8503d1fdcf3",
+        "4e6f9896ce2145029db3a913fc2ba6b2",
+        "51cf9d868a3342e7802e30914c8ef7e0",
+        "56a9802dbe824219992d60debdea6646",
+        "588a0344534a447180cc43706799dbff",
+        "59b031d0f4a54a8c9ae7c07a79088458",
+        "5fba546b1f154f5a8d32c7b72cca78b9",
+        "6558453605c14933bdcedcddd1316c3e",
+        "659e16f0c2724215acfbb9efd54b5597",
+        "67e52fba6b624fd893d5af8d3c4aacca",
+        "68091ec809b14513bbf4b95b13699d7d",
+        "6b0e3d4d10a144bb888da08ffbe13c27",
+        "6f068386a7644d3cac6a355a850c98c6",
+        "70a775f642f04c4081541719521a3b1d",
+        "748eeee14e7749e597437d90295dd265",
+        "751ba7c2c7dc440aa2dca004c051495f",
+        "7a22f0e7913f4136bff525037db98b9b",
+        "7aa3ca414f8e43c98c5cdc138fb352dc",
+        "7c270b1f2cd14012b00d6447e18f46f8",
+        "8275d9f6463a4fdcae4da9bcf579a720",
+        "8374fa0ae0324664824a759fea9119fb",
+        "838b5ef900a140aa9b2ac9c256cc2f2e",
+        "85ed05bf741944c983aeb3c2a3af9649",
+        "877135629cc7439fa843f8b8e23ee0de",
+        "8a454bc5782b4630af37d18cfdcbbaec",
+        "8c4d4351c48240aab819b21e3c68c61a",
+        "8d9cd16311da4026b49c9ab8ec5444c6",
+        "9496b67a78cf4b8ca979114701e5f570",
+        "94b9bc45217f4e53a8fed788be256297",
+        "98300b9c4acb4da9a7aecd0084650265",
+        "99bf66ad3c5f418682abc00017889e90",
+        "9aba64373b7746fba09ee52313428b91",
+        "9adf8eeef30241289a2eb9ad9be95fd3",
+        "9cbdfb38595d421aa076bfb2131cc1de",
+        "a0f8aa3f26ec4f48bdbcc1c761b0de30",
+        "a2f2bf44dbf543b191d047e60f975803",
+        "a32a6f81e147477bb716c6ac6d9edf37",
+        "a376724c0450401e8f61e9ab0cd1056f",
+        "a44cc7ce623a40ff82a8961f4616cdbd",
+        "a4e1eff670704e00844a920f938e4482",
+        "a56c66a11cf949f2bcb93ac09f1af409",
+        "ade9941b402f4729bc82913a872514a5",
+        "b1a7a49af35b48fc92b7b32acc805d71",
+        "b3da7da9f86e47ebb2ff20ae3d0eb5b7",
+        "b56392c6263640519a06c565a6d5180a",
+        "b5af1e7dab28498f937af5e98e9ed9bb",
+        "baa08e2bfd49453394093c810dc1398d",
+        "bd53bebcf84049f699fa69b917a471ec",
+        "bf39cd48ea094c37b880c22443d7449a",
+        "bfb2e8ae3a174c7caf7c193b93a5a4ee",
+        "bfb668ccef1e43a083cc7644029f2e8b",
+        "c4771b4655734bfda4f1a14a4c103505",
+        "c55843d1d3104163a2e097508aa33565",
+        "c6270e36e34e469d96ec972b0d0f611a",
+        "c62a3918ccd04f3baa7ec73d37da317b",
+        "c9aaf3ce97e84545a93961a062969b12",
+        "cb999a1a3b9044f7a2b4b6eadbb1d555",
+        "ce5f1c374526410aa00d82e92aec32d9",
+        "d1b1ed508c6548569b84cef085f600b4",
+        "d4cd0edff4a748b6b6ebbe723bf9f74e",
+        "d5beff09fb134dc1922a4ff8e1ba4d6d",
+        "d84618c0be744031aeabc03a21f32163",
+        "df7e8f12f80c4f3cac45cc3d882592c9",
+        "e73bd4f6ed2b4acc9eba8cdc12c58bf8",
+        "eeed51b73c7d4bee8e25026a7f6acca7",
+        "f067629d0267477dba07b405d6346cea",
+        "f09989e160cf482abb4f73dfdac2fdb8",
+        "f6450ef9ea8d484fb63ddc51f6f5d99d",
+        "f96f66680c9f459b81744b4acd98155f",
+        "fa167204f9a4402a9214bd458140b600",
+        "fc5f8f4d557e4e6c8d2462f821f0709d",
+        "fccf43c8d6b441c49ca41243e3875e07",
+        "fcf8f6ce45b34086bc0514eb96e5f87f",
+        "fe1ed3d9041246fda146d156e4403f46",
+        "ff3b000b77ba48d692c99e11b4abfc4c",
+        "ff4d5fb252b747d2a9a2003d32e0a87e"
+      ],
+      "points_in_overlapping_boxes": 7667,
+      "common_miss_points_in_overlapping_boxes": 5327,
+      "populations": {
+        "all_queries": {
+          "events": 157131,
+          "distinct_target_points": 22689,
+          "counts": {
+            "same_moving_track": 16956,
+            "other_moving_track": 24837,
+            "track_not_moving_by_window_rule": 1906,
+            "outside_all_annotation_boxes": 72473,
+            "ambiguous_target_boxes": 37260,
+            "ambiguous_nearest_boxes": 3699,
+            "exact_nearest_range_tie": 0
+          },
+          "details": {
+            "same_moving_track": {
+              "events": 16956,
+              "distinct_target_points": 6011,
+              "range_gap_quantiles_m": [
+                0.5000668770420162,
+                0.9107080688579821,
+                1.457725737972329,
+                2.334084235027712,
+                6.153613348329909
+              ],
+              "angular_separation_quantiles_deg": [
+                0.006970979062214192,
+                0.8383157170602819,
+                1.3004582403316989,
+                1.797101187284955,
+                3.341056636371809
+              ]
+            },
+            "other_moving_track": {
+              "events": 24837,
+              "distinct_target_points": 13592,
+              "range_gap_quantiles_m": [
+                0.5001007793120813,
+                9.435541517077663,
+                23.917785069413235,
+                39.059275603980964,
+                95.6880503135947
+              ],
+              "angular_separation_quantiles_deg": [
+                0.00629683497686004,
+                0.911237370724461,
+                1.362496961162193,
+                1.8123128135204185,
+                3.415380260444876
+              ]
+            },
+            "track_not_moving_by_window_rule": {
+              "events": 1906,
+              "distinct_target_points": 1857,
+              "range_gap_quantiles_m": [
+                0.5602482787582659,
+                14.222274011466627,
+                18.976897480602787,
+                24.948511527748884,
+                53.90516828511015
+              ],
+              "angular_separation_quantiles_deg": [
+                0.012595423720275572,
+                0.9195582022024216,
+                1.300424202027044,
+                1.617201168736674,
+                2.6704040522680956
+              ]
+            },
+            "outside_all_annotation_boxes": {
+              "events": 72473,
+              "distinct_target_points": 16822,
+              "range_gap_quantiles_m": [
+                0.5001633602480231,
+                6.664414766846518,
+                10.883973855824745,
+                25.83384076539623,
+                102.71362425768592
+              ],
+              "angular_separation_quantiles_deg": [
+                0.002379532555276852,
+                0.9853703779369856,
+                1.5081384667824225,
+                1.9827708494535128,
+                3.3669899488089707
+              ]
+            },
+            "ambiguous_target_boxes": {
+              "events": 37260,
+              "distinct_target_points": 5327,
+              "range_gap_quantiles_m": [
+                0.500159674812414,
+                4.981173282136471,
+                13.355089480204025,
+                29.229539747849802,
+                103.64093360435417
+              ],
+              "angular_separation_quantiles_deg": [
+                0.0052098092716514255,
+                0.9756485467990454,
+                1.4433930989868884,
+                1.9049931222044958,
+                3.4280466356317523
+              ]
+            },
+            "ambiguous_nearest_boxes": {
+              "events": 3699,
+              "distinct_target_points": 3087,
+              "range_gap_quantiles_m": [
+                0.5000212077771771,
+                0.9538043603386563,
+                2.4420137769335675,
+                4.717284212876477,
+                36.6505215751962
+              ],
+              "angular_separation_quantiles_deg": [
+                0.052247403971013684,
+                1.3548434693210427,
+                1.852752368257431,
+                2.2277708623448684,
+                3.308028145739684
+              ]
+            },
+            "exact_nearest_range_tie": {
+              "events": 0,
+              "distinct_target_points": 0,
+              "range_gap_quantiles_m": null,
+              "angular_separation_quantiles_deg": null
+            }
+          }
+        },
+        "same_acquisition_scan": {
+          "events": 4117,
+          "distinct_target_points": 4117,
+          "counts": {
+            "same_moving_track": 865,
+            "other_moving_track": 434,
+            "track_not_moving_by_window_rule": 39,
+            "outside_all_annotation_boxes": 1552,
+            "ambiguous_target_boxes": 950,
+            "ambiguous_nearest_boxes": 277,
+            "exact_nearest_range_tie": 0
+          },
+          "details": {
+            "same_moving_track": {
+              "events": 865,
+              "distinct_target_points": 865,
+              "range_gap_quantiles_m": [
+                0.5003933186975011,
+                0.6260929160693718,
+                0.9021363416910351,
+                1.6537599532654284,
+                5.619548357473121
+              ],
+              "angular_separation_quantiles_deg": [
+                0.1093374305526782,
+                1.3520243255430175,
+                1.6312132981952003,
+                1.993613208376534,
+                2.7814511605427317
+              ]
+            },
+            "other_moving_track": {
+              "events": 434,
+              "distinct_target_points": 434,
+              "range_gap_quantiles_m": [
+                0.5005451426365344,
+                1.186248801863302,
+                3.996081622331162,
+                4.662685250051778,
+                28.34798525897533
+              ],
+              "angular_separation_quantiles_deg": [
+                0.08233526586631203,
+                1.3402277049411673,
+                1.713539009800117,
+                2.101126843340625,
+                3.090325387317005
+              ]
+            },
+            "track_not_moving_by_window_rule": {
+              "events": 39,
+              "distinct_target_points": 39,
+              "range_gap_quantiles_m": [
+                0.5602482787582659,
+                0.9962978285566195,
+                1.5082831787992195,
+                2.0455498901381484,
+                2.7654001650714246
+              ],
+              "angular_separation_quantiles_deg": [
+                0.13997366979453404,
+                1.2809491060783644,
+                1.657507171491856,
+                2.052873382147589,
+                2.6704040522680956
+              ]
+            },
+            "outside_all_annotation_boxes": {
+              "events": 1552,
+              "distinct_target_points": 1552,
+              "range_gap_quantiles_m": [
+                0.5001633602480231,
+                1.5145197975652513,
+                2.8954093251711166,
+                5.926339731889868,
+                50.55535983945603
+              ],
+              "angular_separation_quantiles_deg": [
+                0.03998131470313229,
+                1.323177344773069,
+                1.5238192949633869,
+                1.891888059837372,
+                2.787318763454503
+              ]
+            },
+            "ambiguous_target_boxes": {
+              "events": 950,
+              "distinct_target_points": 950,
+              "range_gap_quantiles_m": [
+                0.500159674812414,
+                0.9758271582124163,
+                1.7155880402252595,
+                3.527039192594331,
+                24.682176533838685
+              ],
+              "angular_separation_quantiles_deg": [
+                0.13196831250412333,
+                1.3113445596112259,
+                1.617441996549324,
+                1.9817723898168464,
+                2.8087738546265757
+              ]
+            },
+            "ambiguous_nearest_boxes": {
+              "events": 277,
+              "distinct_target_points": 277,
+              "range_gap_quantiles_m": [
+                0.5032904785588794,
+                0.7721667705828534,
+                1.2754337669030456,
+                2.6704693418362133,
+                33.130300355718234
+              ],
+              "angular_separation_quantiles_deg": [
+                0.11599755783203343,
+                1.3516246665577394,
+                1.6723808888302665,
+                2.0646818990068296,
+                2.803878324476956
+              ]
+            },
+            "exact_nearest_range_tie": {
+              "events": 0,
+              "distinct_target_points": 0,
+              "range_gap_quantiles_m": null,
+              "angular_separation_quantiles_deg": null
+            }
+          }
+        },
+        "other_query_scans": {
+          "events": 153014,
+          "distinct_target_points": 22689,
+          "counts": {
+            "same_moving_track": 16091,
+            "other_moving_track": 24403,
+            "track_not_moving_by_window_rule": 1867,
+            "outside_all_annotation_boxes": 70921,
+            "ambiguous_target_boxes": 36310,
+            "ambiguous_nearest_boxes": 3422,
+            "exact_nearest_range_tie": 0
+          },
+          "details": {
+            "same_moving_track": {
+              "events": 16091,
+              "distinct_target_points": 5736,
+              "range_gap_quantiles_m": [
+                0.5000668770420162,
+                0.9409125124166793,
+                1.476552453344059,
+                2.3742464249836424,
+                6.153613348329909
+              ],
+              "angular_separation_quantiles_deg": [
+                0.006970979062214192,
+                0.8194209451363597,
+                1.26917690536814,
+                1.7806049523244822,
+                3.341056636371809
+              ]
+            },
+            "other_moving_track": {
+              "events": 24403,
+              "distinct_target_points": 13568,
+              "range_gap_quantiles_m": [
+                0.5001007793120813,
+                9.663494604940198,
+                24.22210603408836,
+                39.22413521796433,
+                95.6880503135947
+              ],
+              "angular_separation_quantiles_deg": [
+                0.00629683497686004,
+                0.9061464222009713,
+                1.354688349349693,
+                1.8047505084309656,
+                3.415380260444876
+              ]
+            },
+            "track_not_moving_by_window_rule": {
+              "events": 1867,
+              "distinct_target_points": 1846,
+              "range_gap_quantiles_m": [
+                0.6254275599858197,
+                14.577292673610318,
+                19.08506031066361,
+                25.038299085021606,
+                53.90516828511015
+              ],
+              "angular_separation_quantiles_deg": [
+                0.012595423720275572,
+                0.9130133746838969,
+                1.2935654797452896,
+                1.6132788828286861,
+                2.646273012675488
+              ]
+            },
+            "outside_all_annotation_boxes": {
+              "events": 70921,
+              "distinct_target_points": 16795,
+              "range_gap_quantiles_m": [
+                0.5011422122641989,
+                6.857228811916485,
+                11.074151882744879,
+                26.075392098347265,
+                102.71362425768592
+              ],
+              "angular_separation_quantiles_deg": [
+                0.002379532555276852,
+                0.9805134016462392,
+                1.5074137612689802,
+                1.9844808236021865,
+                3.3669899488089707
+              ]
+            },
+            "ambiguous_target_boxes": {
+              "events": 36310,
+              "distinct_target_points": 5327,
+              "range_gap_quantiles_m": [
+                0.5004049548311738,
+                5.2810500180411575,
+                14.045411587263638,
+                29.672857153548822,
+                103.64093360435417
+              ],
+              "angular_separation_quantiles_deg": [
+                0.0052098092716514255,
+                0.9689513435452729,
+                1.4385503002699604,
+                1.9028932381951413,
+                3.4280466356317523
+              ]
+            },
+            "ambiguous_nearest_boxes": {
+              "events": 3422,
+              "distinct_target_points": 2916,
+              "range_gap_quantiles_m": [
+                0.5000212077771771,
+                0.9831237195461209,
+                2.5340200683511034,
+                4.893484103620259,
+                36.6505215751962
+              ],
+              "angular_separation_quantiles_deg": [
+                0.052247403971013684,
+                1.355357106252686,
+                1.8625896835573148,
+                2.2378629418181544,
+                3.308028145739684
+              ]
+            },
+            "exact_nearest_range_tie": {
+              "events": 0,
+              "distinct_target_points": 0,
+              "range_gap_quantiles_m": null,
+              "angular_separation_quantiles_deg": null
+            }
+          }
+        }
+      },
+      "query_frames": [
+        {
+          "frame": 0,
+          "events": 19856,
+          "counts": {
+            "same_moving_track": 122,
+            "other_moving_track": 489,
+            "track_not_moving_by_window_rule": 0,
+            "outside_all_annotation_boxes": 14299,
+            "ambiguous_target_boxes": 4641,
+            "ambiguous_nearest_boxes": 305,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 1,
+          "events": 18285,
+          "counts": {
+            "same_moving_track": 344,
+            "other_moving_track": 992,
+            "track_not_moving_by_window_rule": 1,
+            "outside_all_annotation_boxes": 12418,
+            "ambiguous_target_boxes": 4428,
+            "ambiguous_nearest_boxes": 102,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 2,
+          "events": 14284,
+          "counts": {
+            "same_moving_track": 222,
+            "other_moving_track": 628,
+            "track_not_moving_by_window_rule": 0,
+            "outside_all_annotation_boxes": 9672,
+            "ambiguous_target_boxes": 3582,
+            "ambiguous_nearest_boxes": 180,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 3,
+          "events": 11662,
+          "counts": {
+            "same_moving_track": 394,
+            "other_moving_track": 701,
+            "track_not_moving_by_window_rule": 0,
+            "outside_all_annotation_boxes": 7692,
+            "ambiguous_target_boxes": 2670,
+            "ambiguous_nearest_boxes": 205,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 4,
+          "events": 9355,
+          "counts": {
+            "same_moving_track": 997,
+            "other_moving_track": 830,
+            "track_not_moving_by_window_rule": 0,
+            "outside_all_annotation_boxes": 4864,
+            "ambiguous_target_boxes": 2310,
+            "ambiguous_nearest_boxes": 354,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 5,
+          "events": 8248,
+          "counts": {
+            "same_moving_track": 1527,
+            "other_moving_track": 667,
+            "track_not_moving_by_window_rule": 27,
+            "outside_all_annotation_boxes": 3327,
+            "ambiguous_target_boxes": 1600,
+            "ambiguous_nearest_boxes": 1100,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 6,
+          "events": 8756,
+          "counts": {
+            "same_moving_track": 3103,
+            "other_moving_track": 618,
+            "track_not_moving_by_window_rule": 53,
+            "outside_all_annotation_boxes": 3039,
+            "ambiguous_target_boxes": 1381,
+            "ambiguous_nearest_boxes": 562,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 7,
+          "events": 6576,
+          "counts": {
+            "same_moving_track": 1463,
+            "other_moving_track": 1222,
+            "track_not_moving_by_window_rule": 0,
+            "outside_all_annotation_boxes": 1889,
+            "ambiguous_target_boxes": 1324,
+            "ambiguous_nearest_boxes": 678,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 8,
+          "events": 5936,
+          "counts": {
+            "same_moving_track": 745,
+            "other_moving_track": 1211,
+            "track_not_moving_by_window_rule": 5,
+            "outside_all_annotation_boxes": 2315,
+            "ambiguous_target_boxes": 1460,
+            "ambiguous_nearest_boxes": 200,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 9,
+          "events": 15137,
+          "counts": {
+            "same_moving_track": 2556,
+            "other_moving_track": 7584,
+            "track_not_moving_by_window_rule": 35,
+            "outside_all_annotation_boxes": 817,
+            "ambiguous_target_boxes": 4137,
+            "ambiguous_nearest_boxes": 8,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 10,
+          "events": 17928,
+          "counts": {
+            "same_moving_track": 2445,
+            "other_moving_track": 8217,
+            "track_not_moving_by_window_rule": 79,
+            "outside_all_annotation_boxes": 2608,
+            "ambiguous_target_boxes": 4577,
+            "ambiguous_nearest_boxes": 2,
+            "exact_nearest_range_tie": 0
+          }
+        },
+        {
+          "frame": 11,
+          "events": 21108,
+          "counts": {
+            "same_moving_track": 3038,
+            "other_moving_track": 1678,
+            "track_not_moving_by_window_rule": 1706,
+            "outside_all_annotation_boxes": 9533,
+            "ambiguous_target_boxes": 5150,
+            "ambiguous_nearest_boxes": 3,
+            "exact_nearest_range_tie": 0
+          }
+        }
+      ],
+      "events_sha256": "76a9ee45f1c853f1ed4c04eee2aaac9f82f6e2377791f0cc7881fb8de40d9a92"
+    }
+  ],
+  "aggregate_event_counts": {
+    "all_queries": {
+      "same_moving_track": 25641,
+      "other_moving_track": 30018,
+      "track_not_moving_by_window_rule": 7000,
+      "outside_all_annotation_boxes": 138221,
+      "ambiguous_target_boxes": 37383,
+      "ambiguous_nearest_boxes": 4241,
+      "exact_nearest_range_tie": 0
+    },
+    "same_acquisition_scan": {
+      "same_moving_track": 1833,
+      "other_moving_track": 459,
+      "track_not_moving_by_window_rule": 132,
+      "outside_all_annotation_boxes": 2854,
+      "ambiguous_target_boxes": 959,
+      "ambiguous_nearest_boxes": 309,
+      "exact_nearest_range_tie": 0
+    },
+    "other_query_scans": {
+      "same_moving_track": 23808,
+      "other_moving_track": 29559,
+      "track_not_moving_by_window_rule": 6868,
+      "outside_all_annotation_boxes": 135367,
+      "ambiguous_target_boxes": 36424,
+      "ambiguous_nearest_boxes": 3932,
+      "exact_nearest_range_tie": 0
+    }
+  },
+  "limitations": "Three correlated scenes from one drive; repeated point/scan events, not distinct objects. Moving/nonmoving refers to >2 m box-center displacement over the selected window; single-observation tracks are not classified moving. Outside annotations is not proven static structure. Box overlaps and exact nearest-range ties remain separate. Target identities come from acquisition-time boxes; nearest identities from query-time boxes. Angular-bin nearest returns do not establish exact-ray occlusion. Undeskewed/offline/moving-box GT limitations remain. Distinct-point counts overlap across relation categories; no GT attribution is used for inference."
+}

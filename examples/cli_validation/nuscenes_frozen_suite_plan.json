@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-10-24T01:20:57.608374+00:00",
+  "dataset": "nuscenes-trainval",
+  "metadata_version": "v1.0-trainval",
+  "archive_url": "https://motional-nuscenes.s3.amazonaws.com/public/v1.0/v1.0-trainval01_blobs_lidar.tgz",
+  "archive_prefix_sha256": "857d01561d5f9198872376ccde4c1d5bfe1f01e92e53ac96e94cc4adf63f8dc3",
+  "archive_inventory_logs": [
+    "n008-2018-08-01-15-16-36-0400",
+    "n008-2018-08-01-15-52-19-0400",
+    "n015-2018-07-18-11-18-34+0800",
+    "n015-2018-07-18-11-41-49+0800",
+    "n015-2018-07-18-11-50-34+0800",
+    "n015-2018-07-24-11-03-52+0800",
+    "n015-2018-07-24-11-13-19+0800",
+    "n015-2018-07-24-11-22-45+0800"
+  ],
+  "previously_examined_scenes": [
+    "scene-0061",
+    "scene-0103",
+    "scene-0553",
+    "scene-0655",
+    "scene-0757",
+    "scene-0796",
+    "scene-0916",
+    "scene-1077",
+    "scene-1094",
+    "scene-1100"
+  ],
+  "scenes": [
+    "scene-0004",
+    "scene-0005",
+    "scene-0006"
+  ],
+  "selection": "First lexicographic non-mini scenes whose logs occur in the fixed first 8 MiB of trainval01 LiDAR archive; no GT or result screening, no replacement.",
+  "frames": 12,
+  "stride": 3,
+  "moving_threshold_m": 2.0,
+  "box_margin_m": 0.25,
+  "min_distance": 1.0,
+  "sensor_ground_z": -1.6,
+  "deskewed": false,
+  "parameters": {
+    "range": {
+      "h_res_deg": 2.5,
+      "v_res_deg": 2.5,
+      "range_margin": 0.5,
+      "min_see_through": 3,
+      "max_surface_hits": 5,
+      "ground_z": null,
+      "resolutions": null
+    },
+    "scan_ratio": {
+      "n_rings": 20,
+      "n_sectors": 108,
+      "max_range": 80.0,
+      "scan_ratio_threshold": 0.2,
+      "min_map_height": 0.5,
+      "ground_margin": 0.2,
+      "min_votes": null,
+      "votes_fraction": 0.5,
+      "votes_floor": 3
+    }
+  },
+  "parameters_source_sha256": "8c565840aebcdfe9301369432775ea14d66958dd33e6708f3e2a64f878ff15b5",
+  "modes": [
+    "none",
+    "either",
+    "visibility_supported"
+  ],
+  "metadata_sha256": {
+    "scene": "bdc3211bfbfda652d5e9dab73c45c7132925ca84f869bf45e8e14edeafb1d20b",
+    "log": "774c8256554a5569f64660e5f450394ce7e3a82168edfab530edab81f9ae7edc",
+    "sample": "6035ac58b6e971622be2bb1be15b917e7cb4e05ae984d6b339c27c1699c4ad9d",
+    "sample_data": "6dcad49f0b9bd7b1cef04e2a0ff2ac2879b46b938e8d48153f00693cebb4de21",
+    "ego_pose": "be12bd501f694b344628ba0680a37d6e1ec83e62b37f310c205c1dbe41cd09ff",
+    "calibrated_sensor": "67781a5dd7b2504b046ef89d6dcb267b12d1cc91af21f1ec5758624588e99865",
+    "sample_annotation": "1f4f3835cb86f4efe49ccad3ae6f5f6a2d068422696de564c5892b5b06bea2a9"
+  },
+  "code_sha256": {
+    "dynamic_object_removal.py": "e4c668b9ea721b45c89930d06ad52266d06ee420fcc09893603aed818d0b62ad",
+    "bench.py": "6e14eb49076546a07ba0caad08bab8154bfc4a2f36bc7dbe77c8ce90cd134ce2",
+    "scripts/run_nuscenes_benchmark.py": "7ce38d914cb1a30052b1dc496f6278d2bd3afa9ee58290988b93f7ff3b2c239f",
+    "scripts/experiment_neighbor_columns.py": "801837ba42a2bdb18bb9fdc4d40f068914f5ab0af9642f2dc6370669b1eccd51",
+    "scripts/validate_frozen_av2_suite.py": "46050bb23abf11412709003c6d1d3e3b6af7262d1e0c02bcd6637607af60f993",
+    "scripts/validate_frozen_nuscenes_suite.py": "909174890fb8f4d29823ceba112fc5ff6e79ed8b7176c7916bdf46e677ec4e13"
+  },
+  "aggregation": "Unweighted mean of all selected scenes, including zero-GT scenes; per-scene deltas and worst static preservation; no eligibility threshold."
+}

@@ -1,0 +1,112 @@
+{
+  "plan_sha256": "c19221c2e5cd89b0ec6678ae72ac3ba4400337557521b5a4a361051973aaa391",
+  "status": "post-result diagnostic; not part of the prospective candidate comparison",
+  "scene_results": [
+    {
+      "scene": "scene-0004",
+      "source_log": "n015-2018-07-18-11-18-34+0800",
+      "input_hashes": {
+        "manifest_sha256": "797f190308364fa2a8355578ede23547835f9062b57109abfed8e06b17ea57ae",
+        "map_sha256": "c4bcfabeb3697a1714ace0b8b9407701162ce9640330c1b83b4d61c6e86651e0",
+        "gt_sha256": "898c1483efba8fcc7a0e1904fa493ee24788d30f908898a61ee61c9bfdf547b4"
+      },
+      "range": {
+        "precision": 0.4036370119450883,
+        "recall": 0.39740214147797087,
+        "f1": 0.4004953122235981,
+        "iou": 0.2503870825038708,
+        "static_preservation": 0.9761253898805913,
+        "true_positive": 2264,
+        "false_positive": 3345,
+        "false_negative": 3433,
+        "true_negative": 136762
+      },
+      "scan_ratio": {
+        "precision": 0.030001401934669845,
+        "recall": 0.03756362998069159,
+        "f1": 0.033359314107560406,
+        "iou": 0.01696258719086874,
+        "static_preservation": 0.950616314673785,
+        "true_positive": 214,
+        "false_positive": 6919,
+        "false_negative": 5483,
+        "true_negative": 133188
+      },
+      "range_only_moving_removals": 2153,
+      "scan_ratio_only_moving_removals": 103,
+      "moving_points_missed_by_both": 3330,
+      "gt_dynamic_points": 5697
+    },
+    {
+      "scene": "scene-0005",
+      "source_log": "n015-2018-07-18-11-18-34+0800",
+      "input_hashes": {
+        "manifest_sha256": "2d0566d86d247b88eb0d55179b75776de87f8336c81bbdd80bd76f90b55fd5da",
+        "map_sha256": "07b6aaca85d8a1ab3af5b564a8e7fe4e7803cf3eb76e947c1bbdd823a6c36e5f",
+        "gt_sha256": "f074a38a62f404f421b6a6a06885d17acdbbcc84fb9098e193d4e85a783dfec8"
+      },
+      "range": {
+        "precision": 0.039289558665231435,
+        "recall": 0.02428476380572189,
+        "f1": 0.030016447368421056,
+        "iou": 0.015236902525568774,
+        "static_preservation": 0.9718328380190937,
+        "true_positive": 219,
+        "false_positive": 5355,
+        "false_negative": 8799,
+        "true_negative": 184760
+      },
+      "scan_ratio": {
+        "precision": 0.11381898454746137,
+        "recall": 0.14293634952317588,
+        "f1": 0.12672663815563093,
+        "iou": 0.067649837304503,
+        "static_preservation": 0.9472108986665966,
+        "true_positive": 1289,
+        "false_positive": 10036,
+        "false_negative": 7729,
+        "true_negative": 180079
+      },
+      "range_only_moving_removals": 69,
+      "scan_ratio_only_moving_removals": 1139,
+      "moving_points_missed_by_both": 7660,
+      "gt_dynamic_points": 9018
+    },
+    {
+      "scene": "scene-0006",
+      "source_log": "n015-2018-07-18-11-18-34+0800",
+      "input_hashes": {
+        "manifest_sha256": "82a9de80ff38c18b53002af82509622664eeebfe452c93b1a183017404e6d5a4",
+        "map_sha256": "2b48c25303f325e1c00aa0cf4b25aafcdb03268bda3454ca00845d06bbf0e5fc",
+        "gt_sha256": "b6db130e05607865a90bcf16301fb41e2377fda512868ca4a0e05c921ce73b3f"
+      },
+      "range": {
+        "precision": 0.08766412453809262,
+        "recall": 0.03866158113730929,
+        "f1": 0.05365865396183738,
+        "iou": 0.02756898427455247,
+        "static_preservation": 0.9230085324911425,
+        "true_positive": 1115,
+        "false_positive": 11604,
+        "false_negative": 27725,
+        "true_negative": 139114
+      },
+      "scan_ratio": {
+        "precision": 0.15118035603210805,
+        "recall": 0.1769764216366158,
+        "f1": 0.16306448778773502,
+        "iou": 0.08876984886167974,
+        "static_preservation": 0.8098634536020913,
+        "true_positive": 5104,
+        "false_positive": 28657,
+        "false_negative": 23736,
+        "true_negative": 122061
+      },
+      "range_only_moving_removals": 1047,
+      "scan_ratio_only_moving_removals": 5036,
+      "moving_points_missed_by_both": 22689,
+      "gt_dynamic_points": 28840
+    }
+  ],
+  "limitations": "Fixed inputs and parameters; diagnoses channel disagreement only, not proof that either guard is incorrect. Moving-box GT and undeskewed keyframes remain limitations. No retuning or default change."
+}

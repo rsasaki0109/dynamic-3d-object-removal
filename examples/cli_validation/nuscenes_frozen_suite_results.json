@@ -1,0 +1,532 @@
+{
+  "plan_sha256": "c19221c2e5cd89b0ec6678ae72ac3ba4400337557521b5a4a361051973aaa391",
+  "plan": {
+    "schema_version": 1,
+    "created_utc": "2026-10-24T01:20:57.608374+00:00",
+    "dataset": "nuscenes-trainval",
+    "metadata_version": "v1.0-trainval",
+    "archive_url": "https://motional-nuscenes.s3.amazonaws.com/public/v1.0/v1.0-trainval01_blobs_lidar.tgz",
+    "archive_prefix_sha256": "857d01561d5f9198872376ccde4c1d5bfe1f01e92e53ac96e94cc4adf63f8dc3",
+    "archive_inventory_logs": [
+      "n008-2018-08-01-15-16-36-0400",
+      "n008-2018-08-01-15-52-19-0400",
+      "n015-2018-07-18-11-18-34+0800",
+      "n015-2018-07-18-11-41-49+0800",
+      "n015-2018-07-18-11-50-34+0800",
+      "n015-2018-07-24-11-03-52+0800",
+      "n015-2018-07-24-11-13-19+0800",
+      "n015-2018-07-24-11-22-45+0800"
+    ],
+    "previously_examined_scenes": [
+      "scene-0061",
+      "scene-0103",
+      "scene-0553",
+      "scene-0655",
+      "scene-0757",
+      "scene-0796",
+      "scene-0916",
+      "scene-1077",
+      "scene-1094",
+      "scene-1100"
+    ],
+    "scenes": [
+      "scene-0004",
+      "scene-0005",
+      "scene-0006"
+    ],
+    "selection": "First lexicographic non-mini scenes whose logs occur in the fixed first 8 MiB of trainval01 LiDAR archive; no GT or result screening, no replacement.",
+    "frames": 12,
+    "stride": 3,
+    "moving_threshold_m": 2.0,
+    "box_margin_m": 0.25,
+    "min_distance": 1.0,
+    "sensor_ground_z": -1.6,
+    "deskewed": false,
+    "parameters": {
+      "range": {
+        "h_res_deg": 2.5,
+        "v_res_deg": 2.5,
+        "range_margin": 0.5,
+        "min_see_through": 3,
+        "max_surface_hits": 5,
+        "ground_z": null,
+        "resolutions": null
+      },
+      "scan_ratio": {
+        "n_rings": 20,
+        "n_sectors": 108,
+        "max_range": 80.0,
+        "scan_ratio_threshold": 0.2,
+        "min_map_height": 0.5,
+        "ground_margin": 0.2,
+        "min_votes": null,
+        "votes_fraction": 0.5,
+        "votes_floor": 3
+      }
+    },
+    "parameters_source_sha256": "8c565840aebcdfe9301369432775ea14d66958dd33e6708f3e2a64f878ff15b5",
+    "modes": [
+      "none",
+      "either",
+      "visibility_supported"
+    ],
+    "metadata_sha256": {
+      "scene": "bdc3211bfbfda652d5e9dab73c45c7132925ca84f869bf45e8e14edeafb1d20b",
+      "log": "774c8256554a5569f64660e5f450394ce7e3a82168edfab530edab81f9ae7edc",
+      "sample": "6035ac58b6e971622be2bb1be15b917e7cb4e05ae984d6b339c27c1699c4ad9d",
+      "sample_data": "6dcad49f0b9bd7b1cef04e2a0ff2ac2879b46b938e8d48153f00693cebb4de21",
+      "ego_pose": "be12bd501f694b344628ba0680a37d6e1ec83e62b37f310c205c1dbe41cd09ff",
+      "calibrated_sensor": "67781a5dd7b2504b046ef89d6dcb267b12d1cc91af21f1ec5758624588e99865",
+      "sample_annotation": "1f4f3835cb86f4efe49ccad3ae6f5f6a2d068422696de564c5892b5b06bea2a9"
+    },
+    "code_sha256": {
+      "dynamic_object_removal.py": "e4c668b9ea721b45c89930d06ad52266d06ee420fcc09893603aed818d0b62ad",
+      "bench.py": "6e14eb49076546a07ba0caad08bab8154bfc4a2f36bc7dbe77c8ce90cd134ce2",
+      "scripts/run_nuscenes_benchmark.py": "7ce38d914cb1a30052b1dc496f6278d2bd3afa9ee58290988b93f7ff3b2c239f",
+      "scripts/experiment_neighbor_columns.py": "801837ba42a2bdb18bb9fdc4d40f068914f5ab0af9642f2dc6370669b1eccd51",
+      "scripts/validate_frozen_av2_suite.py": "46050bb23abf11412709003c6d1d3e3b6af7262d1e0c02bcd6637607af60f993",
+      "scripts/validate_frozen_nuscenes_suite.py": "909174890fb8f4d29823ceba112fc5ff6e79ed8b7176c7916bdf46e677ec4e13"
+    },
+    "aggregation": "Unweighted mean of all selected scenes, including zero-GT scenes; per-scene deltas and worst static preservation; no eligibility threshold."
+  },
+  "scene_results": [
+    {
+      "scene": "scene-0004",
+      "gt_dynamic_points": 5697,
+      "input_hashes": {
+        "manifest_sha256": "797f190308364fa2a8355578ede23547835f9062b57109abfed8e06b17ea57ae",
+        "map_sha256": "c4bcfabeb3697a1714ace0b8b9407701162ce9640330c1b83b4d61c6e86651e0",
+        "gt_sha256": "898c1483efba8fcc7a0e1904fa493ee24788d30f908898a61ee61c9bfdf547b4"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "results": {
+        "none": {
+          "metrics": {
+            "precision": 0.21346153846153845,
+            "recall": 0.019483938915218536,
+            "f1": 0.03570854109699212,
+            "iou": 0.01817884048476908,
+            "static_preservation": 0.9970808025294953,
+            "true_positive": 111,
+            "false_positive": 409,
+            "false_negative": 5586,
+            "true_negative": 139698
+          },
+          "inferred_point_scan_observations": 0,
+          "additional_moving_removed": 0,
+          "additional_static_removed": 0,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "either": {
+          "metrics": {
+            "precision": 0.2848324514991182,
+            "recall": 0.05669650693347376,
+            "f1": 0.09456887717757283,
+            "iou": 0.04963122311001844,
+            "static_preservation": 0.9942115668738892,
+            "true_positive": 323,
+            "false_positive": 811,
+            "false_negative": 5374,
+            "true_negative": 139296
+          },
+          "inferred_point_scan_observations": 139007,
+          "additional_moving_removed": 254,
+          "additional_static_removed": 424,
+          "lost_moving_removed": 42,
+          "recovered_static_points": 22
+        },
+        "visibility_supported": {
+          "metrics": {
+            "precision": 0.27411167512690354,
+            "recall": 0.02843601895734597,
+            "f1": 0.051526717557251904,
+            "iou": 0.02644466209598433,
+            "static_preservation": 0.9969380544869278,
+            "true_positive": 162,
+            "false_positive": 429,
+            "false_negative": 5535,
+            "true_negative": 139678
+          },
+          "inferred_point_scan_observations": 11781,
+          "additional_moving_removed": 93,
+          "additional_static_removed": 38,
+          "lost_moving_removed": 42,
+          "recovered_static_points": 18
+        }
+      },
+      "map_points": 145804,
+      "native_api_mask_verified": true,
+      "raw_cloud_sha256": {
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531883985948699.pcd.bin": "d690c85b277eaeb6feb86c7ddea0d7ee76e795f1dcd014a86530ef5f9536202f",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531883987398588.pcd.bin": "70cab8639c2a59399e04c5a1a4bc986d2bd22ccf919641729479adf3d2148ede",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531883988898749.pcd.bin": "037c60bbcf0a50bd77d018a4e238467e181df6da8c4d3a64891a39df16d66a4c",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531883990400032.pcd.bin": "1a6db501d966d603e1b2d56d2bb86f979d70a0e647590cc50386df1d077efa1b",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531883991948870.pcd.bin": "330bead315896bb3bbff905469c3c84fede7133e2692a2994e3dc4b1c8797e4e",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531883993449644.pcd.bin": "7a9be93b4617a81ac0c28c5741de50f90c6051be60a67c933f6afad6e79f49a2",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531883994949236.pcd.bin": "c73ef26961e554577a184f3e85f7145fffd10a9b2e7be4aaac22b324f9d809d1",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531883996448871.pcd.bin": "19e74b4c3ae481bd77a55c26f050a1575b0ad27884e9f2856b11be962a349500",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531883997898176.pcd.bin": "6f65cea4ad395a29893621dae44f1d79a051e6567e84f95d70a6ccf3144feb42",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531883999398354.pcd.bin": "e3c55c37f68ecd3036a8b202ad0b6207dc17cb15ad2d000e179c725a5e865246",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531884000798465.pcd.bin": "0e80b30202ffa56e089089059f80b501295bee583b5dcdf009571456a2497bcc",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531884002298646.pcd.bin": "711cdcf673d6100345a03b0d721990820ca73ec0ba8ea14d5a07cc975e878148"
+      }
+    },
+    {
+      "scene": "scene-0005",
+      "gt_dynamic_points": 9018,
+      "input_hashes": {
+        "manifest_sha256": "2d0566d86d247b88eb0d55179b75776de87f8336c81bbdd80bd76f90b55fd5da",
+        "map_sha256": "07b6aaca85d8a1ab3af5b564a8e7fe4e7803cf3eb76e947c1bbdd823a6c36e5f",
+        "gt_sha256": "f074a38a62f404f421b6a6a06885d17acdbbcc84fb9098e193d4e85a783dfec8"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "results": {
+        "none": {
+          "metrics": {
+            "precision": 0.06561679790026247,
+            "recall": 0.0166333998669328,
+            "f1": 0.02653927813163482,
+            "iou": 0.013448090371167294,
+            "static_preservation": 0.9887646950529942,
+            "true_positive": 150,
+            "false_positive": 2136,
+            "false_negative": 8868,
+            "true_negative": 187979
+          },
+          "inferred_point_scan_observations": 0,
+          "additional_moving_removed": 0,
+          "additional_static_removed": 0,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "either": {
+          "metrics": {
+            "precision": 0.0622050622050622,
+            "recall": 0.016078953204701707,
+            "f1": 0.025552912150850295,
+            "iou": 0.0129418064976794,
+            "static_preservation": 0.9885016963416879,
+            "true_positive": 145,
+            "false_positive": 2186,
+            "false_negative": 8873,
+            "true_negative": 187929
+          },
+          "inferred_point_scan_observations": 204917,
+          "additional_moving_removed": 3,
+          "additional_static_removed": 176,
+          "lost_moving_removed": 8,
+          "recovered_static_points": 126
+        },
+        "visibility_supported": {
+          "metrics": {
+            "precision": 0.0708838043965904,
+            "recall": 0.01752051452650255,
+            "f1": 0.028096381257224152,
+            "iou": 0.014248354224907566,
+            "static_preservation": 0.9891065933776925,
+            "true_positive": 158,
+            "false_positive": 2071,
+            "false_negative": 8860,
+            "true_negative": 188044
+          },
+          "inferred_point_scan_observations": 6790,
+          "additional_moving_removed": 10,
+          "additional_static_removed": 4,
+          "lost_moving_removed": 2,
+          "recovered_static_points": 69
+        }
+      },
+      "map_points": 199133,
+      "native_api_mask_verified": true,
+      "raw_cloud_sha256": {
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531884104147859.pcd.bin": "f86acb23f2ad828adf6031380e0b997a03d662c0c8aff0f7996c1a4e61aa27c8",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531884105648615.pcd.bin": "4976fd1749bb11b16755d856c5b397586f89657ee9db8f49f66dea1c20e95476",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531884107048136.pcd.bin": "6c213ee71667958ca7c5a1892229f69cfa04ef0ca07d5cbadf09a358326fb3ad",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531884108548863.pcd.bin": "d8e801450eaa5cd6a7b7a5e7c52775c6a73ec3d9dfda53fa15e87be94879625f",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531884110048523.pcd.bin": "3c06968b70cecd59321a3d99560b79392d1eaa09fb07c5507e8ca4242ad56883",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531884111449198.pcd.bin": "62a5913d3b26f1e7cf1585c39f7d9630068bee941fc66c051944d8185084b209",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531884112948227.pcd.bin": "ddb0c5acbf1f0fe75a1064fdc1255b5664ac839858c2306854df53b02ac995af",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531884114447864.pcd.bin": "b1f3b6ae85c548bcd59a6624d59c52f891384ec6f97fb96d5ec5cfae96b0a942",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531884115898278.pcd.bin": "3503d31f1884a4e115515da525a25e9fea3109ae011fc2432b20c9bcea80ea18",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531884117449330.pcd.bin": "06de603e486c253d6ba7aa0fb2643c8c50a3c00090bd768bf34b98fc6f03d4cd",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531884118949516.pcd.bin": "abac640e25fb16bf4a7d86964b69d45585907054e393b566d7d609f2018669fe",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531884120398809.pcd.bin": "5935241d465908dde739862db8029fa6344e8ab9b5a8661d0a226d725dba62a8"
+      }
+    },
+    {
+      "scene": "scene-0006",
+      "gt_dynamic_points": 28840,
+      "input_hashes": {
+        "manifest_sha256": "82a9de80ff38c18b53002af82509622664eeebfe452c93b1a183017404e6d5a4",
+        "map_sha256": "2b48c25303f325e1c00aa0cf4b25aafcdb03268bda3454ca00845d06bbf0e5fc",
+        "gt_sha256": "b6db130e05607865a90bcf16301fb41e2377fda512868ca4a0e05c921ce73b3f"
+      },
+      "parameters": {
+        "range": {
+          "h_res_deg": 2.5,
+          "v_res_deg": 2.5,
+          "range_margin": 0.5,
+          "min_see_through": 3,
+          "max_surface_hits": 5,
+          "ground_z": null,
+          "resolutions": null
+        },
+        "scan_ratio": {
+          "n_rings": 20,
+          "n_sectors": 108,
+          "max_range": 80.0,
+          "scan_ratio_threshold": 0.2,
+          "min_map_height": 0.5,
+          "ground_margin": 0.2,
+          "min_votes": null,
+          "votes_fraction": 0.5,
+          "votes_floor": 3
+        }
+      },
+      "results": {
+        "none": {
+          "metrics": {
+            "precision": 0.012996941896024464,
+            "recall": 0.0023578363384188627,
+            "f1": 0.0039915473115754874,
+            "iou": 0.0019997647335607575,
+            "static_preservation": 0.9657373372788917,
+            "true_positive": 68,
+            "false_positive": 5164,
+            "false_negative": 28772,
+            "true_negative": 145554
+          },
+          "inferred_point_scan_observations": 0,
+          "additional_moving_removed": 0,
+          "additional_static_removed": 0,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 0
+        },
+        "either": {
+          "metrics": {
+            "precision": 0.011966422575459903,
+            "recall": 0.0023231622746185854,
+            "f1": 0.003890937599814164,
+            "iou": 0.001949261026416851,
+            "static_preservation": 0.9632956912910203,
+            "true_positive": 67,
+            "false_positive": 5532,
+            "false_negative": 28773,
+            "true_negative": 145186
+          },
+          "inferred_point_scan_observations": 220021,
+          "additional_moving_removed": 9,
+          "additional_static_removed": 603,
+          "lost_moving_removed": 10,
+          "recovered_static_points": 235
+        },
+        "visibility_supported": {
+          "metrics": {
+            "precision": 0.01267002049562139,
+            "recall": 0.0023578363384188627,
+            "f1": 0.003975794428041044,
+            "iou": 0.00199185682064501,
+            "static_preservation": 0.9648416247561672,
+            "true_positive": 68,
+            "false_positive": 5299,
+            "false_negative": 28772,
+            "true_negative": 145419
+          },
+          "inferred_point_scan_observations": 5627,
+          "additional_moving_removed": 0,
+          "additional_static_removed": 326,
+          "lost_moving_removed": 0,
+          "recovered_static_points": 191
+        }
+      },
+      "map_points": 179558,
+      "native_api_mask_verified": true,
+      "raw_cloud_sha256": {
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531884156948944.pcd.bin": "44698e4ffad5156d508d357a0cdce2f6c0344bcdaaa51875b14b3330aa80f767",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531884158448576.pcd.bin": "7a9fbd664ec6a12c9b98ff38805c4efbf0b9e6268c2c1c011ff1fbe6e46c8d23",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531884159949288.pcd.bin": "cc13e86f156fb66d420d76197cbe6ea641ed5be92c9031c3839617bce247442d",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531884161448367.pcd.bin": "f2b14171a990b69c009eb384117aab98e7b711998d439c8d4d6190874f41b9a3",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531884162949103.pcd.bin": "7d97f31f4edf531bbd0ff531921120278c8fc774482d00d056164171a59a9fd3",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531884164448725.pcd.bin": "f8ce9f73a97b0e036d8b9520f04fe896c8e4a711553fc6bd50db9f73e315fb5e",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531884165948370.pcd.bin": "a50bb7c6035191caa203bddfc50f195beaecff00a5846490283661db118571d7",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531884167447977.pcd.bin": "757107417703e218f121ac3c9926d793acb3280c4646701ba91d22319c85a7f0",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531884168948169.pcd.bin": "d22d14fc0be1a0c84953781973764bf526fb4d581aaab85d627f18a3a0e63571",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531884170448363.pcd.bin": "8a1cc721eb4c61a66f4de82d29a371a85b1ce69828c66746ad1ee4d296c6e13d",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531884171899867.pcd.bin": "c452b826b2b2f04c17c4288b37208071962acefbfd6a2f63b0a037b311363afa",
+        "samples/LIDAR_TOP/n015-2018-07-18-11-18-34+0800__LIDAR_TOP__1531884173398972.pcd.bin": "e48b549fd7f0f9478d4de49617a6d35c100841a6a38e6ff8ab660aa66536e398"
+      }
+    }
+  ],
+  "aggregate": {
+    "included_scenes": [
+      "scene-0004",
+      "scene-0005",
+      "scene-0006"
+    ],
+    "excluded_scenes": [],
+    "zero_moving_gt_scenes": [],
+    "methods": {
+      "none": {
+        "mean": {
+          "precision": 0.0973584260859418,
+          "recall": 0.0128250583735234,
+          "f1": 0.022079788846734144,
+          "iou": 0.011208898529832376,
+          "static_preservation": 0.9838609449537937
+        },
+        "worst_scene_static_preservation": 0.9657373372788917,
+        "per_scene_delta_from_native": {
+          "scene-0004": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "iou": 0.0,
+            "static_preservation": 0.0
+          },
+          "scene-0005": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "iou": 0.0,
+            "static_preservation": 0.0
+          },
+          "scene-0006": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "iou": 0.0,
+            "static_preservation": 0.0
+          }
+        },
+        "f1_regression_scenes": [],
+        "static_regression_scenes": []
+      },
+      "either": {
+        "mean": {
+          "precision": 0.1196679787598801,
+          "recall": 0.025032874137598013,
+          "f1": 0.04133757564274577,
+          "iou": 0.021507430211371564,
+          "static_preservation": 0.9820029848355326
+        },
+        "worst_scene_static_preservation": 0.9632956912910203,
+        "per_scene_delta_from_native": {
+          "scene-0004": {
+            "precision": 0.07137091303757973,
+            "recall": 0.03721256801825522,
+            "f1": 0.05886033608058071,
+            "iou": 0.03145238262524936,
+            "static_preservation": -0.0028692356556060394
+          },
+          "scene-0005": {
+            "precision": -0.0034117356952002645,
+            "recall": -0.000554446662231093,
+            "f1": -0.000986365980784526,
+            "iou": -0.0005062838734878946,
+            "static_preservation": -0.0002629987113063059
+          },
+          "scene-0006": {
+            "precision": -0.0010305193205645616,
+            "recall": -3.467406380027729e-05,
+            "f1": -0.00010060971176132326,
+            "iou": -5.05037071439065e-05,
+            "static_preservation": -0.0024416459878713326
+          }
+        },
+        "f1_regression_scenes": [
+          "scene-0005",
+          "scene-0006"
+        ],
+        "static_regression_scenes": [
+          "scene-0004",
+          "scene-0005",
+          "scene-0006"
+        ]
+      },
+      "visibility_supported": {
+        "mean": {
+          "precision": 0.11922183333970511,
+          "recall": 0.016104789940755797,
+          "f1": 0.027866297747505698,
+          "iou": 0.014228291047178968,
+          "static_preservation": 0.9836287575402625
+        },
+        "worst_scene_static_preservation": 0.9648416247561672,
+        "per_scene_delta_from_native": {
+          "scene-0004": {
+            "precision": 0.06065013666536509,
+            "recall": 0.008952080042127435,
+            "f1": 0.015818176460259785,
+            "iou": 0.008265821611215248,
+            "static_preservation": -0.0001427480425674199
+          },
+          "scene-0005": {
+            "precision": 0.005267006496327928,
+            "recall": 0.0008871146595697509,
+            "f1": 0.0015571031255893313,
+            "iou": 0.0008002638537402719,
+            "static_preservation": 0.0003418983246982199
+          },
+          "scene-0006": {
+            "precision": -0.0003269214004030744,
+            "recall": 0.0,
+            "f1": -1.5752883534443478e-05,
+            "iou": -7.907912915747477e-06,
+            "static_preservation": -0.0008957125227244678
+          }
+        },
+        "f1_regression_scenes": [
+          "scene-0006"
+        ],
+        "static_regression_scenes": [
+          "scene-0004",
+          "scene-0006"
+        ]
+      }
+    }
+  },
+  "limitations": "Three archive-scoped trainval scenes, not representative or an official held-out test split. Candidates previously tuned on mini; these scenes are separate. Undeskewed rigid-pose keyframes, moving-box GT with >2 m displacement and 0.25 m margin, offline maps including future points. Visibility support reuses angular-bin range evidence. All selected scenes retained; zero-GT precision/recall/F1 use the existing zero convention. No production default changes or automatic promotion."
+}

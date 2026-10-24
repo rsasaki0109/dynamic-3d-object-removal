@@ -110,7 +110,7 @@ mark dynamic. It is a conservative starting workflow with defaults evaluated
 on sparse 32-beam data; match range resolution to your sensor and inspect the
 result. For dense 64-beam-class data, compare `fusion --preset short-window`
 with about 12 scans, or `fusion --preset long-map` for long sequences. See the
-[method and preset guidance](../../README.md#clean-a-map-using-multiple-scans).
+[method and preset guidance](../../docs/usage.md#clean-a-map-using-multiple-scans).
 
 The mask is `true` for kept points. The summary records effective settings and
 removal counts, **not accuracy**. Inspect removed points as well as cleaned

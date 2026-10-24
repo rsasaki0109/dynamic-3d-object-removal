@@ -29,6 +29,8 @@ input hashes only. Use a new output directory when repeating it.
 
 ## Sparse-sensor error diagnosis
 
+For prospective transfer results on new trainval scenes, see [Frozen sparse-sensor validation](FROZEN_NUSCENES.md). These are separate from the exploratory mini-scene comparisons below.
+
 ### Recall diagnosis with devkit selection fixed
 
 [nuscenes_recall_analysis.json](nuscenes_recall_analysis.json) keeps the same
@@ -366,6 +368,8 @@ the earlier diagnostic result; it is a corrected replay, not fresh held-out
 validation. The full benchmark method metrics and coordinate-specific settings
 are included so historical configurations remain distinguishable.
 ## New AV2 log: frozen neighbor candidates
+
+For the subsequent three-log evaluation with coordinate-corrected settings frozen before acquisition, see [Frozen three-log AV2 validation](FROZEN_AV2.md).
 
 [av2_unseen_02a_neighbors.json](av2_unseen_02a_neighbors.json) evaluates
 `02a00399-3857-444e-8db3-a8f58489c394`, the first lexicographic val log absent

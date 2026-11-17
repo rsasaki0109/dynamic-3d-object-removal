@@ -1,10 +1,10 @@
 # dynamic-3d-object-removal plan
 
-Last updated: 2026-08-02 (Asia/Tokyo)
+Last updated: 2026-11-17 (Asia/Tokyo)
 Repo: `rsasaki0109/dynamic-3d-object-removal`
 Branch: `master`
-Latest release: **v0.5.0**（tag + GitHub release + PyPI、2026-06-11）
-Stars: **74 / 100 (目標)** — fork 4, created 2026-03-05
+Latest release: **v0.6.0**（tag + GitHub release、2026-10-09。前回 v0.5.0 は 2026-06-11）
+Stars: **74 / 100 (目標)**（2026-08-02 時点の値。以後未更新）— fork 4, created 2026-03-05
 
 ---
 
@@ -97,6 +97,34 @@ examples/
 
 ---
 
+## Current state (2026-11-17 追記)
+
+2026-08-03〜10-24 の追加分（PR #5〜#13）。headline numbers は変わっていない
+（README / `docs/benchmarks.md` と一致を 2026-11-17 に確認）。
+
+- [x] **v0.6.0 リリース（2026-10-09）**: pose 付き multi-scan manifest から `fusion` /
+      `range_scan_ratio` で map を掃除する CLI。cleaned 点群・keep mask・effective settings の
+      summary JSON を保存。fusion は short-window / long-map の preset を明示選択
+- [x] manifest は deskew metadata 必須。undeskewed は `--allow-undeskewed` の opt-in で、summary に残る
+- [x] download 不要の first-map quickstart と own-data guide（#11）
+- [x] AV2 benchmark の ground cutoff を pose 整列前の ego 座標で適用するよう修正（#10）。
+      参照ベース検証で過去設定を保持
+- [x] Task E（Windows parallel fusion）・Task F（bounded online back-end、**不採用**・private のまま）
+- [x] 再現可能な API/CLI 検証と診断記録を `examples/cli_validation/` に集約（#5〜#9, #13）:
+      nuScenes 10 scene の CLI=API 一致、frozen AV2 / frozen nuScenes の prospective 検証、
+      neighbor-column inference（**research-only、既定値は不変**）、box motion audit、
+      GT policy 比較、vertical alignment 実験（不採用）、laser density ablation、
+      scan-ratio density 診断、common-miss evidence、nearer-return attribution
+- [x] README を短縮し、詳細を `docs/usage.md` / `docs/benchmarks.md` / `docs/api-and-demos.md` へ分割（#13）
+- [x] テスト **353 passed / 5 skipped**（`pip install -e .` 後の `python -m pytest tests/ -q`、2026-11-17）。
+      CLI テストは別ディレクトリから `python -m dynamic_object_removal` を起動するため、未インストールだと 3 件落ちる
+- 診断記録が「次」として挙げている候補（どれも採用前に frozen 比較 + fresh scene が必要）:
+  1. 間引き時に scan_ratio の票がどこで失われるかの label-free 診断（`LASER_DENSITY_ABLATION.md`,
+     `DENSITY_SCAN_RATIO_DIAGNOSIS.md`）
+  2. nuScenes で「空画素」と「手前の return」を区別する幾何チェック（`COMMON_MISS_EVIDENCE.md`）
+  3. nuScenes の 3D 姿勢（ego Z 固定）問題は、独立した 3D pose 根拠なしに閾値をいじらない
+     （`BOX_MOTION_AUDIT.md`, `VERTICAL_ALIGNMENT_EXPERIMENT.md`）
+
 ## Current state (2026-08-02)
 
 ### 完了済み（前回 plan 2026-06-10 以降の追加分に ★）
@@ -139,9 +167,9 @@ examples/
       lidarslam_ros2側リンクとNTU実bagは追加validationとして未完了
 - [ ] PR #28 の draft 解除（**owner の指示があるまで保留** — 2026-06-11 owner 判断）とメンテナ対応
 - [ ] Step C の投稿部分（Show HN / Reddit）— 実装は済み、投稿タイミング待ち
-- [ ] コアのリファクタリング（2026-06-11 着手、**途中・未コミット** — 詳細は次セクション）
+- [ ] コアのリファクタリング（2026-06-11 着手。適用済み 3 件は master に入っている — 詳細は次セクション）
 
-### リファクタリング（2026-06-11 着手 — 途中で中断、作業ツリーに未コミット差分あり）
+### リファクタリング（2026-06-11 着手 — 適用済み 3 件は 2026-11-17 時点で master に入っている）
 
 owner の「refactoring しよう」で着手。**挙動を変えない整理のみ**（公開 API・出力・数値は不変）を
 方針とし、テストをセーフティネットに進めた。途中で owner 判断により中断。
@@ -161,7 +189,7 @@ owner の「refactoring しよう」で着手。**挙動を変えない整理の
     プライベート関数への外部依存は `_parse_kitti_calib`（テスト）の 1 件だけ
 - ベースライン: 87 passed / 3 skipped（変更前後とも同じ。変更後も再実行してグリーン確認済み）
 
-#### 適用済みの変更（`git diff` で 17+/17-、dynamic_object_removal.py のみ・未コミット）
+#### 適用済みの変更（dynamic_object_removal.py のみ。2026-11-17 に master 上で確認）
 
 1. **AV2 feather ローダーの yaw 計算を `_yaw_from_quaternion` に統一** —
    `_load_boxes_from_av2_feather` 内にクォータニオン→yaw の atan2 式が手書きで重複していた。
@@ -200,9 +228,9 @@ owner の「refactoring しよう」で着手。**挙動を変えない整理の
 
 #### 再開時の手順
 
-1. `git diff dynamic_object_removal.py` で適用済み 3 件を確認（または先に commit してから続行）
+1. 適用済み 3 件は commit 済み（`_viewpoint_or_none` / `_pixel_indices` / `_yaw_from_quaternion` の呼び出しで確認可）
 2. 上の候補 1（main() の重複）から着手するのが費用対効果最大
-3. 各編集後に `python3 -m pytest tests/ -q`（87 passed / 3 skipped が基準）
+3. 各編集後に `python3 -m pytest tests/ -q`（2026-11-17 時点 353 passed / 5 skipped が基準。要 `pip install -e .`）
 4. 仕上げに CLI スモーク（box / range / scan_ratio の 3 アルゴリズムを data/ のサンプルで 1 回ずつ）
    と Playground がローカルで読み込めることの確認（単一ファイル fetch が前提のため）
 
@@ -504,7 +532,7 @@ point-wise dynamic GT がない限りアルゴリズム精度 benchmark には�
 ## ★100 Roadmap — 残り 26★
 
 実装優先順: **Gate 0 (pose-aware realtime) → R1 (online benchmark) → Step A
-(lidarslam_ros2 連携)** は技術proofまで完了。残りは **O1 (offline selector) → R2/O2 の採否判断**。
+(lidarslam_ros2 連携)** は技術proofまで完了。O1 / R2 / O2 / F は判定済み（いずれも public 昇格なし）。
 PR #28 ready 化と Step C 投稿は owner の GO / 投稿タイミング待ちで、実装順とは別管理とする。
 
 Step 0 (PyPI) と Step B (DynamicMap PR) は完了。なお owner は一度「PyPI 公開しない」に
@@ -672,9 +700,9 @@ R1 (online sequence benchmark) … shipped: correctness / latency / pose-noise �
   ↓
 Step A (lidarslam_ros2 連携)    … shipped: downstream SLAM proof（NTUは追加validation）
   ↓
-O1 (offline selector)           … 既存 3 benchmark の非回帰 gate
+O1 (offline selector)           … 判定済み: private のまま不昇格
   ↓
-R2 / O2                         … ablation を通った候補だけ public API 化
+R2 / O2                         … 判定済み: public 昇格は不採用
 ```
 
 - PR #28 draft 解除は owner の GO 待ち、Step C は投稿タイミング待ち。上の技術実装と並行管理する

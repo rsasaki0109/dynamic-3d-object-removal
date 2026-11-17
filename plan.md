@@ -167,7 +167,7 @@ examples/
       lidarslam_ros2側リンクとNTU実bagは追加validationとして未完了
 - [ ] PR #28 の draft 解除（**owner の指示があるまで保留** — 2026-06-11 owner 判断）とメンテナ対応
 - [ ] Step C の投稿部分（Show HN / Reddit）— 実装は済み、投稿タイミング待ち
-- [ ] コアのリファクタリング（2026-06-11 着手。適用済み 3 件は master に入っている — 詳細は次セクション）
+- [x] コアのリファクタリング: 費用対効果の高い候補 1〜3 は 2026-11-17 に完了。残り 4〜6 は任意（詳細は次セクション）
 
 ### リファクタリング（2026-06-11 着手 — 適用済み 3 件は 2026-11-17 時点で master に入っている）
 
@@ -206,13 +206,14 @@ owner の「refactoring しよう」で着手。**挙動を変えない整理の
 
 #### 洗い出し済み・未着手のリファクタ候補（優先度順）
 
-1. **`main()` の range / scan_ratio 分岐の重複 ~70 行**（最大の獲物）。
+1. ✅ **2026-11-17 完了** — **`main()` の range / scan_ratio 分岐の重複 ~70 行**（最大の獲物）。
    両分岐は「`--input-map` 検証 → map+query ロード → アルゴリズム呼び出し → 保存 →
    サマリ表示 → summary JSON」が 9 割同一。アルゴリズム名と filter 関数だけ差し替える
    `_run_map_cleaner(args, name=..., desc=..., fn=...)` ヘルパーに畳める
-2. `_load_points_csv_or_txt` のデッドコード: `except Exception` の後の `except IndexError`
+   → `_run_map_cleaner_cli(args, cloud_path, out_path, name=, description=, clean=)` として実装
+2. ✅ **2026-11-17 完了** — `_load_points_csv_or_txt` のデッドコード: `except Exception` の後の `except IndexError`
    は到達不能（IndexError は Exception のサブクラス）
-3. `remove_points_in_boxes` の keep マスク更新が冗長
+3. ✅ **2026-11-17 完了** — `remove_points_in_boxes` の keep マスク更新が冗長
    （`mask_local` 経由の 4 行 → `keep[np.nonzero(keep)[0][inside]] = False` 相当に簡約可）
 4. `load_points` / `load_boxes` の auto 判定の if 連鎖 → suffix→fmt の dict 化（軽微）
 5. クロスファイル: realtime.py の `_eprint` / `_to_float` / `_as_vec3` は core と重複に見えるが
@@ -225,6 +226,14 @@ owner の「refactoring しよう」で着手。**挙動を変えない整理の
    ほぼ HTML/JS テンプレート文字列で、関数定義は L1970 以降のみ。テンプレートの分割は
    公開デモを壊すリスクに対して益が薄い。`if points.size == 0 or len(points) == 0` の
    冗長イディオム（~8 か所）も churn の割に益なしで見送り
+
+#### 2026-11-17 の検証
+
+- `python3 -m pytest tests/ -q`: 変更前後とも 353 passed / 5 skipped
+- CLI golden 比較: range / scan_ratio（通常・`--quiet`・`--input-map` 欠落・map 不在）と box
+  （objects あり・なし）の出力点群・stderr・summary JSON・終了コード 20 ファイルが変更前とバイト一致
+- `remove_points_in_boxes`: 重なる複数 box のランダム 200 ケースで旧実装と keep mask が完全一致
+- `_visibility_votes` への `_pixel_indices` 適用は、6/11 に owner が reject した経緯があるため今回も触っていない
 
 #### 再開時の手順
 

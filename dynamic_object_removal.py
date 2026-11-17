@@ -24,7 +24,7 @@ import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any, Callable, Sequence
 
 import numpy as np
 
@@ -469,8 +469,6 @@ def _load_points_csv_or_txt(path: Path) -> np.ndarray:
     try:
         float(first_tokens[0])
     except Exception:
-        has_header = True
-    except IndexError:
         has_header = True
 
     if has_header:
@@ -2228,10 +2226,7 @@ def remove_points_in_boxes(points: np.ndarray, boxes: Sequence[DetectionBox], ma
             & (local[:, 2] >= -half[2])
             & (local[:, 2] <= half[2])
         )
-        keep_idx = np.nonzero(keep)[0]
-        mask_local = np.ones_like(keep)
-        mask_local[keep_idx] = ~inside
-        keep &= mask_local
+        keep[np.nonzero(keep)[0][inside]] = False
     return xyz[keep], keep
 
 
@@ -2607,6 +2602,48 @@ def _write_summary_json(path: Path, *, total: int, kept: int, boxes: Sequence[De
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+def _run_map_cleaner_cli(
+    args: argparse.Namespace,
+    cloud_path: Path,
+    out_path: Path,
+    *,
+    name: str,
+    description: str,
+    clean: Callable[[np.ndarray, np.ndarray, tuple[float, ...]], tuple[np.ndarray, np.ndarray]],
+) -> int:
+    """Shared CLI flow for single-query map cleaners (``range`` / ``scan_ratio``)."""
+    if not args.input_map:
+        _eprint(f"algorithm={name} requires --input-map (the accumulated map to clean)")
+        return 1
+    map_path = Path(args.input_map)
+    if not map_path.exists():
+        _eprint(f"input map not found: {map_path}")
+        return 1
+    map_points = load_points(map_path, fmt=args.cloud_format)
+    query_points = load_points(cloud_path, fmt=args.cloud_format)
+    filtered, _ = clean(map_points, query_points, tuple(args.sensor_origin))
+    total = map_points.shape[0]
+    removed = total - filtered.shape[0]
+    ratio = float(removed / total) if total else 0.0
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    save_points(out_path, filtered, fmt=args.cloud_format)
+    if not args.quiet:
+        _eprint(f"algorithm: {name} ({description})")
+        _eprint(f"map: {total} points, query: {query_points.shape[0]} points")
+        _eprint(f"removed: {removed} points ({ratio:.2%})")
+        _eprint(f"output: {filtered.shape[0]} points -> {out_path}")
+    if args.summary_json:
+        payload = {
+            "algorithm": name,
+            "total_points": int(total),
+            "kept_points": int(filtered.shape[0]),
+            "removed_points": int(removed),
+            "removed_ratio": ratio,
+        }
+        Path(args.summary_json).write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
@@ -2641,80 +2678,30 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 1
 
     if args.algorithm == "range":
-        if not args.input_map:
-            _eprint("algorithm=range requires --input-map (the accumulated map to clean)")
-            return 1
-        map_path = Path(args.input_map)
-        if not map_path.exists():
-            _eprint(f"input map not found: {map_path}")
-            return 1
-        map_points = load_points(map_path, fmt=args.cloud_format)
-        query_points = load_points(cloud_path, fmt=args.cloud_format)
-        filtered, keep_mask = remove_ghost_by_range_image(
-            map_points,
-            query_points,
-            tuple(args.sensor_origin),
-            h_res_deg=args.range_h_res,
-            v_res_deg=args.range_v_res,
-            range_margin=args.range_margin,
+        return _run_map_cleaner_cli(
+            args, cloud_path, out_path, name="range", description="visibility",
+            clean=lambda map_points, query_points, origin: remove_ghost_by_range_image(
+                map_points,
+                query_points,
+                origin,
+                h_res_deg=args.range_h_res,
+                v_res_deg=args.range_v_res,
+                range_margin=args.range_margin,
+            ),
         )
-        removed = map_points.shape[0] - filtered.shape[0]
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        save_points(out_path, filtered, fmt=args.cloud_format)
-        if not args.quiet:
-            ratio = 0.0 if map_points.shape[0] == 0 else removed / map_points.shape[0]
-            _eprint(f"algorithm: range (visibility)")
-            _eprint(f"map: {map_points.shape[0]} points, query: {query_points.shape[0]} points")
-            _eprint(f"removed: {removed} points ({ratio:.2%})")
-            _eprint(f"output: {filtered.shape[0]} points -> {out_path}")
-        if args.summary_json:
-            payload = {
-                "algorithm": "range",
-                "total_points": int(map_points.shape[0]),
-                "kept_points": int(filtered.shape[0]),
-                "removed_points": int(removed),
-                "removed_ratio": float(removed / map_points.shape[0]) if map_points.shape[0] else 0.0,
-            }
-            Path(args.summary_json).write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-        return 0
 
     if args.algorithm == "scan_ratio":
-        if not args.input_map:
-            _eprint("algorithm=scan_ratio requires --input-map (the accumulated map to clean)")
-            return 1
-        map_path = Path(args.input_map)
-        if not map_path.exists():
-            _eprint(f"input map not found: {map_path}")
-            return 1
-        map_points = load_points(map_path, fmt=args.cloud_format)
-        query_points = load_points(cloud_path, fmt=args.cloud_format)
-        filtered, keep_mask = remove_dynamic_by_scan_ratio(
-            map_points,
-            query_points,
-            tuple(args.sensor_origin),
-            scan_ratio_threshold=args.scan_ratio_threshold,
-            min_map_height=args.scan_ratio_min_map_height,
-            ground_margin=args.scan_ratio_ground_margin,
+        return _run_map_cleaner_cli(
+            args, cloud_path, out_path, name="scan_ratio", description="pseudo-occupancy",
+            clean=lambda map_points, query_points, origin: remove_dynamic_by_scan_ratio(
+                map_points,
+                query_points,
+                origin,
+                scan_ratio_threshold=args.scan_ratio_threshold,
+                min_map_height=args.scan_ratio_min_map_height,
+                ground_margin=args.scan_ratio_ground_margin,
+            ),
         )
-        removed = map_points.shape[0] - filtered.shape[0]
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        save_points(out_path, filtered, fmt=args.cloud_format)
-        if not args.quiet:
-            ratio = 0.0 if map_points.shape[0] == 0 else removed / map_points.shape[0]
-            _eprint(f"algorithm: scan_ratio (pseudo-occupancy)")
-            _eprint(f"map: {map_points.shape[0]} points, query: {query_points.shape[0]} points")
-            _eprint(f"removed: {removed} points ({ratio:.2%})")
-            _eprint(f"output: {filtered.shape[0]} points -> {out_path}")
-        if args.summary_json:
-            payload = {
-                "algorithm": "scan_ratio",
-                "total_points": int(map_points.shape[0]),
-                "kept_points": int(filtered.shape[0]),
-                "removed_points": int(removed),
-                "removed_ratio": float(removed / map_points.shape[0]) if map_points.shape[0] else 0.0,
-            }
-            Path(args.summary_json).write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-        return 0
 
     # algorithm == "box"
     if not args.input_objects:
